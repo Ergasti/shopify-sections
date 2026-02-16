@@ -1,14 +1,13 @@
 {% comment %}
   FBT block snippet — use in product info via Custom Liquid block.
   Usage: {% render 'sl-frequently-bought-together', block_id: block.id, product: product %}
-  Uses Shopify recommendations (complementary). Pass product if block context lacks it.
+  Uses recommendations/products.json (no section_id). Pass product if block context lacks it.
 {% endcomment %}
 
 {% assign block_id = block_id | default: 'fbt' %}
 {% assign prod = product | default: nil %}
 
 {% if prod == blank %}
-  {% comment %} No product context (e.g. not on product page) {% endcomment %}
   {% if request.design_mode %}
     <p style="padding: 12px; color: #666;">FBT — Use on product page.</p>
   {% endif %}
@@ -22,15 +21,137 @@
   #sl-fbt-block-{{ block_id }}.sl-fbt-block-root {
     width: 100%;
     margin: 16px 0;
+    --sl-fbt-card-bg: #fff;
+    --sl-fbt-card-border: #e5e5e5;
+    --sl-fbt-card-padding: 16px;
+    --sl-fbt-card-radius: 12px;
+    --sl-fbt-slide-width: 220px;
   }
+  #sl-fbt-block-{{ block_id }} .sl-fbt-inner { padding: 24px 0; }
+  #sl-fbt-block-{{ block_id }} .sl-fbt-heading { font-size: 24px; margin: 0 0 16px 0; }
+  #sl-fbt-block-{{ block_id }} .sl-fbt-swiper { overflow: hidden; position: relative; }
+  #sl-fbt-block-{{ block_id }} .swiper-wrapper { display: flex; gap: 16px; }
+  #sl-fbt-block-{{ block_id }} .swiper-slide {
+    flex-shrink: 0;
+    width: var(--sl-fbt-slide-width) !important;
+    height: auto;
+  }
+  #sl-fbt-block-{{ block_id }} .sl-fbt-card {
+    padding: var(--sl-fbt-card-padding);
+    border-radius: var(--sl-fbt-card-radius);
+    border: 1px solid var(--sl-fbt-card-border);
+    background: var(--sl-fbt-card-bg);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    height: 100%;
+    box-sizing: border-box;
+  }
+  #sl-fbt-block-{{ block_id }} .sl-fbt-card__media {
+    display: block;
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: calc(var(--sl-fbt-card-radius) - 2px);
+  }
+  #sl-fbt-block-{{ block_id }} .sl-fbt-card__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  #sl-fbt-block-{{ block_id }} .sl-fbt-volume { font-size: 12px; color: #666; margin: 0; }
+  #sl-fbt-block-{{ block_id }} .sl-fbt-card__info { display: flex; flex-direction: column; gap: 8px; flex: 1; }
+  #sl-fbt-block-{{ block_id }} .sl-fbt-card__title {
+    font-size: 14px;
+    font-weight: 500;
+    color: inherit;
+    text-decoration: none;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  #sl-fbt-block-{{ block_id }} .sl-fbt-card__title:hover { text-decoration: underline; }
+  #sl-fbt-block-{{ block_id }} .sl-fbt-card__price { font-size: 14px; font-weight: 600; }
+  #sl-fbt-block-{{ block_id }} .sl-fbt-price--compare {
+    font-size: 12px;
+    font-weight: 400;
+    opacity: 0.7;
+    text-decoration: line-through;
+  }
+  #sl-fbt-block-{{ block_id }} .sl-fbt-add {
+    width: 100%;
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    background: #000;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    margin-top: auto;
+  }
+  #sl-fbt-block-{{ block_id }} .sl-fbt-add:hover:not(:disabled) { opacity: 0.9; }
+  #sl-fbt-block-{{ block_id }} .sl-fbt-add:disabled { opacity: 0.5; cursor: not-allowed; }
+  #sl-fbt-block-{{ block_id }} .swiper-button-prev,
+  #sl-fbt-block-{{ block_id }} .swiper-button-next { color: #000; }
 </style>
 
 <script>
 (function() {
   var blockId = '{{ block_id }}';
   var productId = '{{ prod.id }}';
+  var rootPath = (window.Shopify && window.Shopify.routes && window.Shopify.routes.root) || '/';
   var SWIPER_CSS = 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css';
   var SWIPER_JS = 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js';
+
+  function formatMoney(cents) {
+    if (typeof Shopify !== 'undefined' && Shopify.formatMoney) {
+      return Shopify.formatMoney(cents);
+    }
+    return '$' + (cents / 100).toFixed(2);
+  }
+
+  function pctForIndex(i) {
+    var seeds = [54, 45, 38, 32, 30];
+    var ranges = [12, 10, 8, 7, 6];
+    var base = i < 5 ? seeds[i] : 30;
+    var range = i < 5 ? ranges[i] : 6;
+    return base + (Math.floor(Math.random() * range));
+  }
+
+  function buildCard(p, i, rootPath) {
+    var base = (rootPath && rootPath.replace(/\/$/, '')) || '';
+    var productPath = '/products/' + (p.handle || '');
+    var url = base + productPath;
+    var imgSrc = (p.featured_image || '').replace(/^\/\//, 'https:') || '';
+    var variantId = (p.variants && p.variants[0] && p.variants[0].id) || '';
+    var price = p.price != null ? formatMoney(p.price) : '';
+    var comparePrice = (p.compare_at_price && p.compare_at_price > (p.price || 0)) ? formatMoney(p.compare_at_price) : '';
+    var available = p.available !== false;
+    var imgHtml = imgSrc
+      ? '<img src="' + imgSrc + '" alt="' + (p.title || '').replace(/"/g, '&quot;') + '" width="260" height="260" loading="lazy">'
+      : '<div style="width:100%;height:100%;background:#f0f0f0;display:flex;align-items:center;justify-content:center;">No image</div>';
+    var pctHtml = '<p class="sl-fbt-volume">' + pctForIndex(i) + '% bought together</p>';
+    var priceHtml = comparePrice
+      ? '<span class="sl-fbt-price--sale">' + price + '</span><span class="sl-fbt-price--compare">' + comparePrice + '</span>'
+      : price;
+    var btnHtml = available
+      ? '<form class="sl-fbt-form" action="' + base + '/cart/add" method="post">' +
+        '<input type="hidden" name="quantity" value="1">' +
+        '<input type="hidden" name="id" value="' + variantId + '">' +
+        '<button type="submit" class="sl-fbt-add">Add</button></form>'
+      : '<button type="button" class="sl-fbt-add" disabled>Sold out</button>';
+    return '<div class="swiper-slide"><div class="sl-fbt-card">' +
+      '<a href="' + url + '" class="sl-fbt-card__media">' + imgHtml + '</a>' +
+      pctHtml +
+      '<div class="sl-fbt-card__info">' +
+      '<a href="' + url + '" class="sl-fbt-card__title">' + (p.title || '').replace(/</g, '&lt;') + '</a>' +
+      '<div class="sl-fbt-card__price">' + priceHtml + '</div>' +
+      btnHtml + '</div></div></div>';
+  }
 
   function loadSwiper(cb) {
     if (typeof Swiper !== 'undefined') { cb(); return; }
@@ -56,8 +177,7 @@
       spaceBetween: 16,
       loop: false,
       navigation: (nextEl && prevEl) ? { nextEl: nextEl, prevEl: prevEl } : false,
-      pagination: pagEl ? { el: pagEl, clickable: true } : false,
-      breakpoints: {}
+      pagination: pagEl ? { el: pagEl, clickable: true } : false
     });
   }
 
@@ -68,35 +188,32 @@
       if (!root && productId && retries < 20) setTimeout(function() { run(retries + 1); }, 100);
       return;
     }
-
     var ph = root.querySelector('.sl-fbt-fetch-placeholder');
-    var url = (window.Shopify && window.Shopify.routes && window.Shopify.routes.root || '/') +
-      'recommendations/products?product_id=' + productId + '&limit=10&section_id=sl-frequently-bought-together&intent=complementary';
+    var jsonUrl = rootPath + 'recommendations/products.json?product_id=' + productId + '&limit=10&intent=complementary';
+    console.log('[FBT] Fetching:', jsonUrl);
 
-    fetch(url).then(function(r) { return r.text(); }).then(function(html) {
+    fetch(jsonUrl).then(function(r) {
+      if (!r.ok) { console.log('[FBT] HTTP', r.status, r.statusText); return r.text().then(function() { if (ph) ph.textContent = ''; }); }
+      return r.json();
+    }).then(function(data) {
+      if (!data) return;
       if (!ph) return;
-      var parser = new DOMParser();
-      var doc = parser.parseFromString(html, 'text/html');
-      var innerEl = doc.querySelector('.sl-fbt-inner');
-      var sectionRoot = doc.querySelector('.sl-fbt-root') || doc.querySelector('[id^="sl-fbt-"]') || (innerEl ? innerEl.parentElement : null);
-      if (sectionRoot) {
-        var clone = document.importNode(sectionRoot, true);
-        root.innerHTML = '';
-        root.appendChild(clone);
-        loadSwiper(function() { initSwiper(root); });
-      } else {
-        var div = document.createElement('div');
-        div.innerHTML = html;
-        var inner = div.querySelector('.sl-fbt-inner');
-        if (inner) {
-          root.innerHTML = '';
-          root.appendChild(document.importNode(inner, true));
-          loadSwiper(function() { initSwiper(root); });
-        } else {
-          ph.textContent = '';
-        }
+      var products = (data && data.products) || [];
+      console.log('[FBT] Products:', products.length, products);
+      if (products.length === 0) { ph.textContent = ''; return; }
+      var html = '<div class="sl-fbt-inner">' +
+        '<h2 class="sl-fbt-heading">Frequently Bought Together</h2>' +
+        '<div class="sl-fbt-swiper swiper"><div class="swiper-wrapper">';
+      for (var i = 0; i < products.length; i++) {
+        html += buildCard(products[i], i, rootPath);
       }
-    }).catch(function() {
+      html += '</div>' +
+        '<div class="swiper-button-prev"></div><div class="swiper-button-next"></div>' +
+        '<div class="swiper-pagination"></div></div></div>';
+      root.innerHTML = html;
+      loadSwiper(function() { initSwiper(root); });
+    }).catch(function(err) {
+      console.log('[FBT] Error:', err);
       if (ph) ph.textContent = '';
     });
   }

@@ -122,7 +122,7 @@ To place FBT **inside the product info** (e.g. under price, in the sidebar), use
 
 4. Save.
 
-The block version uses **auto recommendations** (Shopify complementary products). Manual product blocks are not available in this mode.
+The block version uses the **recommendations/products.json** API (no `section_id` required). It works standalone — the section file does not need to be added to the product template. Manual product blocks are not available in this mode.
 
 ---
 
