@@ -4,7 +4,7 @@ Product slider for “Frequently Bought Together” with card styling, auto-gene
 
 **Category:** Products  
 **Templates:** Product page only  
-**Dependencies:** Swiper.js (CDN or theme asset)
+**Dependencies:** None (Swiper loads on demand when section is visible)
 
 ---
 
@@ -20,18 +20,7 @@ Horizontal product carousel for product pages. Each card shows product image, ti
 
 Copy `sections/sl-frequently-bought-together.liquid` into your theme’s **sections** folder.
 
-### Step 2 — Load Swiper (if not already in theme)
-
-Add before `</body>` in `layout/theme.liquid`:
-
-```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-```
-
-Or use your theme’s asset pipeline if Swiper is bundled.
-
-### Step 3 — Add the section
+### Step 2 — Add the section
 
 1. **Online Store** → **Themes** → **Customize**
 2. Open a product page
@@ -39,15 +28,17 @@ Or use your theme’s asset pipeline if Swiper is bundled.
 4. Add product blocks and pick products
 5. Save
 
+**Swiper loads automatically** — No need to add Swiper to `theme.liquid`. The section loads Swiper CSS and JS from CDN only when the section is on the page and near the viewport. If Swiper is already loaded by your theme (e.g. another section), it will be reused.
+
 ---
 
 ## Setup Details
 
 | Item | Details |
 |------|---------|
-| **Section placement** | Product template only |
-| **Blocks** | Product (select product per block) |
-| **Data source** | Theme Editor blocks (manual product selection) |
+| **Data source** | **Manual** (pick products in blocks) or **Auto** (Shopify recommendations) |
+| **Auto mode** | Uses Shopify's complementary intent (often bought together). Add section to product page. |
+| **Manual mode** | Product blocks (select product per block) |
 | **Percentage logic** | Auto-generated from product ID; slide 1 highest, descending, all ≥30% |
 
 ### Percentage ranges (auto-generated)
@@ -82,11 +73,11 @@ Values are pseudo-random per product (based on `product.id`) but stable per page
 | **Lazy loading** | `loading="lazy"` on all images |
 | **Fetch priority** | `fetchpriority="low"` on images after the 2nd slide |
 | **Deferred init** | Swiper initialized only when section is near viewport (Intersection Observer, `rootMargin: 100px`) |
+| **Conditional Swiper** | Swiper CSS/JS loaded **only when this section exists** and is near viewport — not on the whole site |
 | **Scoped CSS** | Styles scoped to section ID, no global pollution |
-| **No extra JS libs** | Only Swiper; no jQuery |
 | **Inline script** | Small IIFE, no extra network request |
 
-Swiper JS initializes when the section enters (or is about to enter) the viewport, so the main bundle is not blocked.
+Swiper is loaded dynamically when the section enters (or is about to enter) the viewport. Pages without this section do not load Swiper.
 
 ---
 
@@ -117,11 +108,31 @@ Swiper JS initializes when the section enters (or is about to enter) the viewpor
 
 ---
 
+## Block version (product info)
+
+To place FBT **inside the product info** (e.g. under price, in the sidebar), use the **snippet** in a **Custom Liquid** block:
+
+1. Copy `snippets/sl-frequently-bought-together.liquid` to your theme **snippets** folder.
+2. In Theme Editor → Product page → Product information block group → **Add block** → **Custom liquid**.
+3. Add:
+
+   ```liquid
+   {% render 'sl-frequently-bought-together', block_id: block.id %}
+   ```
+
+4. Save.
+
+The block version uses **auto recommendations** (Shopify complementary products). Manual product blocks are not available in this mode.
+
+---
+
 ## File structure
 
 ```
 Section Lab/Frequently Bought Together/
 ├── sections/
+│   └── sl-frequently-bought-together.liquid
+├── snippets/
 │   └── sl-frequently-bought-together.liquid
 └── README.md
 ```
@@ -131,7 +142,7 @@ Section Lab/Frequently Bought Together/
 ## Swiper version
 
 - Tested with Swiper 11.x
-- Uses `swiper-bundle` (core + navigation + pagination)
+- Loaded from CDN only when section is present and visible
 - CDN: `https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js`
 - CSS: `https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css`
 
@@ -142,4 +153,16 @@ Section Lab/Frequently Bought Together/
 - **Static products:** Products are chosen manually in blocks; no automatic FBT logic
 - **Single variant:** Adds first available variant; no variant picker
 - **Theme cart behavior:** Uses standard product form; cart drawer/page behavior comes from your theme
-- **Swiper required:** Section will not run correctly without Swiper loaded
+- **Swiper:** Loaded automatically by the section when needed; no manual setup
+
+---
+
+## Auto recommendations (complementary)
+
+When **Product source** is set to **Auto (Shopify recommendations)**:
+
+- Uses Shopify's complementary intent (products often bought together)
+- Based on purchase history and product relationships
+- Fetched via AJAX when section is on the page
+- New or low-sales stores may see few or no results
+- Add the section to the **product template** only

@@ -1,0 +1,96 @@
+{% comment %}
+  FBT block snippet — use in product info via Custom Liquid block.
+  Usage: {% render 'sl-frequently-bought-together', block_id: block.id %}
+  Uses Shopify recommendations (complementary / often bought together). Product must exist.
+{% endcomment %}
+
+{% assign block_id = block_id | default: 'fbt' %}
+{% assign prod = product | default: nil %}
+
+{% if prod == blank %}
+  {% comment %} No product context (e.g. not on product page) {% endcomment %}
+  {% if request.design_mode %}
+    <p style="padding: 12px; color: #666;">FBT — Use on product page.</p>
+  {% endif %}
+{% else %}
+
+<div id="sl-fbt-block-{{ block_id }}" class="sl-fbt-block-root" data-fbt-fetch data-product-id="{{ prod.id }}">
+  <div class="sl-fbt-fetch-placeholder" style="min-height: 180px; display: flex; align-items: center; justify-content: center; color: #666;">Loading…</div>
+</div>
+
+<style>
+  #sl-fbt-block-{{ block_id }}.sl-fbt-block-root {
+    width: 100%;
+    margin: 16px 0;
+  }
+</style>
+
+<script>
+(function() {
+  var blockId = '{{ block_id }}';
+  var productId = '{{ prod.id }}';
+  var SWIPER_CSS = 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css';
+  var SWIPER_JS = 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js';
+
+  function loadSwiper(cb) {
+    if (typeof Swiper !== 'undefined') { cb(); return; }
+    var link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = SWIPER_CSS;
+    document.head.appendChild(link);
+    var s = document.createElement('script');
+    s.src = SWIPER_JS;
+    s.onload = cb;
+    document.head.appendChild(s);
+  }
+
+  function initSwiper(container) {
+    var el = container.querySelector('.sl-fbt-swiper');
+    if (!el || typeof Swiper === 'undefined') return;
+    if (el.swiper) return;
+    var nextEl = container.querySelector('.swiper-button-next');
+    var prevEl = container.querySelector('.swiper-button-prev');
+    var pagEl = container.querySelector('.swiper-pagination');
+    new Swiper(el, {
+      slidesPerView: 'auto',
+      spaceBetween: 16,
+      loop: false,
+      navigation: (nextEl && prevEl) ? { nextEl: nextEl, prevEl: prevEl } : false,
+      pagination: pagEl ? { el: pagEl, clickable: true } : false,
+      breakpoints: {}
+    });
+  }
+
+  function run() {
+    var root = document.getElementById('sl-fbt-block-' + blockId);
+    if (!root || !productId) return;
+
+    var ph = root.querySelector('.sl-fbt-fetch-placeholder');
+    var url = (window.Shopify && window.Shopify.routes && window.Shopify.routes.root || '/') +
+      'recommendations/products?product_id=' + productId + '&limit=10&section_id=sl-frequently-bought-together&intent=complementary';
+
+    fetch(url).then(function(r) { return r.text(); }).then(function(html) {
+      var parser = new DOMParser();
+      var doc = parser.parseFromString(html, 'text/html');
+      var sectionRoot = doc.querySelector('.sl-fbt-root');
+      if (sectionRoot && ph) {
+        var clone = document.importNode(sectionRoot, true);
+        root.innerHTML = '';
+        root.appendChild(clone);
+        loadSwiper(function() { initSwiper(root); });
+      } else if (ph) {
+        ph.textContent = '';
+      }
+    }).catch(function() {
+      if (ph) ph.textContent = '';
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', run);
+  } else {
+    run();
+  }
+})();
+</script>
+{% endif %}

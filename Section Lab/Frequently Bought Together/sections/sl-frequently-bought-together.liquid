@@ -1,18 +1,24 @@
 {% comment %}
   SL - Frequently Bought Together
-  Swiper-based product slider with card styling. Uses product blocks.
-  Requires Swiper.js. Add to product template.
+  Swiper-based product slider. Data: manual blocks OR Shopify recommendations (complementary).
 {% endcomment %}
 
-{% if section.blocks.size == 0 %}
-  {% if request.design_mode %}
-    <div id="sl-fbt-{{ section.id }}" class="sl-fbt-root" style="padding: 24px; text-align: center; border: 2px dashed #ddd;">
-      <p style="margin: 0; color: #666;">Frequently Bought Together — Add product blocks to get started.</p>
-    </div>
-  {% endif %}
-{% else %}
+{% assign data_source = section.settings.data_source | default: 'manual' %}
+{% assign use_recommendations = false %}
+{% assign use_blocks = false %}
+{% assign products_to_show = '' %}
 
-<div id="sl-fbt-{{ section.id }}" class="sl-fbt-root">
+{% if data_source == 'recommendations' and product != blank %}
+  {% if recommendations.performed? and recommendations.products_count > 0 %}
+    {% assign use_recommendations = true %}
+  {% endif %}
+{% elsif data_source == 'manual' and section.blocks.size > 0 %}
+  {% assign use_blocks = true %}
+{% endif %}
+
+{% assign show_section = use_recommendations or use_blocks or (data_source == 'recommendations' and product != blank) %}
+{% if show_section %}
+<div id="sl-fbt-{{ section.id }}" class="sl-fbt-root" {% if data_source == 'recommendations' and product != blank and use_recommendations == false %}data-fbt-fetch data-product-id="{{ product.id }}"{% endif %}>
   <div
     class="sl-fbt-inner"
     style="
@@ -30,12 +36,15 @@
       ">{{ section.settings.heading }}</h2>
     {% endif %}
 
+    {% if use_recommendations == false and data_source == 'recommendations' and product != blank %}
+      <div class="sl-fbt-fetch-placeholder" style="min-height: 200px; display: flex; align-items: center; justify-content: center; color: #666;">Loading…</div>
+    {% else %}
     <div class="sl-fbt-swiper swiper">
       <div class="swiper-wrapper">
-        {% for block in section.blocks %}
-          {% assign product = block.settings.product %}
-          {% if product != blank %}
-            <div class="swiper-slide" {{ block.shopify_attributes }}>
+        {% if use_recommendations %}
+          {% for rec_product in recommendations.products %}
+            {% assign product = rec_product %}
+            <div class="swiper-slide">
               <div class="sl-fbt-card">
                 <a href="{{ product.url }}" class="sl-fbt-card__media">
                   {% if product.featured_image != blank %}
@@ -96,8 +105,74 @@
                 </div>
               </div>
             </div>
-          {% endif %}
-        {% endfor %}
+          {% endfor %}
+        {% else %}
+          {% for block in section.blocks %}
+            {% assign product = block.settings.product %}
+            {% if product != blank %}
+            <div class="swiper-slide" {{ block.shopify_attributes }}>
+              <div class="sl-fbt-card">
+                <a href="{{ product.url }}" class="sl-fbt-card__media">
+                  {% if product.featured_image != blank %}
+                    <img
+                      src="{{ product.featured_image | image_url: width: 520 }}"
+                      srcset="{{ product.featured_image | image_url: width: 260 }} 260w,
+                              {{ product.featured_image | image_url: width: 400 }} 400w,
+                              {{ product.featured_image | image_url: width: 520 }} 520w"
+                      sizes="260px"
+                      alt="{{ product.featured_image.alt | default: product.title | escape }}"
+                      width="260"
+                      height="260"
+                      loading="lazy"
+                      {% if forloop.index0 > 1 %}fetchpriority="low"{% endif %}
+                    >
+                  {% else %}
+                    {{ 'product-1' | placeholder_svg_tag: 'sl-fbt-placeholder' }}
+                  {% endif %}
+                </a>
+                {% if section.settings.show_percentage %}
+                  {% assign seed = product.id | modulo: 100 %}
+                  {% if forloop.index0 == 0 %}
+                    {% assign r = seed | modulo: 12 %}
+                    {% assign pct = 54 | plus: r %}
+                  {% elsif forloop.index0 == 1 %}
+                    {% assign r = seed | modulo: 10 %}
+                    {% assign pct = 45 | plus: r %}
+                  {% elsif forloop.index0 == 2 %}
+                    {% assign r = seed | modulo: 8 %}
+                    {% assign pct = 38 | plus: r %}
+                  {% elsif forloop.index0 == 3 %}
+                    {% assign r = seed | modulo: 7 %}
+                    {% assign pct = 32 | plus: r %}
+                  {% else %}
+                    {% assign r = seed | modulo: 6 %}
+                    {% assign pct = 30 | plus: r %}
+                  {% endif %}
+                  <p class="sl-fbt-volume">{{ pct }}% bought together</p>
+                {% endif %}
+                <div class="sl-fbt-card__info">
+                  <a href="{{ product.url }}" class="sl-fbt-card__title">{{ product.title }}</a>
+                  <div class="sl-fbt-card__price">
+                    {% if product.compare_at_price > product.price %}
+                      <span class="sl-fbt-price--sale">{{ product.price | money }}</span>
+                      <span class="sl-fbt-price--compare">{{ product.compare_at_price | money }}</span>
+                    {% else %}
+                      {{ product.price | money }}
+                    {% endif %}
+                  </div>
+                  {% form 'product', product, class: 'sl-fbt-form' %}
+                    <input type="hidden" name="quantity" value="1">
+                    <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+                    <button type="submit" class="sl-fbt-add" {% unless product.available %}disabled{% endunless %}>
+                      {% if product.available %}Add{% else %}Sold out{% endif %}
+                    </button>
+                  {% endform %}
+                </div>
+              </div>
+            </div>
+            {% endif %}
+          {% endfor %}
+        {% endif %}
       </div>
       {% if section.settings.show_arrows %}
         <div class="swiper-button-prev"></div>
@@ -107,6 +182,7 @@
         <div class="swiper-pagination"></div>
       {% endif %}
     </div>
+    {% endif %}
   </div>
 </div>
 
@@ -262,6 +338,9 @@
 
 <script>
 (function() {
+  var SWIPER_CSS = 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css';
+  var SWIPER_JS = 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js';
+
   function initFbt() {
     var el = document.querySelector('#sl-fbt-{{ section.id }} .sl-fbt-swiper');
     if (!el || typeof Swiper === 'undefined') return;
@@ -291,19 +370,66 @@
       breakpoints: {}
     });
   }
+
+  function loadSwiper(cb) {
+    if (typeof Swiper !== 'undefined') {
+      cb();
+      return;
+    }
+    var link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = SWIPER_CSS;
+    document.head.appendChild(link);
+    var script = document.createElement('script');
+    script.src = SWIPER_JS;
+    script.onload = cb;
+    document.head.appendChild(script);
+  }
+
   function run() {
     var section = document.getElementById('sl-fbt-{{ section.id }}');
     if (!section) return;
+
+    var needsFetch = section.hasAttribute('data-fbt-fetch');
+    var productId = section.getAttribute('data-product-id');
+
+    if (needsFetch && productId) {
+      var root = (window.Shopify && window.Shopify.routes && window.Shopify.routes.root) || '/';
+      var url = root + 'recommendations/products?product_id=' + productId + '&limit=10&section_id=sl-frequently-bought-together&intent=complementary';
+      fetch(url).then(function(r) { return r.text(); }).then(function(html) {
+        var parser = new DOMParser();
+        var doc = parser.parseFromString(html, 'text/html');
+        var inner = doc.querySelector('.sl-fbt-inner');
+        var placeholder = section.querySelector('.sl-fbt-fetch-placeholder');
+        if (inner && placeholder) {
+          var swiper = inner.querySelector('.sl-fbt-swiper');
+          if (swiper) {
+            var swiperClone = document.importNode(swiper, true);
+            placeholder.parentNode.replaceChild(swiperClone, placeholder);
+            loadSwiper(initFbt);
+          }
+        }
+      }).catch(function() {
+        if (section.querySelector('.sl-fbt-fetch-placeholder')) {
+          section.querySelector('.sl-fbt-fetch-placeholder').textContent = '';
+        }
+      });
+      return;
+    }
+
+    function onVisible() {
+      loadSwiper(initFbt);
+    }
     if ('IntersectionObserver' in window) {
       var io = new IntersectionObserver(function(entries) {
         if (entries[0].isIntersecting) {
           io.disconnect();
-          initFbt();
+          onVisible();
         }
       }, { rootMargin: '100px' });
       io.observe(section);
     } else {
-      initFbt();
+      onVisible();
     }
   }
   if (document.readyState === 'loading') {
@@ -317,10 +443,25 @@
 
 {% schema %}
 {
-  "name": "SL - Frequently Bought Together",
+  "name": "SL - Frequently Bought",
   "tag": "section",
   "class": "sl-frequently-bought-together",
   "settings": [
+    {
+      "type": "header",
+      "content": "Data source"
+    },
+    {
+      "type": "select",
+      "id": "data_source",
+      "label": "Product source",
+      "options": [
+        { "value": "manual", "label": "Manual (pick products in blocks)" },
+        { "value": "recommendations", "label": "Auto (Shopify recommendations)" }
+      ],
+      "default": "manual",
+      "info": "Auto uses purchase history & complementary products. Add to product page."
+    },
     {
       "type": "header",
       "content": "Heading"
@@ -583,15 +724,21 @@
   ],
   "presets": [
     {
-      "name": "SL - Frequently Bought Together",
+      "name": "SL - Frequently Bought",
       "category": "Products",
       "blocks": [
         { "type": "product" },
         { "type": "product" },
         { "type": "product" }
       ]
+    },
+    {
+      "name": "SL - FBT (Auto)",
+      "category": "Products",
+      "settings": {
+        "data_source": "recommendations"
+      }
     }
-  ],
-  "templates": ["product"]
+  ]
 }
 {% endschema %}
