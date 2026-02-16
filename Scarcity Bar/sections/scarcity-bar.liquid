@@ -1,0 +1,282 @@
+{% comment %}
+  Scarcity Bar — "Only X items left" urgency widget with progress bar.
+  Source: Custom (found on site). Supports EN/AR text; optional product inventory.
+{% endcomment %}
+
+{% assign min_stock = section.settings.min_stock %}
+{% assign max_stock = section.settings.max_stock %}
+{% assign use_inventory = section.settings.use_product_inventory %}
+{% assign inventory_qty = nil %}
+{% if product != blank and use_inventory and product.variants.size > 0 %}
+  {% assign inventory_qty = product.variants | map: 'inventory_quantity' | sum %}
+{% endif %}
+
+<div
+  id="scarcity-bar-{{ section.id }}"
+  class="scarcity-bar-wrapper"
+  data-min="{{ min_stock }}"
+  data-max="{{ max_stock }}"
+  {% if inventory_qty != nil %}data-inventory="{{ inventory_qty }}"{% endif %}
+  data-en="{{ section.settings.text_en | escape }}"
+  data-ar="{{ section.settings.text_ar | escape }}"
+>
+  <div class="scarcity-bar">
+    <div class="scarcity-bar__track">
+      <div class="scarcity-bar__fill">
+        <div class="scarcity-bar__stripes"></div>
+      </div>
+    </div>
+    <p class="scarcity-bar__text">
+      <span class="scarcity-qty"></span>
+    </p>
+  </div>
+</div>
+
+<style>
+  #scarcity-bar-{{ section.id }}.scarcity-bar-wrapper {
+    margin-top: {{ section.settings.margin_top }}px;
+    margin-bottom: {{ section.settings.margin_bottom }}px;
+  }
+
+  #scarcity-bar-{{ section.id }} .scarcity-bar {
+    font-size: {{ section.settings.font_size }}px;
+  }
+
+  #scarcity-bar-{{ section.id }} .scarcity-bar__track {
+    width: 100%;
+    height: {{ section.settings.track_height }}px;
+    background: {{ section.settings.track_color }};
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  #scarcity-bar-{{ section.id }} .scarcity-bar__fill {
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, {{ section.settings.fill_color_start }}, {{ section.settings.fill_color_end }});
+    position: relative;
+    transition: width 0.5s ease;
+  }
+
+  #scarcity-bar-{{ section.id }} .scarcity-bar__stripes {
+    position: absolute;
+    inset: 0;
+    background-image: linear-gradient(
+      45deg,
+      rgba(255,255,255,0.25) 25%,
+      transparent 25%,
+      transparent 50%,
+      rgba(255,255,255,0.25) 50%,
+      rgba(255,255,255,0.25) 75%,
+      transparent 75%,
+      transparent
+    );
+    background-size: 14px 14px;
+    animation: scarcity-stripes-{{ section.id }} 1s linear infinite;
+  }
+
+  @keyframes scarcity-stripes-{{ section.id }} {
+    from { background-position: 0 0; }
+    to   { background-position: 28px 0; }
+  }
+
+  #scarcity-bar-{{ section.id }} .scarcity-bar__text {
+    margin-top: 6px;
+    color: {{ section.settings.text_color }};
+    font-weight: 500;
+  }
+
+  #scarcity-bar-{{ section.id }} .pulse-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    margin-inline-end: 6px;
+    border-radius: 50%;
+    background: {{ section.settings.pulse_color }};
+    position: relative;
+  }
+
+  #scarcity-bar-{{ section.id }} .pulse-dot::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: {{ section.settings.pulse_color }};
+    opacity: 0.6;
+    animation: scarcity-pulse-{{ section.id }} 1.4s ease-out infinite;
+  }
+
+  @keyframes scarcity-pulse-{{ section.id }} {
+    0% { transform: scale(1); opacity: 0.8; }
+    70% { transform: scale(2.4); opacity: 0; }
+    100% { opacity: 0; }
+  }
+</style>
+
+<script>
+(function() {
+  var wrapper = document.getElementById("scarcity-bar-{{ section.id }}");
+  if (!wrapper) return;
+
+  var min = parseInt(wrapper.getAttribute("data-min"), 10) || 5;
+  var max = parseInt(wrapper.getAttribute("data-max"), 10) || 15;
+  if (min > max) { var t = min; min = max; max = t; }
+
+  var inventory = wrapper.getAttribute("data-inventory");
+  var qty;
+  if (inventory !== null && inventory !== "") {
+    qty = parseInt(inventory, 10);
+    if (isNaN(qty) || qty < 0) qty = min;
+    else if (qty > max) qty = max;
+  } else {
+    qty = Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  var fill = wrapper.querySelector(".scarcity-bar__fill");
+  var textEl = wrapper.querySelector(".scarcity-bar__text");
+  if (fill) fill.style.width = (qty / max * 100) + "%";
+
+  var lang = (document.documentElement.getAttribute("lang") || "").toLowerCase();
+  var template = (lang.indexOf("ar") !== -1 && wrapper.getAttribute("data-ar"))
+    ? wrapper.getAttribute("data-ar")
+    : (wrapper.getAttribute("data-en") || "Only <strong class=\"scarcity-qty\"></strong> items left");
+  if (textEl) {
+    textEl.innerHTML = template;
+    var strong = textEl.querySelector(".scarcity-qty");
+    if (strong) strong.textContent = qty;
+  }
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Scarcity Bar",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Stock"
+    },
+    {
+      "type": "range",
+      "id": "min_stock",
+      "label": "Min (random range)",
+      "min": 1,
+      "max": 50,
+      "step": 1,
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "max_stock",
+      "label": "Max (random range)",
+      "min": 1,
+      "max": 50,
+      "step": 1,
+      "default": 20
+    },
+    {
+      "type": "checkbox",
+      "id": "use_product_inventory",
+      "label": "Use product inventory on product page",
+      "default": false,
+      "info": "When on a product template, show real inventory (capped by min/max). Otherwise uses random between min and max."
+    },
+    {
+      "type": "header",
+      "content": "Text"
+    },
+    {
+      "type": "text",
+      "id": "text_en",
+      "label": "English",
+      "default": "<span class='pulse-dot'></span> Only <strong class='scarcity-qty'></strong> items left"
+    },
+    {
+      "type": "text",
+      "id": "text_ar",
+      "label": "Arabic",
+      "default": "<span class='pulse-dot'></span> باقي <strong class='scarcity-qty'></strong> قطعة فقط"
+    },
+    {
+      "type": "header",
+      "content": "Style"
+    },
+    {
+      "type": "range",
+      "id": "margin_top",
+      "label": "Margin top",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "font_size",
+      "label": "Font size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "track_height",
+      "label": "Bar height",
+      "min": 4,
+      "max": 16,
+      "step": 1,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "color",
+      "id": "track_color",
+      "label": "Track background",
+      "default": "#eeeeee"
+    },
+    {
+      "type": "color",
+      "id": "fill_color_start",
+      "label": "Fill gradient start",
+      "default": "#ff4d4d"
+    },
+    {
+      "type": "color",
+      "id": "fill_color_end",
+      "label": "Fill gradient end",
+      "default": "#ff9f43"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#d63031"
+    },
+    {
+      "type": "color",
+      "id": "pulse_color",
+      "label": "Pulse dot color",
+      "default": "#ff3b30"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Scarcity Bar",
+      "category": "Product"
+    }
+  ]
+}
+{% endschema %}

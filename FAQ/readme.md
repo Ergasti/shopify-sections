@@ -1,5 +1,6 @@
 # Shopify FAQ Rich Snippets Section
 
+**Last updated in library:** 2025-02-14
 
 ## Demo
 https://sections.design/blogs/shopify/faq-rich-snippets-section#demo

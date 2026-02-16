@@ -1,0 +1,157 @@
+{% comment %}
+  Section Lab - Payment Icons
+  Source: Section Lab (paid bundle). Internal use only.
+  Displays payment method icons (shop-enabled or custom list). Optional heading. Can be injected into product info via Custom Liquid.
+{% endcomment %}
+
+{% if section.settings.payment_icons != blank %}
+  {% assign icons = section.settings.payment_icons | split: ',' %}
+{% else %}
+  {% assign icons = shop.enabled_payment_types %}
+{% endif %}
+
+{% assign combined = '' %}
+{% for method in icons %}
+  {% assign trimmed = method | strip %}
+  {% unless combined contains trimmed %}
+    {% assign combined = combined | append: trimmed | append: ',' %}
+  {% endunless %}
+{% endfor %}
+{% assign shown = combined | split: ',' %}
+
+{% if shown.size > 0 %}
+  <div
+    id="sl-payment-icons-{{ section.id }}"
+    class="sl-payment-icons-wrapper"
+    style="
+      background-color: {{ section.settings.bg_color }};
+      border-radius: {{ section.settings.border_radius }}px;
+      border: {{ section.settings.border_width }}px solid {{ section.settings.border_color }};
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      align-items: {% case section.settings.icon_alignment %}
+        {% when 'left' %} flex-start
+        {% when 'right' %} flex-end
+        {% else %} center
+      {% endcase %};
+    "
+  >
+    {% if section.settings.title != blank %}
+      <div
+        style="
+          width: 100%;
+          font-weight: 500;
+          text-align: {{ section.settings.text_alignment }};
+        "
+      >
+        {{ section.settings.title }}
+      </div>
+    {% endif %}
+
+    <div
+      style="
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        justify-content: {% case section.settings.icon_alignment %}
+          {% when 'left' %} flex-start
+          {% when 'right' %} flex-end
+          {% else %} center
+        {% endcase %};
+        width: 100%;
+      "
+    >
+      {% for method in shown %}
+        {% assign trimmed = method | strip %}
+        {% if trimmed != blank %}
+          <div style="display: flex; align-items: center;">
+            {{ trimmed | payment_type_svg_tag }}
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+{% endif %}
+
+{% schema %}
+{
+  "name": "SL Payment Icons",
+  "settings": [
+    {
+      "type": "richtext",
+      "id": "title",
+      "label": "Heading"
+    },
+    {
+      "type": "text",
+      "id": "payment_icons",
+      "label": "Custom payment icons",
+      "info": "Comma-separated list, e.g. visa, master, apple_pay. Leave blank to show all payment methods enabled in your store."
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Text alignment",
+      "default": "center",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "icon_alignment",
+      "label": "Icon alignment",
+      "default": "center",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Style"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background color",
+      "default": "#f0f0f0"
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 50,
+      "default": 20,
+      "unit": "px"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "border_width",
+      "label": "Border width",
+      "min": 0,
+      "max": 10,
+      "default": 1,
+      "unit": "px"
+    }
+  ],
+  "presets": [
+    {
+      "name": "SL Payment Icons",
+      "category": "Custom"
+    }
+  ]
+}
+{% endschema %}

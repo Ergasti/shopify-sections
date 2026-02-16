@@ -1,0 +1,377 @@
+{% comment %}
+  Section Lab - Nudges Widget (Sales Nudge)
+  Source: Section Lab (paid bundle). Internal use only.
+  Uses Toastify-js CDN. Shows "Someone from [city] just bought [product]" toasts.
+{% endcomment %}
+
+<script src="https://cdn.jsdelivr.net/npm/toastify-js" defer></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
+<script id="sales-nudge-products-{{ section.id }}" type="application/json">
+  [
+    {% for product in section.settings.products %}
+      {
+        "title": {{ product.title | json }},
+        "handle": {{ product.handle | json }},
+        "image": {{ product.featured_image | image_url: width: 200 | json }}
+      }{% unless forloop.last %},{% endunless %}
+    {% endfor %}
+  ]
+</script>
+
+<script>
+(function() {
+  function setCookie(name, value, hours) {
+    var expires = new Date(Date.now() + hours * 60 * 60 * 1000).toUTCString();
+    document.cookie = name + "=" + value + "; expires=" + expires + "; path=/; SameSite=Lax";
+  }
+
+  function getCookie(name) {
+    var cookies = document.cookie.split("; ");
+    for (var i = 0; i < cookies.length; i++) {
+      var parts = cookies[i].split("=");
+      if (parts[0] === name) return parts.slice(1).join("=");
+    }
+    return null;
+  }
+
+  document.addEventListener("DOMContentLoaded", function() {
+    if (getCookie("sales-nudge-closed") === "true") return;
+
+    var productDataEl = document.getElementById("sales-nudge-products-{{ section.id }}");
+    var products = productDataEl ? JSON.parse(productDataEl.textContent) : [];
+    var citiesRaw = {{ section.settings.city_names | split: ',' | json }};
+    var cities = [];
+    if (citiesRaw && citiesRaw.length) {
+      for (var c = 0; c < citiesRaw.length; c++) {
+        var t = (citiesRaw[c] && citiesRaw[c].trim) ? citiesRaw[c].trim() : citiesRaw[c];
+        if (t) cities.push(t);
+      }
+    }
+    if (!cities.length) cities = ["Berlin", "Munich", "Hamburg"];
+
+    if (!products.length || !cities.length) return;
+
+    var maxNudges = 5;
+    var interval = 30000;
+    var shown = 0;
+    var sectionId = "{{ section.id }}";
+    var previewMode = {{ section.settings.preview_mode_enable | json }};
+    var headlineText = {{ section.settings.headline_text | strip_html | json }};
+
+    function showNudge() {
+      var product = products[Math.floor(Math.random() * products.length)];
+      var city = cities[Math.floor(Math.random() * cities.length)];
+      var minutes = Math.floor(Math.random() * 59) + 1;
+      var productTitle = product.title.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      var citySafe = city.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+      var html = '<div class="sl-toast-body">' +
+        '<img src="' + product.image + '" alt="" class="sl-toast-image" width="67" height="67" loading="lazy">' +
+        '<div>' +
+        '<h3 class="sl-toast-headline" style="color: {{ section.settings.headline_color }}; font-size: {{ section.settings.size_headline }}px; margin: 0 0 5px 0;">' + headlineText + '</h3>' +
+        '<span class="sl-toast-text" style="color: {{ section.settings.text_color }}; font-size: {{ section.settings.size_text }}px;">Someone from <b>' + citySafe + '</b> just bought <b>' + productTitle + '</b></span>' +
+        '<div class="sl-toast-verified" style="font-size: {{ section.settings.size_highlight }}px; margin-top: 4px; color: {{ section.settings.highlight_color }}; display: flex; align-items: center; gap: 6px;">' +
+        '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M6.01531 14.1539L4.90248 12.277L2.78465 11.8205L2.99231 9.63586L1.56415 8.00002L2.99231 6.36419L2.78465 4.17952L4.90248 3.72302L6.01531 1.84619L7.99998 2.68469L9.98465 1.84619L11.0975 3.72302L13.2153 4.17952L13.0076 6.36419L14.4358 8.00002L13.0076 9.63586L13.2153 11.8205L11.0975 12.277L9.98465 14.1539L7.99998 13.3154L6.01531 14.1539ZM7.29998 9.90519L10.6051 6.60003L10.1333 6.12052L7.29998 8.95386L5.86665 7.52819L5.39481 8.00002L7.29998 9.90519Z" fill="currentColor"/></svg>' +
+        ' Verified Purchase · ' + minutes + ' min ago</div></div></div>';
+
+      Toastify({
+        node: null,
+        text: html,
+        duration: previewMode ? -1 : 10000,
+        gravity: "{{ section.settings.gravity }}",
+        position: "{{ section.settings.position }}",
+        escapeMarkup: false,
+        stopOnFocus: true,
+        close: true,
+        destination: "/products/" + (product.handle || ""),
+        className: "sl-toast sl-toast-{{ section.id }}",
+        style: {
+          background: "{{ section.settings.background_color }}",
+          color: "{{ section.settings.text_color }}",
+          padding: "{{ section.settings.padding }}px",
+          maxWidth: "{{ section.settings.max_width }}px",
+          border: "{{ section.settings.border_width }}px solid {{ section.settings.border_color }}",
+          borderRadius: "{{ section.settings.border_radius }}px",
+          boxShadow: "0px 0px {{ section.settings.shadow_blur }}px 0px rgba(0, 0, 0, {{ section.settings.shadow_opacity }})"
+        },
+        onClick: function() {
+          if (product.handle) window.location.href = "/products/" + product.handle;
+        }
+      }).showToast();
+    }
+
+    showNudge();
+    shown++;
+
+    if (!previewMode) {
+      var timer = setInterval(function() {
+        if (shown >= maxNudges || getCookie("sales-nudge-closed") === "true") {
+          clearInterval(timer);
+          return;
+        }
+        showNudge();
+        shown++;
+      }, interval);
+    }
+  });
+})();
+</script>
+
+<style>
+  .sl-toast-{{ section.id }}.toastify .toast-close {
+    color: {{ section.settings.close_color }};
+    font-size: {{ section.settings.close_size }}px;
+    opacity: 1;
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    z-index: 2;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 4px;
+  }
+
+  .sl-toast-{{ section.id }} .sl-toast-body {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+  }
+
+  .sl-toast-{{ section.id }} .sl-toast-image {
+    width: 67px;
+    height: 67px;
+    object-fit: contain;
+    border-radius: 6px;
+    flex-shrink: 0;
+  }
+
+  .sl-toast-{{ section.id }} .sl-toast-headline {
+    margin: 0 0 5px 0;
+  }
+
+  .sl-toast-{{ section.id }} .sl-toast-verified {
+    margin-top: 4px;
+  }
+
+  @media screen and (max-width: 767px) {
+    .sl-toast-{{ section.id }}.toastify {
+      width: 100% !important;
+      left: 0 !important;
+      right: 0 !important;
+      border-radius: 0 !important;
+      bottom: 0 !important;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "SL Sales Nudge Widget",
+  "class": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "⚠️ Preview"
+    },
+    {
+      "type": "checkbox",
+      "id": "preview_mode_enable",
+      "label": "Always show preview (for editing)",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "⚙️ General"
+    },
+    {
+      "type": "text",
+      "id": "headline_text",
+      "label": "Headline text",
+      "default": "🔔 Someone just made a purchase!"
+    },
+    {
+      "type": "textarea",
+      "id": "city_names",
+      "label": "City names (comma separated)",
+      "default": "Berlin, Munich, Hamburg, Cologne, Frankfurt"
+    },
+    {
+      "type": "product_list",
+      "id": "products",
+      "label": "Products",
+      "limit": 10
+    },
+    {
+      "type": "header",
+      "content": "🖋 Typography"
+    },
+    {
+      "type": "range",
+      "id": "size_headline",
+      "label": "Headline size",
+      "min": 10,
+      "max": 40,
+      "step": 1,
+      "default": 18
+    },
+    {
+      "type": "range",
+      "id": "size_text",
+      "label": "Text size",
+      "min": 10,
+      "max": 30,
+      "step": 1,
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "size_highlight",
+      "label": "Highlight size",
+      "min": 8,
+      "max": 20,
+      "step": 1,
+      "default": 12
+    },
+    {
+      "type": "header",
+      "content": "🎨 Colors"
+    },
+    {
+      "type": "color",
+      "id": "headline_color",
+      "label": "Headline color",
+      "default": "#171717"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#171717"
+    },
+    {
+      "type": "color",
+      "id": "highlight_color",
+      "label": "Highlight color",
+      "default": "#19B03D"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border color",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "📐 Layout & positioning"
+    },
+    {
+      "type": "select",
+      "id": "gravity",
+      "label": "Vertical position",
+      "options": [
+        { "value": "bottom", "label": "Bottom" },
+        { "value": "top", "label": "Top" }
+      ],
+      "default": "bottom"
+    },
+    {
+      "type": "select",
+      "id": "position",
+      "label": "Horizontal alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "label": "Max width",
+      "min": 200,
+      "max": 600,
+      "step": 10,
+      "default": 350
+    },
+    {
+      "type": "range",
+      "id": "padding",
+      "label": "Inner spacing",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "default": 15
+    },
+    {
+      "type": "range",
+      "id": "border_width",
+      "label": "Border width",
+      "min": 0,
+      "max": 5,
+      "step": 1,
+      "default": 1
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "shadow_blur",
+      "label": "Shadow blur",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "shadow_opacity",
+      "label": "Shadow opacity",
+      "min": 0,
+      "max": 1,
+      "step": 0.1,
+      "default": 0.2
+    },
+    {
+      "type": "header",
+      "content": "❌ Close button"
+    },
+    {
+      "type": "color",
+      "id": "close_color",
+      "label": "Close button color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "close_size",
+      "label": "Close button size",
+      "min": 10,
+      "max": 30,
+      "step": 1,
+      "default": 16
+    }
+  ],
+  "presets": [
+    {
+      "name": "SL Sales Nudge Widget",
+      "category": "Marketing"
+    }
+  ]
+}
+{% endschema %}

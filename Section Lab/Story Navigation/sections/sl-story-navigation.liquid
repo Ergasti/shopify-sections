@@ -1,0 +1,325 @@
+{% comment %}
+  Section Lab - Story Navigation
+  Source: Section Lab (paid bundle). Internal use only.
+{% endcomment %}
+
+<div
+  id="sl-story-nav-{{ section.id }}"
+  class="sectionlab-storynav sectionlab-storynav-{{ section.id }}-padding"
+  style="background-color: {{ section.settings['background-color'] }};"
+>
+  <div class="sectionlab-storynav-pswmain">
+    <div class="sectionlab-storynav-optionlist">
+      {% for block in section.blocks %}
+        {% case block.type %}
+          {% when 'slide' %}
+            <div class="sectionlab-storynav-option-item" {{ block.shopify_attributes }}>
+              <a href="{{ block.settings.custom_link }}">
+                <div class="sectionlab-storynav-option-icon">
+                  {% if block.settings.collection != blank and block.settings.collection.metafields.custom.insta_story_badge != blank %}
+                    <div class="sectionlab-storynav-badge">
+                      {{ block.settings.collection.metafields.custom.insta_story_badge }}
+                    </div>
+                  {% endif %}
+                  <div class="sectionlab-storynav-optionicon">
+                    <div class="sectionlab-storynav-opticon">
+                      {% if block.settings.image != blank %}
+                        <img
+                          src="{{ block.settings.image | image_url: width: 300 }}"
+                          alt="{{ block.settings.image.alt | default: block.settings.custom_link_text }}"
+                          width="300"
+                          loading="lazy"
+                        >
+                      {% else %}
+                        <img
+                          class="sectionlab-storynav-placeholder"
+                          src="https://cdn.shopify.com/s/files/1/0747/9725/2858/files/placeholder_sectionlab.jpg?v=1742291047"
+                          alt="Placeholder"
+                          width="300"
+                          loading="lazy"
+                        >
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+                <div class="sectionlab-storynav-option-name">
+                  <span class="sectionlab-storynav-optionname">{{ block.settings.custom_link_text }}</span>
+                </div>
+              </a>
+            </div>
+        {% endcase %}
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<style>
+  #sl-story-nav-{{ section.id }} .sectionlab-storynav-badge {
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #ed93b7;
+    color: #ffffff;
+    font-size: 13px;
+    padding: 4px 8px;
+    border-radius: 7px;
+    z-index: 999;
+  }
+
+  @media screen and (min-width: 620px) {
+    #sl-story-nav-{{ section.id }} .sectionlab-storynav-optionlist {
+      justify-content: center;
+    }
+  }
+
+  #sl-story-nav-{{ section.id }} .sectionlab-storynav-optionname {
+    text-transform: capitalize;
+  }
+
+  #sl-story-nav-{{ section.id }}.sectionlab-storynav {
+    display: block;
+    width: 100%;
+    padding: 10px 0;
+  }
+
+  #sl-story-nav-{{ section.id }}.sectionlab-storynav-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    #sl-story-nav-{{ section.id }}.sectionlab-storynav-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+
+  #sl-story-nav-{{ section.id }} .sectionlab-storynav-pswmain {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  #sl-story-nav-{{ section.id }} .sectionlab-storynav-pswmain::-webkit-scrollbar {
+    display: none;
+  }
+  #sl-story-nav-{{ section.id }} .sectionlab-storynav-optionlist {
+    display: flex;
+    display: -webkit-flex;
+    width: 100%;
+    padding: 0 10px;
+  }
+  #sl-story-nav-{{ section.id }} .sectionlab-storynav-option-item {
+    width: 14.285%;
+    padding: 0 10px;
+  }
+  #sl-story-nav-{{ section.id }} .sectionlab-storynav-option-item.sectionlab-storynav-catactive .sectionlab-storynav-option-name .sectionlab-storynav-optionname {
+    font-weight: 700;
+  }
+  #sl-story-nav-{{ section.id }} .sectionlab-storynav-option-icon {
+    position: relative;
+    display: block;
+    width: 100%;
+    max-width: 90px;
+    width: 65px;
+    margin: 11px auto 5px;
+  }
+  #sl-story-nav-{{ section.id }} .sectionlab-storynav-option-icon img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: cover;
+  }
+  #sl-story-nav-{{ section.id }} .sectionlab-storynav-opticon img.sectionlab-storynav-placeholder {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  #sl-story-nav-{{ section.id }} .sectionlab-storynav-optionicon {
+    display: flex;
+    display: -webkit-flex;
+    width: 100%;
+    position: relative;
+  }
+  #sl-story-nav-{{ section.id }} .sectionlab-storynav-optionicon:after {
+    content: "";
+    padding-top: {{ 100 | divided_by: section.settings.image_ratio }}%;
+    display: block;
+  }
+  #sl-story-nav-{{ section.id }} .sectionlab-storynav-opticon {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    display: flex;
+    display: -webkit-flex;
+    align-items: center;
+    -webkit-align-items: center;
+    justify-content: center;
+    -webkit-justify-content: center;
+    border-radius: {{ section.settings.border_radius }}px;
+    overflow: hidden;
+    border: {{ section.settings.border_width }}px solid {{ section.settings.border_color }};
+  }
+  #sl-story-nav-{{ section.id }} .sectionlab-storynav-option-name {
+    display: block;
+    width: 100%;
+  }
+  #sl-story-nav-{{ section.id }} .sectionlab-storynav-option-name .sectionlab-storynav-optionname {
+    display: block;
+    font-size: {{ section.settings.font_size }}px;
+    text-align: center;
+    transition: all 0.3s ease-out;
+  }
+
+  @media only screen and (min-width: 581px) and (max-width: 767px) {
+    #sl-story-nav-{{ section.id }} .sectionlab-storynav-optionlist {
+      justify-content: space-between;
+    }
+    #sl-story-nav-{{ section.id }} .sectionlab-storynav-option-name .sectionlab-storynav-optionname {
+      font-size: 12px;
+    }
+  }
+  @media only screen and (max-width: 580px) {
+    #sl-story-nav-{{ section.id }} .sectionlab-storynav-option-item {
+      width: 80px;
+      padding: 0 5px;
+    }
+    #sl-story-nav-{{ section.id }} .sectionlab-storynav-optionlist {
+      width: 580px;
+      padding: 0 10px;
+      margin: 0 auto;
+    }
+    #sl-story-nav-{{ section.id }} .sectionlab-storynav-option-name .sectionlab-storynav-optionname {
+      font-size: 12px;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "SL Story Navigation",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Background color 🎨"
+    },
+    {
+      "type": "color",
+      "id": "background-color",
+      "label": "Section background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "header",
+      "content": "Section padding ↕️"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 10
+    },
+    {
+      "type": "header",
+      "content": "Item Styling 🔍"
+    },
+    {
+      "type": "range",
+      "id": "font_size",
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Font size",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "image_ratio",
+      "min": 0.5,
+      "max": 1,
+      "step": 0.1,
+      "label": "Image ratio (width:height)",
+      "default": 1
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "label": "Border radius",
+      "default": 50
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "border_width",
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "label": "Border width",
+      "default": 2
+    }
+  ],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "SL Story Item",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "url",
+          "id": "custom_link",
+          "label": "Link"
+        },
+        {
+          "type": "text",
+          "id": "custom_link_text",
+          "label": "Link text"
+        },
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection (optional, for badge metafield)"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "SL Story Navigation",
+      "category": "Custom"
+    }
+  ]
+}
+{% endschema %}

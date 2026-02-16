@@ -1,0 +1,385 @@
+<style>
+  #mixed-media-carousel-{{ section.id }} {
+    width: 100%;
+    text-align: center;
+  }
+  #mixed-media-carousel-{{ section.id }} .mixed-media-carousel-container {
+    margin: 0 auto;
+  }
+  #mixed-media-carousel-{{ section.id }} .section-heading {
+    font-size: {% if section.settings.heading_size == 'small' %}24px{% elsif section.settings.heading_size == 'medium' %}32px{% elsif section.settings.heading_size == 'large' %}40px{% endif %};
+    text-align: {{ section.settings.heading_alignment }};
+    margin-bottom: 20px;
+  }
+  #mixed-media-carousel-{{ section.id }} .mixed-media-carousel-wrapper {
+    position: relative;
+    overflow: hidden;
+  }
+  #mixed-media-carousel-{{ section.id }} .mixed-media-carousel-slider {
+    overflow: hidden;
+    position: relative;
+  }
+  #mixed-media-carousel-{{ section.id }} .slider-track {
+    display: flex;
+    transition: transform 0.5s ease-in-out;
+    will-change: transform;
+  }
+  #mixed-media-carousel-{{ section.id }} .slide {
+    flex: 0 0 calc(100% / {{ section.settings.visible_slides }});
+    box-sizing: border-box;
+    padding: 20px;
+  }
+  @media (max-width: 767px) {
+    #mixed-media-carousel-{{ section.id }} .slide {
+      flex: 0 0 calc(100% / {{ section.settings.visible_mobile }});
+    }
+  }
+  #mixed-media-carousel-{{ section.id }} .media-element {
+    width: 100%;
+    object-fit: cover;
+    {% case section.settings.media_design %}
+      {% when "square" %}
+        aspect-ratio: 1 / 1;
+      {% when "portrait" %}
+        aspect-ratio: 2 / 3;
+      {% else %}
+        height: auto;
+    {% endcase %}
+  }
+  #mixed-media-carousel-{{ section.id }} .arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: {{ section.settings.arrow_bg_color }};
+    color: #fff;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 10;
+    border-radius: {% if section.settings.arrow_shape == 'circle' %}50%{% else %}0{% endif %};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+  }
+  #mixed-media-carousel-{{ section.id }} .left-arrow {
+    left: 10px;
+  }
+  #mixed-media-carousel-{{ section.id }} .right-arrow {
+    right: 10px;
+  }
+</style>
+
+{% assign cloneCount = section.settings.visible_slides %}
+
+<div id="mixed-media-carousel-{{ section.id }}" class="mixed-media-carousel-section" style="background-color: {{ section.settings.section_bg_color }}; padding-top: {{ section.settings.section_padding_top }}px; padding-bottom: {{ section.settings.section_padding_bottom }}px;">
+  <div class="mixed-media-carousel-container" style="width: {% if section.settings.full_width %}100%{% else %}80%{% endif %}; margin: 0 auto;">
+    {% if section.settings.section_heading != blank %}
+      <h2 class="section-heading">{{ section.settings.section_heading }}</h2>
+    {% endif %}
+    <div class="mixed-media-carousel-wrapper">
+      {% if section.settings.show_arrows %}
+        <button type="button" class="arrow left-arrow" aria-label="Previous slide">❮</button>
+      {% endif %}
+      <div class="mixed-media-carousel-slider">
+        <div class="slider-track">
+          {% if section.blocks.size > 0 %}
+            {% assign total = section.blocks.size %}
+            {% assign offset_value = total | minus: cloneCount %}
+            {% if offset_value < 0 %}{% assign offset_value = 0 %}{% endif %}
+            {% for block in section.blocks limit: cloneCount offset: offset_value %}
+              <div class="slide clone" {% if section.settings.media_shadow %}style="box-shadow: 0 4px 8px rgba(0,0,0,0.2);"{% endif %}>
+                {% if block.type == "carousel_image" and block.settings.media != blank %}
+                  <img class="media-element" src="{{ block.settings.media | img_url: section.settings.media_size }}" alt="{{ block.settings.media.alt | default: 'Carousel image' }}" loading="lazy">
+                {% elsif block.type == "carousel_video" and block.settings.media != blank %}
+                  <video class="media-element" controls muted autoplay loop playsinline>
+                    <source src="{{ block.settings.media }}">
+                  </video>
+                {% endif %}
+              </div>
+            {% endfor %}
+            {% for block in section.blocks %}
+              <div class="slide" {{ block.shopify_attributes }}{% if section.settings.media_shadow %} style="box-shadow: 0 4px 8px rgba(0,0,0,0.2);"{% endif %}>
+                {% if block.type == "carousel_image" and block.settings.media != blank %}
+                  <img class="media-element" src="{{ block.settings.media | img_url: section.settings.media_size }}" alt="{{ block.settings.media.alt | default: 'Carousel image' }}" loading="lazy">
+                {% elsif block.type == "carousel_video" and block.settings.media != blank %}
+                  <video class="media-element" controls muted autoplay loop playsinline>
+                    <source src="{{ block.settings.media }}">
+                  </video>
+                {% endif %}
+              </div>
+            {% endfor %}
+            {% for block in section.blocks limit: cloneCount %}
+              <div class="slide clone" {% if section.settings.media_shadow %}style="box-shadow: 0 4px 8px rgba(0,0,0,0.2);"{% endif %}>
+                {% if block.type == "carousel_image" and block.settings.media != blank %}
+                  <img class="media-element" src="{{ block.settings.media | img_url: section.settings.media_size }}" alt="{{ block.settings.media.alt | default: 'Carousel image' }}" loading="lazy">
+                {% elsif block.type == "carousel_video" and block.settings.media != blank %}
+                  <video class="media-element" controls playsinline>
+                    <source src="{{ block.settings.media }}">
+                  </video>
+                {% endif %}
+              </div>
+            {% endfor %}
+          {% endif %}
+        </div>
+      </div>
+      {% if section.settings.show_arrows %}
+        <button type="button" class="arrow right-arrow" aria-label="Next slide">❯</button>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  var container = document.getElementById("mixed-media-carousel-{{ section.id }}");
+  if (!container) return;
+  var sliderTrack = container.querySelector(".slider-track");
+  var slides = container.querySelectorAll(".slide");
+  if (slides.length === 0) return;
+
+  var cloneCount = {{ cloneCount }};
+  var visibleSlides = window.innerWidth <= 767 ? {{ section.settings.visible_mobile }} : {{ section.settings.visible_slides }};
+  var slider = container.querySelector(".mixed-media-carousel-slider");
+  var slideWidth = slider ? slider.offsetWidth / visibleSlides : 0;
+  var currentIndex = cloneCount;
+
+  function updateSlidePosition() {
+    if (sliderTrack && slideWidth > 0) {
+      sliderTrack.style.transform = "translateX(-" + (currentIndex * slideWidth) + "px)";
+    }
+  }
+
+  updateSlidePosition();
+
+  function nextSlide() {
+    currentIndex++;
+    sliderTrack.style.transition = "transform 0.5s ease-in-out";
+    updateSlidePosition();
+    if (currentIndex >= slides.length - cloneCount) {
+      setTimeout(function() {
+        sliderTrack.style.transition = "none";
+        currentIndex = cloneCount;
+        updateSlidePosition();
+        void sliderTrack.offsetWidth;
+        sliderTrack.style.transition = "transform 0.5s ease-in-out";
+      }, 500);
+    }
+  }
+
+  function prevSlide() {
+    currentIndex--;
+    sliderTrack.style.transition = "transform 0.5s ease-in-out";
+    updateSlidePosition();
+    if (currentIndex < cloneCount) {
+      setTimeout(function() {
+        sliderTrack.style.transition = "none";
+        currentIndex = slides.length - cloneCount - 1;
+        updateSlidePosition();
+        void sliderTrack.offsetWidth;
+        sliderTrack.style.transition = "transform 0.5s ease-in-out";
+      }, 500);
+    }
+  }
+
+  var rightArrow = container.querySelector(".right-arrow");
+  var leftArrow = container.querySelector(".left-arrow");
+  if (rightArrow) rightArrow.addEventListener("click", nextSlide);
+  if (leftArrow) leftArrow.addEventListener("click", prevSlide);
+
+  var autoplay = {{ section.settings.auto_slide | json }};
+  var autoplaySpeed = {{ section.settings.auto_slide_speed | json }};
+  if (autoplay && autoplaySpeed > 0) {
+    setInterval(nextSlide, autoplaySpeed);
+  }
+
+  window.addEventListener("resize", function() {
+    visibleSlides = window.innerWidth <= 767 ? {{ section.settings.visible_mobile }} : {{ section.settings.visible_slides }};
+    var el = container.querySelector(".mixed-media-carousel-slider");
+    if (el) slideWidth = el.offsetWidth / visibleSlides;
+    sliderTrack.style.transition = "none";
+    updateSlidePosition();
+  });
+});
+</script>
+
+{% schema %}
+{
+  "name": "Videos Slider",
+  "settings": [
+    {
+      "type": "text",
+      "id": "section_heading",
+      "label": "Section Heading",
+      "default": "Videos Slider"
+    },
+    {
+      "type": "select",
+      "id": "heading_alignment",
+      "label": "Section Heading Alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Section Heading Size",
+      "options": [
+        { "value": "small", "label": "Small" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "large", "label": "Large" }
+      ],
+      "default": "medium"
+    },
+    {
+      "type": "checkbox",
+      "id": "full_width",
+      "label": "Full Width Section (applies to heading & slider)",
+      "default": false
+    },
+    {
+      "type": "color",
+      "id": "section_bg_color",
+      "label": "Section Background Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "section_padding_top",
+      "label": "Section Padding Top (px)",
+      "min": 0,
+      "max": 200,
+      "step": 5,
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "section_padding_bottom",
+      "label": "Section Padding Bottom (px)",
+      "min": 0,
+      "max": 200,
+      "step": 5,
+      "default": 40
+    },
+    {
+      "type": "checkbox",
+      "id": "auto_slide",
+      "label": "Enable Auto Slide",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "auto_slide_speed",
+      "label": "Auto Slide Speed (ms)",
+      "min": 1000,
+      "max": 9000,
+      "step": 100,
+      "default": 6000
+    },
+    {
+      "type": "checkbox",
+      "id": "show_arrows",
+      "label": "Show Left/Right Arrows",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "arrow_shape",
+      "label": "Arrow Shape",
+      "options": [
+        { "value": "circle", "label": "Circle" },
+        { "value": "square", "label": "Square" }
+      ],
+      "default": "circle"
+    },
+    {
+      "type": "color",
+      "id": "arrow_bg_color",
+      "label": "Arrow Background Color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "visible_slides",
+      "label": "Number of Visible Slides (Desktop)",
+      "min": 1,
+      "max": 8,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "visible_mobile",
+      "label": "Number of Visible Slides (Mobile)",
+      "min": 1,
+      "max": 8,
+      "step": 1,
+      "default": 1
+    },
+    {
+      "type": "select",
+      "id": "media_size",
+      "label": "Media Size (for images)",
+      "options": [
+        { "value": "small", "label": "Small" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "large", "label": "Large" }
+      ],
+      "default": "medium"
+    },
+    {
+      "type": "select",
+      "id": "media_design",
+      "label": "Media Design",
+      "options": [
+        { "value": "square", "label": "Square" },
+        { "value": "portrait", "label": "Portrait" },
+        { "value": "adapt", "label": "Adapt" }
+      ],
+      "default": "adapt"
+    },
+    {
+      "type": "checkbox",
+      "id": "media_shadow",
+      "label": "Enable Media Shadow",
+      "default": false
+    }
+  ],
+  "blocks": [
+    {
+      "type": "carousel_image",
+      "name": "Carousel Image",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "media",
+          "label": "Image"
+        }
+      ]
+    },
+    {
+      "type": "carousel_video",
+      "name": "Carousel Video",
+      "settings": [
+        {
+          "type": "url",
+          "id": "media",
+          "label": "Video URL"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 10,
+  "presets": [
+    {
+      "name": "Videos Slider",
+      "category": "Media"
+    }
+  ]
+}
+{% endschema %}

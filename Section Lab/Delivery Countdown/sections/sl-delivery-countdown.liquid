@@ -1,0 +1,193 @@
+{% comment %}
+  Section Lab - Delivery Countdown
+  Source: Section Lab (paid bundle). Internal use only.
+  Estimated delivery day/date and countdown to order cutoff. Optional product-page inject.
+{% endcomment %}
+
+<div id="sl-estimated-delivery-{{ section.id }}" class="sl-estimated-delivery">
+  <span id="sl-status-dot-{{ section.id }}" class="sl-dot-available"></span>
+  <p>
+    Delivery on <strong id="delivery-day-{{ section.id }}"></strong>, <strong id="delivery-date-{{ section.id }}"></strong> when ordering before
+    <strong id="remaining-time-{{ section.id }}"></strong>
+  </p>
+</div>
+
+<style>
+  #sl-estimated-delivery-{{ section.id }}.sl-estimated-delivery {
+    display: flex;
+    align-items: center;
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+    background-color: {{ section.settings.background_color }};
+    border-radius: {{ section.settings.border_radius }}px;
+    border: {{ section.settings.border_width }}px solid {{ section.settings.border_color }};
+    font-size: 16px;
+  }
+  #sl-estimated-delivery-{{ section.id }} .sl-estimated-delivery p {
+    margin-left: 10px;
+    font-size: 13px;
+  }
+
+  #sl-estimated-delivery-{{ section.id }} .sl-dot-available {
+    background: {{ section.settings.available_dot_color }};
+    animation: sl-pulse-available-{{ section.id }} 2s infinite;
+    margin-right: 5px;
+    margin-left: 20px;
+    min-width: 9px;
+    height: 9px;
+    border-radius: 50%;
+  }
+
+  #sl-estimated-delivery-{{ section.id }} .sl-dot-unavailable {
+    background: {{ section.settings.unavailable_dot_color }};
+    animation: sl-pulse-unavailable-{{ section.id }} 2s infinite;
+    margin-right: 5px;
+    min-width: 9px;
+    height: 9px;
+    border-radius: 50%;
+  }
+
+  @keyframes sl-pulse-available-{{ section.id }} {
+    0% { box-shadow: 0 0 0 0 {{ section.settings.available_pulse_color }}; }
+    70% { box-shadow: 0 0 0 10px {{ section.settings.available_pulse_color | replace: '44', '00' }}; }
+    100% { box-shadow: 0 0 0 0 {{ section.settings.available_pulse_color | replace: '44', '00' }}; }
+  }
+
+  @keyframes sl-pulse-unavailable-{{ section.id }} {
+    0% { box-shadow: 0 0 0 0 {{ section.settings.unavailable_pulse_color }}; }
+    70% { box-shadow: 0 0 0 10px {{ section.settings.unavailable_pulse_color | replace: '44', '00' }}; }
+    100% { box-shadow: 0 0 0 0 {{ section.settings.unavailable_pulse_color | replace: '44', '00' }}; }
+  }
+</style>
+
+<script>
+(function() {
+  const sectionId = "{{ section.id }}";
+  const wrapper = document.getElementById("sl-estimated-delivery-" + sectionId);
+  if (!wrapper) return;
+
+  const cutoffHour = {{ section.settings.cutoff_time }};
+  const deliveryTimeMin = {{ section.settings.delivery_time_min }};
+  const deliveryTimeMax = {{ section.settings.delivery_time_max }};
+
+  const allowedDays = [
+    {{ section.settings.day_0 | json }},
+    {{ section.settings.day_1 | json }},
+    {{ section.settings.day_2 | json }},
+    {{ section.settings.day_3 | json }},
+    {{ section.settings.day_4 | json }},
+    {{ section.settings.day_5 | json }},
+    {{ section.settings.day_6 | json }}
+  ].map(function(val, index) { return val ? index : null; }).filter(function(val) { return val !== null; });
+
+  function isAllowedDeliveryDay(date) {
+    return allowedDays.indexOf(date.getDay()) !== -1;
+  }
+
+  function getNextDeliveryDate(startDate, offsetDays) {
+    var count = 0;
+    var date = new Date(startDate.getTime());
+    while (count < offsetDays) {
+      date.setDate(date.getDate() + 1);
+      count++;
+    }
+    while (!isAllowedDeliveryDay(date)) {
+      date.setDate(date.getDate() + 1);
+    }
+    return date;
+  }
+
+  function updateRemainingTime() {
+    var now = new Date();
+    var cutoffTime = new Date(now.getTime());
+
+    if (now.getHours() < cutoffHour) {
+      cutoffTime.setHours(cutoffHour, 0, 0, 0);
+    } else {
+      cutoffTime.setDate(cutoffTime.getDate() + 1);
+      cutoffTime.setHours(cutoffHour, 0, 0, 0);
+    }
+
+    var timeDiff = cutoffTime - now;
+    var hours = Math.floor(timeDiff / (1000 * 60 * 60));
+    var minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+
+    var remainingEl = document.getElementById("remaining-time-" + sectionId);
+    var deliveryDayEl = document.getElementById("delivery-day-" + sectionId);
+    var deliveryDateEl = document.getElementById("delivery-date-" + sectionId);
+    if (!remainingEl || !deliveryDayEl || !deliveryDateEl) return;
+
+    remainingEl.innerText = hours + " H " + minutes + " M";
+
+    var deliveryDateMin = getNextDeliveryDate(cutoffTime, deliveryTimeMin);
+    var deliveryDateMax = getNextDeliveryDate(deliveryDateMin, deliveryTimeMax - deliveryTimeMin);
+
+    var weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+    var deliveryText;
+    if (deliveryTimeMin === deliveryTimeMax) {
+      deliveryText = weekdays[deliveryDateMin.getDay()] + ", " + deliveryDateMin.getDate() + ". " + months[deliveryDateMin.getMonth()];
+    } else {
+      deliveryText = weekdays[deliveryDateMin.getDay()] + ", " + deliveryDateMin.getDate() + ". " + months[deliveryDateMin.getMonth()] + " – " + weekdays[deliveryDateMax.getDay()] + ", " + deliveryDateMax.getDate() + ". " + months[deliveryDateMax.getMonth()];
+    }
+
+    deliveryDayEl.innerText = weekdays[deliveryDateMin.getDay()];
+    deliveryDateEl.innerText = deliveryText;
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", function() {
+      updateRemainingTime();
+      var now = new Date();
+      var secondsUntilNextMinute = 60 - now.getSeconds();
+      setTimeout(function() {
+        updateRemainingTime();
+        setInterval(updateRemainingTime, 60000);
+      }, secondsUntilNextMinute * 1000);
+    });
+  } else {
+    updateRemainingTime();
+    var now = new Date();
+    var secondsUntilNextMinute = 60 - now.getSeconds();
+    setTimeout(function() {
+      updateRemainingTime();
+      setInterval(updateRemainingTime, 60000);
+    }, secondsUntilNextMinute * 1000);
+  }
+})();
+</script>
+
+{% schema %}
+{
+  "name": "SL Delivery Countdown",
+  "settings": [
+    { "type": "header", "content": "Time settings" },
+    { "type": "range", "id": "cutoff_time", "min": 0, "max": 23, "step": 1, "unit": "h", "label": "Cutoff time (hour)", "default": 13 },
+    { "type": "range", "id": "delivery_time_min", "min": 1, "max": 10, "step": 1, "unit": "d", "label": "Min delivery days", "default": 1 },
+    { "type": "range", "id": "delivery_time_max", "min": 1, "max": 10, "step": 1, "unit": "d", "label": "Max delivery days", "default": 3 },
+    { "type": "checkbox", "id": "day_0", "label": "Sunday", "default": false },
+    { "type": "checkbox", "id": "day_1", "label": "Monday", "default": true },
+    { "type": "checkbox", "id": "day_2", "label": "Tuesday", "default": true },
+    { "type": "checkbox", "id": "day_3", "label": "Wednesday", "default": true },
+    { "type": "checkbox", "id": "day_4", "label": "Thursday", "default": true },
+    { "type": "checkbox", "id": "day_5", "label": "Friday", "default": true },
+    { "type": "checkbox", "id": "day_6", "label": "Saturday", "default": false },
+    { "type": "header", "content": "Style settings" },
+    { "type": "range", "id": "padding_top", "min": 0, "max": 100, "step": 5, "unit": "px", "label": "Top padding", "default": 10 },
+    { "type": "range", "id": "padding_bottom", "min": 0, "max": 100, "step": 5, "unit": "px", "label": "Bottom padding", "default": 10 },
+    { "type": "color", "id": "background_color", "label": "Background color", "default": "#f0f0f0" },
+    { "type": "range", "id": "border_radius", "min": 0, "max": 50, "step": 1, "unit": "px", "label": "Border radius", "default": 8 },
+    { "type": "color", "id": "border_color", "label": "Border color", "default": "#000000" },
+    { "type": "range", "id": "border_width", "min": 0, "max": 10, "step": 1, "unit": "px", "label": "Border width", "default": 1 },
+    { "type": "color", "id": "available_dot_color", "label": "Dot color (available)", "default": "#27ae60" },
+    { "type": "color", "id": "available_pulse_color", "label": "Pulse color (available)", "default": "#8AD4A9" },
+    { "type": "color", "id": "unavailable_dot_color", "label": "Dot color (unavailable)", "default": "#c0392b" },
+    { "type": "color", "id": "unavailable_pulse_color", "label": "Pulse color (unavailable)", "default": "#E48379" }
+  ],
+  "presets": [
+    { "name": "SL Delivery Countdown", "category": "Custom" }
+  ],
+  "templates": ["product"]
+}
+{% endschema %}

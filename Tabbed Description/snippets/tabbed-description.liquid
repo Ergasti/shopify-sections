@@ -1,0 +1,95 @@
+{% comment %}
+  If combine_pretext is false, the text before the first will be shown above all tabs, otherwise added to the first tab
+  Usage: Include in product template; splits description at H6 for tabs. May require jQuery.
+{% endcomment %}
+{% assign combine_pretext = false %}
+
+{% assign description = tabbed-description | default: product.description %}
+{% if description contains " " %}
+  {% assign tab_heads = '' %}
+  {% assign tab_texts = '' %}
+  {% assign pretext = '' %}
+
+  {% assign chunks = description | strip | split: " " %}
+  {% for c in chunks %}
+    {% if c contains " " %}
+      {% assign chunk = c | split: " " %}
+      {% assign tab_heads = tab_heads | append: ",," | append: chunk.first %}
+      {% assign tab_texts = tab_texts | append: ",," %}
+      {% if pretext != blank and combine_pretext %}
+        {% assign tab_texts = tab_texts | append: pretext | append: " " %}
+        {% assign pretext = '' %}
+      {% endif %}
+      {% assign tab_texts = tab_texts | append: chunk.last %}
+    {% elsif forloop.first %}
+      {% assign pretext = c %}
+    {% endif %}
+  {% endfor %}
+
+  {% assign tab_heads = tab_heads | remove_first: ",," | split: ",," %}
+  {% assign tab_texts = tab_texts | remove_first: ",," | split: ",," %}
+
+  {% assign index = 1 %}
+
+  {% if pretext != blank and combine_pretext == false %}
+    {{ pretext }}
+  {% endif %}
+
+  {% for head in tab_heads %}
+    {{ head }}
+    {% assign index = index | plus: 1 %}
+  {% endfor %}
+
+  {% assign index = 1 %}
+  {% for text in tab_texts %}
+    {{ text }}
+    {% assign index = index | plus: 1 %}
+  {% endfor %}
+
+  <script>
+  document.addEventListener('DOMContentLoaded', function () {
+    $('ul.tabs').each(function(){
+      var active, content, links = $(this).find('a');
+      active = links.first().addClass('active');
+      content = $(active.attr('href'));
+      links.not(':first').each(function () {
+        $($(this).attr('href')).hide();
+      });
+      $(this).find('a').click(function(e){
+        active.removeClass('active');
+        content.hide();
+        active = $(this);
+        content = $($(this).attr('href'));
+        active.addClass('active');
+        content.show();
+        return false;
+      });
+    });
+  }, false);
+  </script>
+
+  <style>
+  ul.tabs { border-bottom: 1px solid #DDDDDD; display: block; margin: 0 0 20px; padding: 0; }
+  ul.tabs li { display: block; float: left; height: 30px; margin-bottom: 0; padding: 0; width: auto; }
+  ul.tabs li a {
+    background: #F5F5F5;
+    border: 1px solid #DDDDDD;
+    border-bottom: none;
+    display: block;
+    font-size: 13px;
+    height: 29px;
+    line-height: 30px;
+    padding: 0 20px;
+    text-decoration: none;
+    color: #303030;
+  }
+  ul.tabs li a.active {
+    background: #FFFFFF;
+    margin-bottom: -1px;
+    padding-bottom: 1px;
+    position: relative;
+  }
+  </style>
+{% else %}
+  {{ description }}
+{% endif %}

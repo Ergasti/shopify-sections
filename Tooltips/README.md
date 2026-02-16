@@ -1,5 +1,7 @@
 # Shopify Tooltips Section
 
+**Last updated in library:** 2025-02-14
+
 Simple, accesibile and performant. Provide additional explanatory content and showcase product features. 
 For demo and aditional info please see https://sections.design/blogs/shopify/product-tooltips
 

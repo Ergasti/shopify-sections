@@ -1,0 +1,159 @@
+{% comment %}
+  Section Lab - Icon List (Product Bullets)
+  Source: Section Lab (paid bundle). Internal use only.
+  Vertical list of icon + text items. Can be injected into product page via Custom Liquid.
+{% endcomment %}
+
+{% assign position = section.settings.icon_position %}
+{% assign alignment = section.settings.list_alignment %}
+
+<div id="sl-pdp-icon-list-{{ section.id }}" class="sl-icon-list-wrapper sl-icon-list-wrapper--{{ section.id }} {{ alignment }}">
+  <ul class="sl-icon-list" style="--item-gap: {{ section.settings.item_gap }}px;">
+    {% for block in section.blocks %}
+      <li class="sl-icon-list-item {{ position }}" style="--icon-text-gap: {{ section.settings.space_between }}px;" {{ block.shopify_attributes }}>
+        {% if block.settings.icon_image != blank %}
+          <img
+            src="{{ block.settings.icon_image | image_url: width: section.settings.icon_size }}"
+            width="{{ section.settings.icon_size }}"
+            height="{{ section.settings.icon_size }}"
+            alt=""
+            loading="lazy"
+          >
+        {% endif %}
+        <div class="sl-icon-list-text" style="font-size: {{ section.settings.font_size }}px;">
+          {{ block.settings.text }}
+        </div>
+      </li>
+    {% endfor %}
+  </ul>
+</div>
+
+<style>
+  #sl-pdp-icon-list-{{ section.id }}.sl-icon-list-wrapper {
+    display: flex;
+    width: 100%;
+  }
+  #sl-pdp-icon-list-{{ section.id }}.sl-icon-list-wrapper.left {
+    justify-content: flex-start;
+  }
+  #sl-pdp-icon-list-{{ section.id }}.sl-icon-list-wrapper.center {
+    justify-content: center;
+  }
+  #sl-pdp-icon-list-{{ section.id }}.sl-icon-list-wrapper.right {
+    justify-content: flex-end;
+  }
+
+  #sl-pdp-icon-list-{{ section.id }} .sl-icon-list {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--item-gap, 2rem);
+  }
+  #sl-pdp-icon-list-{{ section.id }} .sl-icon-list-item {
+    display: flex;
+    flex-direction: row;
+    gap: var(--icon-text-gap, 1rem);
+    text-align: left;
+  }
+  #sl-pdp-icon-list-{{ section.id }} .sl-icon-list-item.center {
+    align-items: center;
+  }
+  #sl-pdp-icon-list-{{ section.id }} .sl-icon-list-item.top {
+    align-items: flex-start;
+  }
+  #sl-pdp-icon-list-{{ section.id }} .sl-icon-list-item img {
+    display: block;
+    flex-shrink: 0;
+  }
+</style>
+
+{% schema %}
+{
+  "name": "SL Icon List",
+  "settings": [
+    {
+      "type": "range",
+      "id": "font_size",
+      "label": "Font size",
+      "unit": "px",
+      "min": 10,
+      "max": 40,
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "space_between",
+      "label": "Space between icon and text",
+      "unit": "px",
+      "min": 0,
+      "max": 40,
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "item_gap",
+      "label": "Space between items",
+      "unit": "px",
+      "min": 0,
+      "max": 80,
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "icon_size",
+      "label": "Icon size",
+      "unit": "px",
+      "min": 10,
+      "max": 80,
+      "default": 24
+    },
+    {
+      "type": "select",
+      "id": "icon_position",
+      "label": "Icon vertical alignment",
+      "options": [
+        { "value": "top", "label": "Top aligned" },
+        { "value": "center", "label": "Center aligned" }
+      ],
+      "default": "top"
+    },
+    {
+      "type": "select",
+      "id": "list_alignment",
+      "label": "List alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "item",
+      "name": "Item",
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text"
+        },
+        {
+          "type": "image_picker",
+          "id": "icon_image",
+          "label": "Icon image"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "SL Icon List",
+      "category": "Text"
+    }
+  ]
+}
+{% endschema %}

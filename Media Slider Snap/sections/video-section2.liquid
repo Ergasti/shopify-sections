@@ -1,0 +1,325 @@
+<style>
+#media-snap-{{ section.id }} {
+  --gap: 14px;
+  --radius: 12px;
+  --arrow-size: {{ section.settings.arrow_size }}px;
+  --arrow-bg: {{ section.settings.arrow_bg }};
+  --arrow-color: {{ section.settings.arrow_color }};
+}
+
+@media (max-width: 768px) {
+  #media-snap-{{ section.id }} {
+    --gap: 10px;
+  }
+}
+
+.media-snap-container {
+  width: 100%;
+  max-width: {% if section.settings.full_width %}100%{% else %}1080px{% endif %};
+  margin: 0 auto;
+  position: relative;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+.media-snap-heading {
+  text-align: {{ section.settings.heading_alignment }};
+  font-size: {% if section.settings.heading_size == 'small' %}24px{% elsif section.settings.heading_size == 'medium' %}32px{% else %}40px{% endif %};
+  margin-bottom: 24px;
+}
+
+.media-snap-track {
+  display: flex;
+  gap: var(--gap);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.media-snap-track::-webkit-scrollbar { display: none; }
+
+.media-snap-slide {
+  flex: 0 0 calc(
+    (100% - ({{ section.settings.visible_slides }} - 1) * var(--gap))
+    / {{ section.settings.visible_slides }}
+  );
+  scroll-snap-align: center;
+  opacity: 0.65;
+  transform: scale(0.96);
+  transition: transform .25s ease, opacity .25s ease;
+  position: relative;
+}
+
+@media (max-width: 768px) {
+  .media-snap-slide {
+    flex: 0 0 calc(
+      (100% - ({{ section.settings.visible_mobile }} - 1) * var(--gap))
+      / {{ section.settings.visible_mobile }}
+    );
+  }
+}
+
+.media-snap-slide.is-active {
+  opacity: 1;
+  transform: scale(1);
+  z-index: 2;
+}
+
+.media-snap-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255, {{ section.settings.overlay_opacity | divided_by: 100.0 }});
+  pointer-events: none;
+  opacity: {% if section.settings.show_overlay %}1{% else %}0{% endif %};
+  transition: opacity .25s ease;
+  border-radius: var(--radius);
+}
+
+.media-snap-slide.is-active .media-snap-overlay {
+  opacity: 0;
+}
+
+.media-snap-media {
+  width: 100%;
+  display: block;
+  border-radius: var(--radius);
+  object-fit: cover;
+  background: #f2f2f2;
+
+  {% if section.settings.media_design == "square" %}
+    aspect-ratio: 1 / 1;
+  {% elsif section.settings.media_design == "portrait" %}
+    aspect-ratio: 2 / 3;
+  {% endif %}
+}
+
+video.media-snap-media {
+  pointer-events: none;
+}
+
+.media-snap-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: var(--arrow-size);
+  height: var(--arrow-size);
+  background: var(--arrow-bg);
+  color: var(--arrow-color);
+  border: none;
+  cursor: pointer;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(var(--arrow-size) / 2.5);
+  border-radius: {% if section.settings.arrow_shape == 'circle' %}50%{% else %}8px{% endif %};
+}
+
+.media-snap-arrow.left { left: 10px; }
+.media-snap-arrow.right { right: 10px; }
+
+.media-snap-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.media-snap-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ccc;
+  border: none;
+}
+
+.media-snap-dot.is-active {
+  background: #000;
+}
+</style>
+
+<div id="media-snap-{{ section.id }}"
+     style="background: {{ section.settings.section_bg_color }};
+            padding: {{ section.settings.section_padding_top }}px 0 {{ section.settings.section_padding_bottom }}px">
+
+  <div class="media-snap-container">
+
+    {% if section.settings.section_heading != blank %}
+      <h2 class="media-snap-heading">{{ section.settings.section_heading }}</h2>
+    {% endif %}
+
+    {% if section.settings.show_arrows %}
+      <button type="button" class="media-snap-arrow left" aria-label="Previous">❮</button>
+      <button type="button" class="media-snap-arrow right" aria-label="Next">❯</button>
+    {% endif %}
+
+    <div class="media-snap-track">
+      {% assign slide_count = 0 %}
+      {% for block in section.blocks %}
+        {% if block.settings.media_type == 'image' and block.settings.image != blank %}
+          {% assign slide_count = slide_count | plus: 1 %}
+          <div class="media-snap-slide" data-type="image" {{ block.shopify_attributes }}>
+            <img class="media-snap-media" loading="lazy"
+                 src="{{ block.settings.image | img_url: '600x' }}" alt="{{ block.settings.image.alt | default: section.settings.section_heading }}">
+            <div class="media-snap-overlay"></div>
+          </div>
+        {% elsif block.settings.media_type == 'video' and block.settings.video != blank %}
+          {% assign slide_count = slide_count | plus: 1 %}
+          <div class="media-snap-slide" data-type="video" {{ block.shopify_attributes }}>
+            <video class="media-snap-media" muted playsinline preload="metadata">
+              <source src="{{ block.settings.video }}">
+            </video>
+            <div class="media-snap-overlay"></div>
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+
+    {% if section.settings.show_dots and slide_count > 1 %}
+      <div class="media-snap-dots">
+        {% for i in (1..slide_count) %}
+          <button type="button" class="media-snap-dot" aria-label="Slide {{ forloop.index }}"></button>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+  </div>
+</div>
+
+<script defer>
+document.addEventListener("DOMContentLoaded", () => {
+  const root = document.getElementById("media-snap-{{ section.id }}");
+  if (!root) return;
+
+  const track = root.querySelector(".media-snap-track");
+  const slides = [...root.querySelectorAll(".media-snap-slide")];
+  const dots = [...root.querySelectorAll(".media-snap-dot")];
+  const videos = [...root.querySelectorAll("video")];
+
+  let activeIndex = 0;
+
+  function setActive(index) {
+    activeIndex = index;
+    slides.forEach((s,i) => s.classList.toggle("is-active", i === index));
+    dots.forEach((d,i) => d.classList.toggle("is-active", i === index));
+    scrollToSlide(index);
+    playActiveVideo();
+  }
+
+  function scrollToSlide(index) {
+    const slide = slides[index];
+    if (!slide) return;
+    track.scrollTo({
+      left: slide.offsetLeft - (track.offsetWidth - slide.offsetWidth) / 2,
+      behavior: "smooth"
+    });
+  }
+
+  function playActiveVideo() {
+    videos.forEach(v => { v.pause(); v.currentTime = 0; });
+    const slide = slides[activeIndex];
+    if (!slide) return;
+    const video = slide.querySelector("video");
+    if (video) video.play();
+  }
+
+  videos.forEach((video, index) => {
+    video.addEventListener("ended", () => {
+      let next = index + 1;
+      while (next < slides.length && slides[next].dataset.type !== "video") {
+        next++;
+      }
+      if (next < slides.length) setActive(next);
+    });
+  });
+
+  if (window.matchMedia('(hover: hover)').matches) {
+    videos.forEach((video, index) => {
+      video.closest(".media-snap-slide").addEventListener("mouseenter", () => {
+        setActive(index);
+      });
+    });
+  }
+
+  root.querySelector(".media-snap-arrow.left")?.addEventListener("click", () => {
+    if (activeIndex > 0) setActive(activeIndex - 1);
+  });
+
+  root.querySelector(".media-snap-arrow.right")?.addEventListener("click", () => {
+    if (activeIndex < slides.length - 1) setActive(activeIndex + 1);
+  });
+
+  dots.forEach((dot, i) => {
+    dot.addEventListener("click", () => setActive(i));
+  });
+
+  setActive(0);
+});
+</script>
+
+{% schema %}
+{
+  "name": "Media Slider Snap",
+  "settings": [
+    { "type": "text", "id": "section_heading", "label": "Heading", "default": "Explore" },
+    { "type": "select", "id": "heading_alignment", "label": "Heading alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "center" },
+    { "type": "select", "id": "heading_size", "label": "Heading size",
+      "options": [
+        { "value": "small", "label": "Small" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "large", "label": "Large" }
+      ],
+      "default": "medium" },
+    { "type": "checkbox", "id": "full_width", "label": "Full width", "default": false },
+    { "type": "color", "id": "section_bg_color", "label": "Section background", "default": "#ffffff" },
+    { "type": "range", "id": "section_padding_top", "label": "Section padding top", "min": 0, "max": 100, "step": 4, "unit": "px", "default": 40 },
+    { "type": "range", "id": "section_padding_bottom", "label": "Section padding bottom", "min": 0, "max": 100, "step": 4, "unit": "px", "default": 40 },
+    { "type": "checkbox", "id": "show_overlay", "label": "Show white overlay on inactive slides", "default": false },
+    { "type": "range", "id": "overlay_opacity", "label": "Overlay opacity", "min": 0, "max": 80, "step": 5, "default": 30 },
+    { "type": "checkbox", "id": "show_arrows", "label": "Show arrows", "default": true },
+    { "type": "select", "id": "arrow_shape", "label": "Arrow shape",
+      "options": [
+        { "value": "circle", "label": "Circle" },
+        { "value": "square", "label": "Square" }
+      ],
+      "default": "circle" },
+    { "type": "range", "id": "arrow_size", "label": "Arrow size", "min": 32, "max": 64, "step": 4, "default": 44 },
+    { "type": "color", "id": "arrow_bg", "label": "Arrow background", "default": "#000000" },
+    { "type": "color", "id": "arrow_color", "label": "Arrow color", "default": "#ffffff" },
+    { "type": "range", "id": "visible_slides", "label": "Visible slides (desktop)", "min": 1, "max": 6, "step": 1, "default": 4 },
+    { "type": "range", "id": "visible_mobile", "label": "Visible slides (mobile)", "min": 1, "max": 3, "step": 1, "default": 1 },
+    { "type": "checkbox", "id": "show_dots", "label": "Show dots", "default": true },
+    { "type": "select", "id": "media_design", "label": "Media ratio",
+      "options": [
+        { "value": "adapt", "label": "Adapt" },
+        { "value": "square", "label": "Square (1:1)" },
+        { "value": "portrait", "label": "Portrait (2:3)" }
+      ],
+      "default": "adapt" }
+  ],
+  "blocks": [
+    {
+      "type": "media",
+      "name": "Media item",
+      "settings": [
+        { "type": "select", "id": "media_type", "label": "Media type",
+          "options": [
+            { "value": "image", "label": "Image" },
+            { "value": "video", "label": "Video" }
+          ],
+          "default": "image" },
+        { "type": "image_picker", "id": "image", "label": "Image" },
+        { "type": "url", "id": "video", "label": "Video URL" }
+      ]
+    }
+  ],
+  "presets": [{ "name": "Media Slider Snap", "category": "Media" }]
+}
+{% endschema %}

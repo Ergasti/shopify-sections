@@ -1,0 +1,82 @@
+<!-- marquee-products.liquid -->
+{% assign s_settings = section.settings %}
+<div class="marquee-wrapper">
+  <h2 class="marquee__section-title">{{ s_settings.section_title }}</h2>
+  <div class="marquee-track">
+    {% for block in section.blocks %}
+      {% assign b_settings = block.settings %}
+      <div class="marquee-item" data-id="{{ block.id }}" data-product-id="{{ b_settings.product_id }}">
+         <div class="marquee__item-image">
+         {% if b_settings.image != blank %}
+            <img
+            src="{{ b_settings.image | image_url: width: 300 }}"
+            srcset="{{ b_settings.image | image_url: width: 300 }} 1x, {{ b_settings.image | image_url: width: 600 }} 2x"
+            width="300"
+            height="300"
+            alt="{{ b_settings.title }}"
+            loading="lazy">
+        {% else %}
+          {% render 'image-placeholder' %}
+        {% endif %}
+        </div>
+        <div class="marquee__item-text">
+            <h3 class="marquee__item-title">{{ b_settings.title }}</h3>
+            <p class="marquee__item-description">{{ b_settings.description | truncate: 123, "" }}</p>
+            <div class="marquee__item-price">Loading price...</div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+
+{% schema %}
+{
+  "name": "Marquee Products",
+  "settings": [
+    {
+        "type": "text",
+        "id": "section_title",
+        "label": "Section title"
+    },
+  ],
+  "max_blocks": 6,
+  "blocks": [
+    {
+      "type": "product",
+      "name": "Product",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Product title"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Short description",
+          "default": "Test",
+          "info": "Used for short product summary. Max 120 characters recommended."
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Product image"
+        },
+        {
+          "type": "text",
+          "id": "product_id",
+          "label": "API Product ID",
+          "info": "Enter the product ID from https://fakestoreapi.com"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Marquee Products",
+      "category": "Custom"
+    }
+  ]
+}
+{% endschema %}

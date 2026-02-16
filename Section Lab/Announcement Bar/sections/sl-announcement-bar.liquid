@@ -1,0 +1,282 @@
+{% comment %}
+  Section Lab - Announcement Bar
+  Source: Section Lab (paid bundle). Internal use only.
+  Optional countdown timer; message when timer ends; optional link for entire bar.
+{% endcomment %}
+
+{% assign show_timer_first = false %}
+{% if section.settings.timer_position == 'first' %}
+  {% assign show_timer_first = true %}
+{% endif %}
+
+<div
+  id="sl-announcement-bar-{{ section.id }}"
+  class="sl-announcement-bar-full"
+  style="
+    background-color: {{ section.settings.background_color }};
+    border-radius: {{ section.settings.border_radius }}px;
+    border-bottom: {{ section.settings.border_width }}px solid {{ section.settings.border_color }};
+  "
+>
+  <a
+    class="sl-bar-link"
+    href="{{ section.settings.custom_link | default: '#' }}"
+    {% unless section.settings.custom_link != blank %}
+      style="pointer-events: none; cursor: default;"
+    {% endunless %}
+  >
+    <div
+      class="sl-bar-wrapper"
+      style="font-size: {{ section.settings.font_size }}px;"
+    >
+      {% if show_timer_first %}
+        <div
+          class="sl-bar-right sl-timer"
+          data-end-time="{{ section.settings.end_time | escape }}"
+          data-complete-message="{{ section.settings.timer_complete_message | strip_html | escape }}"
+        ></div>
+        <div class="sl-bar-left">
+          {{ section.settings.text }}
+        </div>
+      {% else %}
+        <div class="sl-bar-left">
+          {{ section.settings.text }}
+        </div>
+        <div
+          class="sl-bar-right sl-timer"
+          data-end-time="{{ section.settings.end_time | escape }}"
+          data-complete-message="{{ section.settings.timer_complete_message | strip_html | escape }}"
+        ></div>
+      {% endif %}
+    </div>
+  </a>
+</div>
+
+<style>
+  #sl-announcement-bar-{{ section.id }}.sl-announcement-bar-full {
+    width: 100%;
+  }
+  #sl-announcement-bar-{{ section.id }} .sl-bar-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    width: 100%;
+  }
+  #sl-announcement-bar-{{ section.id }} .sl-bar-link * {
+    color: inherit;
+    text-decoration: none;
+  }
+  #sl-announcement-bar-{{ section.id }} .sl-bar-wrapper {
+    max-width: fit-content;
+    margin: 0 auto;
+    padding: 10px 10px;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+  }
+  #sl-announcement-bar-{{ section.id }} .sl-bar-left {
+    display: inline-block;
+  }
+  #sl-announcement-bar-{{ section.id }} .sl-bar-right {
+    display: flex;
+    gap: 16px;
+  }
+  #sl-announcement-bar-{{ section.id }} .sl-countdown-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-weight: bold;
+    min-width: 40px;
+  }
+  #sl-announcement-bar-{{ section.id }} .sl-countdown-item span:first-child {
+    font-size: {{ section.settings.countdown_font_size }}px;
+  }
+  #sl-announcement-bar-{{ section.id }} .sl-countdown-item span:last-child {
+    font-size: 12px;
+    font-weight: normal;
+    color: #555;
+  }
+  @media screen and (max-width: 768px) {
+    #sl-announcement-bar-{{ section.id }} .sl-bar-wrapper {
+      gap: 10px;
+      text-align: center;
+    }
+    #sl-announcement-bar-{{ section.id }} .sl-countdown-item span:first-child {
+      font-size: {{ section.settings.countdown_font_size | times: 0.8 | round }}px;
+    }
+    #sl-announcement-bar-{{ section.id }} .sl-countdown-item span:last-child {
+      font-size: 10px;
+    }
+    #sl-announcement-bar-{{ section.id }} .sl-bar-right {
+      justify-content: center;
+    }
+  }
+</style>
+
+<script>
+(function() {
+  document.addEventListener("DOMContentLoaded", function() {
+    var root = document.getElementById("sl-announcement-bar-{{ section.id }}");
+    if (!root) return;
+    var timerEl = root.querySelector(".sl-timer");
+    if (!timerEl) return;
+
+    var endTimeInput = (timerEl.dataset.endTime || "").trim();
+    var parts = endTimeInput.split(" ");
+    if (parts.length < 2) return;
+    var datePart = parts[0];
+    var timePart = parts[1];
+    var dateBits = datePart.split("-").map(Number);
+    var timeBits = timePart.split(":").map(Number);
+    if (dateBits.length < 3 || timeBits.length < 2) return;
+    var endTime = new Date(dateBits[0], dateBits[1] - 1, dateBits[2], timeBits[0], timeBits[1] || 0);
+
+    if (isNaN(endTime.getTime())) {
+      timerEl.textContent = "Invalid date format";
+      return;
+    }
+
+    var completeMessage = timerEl.dataset.completeMessage || "Offer expired";
+    var intervalId;
+
+    function updateTimer() {
+      var now = new Date();
+      var distance = endTime - now;
+
+      if (distance <= 0) {
+        timerEl.textContent = completeMessage;
+        if (intervalId) clearInterval(intervalId);
+        return;
+      }
+
+      var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+      var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+
+      var output = "";
+      if (days > 0) {
+        output += '<div class="sl-countdown-item"><span>' + days + '</span><span>Days</span></div>';
+      }
+      output += '<div class="sl-countdown-item"><span>' + hours + '</span><span>Hours</span></div>';
+      output += '<div class="sl-countdown-item"><span>' + minutes + '</span><span>Minutes</span></div>';
+      timerEl.innerHTML = output;
+    }
+
+    updateTimer();
+    intervalId = setInterval(updateTimer, 1000);
+  });
+})();
+</script>
+
+{% schema %}
+{
+  "name": "SL Announcement Bar",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "💬 Content"
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Text",
+      "default": "<p>✨ FINAL SALE up to 70%</p>"
+    },
+    {
+      "type": "richtext",
+      "id": "timer_complete_message",
+      "label": "Message after countdown ends",
+      "default": "<p>Offer expired</p>"
+    },
+    {
+      "type": "text",
+      "id": "end_time",
+      "label": "Countdown target time",
+      "info": "Use format: YYYY-MM-DD HH:MM (e.g. 2025-04-10 18:00)",
+      "default": "2025-04-10 18:00"
+    },
+    {
+      "type": "url",
+      "id": "custom_link",
+      "label": "Link for entire bar"
+    },
+    {
+      "type": "header",
+      "content": "⚙️ Layout"
+    },
+    {
+      "type": "select",
+      "id": "timer_position",
+      "label": "Timer position",
+      "default": "first",
+      "options": [
+        { "value": "first", "label": "Before text" },
+        { "value": "last", "label": "After text" }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "🎨 Style"
+    },
+    {
+      "type": "range",
+      "id": "font_size",
+      "label": "Font size",
+      "min": 10,
+      "max": 30,
+      "step": 1,
+      "default": 14,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "countdown_font_size",
+      "label": "Countdown number font size",
+      "min": 10,
+      "max": 40,
+      "step": 1,
+      "default": 20,
+      "unit": "px"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#F0F0F0"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "default": 20,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "border_width",
+      "label": "Border width",
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "default": 1,
+      "unit": "px"
+    }
+  ],
+  "presets": [
+    {
+      "name": "SL Announcement Bar",
+      "category": "Promotional"
+    }
+  ]
+}
+{% endschema %}

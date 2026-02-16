@@ -1,0 +1,736 @@
+{% comment %}
+  Section Lab - Native Video Slider
+  Source: Section Lab (paid bundle). Internal use only.
+  Uses Shopify native video block (video_file); no external URLs.
+{% endcomment %}
+
+<div id="sl-video-slider-{{ section.id }}" class="sl-video-slider-root">
+  <div
+    class="sl-video-slider"
+    style="
+      background-color: {{ section.settings.background_color }};
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+      {% unless section.settings.full_width %}
+        max-width: {{ section.settings.content_width }}px;
+        margin-left: auto;
+        margin-right: auto;
+      {% endunless %}
+    "
+  >
+    {% if section.settings.arrows_show_desktop or section.settings.arrows_show_mobile %}
+      <button type="button" class="sl-nav sl-nav-left" aria-label="Previous slide">
+        <span
+          style="
+            color: {{ section.settings.arrow_icon_color }};
+            background-color: {{ section.settings.arrow_bg_color }};
+          "
+        >‹</span>
+      </button>
+    {% endif %}
+
+    <div
+      class="sl-video-slider-track"
+      style="--slides-visible: {{ section.settings.slides_visible_desktop }}; gap: {{ section.settings.slide_gap }}px;"
+    >
+      {% for block in section.blocks %}
+        {% assign video_file = block.settings.video_file %}
+        {% assign mp4_source = video_file.sources | where: 'format', 'mp4' | first %}
+        {% if mp4_source and mp4_source.url != blank %}
+          <div
+            class="sl-video-slide {{ section.settings.aspect_ratio }}{% if section.settings.staggered_slides %} sl-slide-staggered{% endif %}"
+            {{ block.shopify_attributes }}
+            style="
+              border-radius: {{ section.settings.border_radius }}px;
+              border-width: {{ section.settings.border_thickness }}px;
+              border-color: {{ section.settings.border_color }};
+              {% if section.settings.slide_gap == 0 %}
+                width: calc(100% / var(--slides-visible));
+              {% else %}
+                width: calc((100% - (var(--slides-visible) - 1) * {{ section.settings.slide_gap }}px) / var(--slides-visible));
+              {% endif %}
+            "
+          >
+            <video
+              src="{{ mp4_source.url }}"
+              poster="{% if video_file.preview_image %}{{ video_file.preview_image | image_url: width: 800 }}{% endif %}"
+              muted
+              loop
+              playsinline
+              {% if section.settings.lazy_load %}loading="lazy"{% endif %}
+              preload="metadata"
+              class="sl-overlay"
+            ></video>
+
+            <div
+              class="sl-video-controls"
+              style="--control-size: {{ section.settings.control_button_size }}px;"
+            >
+              <button
+                type="button"
+                class="sl-mute-toggle"
+                data-state="muted"
+                style="color: {{ section.settings.mute_button_color }};"
+                aria-label="Mute / Unmute"
+              >
+                {% if section.settings.icon_mute != blank %}
+                  <img src="{{ section.settings.icon_mute | image_url: width: 48 }}" alt="" class="mute-icon" width="20" height="20">
+                {% endif %}
+                {% if section.settings.icon_unmute != blank %}
+                  <img src="{{ section.settings.icon_unmute | image_url: width: 48 }}" alt="" class="unmute-icon" width="20" height="20">
+                {% endif %}
+                {% if section.settings.icon_mute == blank and section.settings.icon_unmute == blank %}
+                  <span class="fallback-icon" aria-hidden="true">🔇</span>
+                {% endif %}
+              </button>
+
+              <button
+                type="button"
+                class="sl-play-toggle"
+                data-state="paused"
+                style="color: {{ section.settings.play_button_color }};"
+                aria-label="Play / Pause"
+              >
+                {% if section.settings.icon_play != blank %}
+                  <img src="{{ section.settings.icon_play | image_url: width: 48 }}" alt="" class="play-icon" width="20" height="20">
+                {% endif %}
+                {% if section.settings.icon_pause != blank %}
+                  <img src="{{ section.settings.icon_pause | image_url: width: 48 }}" alt="" class="pause-icon" width="20" height="20">
+                {% endif %}
+                {% if section.settings.icon_play == blank and section.settings.icon_pause == blank %}
+                  <span class="fallback-icon" aria-hidden="true">▶</span>
+                {% endif %}
+              </button>
+            </div>
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+
+    {% if section.settings.arrows_show_desktop or section.settings.arrows_show_mobile %}
+      <button type="button" class="sl-nav sl-nav-right" aria-label="Next slide">
+        <span
+          style="
+            color: {{ section.settings.arrow_icon_color }};
+            background-color: {{ section.settings.arrow_bg_color }};
+          "
+        >›</span>
+      </button>
+    {% endif %}
+  </div>
+</div>
+
+<style>
+  #sl-video-slider-{{ section.id }} .sl-video-slider {
+    position: relative;
+    overflow: hidden;
+  }
+
+  #sl-video-slider-{{ section.id }} .sl-video-slider-track {
+    display: flex;
+    scroll-snap-type: x mandatory;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding-left: var(--slider-padding-left, 0);
+    padding-right: var(--slider-padding-right, 0);
+  }
+
+  #sl-video-slider-{{ section.id }} .sl-video-slider-track::-webkit-scrollbar {
+    display: none;
+  }
+
+  #sl-video-slider-{{ section.id }} .sl-video-slide {
+    flex: 0 0 auto;
+    scroll-snap-align: center;
+    position: relative;
+    overflow: hidden;
+    background: #000;
+    border-style: solid;
+    aspect-ratio: inherit;
+    box-sizing: border-box;
+  }
+
+  #sl-video-slider-{{ section.id }} .sl-video-slide video {
+    width: 100%;
+    height: 100%;
+    aspect-ratio: inherit;
+    object-fit: cover;
+    display: block;
+    border-radius: inherit;
+  }
+
+  #sl-video-slider-{{ section.id }} .sl-slide-staggered {
+    transform: scale(0.92);
+    transition: transform 0.3s ease;
+  }
+
+  #sl-video-slider-{{ section.id }} .sl-slide-active {
+    transform: scale(1);
+  }
+
+  #sl-video-slider-{{ section.id }} .sl-video-controls {
+    position: absolute;
+    bottom: 0.5rem;
+    right: 0.5rem;
+    display: none;
+    gap: 0.5rem;
+    z-index: 2;
+  }
+
+  #sl-video-slider-{{ section.id }} .sl-slide-active .sl-video-controls {
+    display: flex;
+  }
+
+  #sl-video-slider-{{ section.id }} .sl-video-controls button {
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    border-radius: 50%;
+    width: var(--control-size);
+    height: var(--control-size);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0;
+    cursor: pointer;
+  }
+
+  #sl-video-slider-{{ section.id }} .sl-video-controls img {
+    width: 20px;
+    height: 20px;
+  }
+
+  #sl-video-slider-{{ section.id }} .sl-video-controls .fallback-icon {
+    font-size: 18px;
+    line-height: 1;
+    color: currentColor;
+  }
+
+  #sl-video-slider-{{ section.id }} .sl-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    z-index: 5;
+    cursor: pointer;
+    padding: 0;
+    background: none;
+    width: {{ section.settings.arrow_size }}px;
+    height: {{ section.settings.arrow_size }}px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #sl-video-slider-{{ section.id }} .sl-nav span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    font-size: calc({{ section.settings.arrow_size }}px * 0.65);
+    font-weight: bold;
+    line-height: 1;
+    padding-bottom: 4px;
+  }
+
+  #sl-video-slider-{{ section.id }} .sl-nav-left {
+    left: 10px;
+  }
+
+  #sl-video-slider-{{ section.id }} .sl-nav-right {
+    right: 10px;
+  }
+
+  #sl-video-slider-{{ section.id }} .sl-arrow-hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  #sl-video-slider-{{ section.id }} .aspect-16-9 { aspect-ratio: 16 / 9; }
+  #sl-video-slider-{{ section.id }} .aspect-9-16 { aspect-ratio: 9 / 16; }
+  #sl-video-slider-{{ section.id }} .aspect-1-1 { aspect-ratio: 1 / 1; }
+
+  @media (max-width: 768px) {
+    #sl-video-slider-{{ section.id }} .sl-video-slider {
+      padding-left: 15px;
+      padding-right: 15px;
+    }
+    #sl-video-slider-{{ section.id }} .sl-video-slider-track {
+      --slides-visible: {{ section.settings.slides_visible_mobile }};
+    }
+    {% unless section.settings.arrows_show_mobile %}
+    #sl-video-slider-{{ section.id }} .sl-nav {
+      display: none !important;
+    }
+    {% endunless %}
+  }
+
+  {% unless section.settings.arrows_show_desktop %}
+  @media (min-width: 769px) {
+    #sl-video-slider-{{ section.id }} .sl-nav {
+      display: none !important;
+    }
+  }
+  {% endunless %}
+
+  #sl-video-slider-{{ section.id }} .sl-mute-toggle[data-state="muted"] .mute-icon { display: inline; }
+  #sl-video-slider-{{ section.id }} .sl-mute-toggle[data-state="muted"] .unmute-icon { display: none; }
+  #sl-video-slider-{{ section.id }} .sl-mute-toggle[data-state="unmuted"] .mute-icon { display: none; }
+  #sl-video-slider-{{ section.id }} .sl-mute-toggle[data-state="unmuted"] .unmute-icon { display: inline; }
+
+  #sl-video-slider-{{ section.id }} .sl-play-toggle[data-state="paused"] .play-icon { display: inline; }
+  #sl-video-slider-{{ section.id }} .sl-play-toggle[data-state="paused"] .pause-icon { display: none; }
+  #sl-video-slider-{{ section.id }} .sl-play-toggle[data-state="playing"] .play-icon { display: none; }
+  #sl-video-slider-{{ section.id }} .sl-play-toggle[data-state="playing"] .pause-icon { display: inline; }
+</style>
+
+<script>
+(function() {
+  document.addEventListener('DOMContentLoaded', function() {
+    var root = document.getElementById('sl-video-slider-{{ section.id }}');
+    if (!root) return;
+
+    var slides = Array.from(root.querySelectorAll('.sl-video-slide'));
+    var track = root.querySelector('.sl-video-slider-track');
+    var prevButton = root.querySelector('.sl-nav-left');
+    var nextButton = root.querySelector('.sl-nav-right');
+    var autoplay = {{ section.settings.autoplay_active | json }};
+    var isMuted = true;
+
+    function smoothScrollBy(container, distance, duration) {
+      duration = duration || 500;
+      var start = container.scrollLeft;
+      var startTime = performance.now();
+      function scrollStep(currentTime) {
+        var elapsed = currentTime - startTime;
+        var progress = Math.min(elapsed / duration, 1);
+        var ease = 0.5 - Math.cos(progress * Math.PI) / 2;
+        container.scrollLeft = start + distance * ease;
+        if (progress < 1) requestAnimationFrame(scrollStep);
+      }
+      requestAnimationFrame(scrollStep);
+    }
+
+    function getSlidesVisible() {
+      return window.innerWidth <= 768 ? {{ section.settings.slides_visible_mobile }} : {{ section.settings.slides_visible_desktop }};
+    }
+
+    function updateSliderPadding() {
+      var visibleSlides = getSlidesVisible();
+      var slide = slides[0];
+      if (!slide || !track) return;
+      var slideWidth = slide.offsetWidth;
+      var totalWidth = track.clientWidth;
+      var sidePadding = Math.max(0, (totalWidth - slideWidth) / 2);
+      track.style.setProperty('--slider-padding-left', sidePadding + 'px');
+      track.style.setProperty('--slider-padding-right', sidePadding + 'px');
+    }
+
+    function updateVideosOnScrollOrClick() {
+      if (!track) return;
+      var center = track.scrollLeft + track.clientWidth / 2;
+      var closest = null;
+      var minDist = Infinity;
+      slides.forEach(function(slide) {
+        var slideCenter = slide.offsetLeft + slide.offsetWidth / 2;
+        var dist = Math.abs(center - slideCenter);
+        if (dist < minDist) {
+          minDist = dist;
+          closest = slide;
+        }
+      });
+      slides.forEach(function(slide) {
+        var video = slide.querySelector('video');
+        if (slide === closest) {
+          slide.classList.add('sl-slide-active');
+          if (autoplay && video && video.src) {
+            if (video.readyState > 0) {
+              video.muted = isMuted;
+              video.play().catch(function() {});
+            } else {
+              video.addEventListener('loadedmetadata', function() {
+                video.muted = isMuted;
+                video.play().catch(function() {});
+              }, { once: true });
+            }
+          }
+        } else {
+          slide.classList.remove('sl-slide-active');
+          if (video) video.pause();
+        }
+      });
+    }
+
+    function updateArrowVisibility() {
+      if (!track) return;
+      var scrollLeft = track.scrollLeft;
+      var maxScrollLeft = track.scrollWidth - track.clientWidth;
+      if (prevButton) {
+        if (scrollLeft <= 5) prevButton.classList.add('sl-arrow-hidden');
+        else prevButton.classList.remove('sl-arrow-hidden');
+      }
+      if (nextButton) {
+        if (scrollLeft >= maxScrollLeft - 5) nextButton.classList.add('sl-arrow-hidden');
+        else nextButton.classList.remove('sl-arrow-hidden');
+      }
+    }
+
+    slides.forEach(function(slide) {
+      slide.addEventListener('click', function() {
+        var video = slide.querySelector('video');
+        slides.forEach(function(s) {
+          var v = s.querySelector('video');
+          s.classList.remove('sl-slide-active');
+          if (v) v.pause();
+        });
+        slide.classList.add('sl-slide-active');
+        if (video && video.src) {
+          video.muted = isMuted;
+          video.readyState > 0 ? video.play().catch(function() {}) : video.addEventListener('loadedmetadata', function() { video.play(); }, { once: true });
+        }
+      });
+    });
+
+    root.querySelectorAll('.sl-mute-toggle').forEach(function(button) {
+      button.addEventListener('click', function() {
+        isMuted = !isMuted;
+        var state = isMuted ? 'muted' : 'unmuted';
+        var activeSlide = root.querySelector('.sl-slide-active');
+        var activeVideo = activeSlide ? activeSlide.querySelector('video') : null;
+        if (activeVideo) {
+          activeVideo.muted = isMuted;
+          if (!isMuted && !activeVideo.paused) {
+            try {
+              activeVideo.pause();
+              activeVideo.muted = false;
+              activeVideo.play();
+            } catch (e) {}
+          }
+        }
+        root.querySelectorAll('.sl-mute-toggle').forEach(function(btn) { btn.setAttribute('data-state', state); });
+      });
+    });
+
+    root.querySelectorAll('.sl-play-toggle').forEach(function(button) {
+      button.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var slide = button.closest('.sl-video-slide');
+        var video = slide ? slide.querySelector('video') : null;
+        if (!video || !video.src) return;
+        slides.forEach(function(s) {
+          var v = s.querySelector('video');
+          if (v && v !== video) {
+            v.pause();
+            s.classList.remove('sl-slide-active');
+            var ob = s.querySelector('.sl-play-toggle');
+            if (ob) ob.setAttribute('data-state', 'paused');
+          }
+        });
+        if (video.paused) {
+          video.muted = false;
+          video.play().then(function() {
+            slide.classList.add('sl-slide-active');
+            button.setAttribute('data-state', 'playing');
+          }).catch(function() {});
+        } else {
+          video.pause();
+          button.setAttribute('data-state', 'paused');
+        }
+      });
+    });
+
+    if (prevButton) {
+      prevButton.addEventListener('click', function() {
+        smoothScrollBy(track, -track.clientWidth / getSlidesVisible(), 500);
+        setTimeout(updateArrowVisibility, 600);
+      });
+    }
+    if (nextButton) {
+      nextButton.addEventListener('click', function() {
+        smoothScrollBy(track, track.clientWidth / getSlidesVisible(), 500);
+        setTimeout(updateArrowVisibility, 600);
+      });
+    }
+
+    if (track) {
+      track.addEventListener('scroll', function() {
+        requestAnimationFrame(function() {
+          updateVideosOnScrollOrClick();
+          updateArrowVisibility();
+        });
+      });
+    }
+
+    track.style.setProperty('--slides-visible', getSlidesVisible());
+    updateSliderPadding();
+    setTimeout(function() {
+      updateVideosOnScrollOrClick();
+      updateArrowVisibility();
+    }, 300);
+
+    window.addEventListener('resize', function() {
+      track.style.setProperty('--slides-visible', getSlidesVisible());
+      updateVideosOnScrollOrClick();
+      updateArrowVisibility();
+      updateSliderPadding();
+    });
+  });
+})();
+</script>
+
+{% schema %}
+{
+  "name": "SL - Native Video Slider",
+  "settings": [
+    {
+      "type": "header",
+      "content": "⚙️ Slider Settings"
+    },
+    {
+      "type": "range",
+      "id": "slides_visible_desktop",
+      "label": "Slides per view (desktop)",
+      "min": 1,
+      "max": 6,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "type": "range",
+      "id": "slides_visible_mobile",
+      "label": "Slides per view (mobile)",
+      "min": 1,
+      "max": 3,
+      "step": 1,
+      "default": 1
+    },
+    {
+      "type": "range",
+      "id": "slide_gap",
+      "label": "Slider gap (px)",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "default": 16,
+      "unit": "px"
+    },
+    {
+      "type": "checkbox",
+      "id": "lazy_load",
+      "label": "Lazy load videos",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay_active",
+      "label": "Autoplay active slide",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "staggered_slides",
+      "label": "Staggered slides effect",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "🎞️ Slide styling"
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "Slide border radius (px)",
+      "min": 0,
+      "max": 40,
+      "step": 1,
+      "default": 12,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "border_thickness",
+      "label": "Slide border thickness (px)",
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "default": 0,
+      "unit": "px"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Slide border color",
+      "default": "#000000"
+    },
+    {
+      "type": "select",
+      "id": "aspect_ratio",
+      "label": "Media aspect ratio",
+      "options": [
+        { "label": "16:9 (Landscape)", "value": "aspect-16-9" },
+        { "label": "9:16 (Portrait)", "value": "aspect-9-16" },
+        { "label": "1:1 (Square)", "value": "aspect-1-1" }
+      ],
+      "default": "aspect-16-9"
+    },
+    {
+      "type": "header",
+      "content": "⏯️ Controls styling"
+    },
+    {
+      "type": "range",
+      "id": "control_button_size",
+      "label": "Play / Mute button size (px)",
+      "min": 20,
+      "max": 100,
+      "step": 2,
+      "default": 40,
+      "unit": "px"
+    },
+    {
+      "type": "color",
+      "id": "play_button_color",
+      "label": "Play button color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "mute_button_color",
+      "label": "Mute button color",
+      "default": "#000000"
+    },
+    {
+      "type": "image_picker",
+      "id": "icon_mute",
+      "label": "Mute icon (optional)"
+    },
+    {
+      "type": "image_picker",
+      "id": "icon_unmute",
+      "label": "Unmute icon (optional)"
+    },
+    {
+      "type": "image_picker",
+      "id": "icon_play",
+      "label": "Play icon (optional)"
+    },
+    {
+      "type": "image_picker",
+      "id": "icon_pause",
+      "label": "Pause icon (optional)"
+    },
+    {
+      "type": "header",
+      "content": "➡️ Arrow styling"
+    },
+    {
+      "type": "checkbox",
+      "id": "arrows_show_desktop",
+      "label": "Show arrows on desktop",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "arrows_show_mobile",
+      "label": "Show arrows on mobile",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "arrow_icon_color",
+      "label": "Arrow icon color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "arrow_bg_color",
+      "label": "Arrow background color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "arrow_size",
+      "label": "Arrow size (px)",
+      "min": 12,
+      "max": 120,
+      "step": 12,
+      "default": 36,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "🎨 Section styling"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Section background color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "default": 36,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "default": 36,
+      "unit": "px"
+    },
+    {
+      "type": "checkbox",
+      "id": "full_width",
+      "label": "Full width section",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "content_width",
+      "label": "Content width (if not full width)",
+      "min": 400,
+      "max": 1600,
+      "step": 20,
+      "default": 1200,
+      "unit": "px"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "Video slide",
+      "settings": [
+        {
+          "type": "video",
+          "id": "video_file",
+          "label": "Video file"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "SL - Native Video Slider",
+      "category": "Media",
+      "blocks": [
+        { "type": "slide" },
+        { "type": "slide" },
+        { "type": "slide" }
+      ]
+    }
+  ]
+}
+{% endschema %}

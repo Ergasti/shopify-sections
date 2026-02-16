@@ -1,4 +1,7 @@
 # Shopify App Performance Optimization
+
+**Last updated in library:** 2025-02-14
+
 Optimize Shopify apps performance, loaded via the Script Tag API, by selecting how, when, and where to load.
 
 

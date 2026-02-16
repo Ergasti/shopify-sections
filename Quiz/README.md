@@ -1,5 +1,7 @@
 # Shopify Quiz Section
 
+**Last updated in library:** 2025-02-14
+
 A Shopify product recommendation quiz section.
 For demo and aditional info please see https://sections.design/pages/quiz
 

@@ -1,0 +1,28 @@
+{% comment %}
+  Geolocation redirect by IP. Disabled when theme customizer/preview is open.
+  Requires: jQuery, and an IP-to-location API (e.g. ipdata.co). Replace API key and redirect URL.
+{% endcomment %}
+{% if content_for_header contains 'adminBarInjector' or content_for_header contains 'previewBarInjector' or content_for_header contains 'designMode' %}
+  {% assign dontShow = true %}
+{% endif %}
+
+{% unless dontShow %}
+  <script>
+  (function() {
+    var uk_list = ['Europe', 'North America', 'South America'];
+    var asia_list = ['Africa', 'Antarctica', 'Asia', 'Oceania'];
+    // Replace with your API key and redirect URL
+    var apiKey = 'YOUR_IPDATA_API_KEY';
+    var redirectUrl = 'https://your-store.com/regional-page';
+
+    fetch('https://api.ipdata.co?api-key=' + apiKey)
+      .then(function(r) { return r.json(); })
+      .then(function(response) {
+        if (asia_list.indexOf(response.continent_name) !== -1) {
+          window.location.href = redirectUrl;
+        }
+      })
+      .catch(function() {});
+  })();
+  </script>
+{% endunless %}

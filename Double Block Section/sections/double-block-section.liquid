@@ -1,0 +1,69 @@
+{%- comment %}
+  Double Hero / two-block layout: 3/4 left slider + 1/4 right block.
+  Add blocks in Theme Editor (block-1 = 3/4 image, block-2 = 1/4 image).
+{% endcomment -%}
+
+<div class="double-block-section">
+  {% for block in section.blocks %}
+    {% if block.type == 'block-1' %}
+      <div class="double-block double-block--left" {{ block.shopify_attributes }}>
+        {% if block.settings.hero_banner != blank %}
+          <a href="{{ block.settings.hero_link | default: '#' }}">
+            <img src="{{ block.settings.hero_banner | image_url: width: 1200 }}" alt="" loading="lazy" width="1200">
+          </a>
+        {% endif %}
+      </div>
+    {% endif %}
+  {% endfor %}
+
+  {% for block in section.blocks %}
+    {% if block.type == 'block-2' %}
+      <div class="double-block double-block--right" {{ block.shopify_attributes }}>
+        {% if block.settings.weekly_banner != blank %}
+          <a href="{{ block.settings.weekly_link | default: '#' }}">
+            <img src="{{ block.settings.weekly_banner | image_url: width: 400 }}" alt="" loading="lazy" width="400">
+          </a>
+        {% endif %}
+      </div>
+    {% endif %}
+  {% endfor %}
+</div>
+
+<style>
+.double-block-section { display: flex; flex-wrap: wrap; gap: 0; }
+.double-block--left { flex: 0 0 75%; max-width: 75%; }
+.double-block--right { flex: 0 0 25%; max-width: 25%; }
+.double-block img { width: 100%; height: auto; display: block; }
+@media (max-width: 768px) {
+  .double-block--left, .double-block--right { flex: 0 0 100%; max-width: 100%; }
+}
+</style>
+
+{% schema %}
+{
+  "name": "Double Hero Slider",
+  "blocks": [
+    {
+      "type": "block-1",
+      "name": "3/4 Slider (Left)",
+      "limit": 1,
+      "settings": [
+        { "id": "hero_banner", "type": "image_picker", "label": "3/4 Image" },
+        { "id": "hero_link", "type": "url", "label": "Hero Link" }
+      ]
+    },
+    {
+      "type": "block-2",
+      "name": "1/4 Slider (Right)",
+      "limit": 1,
+      "settings": [
+        { "id": "weekly_banner", "type": "image_picker", "label": "1/4 Image" },
+        { "id": "weekly_link", "type": "url", "label": "Weekly Link" }
+      ]
+    }
+  ],
+  "presets": [
+    { "category": "Advanced content", "name": "Double Hero Slider" }
+  ]
+}
+{% endschema %}
