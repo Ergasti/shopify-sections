@@ -87,7 +87,13 @@
     "
   >
     <div class="sl-bubble-container">
-      {% if section.settings.image != blank %}
+      {% assign image_url = '' %}
+      {% if section.settings.image_url != blank %}
+        {% assign image_url = section.settings.image_url %}
+      {% elsif section.settings.image != blank %}
+        {% assign image_url = section.settings.image | image_url: width: 200 %}
+      {% endif %}
+      {% if image_url != blank %}
         <div
           class="sl-icon-wrapper"
           style="
@@ -97,7 +103,7 @@
           "
         >
           <img
-            src="{{ section.settings.image | image_url: width: 200 }}"
+            src="{{ image_url }}"
             alt=""
             width="{{ section.settings.image_size }}"
             height="{{ section.settings.image_size }}"
@@ -106,7 +112,13 @@
           >
         </div>
       {% endif %}
-      <span>{{ section.settings.bubble_text }}</span>
+      {% comment %} Language detection: use Arabic if available and locale is Arabic {% endcomment %}
+      {% assign lang = request.locale.iso_code | downcase %}
+      {% if section.settings.bubble_text_ar != blank and lang == 'ar' %}
+        <span>{{ section.settings.bubble_text_ar }}</span>
+      {% else %}
+        <span>{{ section.settings.bubble_text }}</span>
+      {% endif %}
     </div>
   </div>
 </div>
@@ -122,13 +134,25 @@
     {
       "type": "text",
       "id": "bubble_text",
-      "label": "Text",
+      "label": "Text (English)",
       "default": "Only 0.27€ per day"
+    },
+    {
+      "type": "text",
+      "id": "bubble_text_ar",
+      "label": "Text (Arabic)",
+      "info": "Shows automatically when store locale is Arabic"
     },
     {
       "type": "image_picker",
       "id": "image",
-      "label": "Icon image"
+      "label": "Icon image (upload)"
+    },
+    {
+      "type": "text",
+      "id": "image_url",
+      "label": "Icon image URL",
+      "info": "Alternative to upload: paste image URL (e.g., Shopify CDN URL). Takes priority over uploaded image."
     },
     {
       "type": "select",
@@ -161,7 +185,7 @@
         { "value": "up", "label": "Up" },
         { "value": "down", "label": "Down" }
       ],
-      "default": "down"
+      "default": "up"
     },
     {
       "type": "header",

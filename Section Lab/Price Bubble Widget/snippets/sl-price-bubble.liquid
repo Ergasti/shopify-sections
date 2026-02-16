@@ -1,0 +1,119 @@
+{% comment %}
+  Price bubble snippet — use in a Custom Liquid block to show the bubble under price (block placement).
+  Usage: {% render 'sl-price-bubble', bubble_text: 'Only 0.27€ per day', bubble_id: block.id %}
+  All parameters optional; defaults below.
+{% endcomment %}
+
+{% assign bubble_id = bubble_id | default: 'default' %}
+{% assign align_d = align_desktop | default: 'center' %}
+{% assign align_m = align_mobile | default: 'center' %}
+{% assign tail_dir = tail | default: 'up' %}
+
+{% comment %} Language detection: use Arabic if available and locale is Arabic {% endcomment %}
+{% assign lang = request.locale.iso_code | downcase %}
+{% if bubble_text_ar != blank and lang == 'ar' %}
+  {% assign text = bubble_text_ar %}
+{% elsif bubble_text != blank %}
+  {% assign text = bubble_text %}
+{% else %}
+  {% assign text = 'Only 0.27€ per day' %}
+{% endif %}
+{% assign pad_t = padding_top | default: 10 %}
+{% assign pad_b = padding_bottom | default: 20 %}
+{% assign bg = background_color | default: '#F0F0F0' %}
+{% assign fg = text_color | default: '#000000' %}
+{% assign fz = font_size | default: 14 %}
+{% assign img_sz = image_size | default: 24 %}
+{% assign radius = border_radius | default: 8 %}
+{% assign border_c = border_color | default: '#0171E2' %}
+{% assign border_w = border_width | default: 2 %}
+
+{% comment %} Handle image: can be image object or URL string {% endcomment %}
+{% assign image_url = '' %}
+{% if image != blank %}
+  {% if image contains 'http' or image contains '//' %}
+    {% comment %} It's a URL string {% endcomment %}
+    {% assign image_url = image %}
+  {% else %}
+    {% comment %} It's an image object from image_picker {% endcomment %}
+    {% assign image_url = image | image_url: width: 200 %}
+  {% endif %}
+{% endif %}
+
+<style>
+  #sl-price-bubble-{{ bubble_id }}.sl-bubble-section-wrapper {
+    align-items: {{ align_m }};
+    width: fit-content;
+    max-width: 100%;
+    {% if align_m == 'center' %}margin-left: auto; margin-right: auto;{% endif %}
+  }
+  @media screen and (min-width: 768px) {
+    #sl-price-bubble-{{ bubble_id }}.sl-bubble-section-wrapper {
+      align-items: {{ align_d }};
+      {% if align_d == 'center' %}margin-left: auto; margin-right: auto;{% else %}margin-left: 0; margin-right: 0;{% endif %}
+    }
+  }
+  #sl-price-bubble-{{ bubble_id }} .sl-bubble-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  #sl-price-bubble-{{ bubble_id }} .sl-icon-wrapper {
+    background-color: #fff;
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+  #sl-price-bubble-{{ bubble_id }} .sl-tail {
+    position: relative;
+    overflow: visible;
+  }
+  #sl-price-bubble-{{ bubble_id }} .sl-tail::after {
+    content: '';
+    position: absolute;
+    left: 20%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+  }
+  #sl-price-bubble-{{ bubble_id }} .sl-tail-down::after {
+    bottom: -8px;
+    border-top: 8px solid var(--bubble-bg, #F0F0F0);
+  }
+  #sl-price-bubble-{{ bubble_id }} .sl-tail-up::after {
+    top: -8px;
+    border-bottom: 8px solid var(--bubble-bg, #F0F0F0);
+  }
+</style>
+
+<div
+  id="sl-price-bubble-{{ bubble_id }}"
+  class="sl-bubble-section-wrapper"
+  style="padding-top: {{ pad_t }}px; padding-bottom: {{ pad_b }}px; display: flex; flex-direction: column;"
+>
+  <div
+    class="sl-bubble {% if tail_dir != 'none' %}sl-tail sl-tail-{{ tail_dir }}{% endif %}"
+    style="--bubble-bg: {{ bg }}; background-color: {{ bg }}; color: {{ fg }}; border-radius: {{ radius }}px; border: {{ border_w }}px solid {{ border_c }}; font-size: {{ fz }}px; padding: 7px 12px 7px 10px; position: relative; display: inline-block;"
+  >
+    <div class="sl-bubble-container">
+      {% if image_url != blank %}
+        <div class="sl-icon-wrapper" style="width: {{ img_sz }}px; height: {{ img_sz }}px; background-color: transparent;">
+          <img
+            src="{{ image_url }}"
+            alt=""
+            width="{{ img_sz }}"
+            height="{{ img_sz }}"
+            loading="lazy"
+            style="width: 100%; height: 100%; object-fit: cover;"
+          >
+        </div>
+      {% endif %}
+      <span>{{ text }}</span>
+    </div>
+  </div>
+</div>

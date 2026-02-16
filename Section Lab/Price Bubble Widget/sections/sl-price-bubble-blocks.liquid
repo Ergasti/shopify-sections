@@ -1,0 +1,185 @@
+{% comment %}
+  Section Lab - Price Bubble Widget (Block-based)
+  Source: Section Lab (paid bundle). Internal use only.
+  Each block is a price bubble instance with its own settings.
+{% endcomment %}
+
+{% if section.blocks.size > 0 %}
+  <div id="sl-price-bubble-blocks-{{ section.id }}" class="sl-price-bubble-blocks-wrapper">
+    {% for block in section.blocks %}
+      {% render 'sl-price-bubble',
+        bubble_text: block.settings.bubble_text,
+        image: block.settings.image,
+        bubble_id: block.id,
+        align_desktop: block.settings.align_desktop,
+        align_mobile: block.settings.align_mobile,
+        tail: block.settings.tail,
+        padding_top: block.settings.padding_top,
+        padding_bottom: block.settings.padding_bottom,
+        background_color: block.settings.background_color,
+        text_color: block.settings.text_color,
+        font_size: block.settings.font_size,
+        image_size: block.settings.image_size,
+        border_radius: block.settings.border_radius,
+        border_color: block.settings.border_color,
+        border_width: block.settings.border_width
+      %}
+    {% endfor %}
+  </div>
+{% endif %}
+
+{% schema %}
+{
+  "name": "SL Price Bubble Widget (Blocks)",
+  "blocks": [
+    {
+      "type": "bubble",
+      "name": "Price Bubble",
+      "settings": [
+        {
+          "type": "header",
+          "content": "Content"
+        },
+        {
+          "type": "text",
+          "id": "bubble_text",
+          "label": "Text",
+          "default": "Only 0.27€ per day"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Icon image"
+        },
+        {
+          "type": "select",
+          "id": "align_desktop",
+          "label": "Alignment (desktop)",
+          "options": [
+            { "value": "flex-start", "label": "Left" },
+            { "value": "center", "label": "Center" },
+            { "value": "flex-end", "label": "Right" }
+          ],
+          "default": "center"
+        },
+        {
+          "type": "select",
+          "id": "align_mobile",
+          "label": "Alignment (mobile)",
+          "options": [
+            { "value": "flex-start", "label": "Left" },
+            { "value": "center", "label": "Center" },
+            { "value": "flex-end", "label": "Right" }
+          ],
+          "default": "center"
+        },
+        {
+          "type": "select",
+          "id": "tail",
+          "label": "Tail direction",
+          "options": [
+            { "value": "none", "label": "None" },
+            { "value": "up", "label": "Up" },
+            { "value": "down", "label": "Down" }
+          ],
+          "default": "down"
+        },
+        {
+          "type": "header",
+          "content": "Style"
+        },
+        {
+          "type": "range",
+          "id": "padding_top",
+          "label": "Padding top",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "px",
+          "default": 10
+        },
+        {
+          "type": "range",
+          "id": "padding_bottom",
+          "label": "Padding bottom",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "px",
+          "default": 20
+        },
+        {
+          "type": "color",
+          "id": "background_color",
+          "label": "Background color",
+          "default": "#F0F0F0"
+        },
+        {
+          "type": "color",
+          "id": "text_color",
+          "label": "Text color",
+          "default": "#000000"
+        },
+        {
+          "type": "range",
+          "id": "font_size",
+          "label": "Text size",
+          "min": 10,
+          "max": 40,
+          "step": 1,
+          "unit": "px",
+          "default": 14
+        },
+        {
+          "type": "range",
+          "id": "image_size",
+          "label": "Icon size",
+          "min": 10,
+          "max": 100,
+          "step": 1,
+          "unit": "px",
+          "default": 24
+        },
+        {
+          "type": "range",
+          "id": "border_radius",
+          "label": "Border radius",
+          "min": 0,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "default": 8
+        },
+        {
+          "type": "color",
+          "id": "border_color",
+          "label": "Border color",
+          "default": "#0171E2"
+        },
+        {
+          "type": "range",
+          "id": "border_width",
+          "label": "Border width",
+          "min": 0,
+          "max": 10,
+          "step": 1,
+          "unit": "px",
+          "default": 2,
+          "info": "Not compatible with Tail"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "SL Price Bubble Widget (Blocks)",
+      "blocks": [
+        {
+          "type": "bubble"
+        }
+      ],
+      "category": "Text"
+    }
+  ]
+}
+{% endschema %}
