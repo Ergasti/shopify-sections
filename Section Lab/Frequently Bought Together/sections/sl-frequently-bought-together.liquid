@@ -1,0 +1,597 @@
+{% comment %}
+  SL - Frequently Bought Together
+  Swiper-based product slider with card styling. Uses product blocks.
+  Requires Swiper.js. Add to product template.
+{% endcomment %}
+
+{% if section.blocks.size == 0 %}
+  {% if request.design_mode %}
+    <div id="sl-fbt-{{ section.id }}" class="sl-fbt-root" style="padding: 24px; text-align: center; border: 2px dashed #ddd;">
+      <p style="margin: 0; color: #666;">Frequently Bought Together — Add product blocks to get started.</p>
+    </div>
+  {% endif %}
+{% else %}
+
+<div id="sl-fbt-{{ section.id }}" class="sl-fbt-root">
+  <div
+    class="sl-fbt-inner"
+    style="
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+      {% unless section.settings.full_width %}max-width: {{ section.settings.content_width }}px; margin-left: auto; margin-right: auto;{% endunless %}
+    "
+  >
+    {% if section.settings.heading != blank %}
+      <h2 class="sl-fbt-heading" style="
+        text-align: {{ section.settings.heading_alignment }};
+        font-size: {% if section.settings.heading_size == 'small' %}20px{% elsif section.settings.heading_size == 'medium' %}24px{% else %}32px{% endif %};
+        color: {{ section.settings.heading_color }};
+        margin: 0 0 {{ section.settings.heading_spacing }}px 0;
+      ">{{ section.settings.heading }}</h2>
+    {% endif %}
+
+    <div class="sl-fbt-swiper swiper">
+      <div class="swiper-wrapper">
+        {% for block in section.blocks %}
+          {% assign product = block.settings.product %}
+          {% if product != blank %}
+            <div class="swiper-slide" {{ block.shopify_attributes }}>
+              <div class="sl-fbt-card">
+                <a href="{{ product.url }}" class="sl-fbt-card__media">
+                  {% if product.featured_image != blank %}
+                    <img
+                      src="{{ product.featured_image | image_url: width: 520 }}"
+                      srcset="{{ product.featured_image | image_url: width: 260 }} 260w,
+                              {{ product.featured_image | image_url: width: 400 }} 400w,
+                              {{ product.featured_image | image_url: width: 520 }} 520w"
+                      sizes="260px"
+                      alt="{{ product.featured_image.alt | default: product.title | escape }}"
+                      width="260"
+                      height="260"
+                      loading="lazy"
+                      {% if forloop.index0 > 1 %}fetchpriority="low"{% endif %}
+                    >
+                  {% else %}
+                    {{ 'product-1' | placeholder_svg_tag: 'sl-fbt-placeholder' }}
+                  {% endif %}
+                </a>
+                {% if section.settings.show_percentage %}
+                  {% comment %} Descending pseudo-random %: slide 1 (54-65%), 2 (45-54%), 3 (38-45%), 4 (32-38%), 5+ (30-35%) {% endcomment %}
+                  {% assign seed = product.id | modulo: 100 %}
+                  {% if forloop.index0 == 0 %}
+                    {% assign r = seed | modulo: 12 %}
+                    {% assign pct = 54 | plus: r %}
+                  {% elsif forloop.index0 == 1 %}
+                    {% assign r = seed | modulo: 10 %}
+                    {% assign pct = 45 | plus: r %}
+                  {% elsif forloop.index0 == 2 %}
+                    {% assign r = seed | modulo: 8 %}
+                    {% assign pct = 38 | plus: r %}
+                  {% elsif forloop.index0 == 3 %}
+                    {% assign r = seed | modulo: 7 %}
+                    {% assign pct = 32 | plus: r %}
+                  {% else %}
+                    {% assign r = seed | modulo: 6 %}
+                    {% assign pct = 30 | plus: r %}
+                  {% endif %}
+                  <p class="sl-fbt-volume">{{ pct }}% bought together</p>
+                {% endif %}
+                <div class="sl-fbt-card__info">
+                  <a href="{{ product.url }}" class="sl-fbt-card__title">{{ product.title }}</a>
+                  <div class="sl-fbt-card__price">
+                    {% if product.compare_at_price > product.price %}
+                      <span class="sl-fbt-price--sale">{{ product.price | money }}</span>
+                      <span class="sl-fbt-price--compare">{{ product.compare_at_price | money }}</span>
+                    {% else %}
+                      {{ product.price | money }}
+                    {% endif %}
+                  </div>
+                  {% form 'product', product, class: 'sl-fbt-form' %}
+                    <input type="hidden" name="quantity" value="1">
+                    <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+                    <button type="submit" class="sl-fbt-add" {% unless product.available %}disabled{% endunless %}>
+                      {% if product.available %}Add{% else %}Sold out{% endif %}
+                    </button>
+                  {% endform %}
+                </div>
+              </div>
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+      {% if section.settings.show_arrows %}
+        <div class="swiper-button-prev"></div>
+        <div class="swiper-button-next"></div>
+      {% endif %}
+      {% if section.settings.show_pagination %}
+        <div class="swiper-pagination"></div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<style>
+  #sl-fbt-{{ section.id }}.sl-fbt-root {
+    --sl-fbt-card-bg: {{ section.settings.card_bg }};
+    --sl-fbt-card-border: {{ section.settings.card_border }};
+    --sl-fbt-card-padding: {{ section.settings.card_padding }}px;
+    --sl-fbt-card-radius: {{ section.settings.card_radius }}px;
+    --sl-fbt-slide-width: {{ section.settings.slide_width }}px;
+  }
+
+  #sl-fbt-{{ section.id }} .sl-fbt-swiper {
+    overflow: hidden;
+    position: relative;
+  }
+
+  #sl-fbt-{{ section.id }} .swiper-wrapper {
+    display: flex;
+    gap: {{ section.settings.slide_gap }}px;
+  }
+
+  #sl-fbt-{{ section.id }} .swiper-slide {
+    flex-shrink: 0;
+    width: var(--sl-fbt-slide-width) !important;
+    height: auto;
+    display: block;
+    position: relative;
+    transition-property: transform;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+  }
+
+  #sl-fbt-{{ section.id }} .sl-fbt-card {
+    padding: var(--sl-fbt-card-padding);
+    border-radius: var(--sl-fbt-card-radius);
+    border: 0.5px solid var(--sl-fbt-card-border);
+    background: var(--sl-fbt-card-bg);
+    box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.02), 0px 4px 4px -1px rgba(0, 0, 0, 0.02);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    height: 100%;
+    box-sizing: border-box;
+  }
+
+  #sl-fbt-{{ section.id }} .sl-fbt-card__media {
+    display: block;
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: calc(var(--sl-fbt-card-radius) - 2px);
+  }
+
+  #sl-fbt-{{ section.id }} .sl-fbt-card__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  #sl-fbt-{{ section.id }} .sl-fbt-placeholder {
+    width: 100%;
+    height: 100%;
+  }
+
+  #sl-fbt-{{ section.id }} .sl-fbt-volume {
+    font-size: 12px;
+    color: {{ section.settings.percentage_color }};
+    margin: 0;
+  }
+
+  #sl-fbt-{{ section.id }} .sl-fbt-card__info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+  }
+
+  #sl-fbt-{{ section.id }} .sl-fbt-card__title {
+    font-size: 14px;
+    font-weight: 500;
+    color: inherit;
+    text-decoration: none;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  #sl-fbt-{{ section.id }} .sl-fbt-card__title:hover {
+    text-decoration: underline;
+  }
+
+  #sl-fbt-{{ section.id }} .sl-fbt-card__price {
+    font-size: 14px;
+    font-weight: 600;
+    color: {{ section.settings.price_color }};
+  }
+
+  #sl-fbt-{{ section.id }} .sl-fbt-price--compare {
+    font-size: 12px;
+    font-weight: 400;
+    opacity: 0.7;
+    text-decoration: line-through;
+  }
+
+  #sl-fbt-{{ section.id }} .sl-fbt-form {
+    margin-top: auto;
+  }
+
+  #sl-fbt-{{ section.id }} .sl-fbt-add {
+    width: 100%;
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    background: {{ section.settings.button_bg }};
+    color: {{ section.settings.button_color }};
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+
+  #sl-fbt-{{ section.id }} .sl-fbt-add:hover:not(:disabled) {
+    opacity: 0.9;
+  }
+
+  #sl-fbt-{{ section.id }} .sl-fbt-add:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  #sl-fbt-{{ section.id }} .swiper-button-prev,
+  #sl-fbt-{{ section.id }} .swiper-button-next {
+    color: {{ section.settings.arrow_color }};
+    background: {{ section.settings.arrow_bg }};
+  }
+
+  #sl-fbt-{{ section.id }} .swiper-pagination-bullet {
+    background: {{ section.settings.pagination_color }};
+  }
+
+  #sl-fbt-{{ section.id }} .swiper-pagination-bullet-active {
+    background: {{ section.settings.pagination_active_color }};
+  }
+
+  @media (max-width: 768px) {
+    #sl-fbt-{{ section.id }} .swiper-slide {
+      width: calc(var(--sl-fbt-slide-width) * 0.85) !important;
+    }
+  }
+</style>
+
+<script>
+(function() {
+  function initFbt() {
+    var el = document.querySelector('#sl-fbt-{{ section.id }} .sl-fbt-swiper');
+    if (!el || typeof Swiper === 'undefined') return;
+    if (el.swiper) return;
+    new Swiper(el, {
+      slidesPerView: 'auto',
+      spaceBetween: {{ section.settings.slide_gap }},
+      loop: {{ section.settings.loop }},
+      {% if section.settings.show_arrows %}
+      navigation: {
+        nextEl: '#sl-fbt-{{ section.id }} .swiper-button-next',
+        prevEl: '#sl-fbt-{{ section.id }} .swiper-button-prev',
+      },
+      {% endif %}
+      {% if section.settings.show_pagination %}
+      pagination: {
+        el: '#sl-fbt-{{ section.id }} .swiper-pagination',
+        clickable: true,
+      },
+      {% endif %}
+      {% if section.settings.autoplay %}
+      autoplay: {
+        delay: {{ section.settings.autoplay_delay }},
+        disableOnInteraction: false,
+      },
+      {% endif %}
+      breakpoints: {}
+    });
+  }
+  function run() {
+    var section = document.getElementById('sl-fbt-{{ section.id }}');
+    if (!section) return;
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function(entries) {
+        if (entries[0].isIntersecting) {
+          io.disconnect();
+          initFbt();
+        }
+      }, { rootMargin: '100px' });
+      io.observe(section);
+    } else {
+      initFbt();
+    }
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', run);
+  } else {
+    run();
+  }
+})();
+</script>
+{% endif %}
+
+{% schema %}
+{
+  "name": "SL - Frequently Bought Together",
+  "tag": "section",
+  "class": "sl-frequently-bought-together",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Heading"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Frequently Bought Together"
+    },
+    {
+      "type": "select",
+      "id": "heading_alignment",
+      "label": "Heading alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Heading size",
+      "options": [
+        { "value": "small", "label": "Small" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "large", "label": "Large" }
+      ],
+      "default": "medium"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "default": "#1c1c1c"
+    },
+    {
+      "type": "range",
+      "id": "heading_spacing",
+      "label": "Heading bottom spacing",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "default": 20,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Card styling"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_percentage",
+      "label": "Show percentage badge",
+      "info": "Auto-generated descending % (slide 1 highest, 2 lower, etc.), all above 30%",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "card_bg",
+      "label": "Card background",
+      "default": "rgba(255, 255, 255, 0.90)"
+    },
+    {
+      "type": "color",
+      "id": "card_border",
+      "label": "Card border",
+      "default": "#EBEBEB"
+    },
+    {
+      "type": "range",
+      "id": "card_padding",
+      "label": "Card padding",
+      "min": 8,
+      "max": 32,
+      "step": 1,
+      "default": 13,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "card_radius",
+      "label": "Card border radius",
+      "min": 0,
+      "max": 24,
+      "step": 1,
+      "default": 16,
+      "unit": "px"
+    },
+    {
+      "type": "color",
+      "id": "percentage_color",
+      "label": "Percentage text color",
+      "default": "#666666"
+    },
+    {
+      "type": "color",
+      "id": "price_color",
+      "label": "Price color",
+      "default": "#1c1c1c"
+    },
+    {
+      "type": "color",
+      "id": "button_bg",
+      "label": "Add button background",
+      "default": "#1c1c1c"
+    },
+    {
+      "type": "color",
+      "id": "button_color",
+      "label": "Add button text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "header",
+      "content": "Slider"
+    },
+    {
+      "type": "range",
+      "id": "slide_width",
+      "label": "Slide width",
+      "min": 180,
+      "max": 360,
+      "step": 10,
+      "default": 260,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "slide_gap",
+      "label": "Gap between slides",
+      "min": 8,
+      "max": 32,
+      "step": 2,
+      "default": 16,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "slides_desktop",
+      "label": "Slides visible (desktop)",
+      "min": 2,
+      "max": 5,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "checkbox",
+      "id": "loop",
+      "label": "Loop slider",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_arrows",
+      "label": "Show navigation arrows",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_pagination",
+      "label": "Show pagination dots",
+      "default": false
+    },
+    {
+      "type": "color",
+      "id": "arrow_color",
+      "label": "Arrow color",
+      "default": "#1c1c1c"
+    },
+    {
+      "type": "color",
+      "id": "arrow_bg",
+      "label": "Arrow background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "pagination_color",
+      "label": "Pagination color",
+      "default": "#cccccc"
+    },
+    {
+      "type": "color",
+      "id": "pagination_active_color",
+      "label": "Pagination active color",
+      "default": "#1c1c1c"
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": "Autoplay",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "autoplay_delay",
+      "label": "Autoplay delay",
+      "min": 2000,
+      "max": 8000,
+      "step": 500,
+      "default": 4000,
+      "unit": "ms"
+    },
+    {
+      "type": "header",
+      "content": "Section"
+    },
+    {
+      "type": "checkbox",
+      "id": "full_width",
+      "label": "Full width",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "content_width",
+      "label": "Content width",
+      "min": 800,
+      "max": 1600,
+      "step": 40,
+      "default": 1200,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "default": 24,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "default": 24,
+      "unit": "px"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "product",
+      "name": "Product",
+      "settings": [
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Product"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "SL - Frequently Bought Together",
+      "category": "Products",
+      "blocks": [
+        { "type": "product" },
+        { "type": "product" },
+        { "type": "product" }
+      ]
+    }
+  ],
+  "templates": ["product"]
+}
+{% endschema %}
