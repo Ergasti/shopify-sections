@@ -18,8 +18,8 @@
 {% else %}
   {% assign text = 'Only 0.27€ per day' %}
 {% endif %}
-{% assign pad_t = padding_top | default: 10 %}
-{% assign pad_b = padding_bottom | default: 20 %}
+{% assign pad_t = padding_top | default: 6 %}
+{% assign pad_b = padding_bottom | default: 10 %}
 {% assign bg = background_color | default: '#F0F0F0' %}
 {% assign fg = text_color | default: '#000000' %}
 {% assign fz = font_size | default: 14 %}
@@ -56,7 +56,7 @@
   #sl-price-bubble-{{ bubble_id }} .sl-bubble-container {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 6px;
   }
   #sl-price-bubble-{{ bubble_id }} .sl-icon-wrapper {
     background-color: #fff;
@@ -98,7 +98,7 @@
 >
   <div
     class="sl-bubble {% if tail_dir != 'none' %}sl-tail sl-tail-{{ tail_dir }}{% endif %}"
-    style="--bubble-bg: {{ bg }}; background-color: {{ bg }}; color: {{ fg }}; border-radius: {{ radius }}px; border: {{ border_w }}px solid {{ border_c }}; font-size: {{ fz }}px; padding: 7px 12px 7px 10px; position: relative; display: inline-block;"
+    style="--bubble-bg: {{ bg }}; background-color: {{ bg }}; color: {{ fg }}; border-radius: {{ radius }}px; border: {{ border_w }}px solid {{ border_c }}; font-size: {{ fz }}px; padding: 4px 8px 4px 6px; position: relative; display: inline-block;"
   >
     <div class="sl-bubble-container">
       {% if image_url != blank %}
