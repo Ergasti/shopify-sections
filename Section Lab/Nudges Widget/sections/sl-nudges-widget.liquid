@@ -1,8 +1,17 @@
 {% comment %}
   Section Lab - Nudges Widget (Sales Nudge)
-  Source: Section Lab (paid bundle). Internal use only.
   Uses Toastify-js CDN. Shows "Someone from [city] just bought [product]" toasts.
+  Supports translations (en/ar) and RTL.
 {% endcomment %}
+
+{% assign locale_iso = request.locale.iso_code | default: 'en' %}
+{% assign is_rtl = false %}
+{% assign locale_start = locale_iso | slice: 0, 2 %}
+{% if locale_iso == 'ar' or locale_iso == 'he' or locale_iso == 'fa' or locale_iso == 'ur' or locale_iso == 'yi' %}
+  {% assign is_rtl = true %}
+{% elsif locale_start == 'ar' %}
+  {% assign is_rtl = true %}
+{% endif %}
 
 <script src="https://cdn.jsdelivr.net/npm/toastify-js" defer></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
@@ -52,12 +61,28 @@
 
     if (!products.length || !cities.length) return;
 
+    var i18n = {
+      nudge_message: {{ 'sections.sl_nudges.nudge_message' | t | json }},
+      verified_purchase: {{ 'sections.sl_nudges.verified_purchase' | t | json }}
+    };
+    var isRtl = {{ is_rtl }};
+    var rootPath = (window.Shopify && window.Shopify.routes && window.Shopify.routes.root) || '/';
     var maxNudges = 5;
     var interval = 30000;
     var shown = 0;
     var sectionId = "{{ section.id }}";
     var previewMode = {{ section.settings.preview_mode_enable | json }};
     var headlineText = {{ section.settings.headline_text | strip_html | json }};
+
+    function formatNudgeMessage(city, productTitle) {
+      var msg = i18n.nudge_message || 'Someone from {{ city }} just bought {{ product }}';
+      return msg.replace(/\{\{\s*city\s*\}\}/g, city).replace(/\{\{\s*product\s*\}\}/g, productTitle);
+    }
+
+    function formatVerified(count) {
+      var msg = i18n.verified_purchase || 'Verified Purchase · {{ count }} min ago';
+      return msg.replace(/\{\{\s*count\s*\}\}/g, count);
+    }
 
     function showNudge() {
       var product = products[Math.floor(Math.random() * products.length)];
@@ -66,25 +91,30 @@
       var productTitle = product.title.replace(/</g, "&lt;").replace(/>/g, "&gt;");
       var citySafe = city.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-      var html = '<div class="sl-toast-body">' +
+      var nudgeText = formatNudgeMessage('<b>' + citySafe + '</b>', '<b>' + productTitle + '</b>');
+      var verifiedText = formatVerified(minutes);
+      var html = '<div class="sl-toast-body' + (isRtl ? ' sl-toast-rtl' : '') + '" dir="' + (isRtl ? 'rtl' : 'ltr') + '">' +
         '<img src="' + product.image + '" alt="" class="sl-toast-image" width="67" height="67" loading="lazy">' +
         '<div>' +
         '<h3 class="sl-toast-headline" style="color: {{ section.settings.headline_color }}; font-size: {{ section.settings.size_headline }}px; margin: 0 0 5px 0;">' + headlineText + '</h3>' +
-        '<span class="sl-toast-text" style="color: {{ section.settings.text_color }}; font-size: {{ section.settings.size_text }}px;">Someone from <b>' + citySafe + '</b> just bought <b>' + productTitle + '</b></span>' +
+        '<span class="sl-toast-text" style="color: {{ section.settings.text_color }}; font-size: {{ section.settings.size_text }}px;">' + nudgeText + '</span>' +
         '<div class="sl-toast-verified" style="font-size: {{ section.settings.size_highlight }}px; margin-top: 4px; color: {{ section.settings.highlight_color }}; display: flex; align-items: center; gap: 6px;">' +
         '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M6.01531 14.1539L4.90248 12.277L2.78465 11.8205L2.99231 9.63586L1.56415 8.00002L2.99231 6.36419L2.78465 4.17952L4.90248 3.72302L6.01531 1.84619L7.99998 2.68469L9.98465 1.84619L11.0975 3.72302L13.2153 4.17952L13.0076 6.36419L14.4358 8.00002L13.0076 9.63586L13.2153 11.8205L11.0975 12.277L9.98465 14.1539L7.99998 13.3154L6.01531 14.1539ZM7.29998 9.90519L10.6051 6.60003L10.1333 6.12052L7.29998 8.95386L5.86665 7.52819L5.39481 8.00002L7.29998 9.90519Z" fill="currentColor"/></svg>' +
-        ' Verified Purchase · ' + minutes + ' min ago</div></div></div>';
+        verifiedText + '</div></div></div>';
+
+      var pos = "{{ section.settings.position }}";
+      if (isRtl && (pos === 'left' || pos === 'right')) pos = pos === 'left' ? 'right' : 'left';
 
       Toastify({
         node: null,
         text: html,
         duration: previewMode ? -1 : 10000,
         gravity: "{{ section.settings.gravity }}",
-        position: "{{ section.settings.position }}",
+        position: pos,
         escapeMarkup: false,
         stopOnFocus: true,
         close: true,
-        destination: "/products/" + (product.handle || ""),
+        destination: rootPath.replace(/\/$/, '') + "/products/" + (product.handle || ""),
         className: "sl-toast sl-toast-{{ section.id }}",
         style: {
           background: "{{ section.settings.background_color }}",
@@ -96,7 +126,7 @@
           boxShadow: "0px 0px {{ section.settings.shadow_blur }}px 0px rgba(0, 0, 0, {{ section.settings.shadow_opacity }})"
         },
         onClick: function() {
-          if (product.handle) window.location.href = "/products/" + product.handle;
+          if (product.handle) window.location.href = rootPath.replace(/\/$/, '') + "/products/" + product.handle;
         }
       }).showToast();
     }
@@ -153,6 +183,11 @@
 
   .sl-toast-{{ section.id }} .sl-toast-verified {
     margin-top: 4px;
+  }
+
+  .sl-toast-{{ section.id }} .sl-toast-body.sl-toast-rtl {
+    flex-direction: row-reverse;
+    text-align: right;
   }
 
   @media screen and (max-width: 767px) {

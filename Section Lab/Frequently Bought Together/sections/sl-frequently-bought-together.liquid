@@ -5,6 +5,14 @@
 
 {% assign data_source = section.settings.data_source | default: 'manual' %}
 {% assign use_recommendations = false %}
+{% assign locale_iso = request.locale.iso_code | default: 'en' %}
+{% assign is_rtl = false %}
+{% assign locale_start = locale_iso | slice: 0, 2 %}
+{% if locale_iso == 'ar' or locale_iso == 'he' or locale_iso == 'fa' or locale_iso == 'ur' or locale_iso == 'yi' %}
+  {% assign is_rtl = true %}
+{% elsif locale_start == 'ar' %}
+  {% assign is_rtl = true %}
+{% endif %}
 {% assign use_blocks = false %}
 {% assign products_to_show = '' %}
 
@@ -23,7 +31,7 @@
   {% assign show_section = true %}
 {% endif %}
 {% if show_section %}
-<div id="sl-fbt-{{ section.id }}" class="sl-fbt-root" {% if data_source == 'recommendations' and product != blank and use_recommendations == false %}data-fbt-fetch data-product-id="{{ product.id }}"{% endif %}>
+<div id="sl-fbt-{{ section.id }}" class="sl-fbt-root{% if is_rtl %} sl-fbt-rtl{% endif %}"{% if is_rtl %} dir="rtl"{% endif %} {% if data_source == 'recommendations' and product != blank and use_recommendations == false %}data-fbt-fetch data-product-id="{{ product.id }}"{% endif %}>
   <div
     class="sl-fbt-inner"
     style="
@@ -42,7 +50,7 @@
     {% endif %}
 
     {% if use_recommendations == false and data_source == 'recommendations' and product != blank %}
-      <div class="sl-fbt-fetch-placeholder" style="min-height: 200px; display: flex; align-items: center; justify-content: center; color: #666;">Loading…</div>
+      <div class="sl-fbt-fetch-placeholder" style="min-height: 200px; display: flex; align-items: center; justify-content: center; color: #666;">{{ 'sections.sl_fbt.loading' | t }}</div>
     {% else %}
     <div class="sl-fbt-swiper swiper">
       <div class="swiper-wrapper">
@@ -88,7 +96,7 @@
                     {% assign r = seed | modulo: 6 %}
                     {% assign pct = 30 | plus: r %}
                   {% endif %}
-                  <p class="sl-fbt-volume">{{ pct }}% bought together</p>
+                  <p class="sl-fbt-volume">{{ 'sections.sl_fbt.percent_bought' | t: count: pct }}</p>
                 {% endif %}
                 <div class="sl-fbt-card__info">
                   <a href="{{ product.url }}" class="sl-fbt-card__title">{{ product.title }}</a>
@@ -104,7 +112,7 @@
                     <input type="hidden" name="quantity" value="1">
                     <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
                     <button type="submit" class="sl-fbt-add" {% unless product.available %}disabled{% endunless %}>
-                      {% if product.available %}Add{% else %}Sold out{% endif %}
+                      {% if product.available %}{{ 'sections.sl_fbt.add' | t }}{% else %}{{ 'sections.sl_fbt.sold_out' | t }}{% endif %}
                     </button>
                   {% endform %}
                 </div>
@@ -153,7 +161,7 @@
                     {% assign r = seed | modulo: 6 %}
                     {% assign pct = 30 | plus: r %}
                   {% endif %}
-                  <p class="sl-fbt-volume">{{ pct }}% bought together</p>
+                  <p class="sl-fbt-volume">{{ 'sections.sl_fbt.percent_bought' | t: count: pct }}</p>
                 {% endif %}
                 <div class="sl-fbt-card__info">
                   <a href="{{ product.url }}" class="sl-fbt-card__title">{{ product.title }}</a>
@@ -169,7 +177,7 @@
                     <input type="hidden" name="quantity" value="1">
                     <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
                     <button type="submit" class="sl-fbt-add" {% unless product.available %}disabled{% endunless %}>
-                      {% if product.available %}Add{% else %}Sold out{% endif %}
+                      {% if product.available %}{{ 'sections.sl_fbt.add' | t }}{% else %}{{ 'sections.sl_fbt.sold_out' | t }}{% endif %}
                     </button>
                   {% endform %}
                 </div>
@@ -339,6 +347,11 @@
       width: calc(var(--sl-fbt-slide-width) * 0.85) !important;
     }
   }
+
+  #sl-fbt-{{ section.id }}.sl-fbt-rtl .sl-fbt-inner,
+  #sl-fbt-{{ section.id }}.sl-fbt-rtl .sl-fbt-heading { text-align: right; }
+  #sl-fbt-{{ section.id }}.sl-fbt-rtl .sl-fbt-card { text-align: right; }
+  #sl-fbt-{{ section.id }}.sl-fbt-rtl .swiper-wrapper { flex-direction: row-reverse; }
 </style>
 
 <script>
@@ -354,6 +367,7 @@
       slidesPerView: 'auto',
       spaceBetween: {{ section.settings.slide_gap }},
       loop: {{ section.settings.loop }},
+      rtl: {{ is_rtl }},
       {% if section.settings.show_arrows %}
       navigation: {
         nextEl: '#sl-fbt-{{ section.id }} .swiper-button-next',

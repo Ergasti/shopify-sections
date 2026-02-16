@@ -114,7 +114,7 @@
   #sl-fbt-block-{{ block_id }}.sl-fbt-rtl .sl-fbt-inner,
   #sl-fbt-block-{{ block_id }}.sl-fbt-rtl .sl-fbt-heading { text-align: right; }
   #sl-fbt-block-{{ block_id }}.sl-fbt-rtl .sl-fbt-card { text-align: right; }
-  #sl-fbt-block-{{ block_id }}.sl-fbt-rtl .swiper-wrapper { flex-direction: row-reverse; }
+  #sl-fbt-block-{{ block_id }} .swiper-pagination { display: none !important; }
 </style>
 
 <script>
@@ -127,7 +127,7 @@
   var i18n = {
     loading: {{ 'sections.sl_fbt.loading' | t | json }},
     heading: {{ 'sections.sl_fbt.heading' | t | json }},
-    popular: {{ 'sections.sl_fbt.popular' | t | json }},
+    percent_bought: {{ 'sections.sl_fbt.percent_bought' | t | json }},
     add: {{ 'sections.sl_fbt.add' | t | json }},
     adding: {{ 'sections.sl_fbt.adding' | t | json }},
     added: {{ 'sections.sl_fbt.added' | t | json }},
@@ -144,6 +144,14 @@
     return fmt.replace(/\{\{\s*amount\s*\}\}/, val).replace(/\{\{\s*amount_no_decimals\s*\}\}/, Math.round(cents / 100));
   }
 
+  function pctForIndex(i, productId) {
+    var seeds = [54, 45, 38, 32, 30];
+    var ranges = [12, 10, 8, 7, 6];
+    var base = i < 5 ? seeds[i] : 30;
+    var range = i < 5 ? ranges[i] : 6;
+    var seed = (productId || 0) % 100;
+    return base + (seed % range);
+  }
 
   function buildCard(p, i, rootPath) {
     var base = (rootPath && rootPath.replace(/\/$/, '')) || '';
@@ -167,7 +175,9 @@
     var imgHtml = imgSrc
       ? '<img src="' + imgSrc + '" alt="' + (p.title || '').replace(/"/g, '&quot;') + '" width="260" height="260" loading="lazy">'
       : '<div style="width:100%;height:100%;background:#f0f0f0;display:flex;align-items:center;justify-content:center;">' + i18n.no_image + '</div>';
-    var badgeHtml = '<span class="sl-fbt-badge">' + i18n.popular + '</span>';
+    var pct = pctForIndex(i, p.id);
+    var badgeText = (i18n.percent_bought || '{{ count }}% of people like this').replace(/\{\{\s*count\s*\}\}/g, pct);
+    var badgeHtml = '<span class="sl-fbt-badge">' + badgeText + '</span>';
     var priceHtml = comparePrice
       ? '<span class="sl-fbt-price--sale">' + price + '</span><span class="sl-fbt-price--compare">' + comparePrice + '</span>'
       : price;
@@ -255,14 +265,13 @@
     if (el.swiper) return;
     var nextEl = container.querySelector('.swiper-button-next');
     var prevEl = container.querySelector('.swiper-button-prev');
-    var pagEl = container.querySelector('.swiper-pagination');
     new Swiper(el, {
       slidesPerView: 'auto',
       spaceBetween: 5,
       loop: false,
       rtl: isRtl,
       navigation: (nextEl && prevEl) ? { nextEl: nextEl, prevEl: prevEl } : false,
-      pagination: pagEl ? { el: pagEl, clickable: true } : false
+      pagination: false
     });
   }
 
@@ -290,7 +299,7 @@
       return products;
     }).then(function(products) {
       if (!ph) return;
-      if (!products || products.length === 0) { ph.textContent = ''; return; }
+      if (!products || products.length === 0) { ph.style.display = 'none'; return; }
       var html = '<div class="sl-fbt-inner">' +
         '<h2 class="sl-fbt-heading">' + i18n.heading + '</h2>' +
         '<div class="sl-fbt-swiper swiper"><div class="swiper-wrapper">';
@@ -299,12 +308,12 @@
       }
       html += '</div>' +
         '<div class="swiper-button-prev"></div><div class="swiper-button-next"></div>' +
-        '<div class="swiper-pagination"></div></div></div>';
+        '</div></div>';
       root.innerHTML = html;
       setupAjaxAddToCart(root);
       loadSwiper(function() { initSwiper(root); });
     }).catch(function() {
-      if (ph) ph.textContent = '';
+      if (ph) ph.style.display = 'none';
     });
   }
 

@@ -18,6 +18,19 @@ Toast-style **“social proof”** nudges: “Someone from [city] just bought [p
 
 - **Toastify-js** is loaded from CDN (`cdn.jsdelivr.net/npm/toastify-js`). The section includes the script and CSS; no theme changes needed unless you want to self-host.
 
+## Translations & RTL (Arabic, etc.)
+
+The widget supports translations and RTL. Copy the `locales/` folder into your theme and merge with existing locale files:
+
+- `locales/en.default.json` — English
+- `locales/ar.json` — Arabic
+
+**Keys:** `sections.sl_nudges.nudge_message` (format: `Someone from {{ city }} just bought {{ product }}`), `sections.sl_nudges.verified_purchase` (format: `Verified Purchase · {{ count }} min ago`).
+
+RTL (Arabic, Hebrew, etc.) is applied automatically: toast flips layout and position.
+
+---
+
 ## Installation
 
 1. Copy `sections/sl-nudges-widget.liquid` to your theme **sections** folder.

@@ -1,0 +1,8 @@
+{
+  "sections": {
+    "sl_nudges": {
+      "nudge_message": "شخص من {{ city }} اشترى {{ product }}",
+      "verified_purchase": "شراء · منذ {{ count }} دقيقة"
+    }
+  }
+}

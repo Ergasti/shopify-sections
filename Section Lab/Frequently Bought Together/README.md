@@ -140,6 +140,7 @@ The snippet supports translations and RTL layouts. **Copy the `locales/` folder*
 | `sections.sl_fbt.added` | Added |
 | `sections.sl_fbt.sold_out` | Sold out |
 | `sections.sl_fbt.no_image` | No image |
+| `sections.sl_fbt.percent_bought` | {{ count }}% bought together (section only) |
 
 - `locales/en.default.json` — English defaults (merge into your theme's `en.default.json`)
 - `locales/ar.json` — Arabic (merge into your theme's `ar.json`)

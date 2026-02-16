@@ -4,6 +4,7 @@
       "loading": "Loading…",
       "heading": "Frequently Bought Together",
       "popular": "Popular",
+      "percent_bought": "{{ count }}% of people like this",
       "add": "Add",
       "adding": "Adding…",
       "added": "Added",
