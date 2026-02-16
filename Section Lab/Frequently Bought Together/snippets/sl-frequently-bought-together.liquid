@@ -1,7 +1,7 @@
 {% comment %}
   FBT block snippet — use in product info via Custom Liquid block.
-  Usage: {% render 'sl-frequently-bought-together', block_id: block.id %}
-  Uses Shopify recommendations (complementary / often bought together). Product must exist.
+  Usage: {% render 'sl-frequently-bought-together', block_id: block.id, product: product %}
+  Uses Shopify recommendations (complementary). Pass product if block context lacks it.
 {% endcomment %}
 
 {% assign block_id = block_id | default: 'fbt' %}
@@ -61,25 +61,40 @@
     });
   }
 
-  function run() {
+  function run(retries) {
+    retries = retries || 0;
     var root = document.getElementById('sl-fbt-block-' + blockId);
-    if (!root || !productId) return;
+    if (!root || !productId) {
+      if (!root && productId && retries < 20) setTimeout(function() { run(retries + 1); }, 100);
+      return;
+    }
 
     var ph = root.querySelector('.sl-fbt-fetch-placeholder');
     var url = (window.Shopify && window.Shopify.routes && window.Shopify.routes.root || '/') +
       'recommendations/products?product_id=' + productId + '&limit=10&section_id=sl-frequently-bought-together&intent=complementary';
 
     fetch(url).then(function(r) { return r.text(); }).then(function(html) {
+      if (!ph) return;
       var parser = new DOMParser();
       var doc = parser.parseFromString(html, 'text/html');
-      var sectionRoot = doc.querySelector('.sl-fbt-root');
-      if (sectionRoot && ph) {
+      var innerEl = doc.querySelector('.sl-fbt-inner');
+      var sectionRoot = doc.querySelector('.sl-fbt-root') || doc.querySelector('[id^="sl-fbt-"]') || (innerEl ? innerEl.parentElement : null);
+      if (sectionRoot) {
         var clone = document.importNode(sectionRoot, true);
         root.innerHTML = '';
         root.appendChild(clone);
         loadSwiper(function() { initSwiper(root); });
-      } else if (ph) {
-        ph.textContent = '';
+      } else {
+        var div = document.createElement('div');
+        div.innerHTML = html;
+        var inner = div.querySelector('.sl-fbt-inner');
+        if (inner) {
+          root.innerHTML = '';
+          root.appendChild(document.importNode(inner, true));
+          loadSwiper(function() { initSwiper(root); });
+        } else {
+          ph.textContent = '';
+        }
       }
     }).catch(function() {
       if (ph) ph.textContent = '';

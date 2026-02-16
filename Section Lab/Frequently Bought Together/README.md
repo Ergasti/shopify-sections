@@ -117,7 +117,7 @@ To place FBT **inside the product info** (e.g. under price, in the sidebar), use
 3. Add:
 
    ```liquid
-   {% render 'sl-frequently-bought-together', block_id: block.id %}
+   {% render 'sl-frequently-bought-together', block_id: block.id, product: product %}
    ```
 
 4. Save.

@@ -16,7 +16,12 @@
   {% assign use_blocks = true %}
 {% endif %}
 
-{% assign show_section = use_recommendations or use_blocks or (data_source == 'recommendations' and product != blank) %}
+{% assign show_section = false %}
+{% if use_recommendations or use_blocks %}
+  {% assign show_section = true %}
+{% elsif data_source == 'recommendations' and product != blank %}
+  {% assign show_section = true %}
+{% endif %}
 {% if show_section %}
 <div id="sl-fbt-{{ section.id }}" class="sl-fbt-root" {% if data_source == 'recommendations' and product != blank and use_recommendations == false %}data-fbt-fetch data-product-id="{{ product.id }}"{% endif %}>
   <div
