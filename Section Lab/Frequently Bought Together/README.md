@@ -126,6 +126,28 @@ The block version uses the **recommendations/products.json** API (no `section_id
 
 ---
 
+## Translations & RTL (Arabic, etc.)
+
+The snippet supports translations and RTL layouts. **Copy the `locales/` folder** into your theme and merge with existing locale files:
+
+| Key | Default (EN) |
+|-----|--------------|
+| `sections.sl_fbt.loading` | Loading… |
+| `sections.sl_fbt.heading` | Frequently Bought Together |
+| `sections.sl_fbt.popular` | Popular |
+| `sections.sl_fbt.add` | Add |
+| `sections.sl_fbt.adding` | Adding… |
+| `sections.sl_fbt.added` | Added |
+| `sections.sl_fbt.sold_out` | Sold out |
+| `sections.sl_fbt.no_image` | No image |
+
+- `locales/en.default.json` — English defaults (merge into your theme's `en.default.json`)
+- `locales/ar.json` — Arabic (merge into your theme's `ar.json`)
+
+RTL (Arabic, Hebrew, Farsi, Urdu) is applied automatically via `dir="rtl"` and Swiper's RTL option when the store language is switched.
+
+---
+
 ## File structure
 
 ```
@@ -134,6 +156,8 @@ Section Lab/Frequently Bought Together/
 │   └── sl-frequently-bought-together.liquid
 ├── snippets/
 │   └── sl-frequently-bought-together.liquid
+├── locales/
+│   └── ar.json
 └── README.md
 ```
 

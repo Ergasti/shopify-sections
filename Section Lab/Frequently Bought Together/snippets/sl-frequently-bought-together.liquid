@@ -6,6 +6,14 @@
 
 {% assign block_id = block_id | default: 'fbt' %}
 {% assign prod = product | default: nil %}
+{% assign locale_iso = request.locale.iso_code | default: 'en' %}
+{% assign is_rtl = false %}
+{% assign locale_start = locale_iso | slice: 0, 2 %}
+{% if locale_iso == 'ar' or locale_iso == 'he' or locale_iso == 'fa' or locale_iso == 'ur' or locale_iso == 'yi' %}
+  {% assign is_rtl = true %}
+{% elsif locale_start == 'ar' %}
+  {% assign is_rtl = true %}
+{% endif %}
 
 {% if prod == blank %}
   {% if request.design_mode %}
@@ -13,8 +21,8 @@
   {% endif %}
 {% else %}
 
-<div id="sl-fbt-block-{{ block_id }}" class="sl-fbt-block-root" data-fbt-fetch data-product-id="{{ prod.id }}">
-  <div class="sl-fbt-fetch-placeholder" style="min-height: 180px; display: flex; align-items: center; justify-content: center; color: #666;">Loading…</div>
+<div id="sl-fbt-block-{{ block_id }}" class="sl-fbt-block-root{% if is_rtl %} sl-fbt-rtl{% endif %}" data-fbt-fetch data-product-id="{{ prod.id }}"{% if is_rtl %} dir="rtl"{% endif %}>
+  <div class="sl-fbt-fetch-placeholder" style="min-height: 180px; display: flex; align-items: center; justify-content: center; color: #666;">{{ 'sections.sl_fbt.loading' | t }}</div>
 </div>
 
 <style>
@@ -30,7 +38,7 @@
   #sl-fbt-block-{{ block_id }} .sl-fbt-inner { padding: 24px 0; }
   #sl-fbt-block-{{ block_id }} .sl-fbt-heading { font-size: 24px; margin: 0 0 16px 0; }
   #sl-fbt-block-{{ block_id }} .sl-fbt-swiper { overflow: hidden; position: relative; }
-  #sl-fbt-block-{{ block_id }} .swiper-wrapper { display: flex; gap: 16px; }
+  #sl-fbt-block-{{ block_id }} .swiper-wrapper { display: flex; gap: 5px; }
   #sl-fbt-block-{{ block_id }} .swiper-slide {
     flex-shrink: 0;
     width: var(--sl-fbt-slide-width) !important;
@@ -59,7 +67,7 @@
     height: 100%;
     object-fit: cover;
   }
-  #sl-fbt-block-{{ block_id }} .sl-fbt-volume { font-size: 12px; color: #666; margin: 0; }
+  #sl-fbt-block-{{ block_id }} .sl-fbt-badge { font-size: 11px; color: #666; margin: 0; opacity: 0.9; }
   #sl-fbt-block-{{ block_id }} .sl-fbt-card__info { display: flex; flex-direction: column; gap: 8px; flex: 1; }
   #sl-fbt-block-{{ block_id }} .sl-fbt-card__title {
     font-size: 14px;
@@ -95,58 +103,81 @@
   }
   #sl-fbt-block-{{ block_id }} .sl-fbt-add:hover:not(:disabled) { opacity: 0.9; }
   #sl-fbt-block-{{ block_id }} .sl-fbt-add:disabled { opacity: 0.5; cursor: not-allowed; }
+  @keyframes sl-fbt-pulse { 0%, 100% { opacity: 0.8; } 50% { opacity: 0.5; } }
+  #sl-fbt-block-{{ block_id }} .sl-fbt-add.is-loading { animation: sl-fbt-pulse 0.8s ease-in-out infinite; pointer-events: none; }
   #sl-fbt-block-{{ block_id }} .swiper-button-prev,
-  #sl-fbt-block-{{ block_id }} .swiper-button-next { color: #000; }
+  #sl-fbt-block-{{ block_id }} .swiper-button-next,
+  #sl-fbt-block-{{ block_id }} .swiper-button-prev::after,
+  #sl-fbt-block-{{ block_id }} .swiper-button-next::after,
+  #sl-fbt-block-{{ block_id }} .swiper-button-prev svg,
+  #sl-fbt-block-{{ block_id }} .swiper-button-next svg { color: #000 !important; fill: #000 !important; stroke: #000 !important; }
+  #sl-fbt-block-{{ block_id }}.sl-fbt-rtl .sl-fbt-inner,
+  #sl-fbt-block-{{ block_id }}.sl-fbt-rtl .sl-fbt-heading { text-align: right; }
+  #sl-fbt-block-{{ block_id }}.sl-fbt-rtl .sl-fbt-card { text-align: right; }
+  #sl-fbt-block-{{ block_id }}.sl-fbt-rtl .swiper-wrapper { flex-direction: row-reverse; }
 </style>
 
 <script>
 (function() {
   var blockId = '{{ block_id }}';
   var productId = '{{ prod.id }}';
+  var isRtl = {{ is_rtl }};
   var rootPath = (window.Shopify && window.Shopify.routes && window.Shopify.routes.root) || '/';
+  var moneyFormat = {{ shop.money_format | json }};
+  var i18n = {
+    loading: {{ 'sections.sl_fbt.loading' | t | json }},
+    heading: {{ 'sections.sl_fbt.heading' | t | json }},
+    popular: {{ 'sections.sl_fbt.popular' | t | json }},
+    add: {{ 'sections.sl_fbt.add' | t | json }},
+    adding: {{ 'sections.sl_fbt.adding' | t | json }},
+    added: {{ 'sections.sl_fbt.added' | t | json }},
+    sold_out: {{ 'sections.sl_fbt.sold_out' | t | json }},
+    no_image: {{ 'sections.sl_fbt.no_image' | t | json }}
+  };
   var SWIPER_CSS = 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css';
   var SWIPER_JS = 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js';
 
   function formatMoney(cents) {
-    if (typeof Shopify !== 'undefined' && Shopify.formatMoney) {
-      return Shopify.formatMoney(cents);
-    }
-    return '$' + (cents / 100).toFixed(2);
+    if (typeof Shopify !== 'undefined' && Shopify.formatMoney) return Shopify.formatMoney(cents);
+    var fmt = (typeof moneyFormat === 'string' && moneyFormat) || '${{amount}}';
+    var val = (cents / 100).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+    return fmt.replace(/\{\{\s*amount\s*\}\}/, val).replace(/\{\{\s*amount_no_decimals\s*\}\}/, Math.round(cents / 100));
   }
 
-  function pctForIndex(i) {
-    var seeds = [54, 45, 38, 32, 30];
-    var ranges = [12, 10, 8, 7, 6];
-    var base = i < 5 ? seeds[i] : 30;
-    var range = i < 5 ? ranges[i] : 6;
-    return base + (Math.floor(Math.random() * range));
-  }
 
   function buildCard(p, i, rootPath) {
     var base = (rootPath && rootPath.replace(/\/$/, '')) || '';
     var productPath = '/products/' + (p.handle || '');
     var url = base + productPath;
-    var imgSrc = (p.featured_image || '').replace(/^\/\//, 'https:') || '';
+    var img = p.featured_image || p.image || (p.featured_media && p.featured_media.preview_image && p.featured_media.preview_image.src) || (p.images && p.images[0]) || (p.variants && p.variants[0] && p.variants[0].featured_image) || '';
+    var imgSrc = (typeof img === 'string' ? img : (img && (img.src || img.url))) || '';
+    if (imgSrc) {
+      imgSrc = String(imgSrc).trim();
+      var cdnIdx = imgSrc.indexOf('cdn.shopify.com');
+      if (cdnIdx > 0) imgSrc = imgSrc.substring(cdnIdx);
+      imgSrc = imgSrc.replace(/^\/\//, 'https://');
+      if (imgSrc.indexOf('http') !== 0) {
+        imgSrc = (imgSrc.charAt(0) === '/' ? 'https://cdn.shopify.com' : 'https://') + imgSrc;
+      }
+    }
     var variantId = (p.variants && p.variants[0] && p.variants[0].id) || '';
     var price = p.price != null ? formatMoney(p.price) : '';
     var comparePrice = (p.compare_at_price && p.compare_at_price > (p.price || 0)) ? formatMoney(p.compare_at_price) : '';
     var available = p.available !== false;
     var imgHtml = imgSrc
       ? '<img src="' + imgSrc + '" alt="' + (p.title || '').replace(/"/g, '&quot;') + '" width="260" height="260" loading="lazy">'
-      : '<div style="width:100%;height:100%;background:#f0f0f0;display:flex;align-items:center;justify-content:center;">No image</div>';
-    var pctHtml = '<p class="sl-fbt-volume">' + pctForIndex(i) + '% bought together</p>';
+      : '<div style="width:100%;height:100%;background:#f0f0f0;display:flex;align-items:center;justify-content:center;">' + i18n.no_image + '</div>';
+    var badgeHtml = '<span class="sl-fbt-badge">' + i18n.popular + '</span>';
     var priceHtml = comparePrice
       ? '<span class="sl-fbt-price--sale">' + price + '</span><span class="sl-fbt-price--compare">' + comparePrice + '</span>'
       : price;
     var btnHtml = available
-      ? '<form class="sl-fbt-form" action="' + base + '/cart/add" method="post">' +
-        '<input type="hidden" name="quantity" value="1">' +
-        '<input type="hidden" name="id" value="' + variantId + '">' +
-        '<button type="submit" class="sl-fbt-add">Add</button></form>'
-      : '<button type="button" class="sl-fbt-add" disabled>Sold out</button>';
+      ? '<form class="sl-fbt-form" data-variant-id="' + variantId + '">' +
+        '<button type="submit" class="sl-fbt-add">' + i18n.add + '</button></form>'
+      : '<button type="button" class="sl-fbt-add" disabled>' + i18n.sold_out + '</button>';
     return '<div class="swiper-slide"><div class="sl-fbt-card">' +
       '<a href="' + url + '" class="sl-fbt-card__media">' + imgHtml + '</a>' +
-      pctHtml +
+      badgeHtml +
       '<div class="sl-fbt-card__info">' +
       '<a href="' + url + '" class="sl-fbt-card__title">' + (p.title || '').replace(/</g, '&lt;') + '</a>' +
       '<div class="sl-fbt-card__price">' + priceHtml + '</div>' +
@@ -165,6 +196,59 @@
     document.head.appendChild(s);
   }
 
+  function refreshCartCount(count) {
+    var sel = '.cart-count-bubble, .cart-count, [data-cart-count], .header__icon--cart .count, [data-header-cart-count], .cart-icon__count';
+    document.querySelectorAll(sel).forEach(function(el) { el.textContent = count; });
+  }
+
+  function updateCartFromSections(sections) {
+    if (!sections || typeof sections !== 'object') return;
+    for (var id in sections) {
+      var html = sections[id];
+      if (!html) continue;
+      var sel = id.replace(/_/g, '-');
+      var el = document.querySelector('[id*="' + sel + '"]') || document.querySelector('[id*="' + id + '"]');
+      if (el) el.innerHTML = html;
+    }
+  }
+
+  function setupAjaxAddToCart(container) {
+    container.addEventListener('submit', function(e) {
+      var form = e.target;
+      if (!form || !form.classList.contains('sl-fbt-form')) return;
+      e.preventDefault();
+      var variantId = form.getAttribute('data-variant-id');
+      var btn = form.querySelector('.sl-fbt-add');
+      if (!variantId || !btn) return;
+      btn.disabled = true;
+      btn.classList.add('is-loading');
+      btn.textContent = i18n.adding;
+      var sectionsToRender = 'cart-icon-bubble,cart-drawer,cart-live-region-text';
+      fetch(rootPath + 'cart/add.js', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({
+          items: [{ id: parseInt(variantId, 10), quantity: 1 }],
+          sections: sectionsToRender,
+          sections_url: window.location.pathname
+        })
+      }).then(function(r) { return r.json(); }).then(function(data) {
+        if (data.status === 422 || (data.status && data.status >= 400)) throw new Error(data.description || data.message || 'Error');
+        btn.classList.remove('is-loading');
+        btn.textContent = i18n.added;
+        if (data.sections) updateCartFromSections(data.sections);
+        fetch(rootPath + 'cart.js').then(function(r) { return r.json(); }).then(function(c) { refreshCartCount(c.item_count || 0); }).catch(function() {});
+        document.dispatchEvent(new CustomEvent('cart:refresh'));
+        if (typeof window.theme !== 'undefined' && window.theme.refreshCart) window.theme.refreshCart();
+        setTimeout(function() { btn.disabled = false; btn.textContent = i18n.add; }, 2000);
+      }).catch(function() {
+        btn.classList.remove('is-loading');
+        btn.disabled = false;
+        btn.textContent = i18n.add;
+      });
+    });
+  }
+
   function initSwiper(container) {
     var el = container.querySelector('.sl-fbt-swiper');
     if (!el || typeof Swiper === 'undefined') return;
@@ -174,8 +258,9 @@
     var pagEl = container.querySelector('.swiper-pagination');
     new Swiper(el, {
       slidesPerView: 'auto',
-      spaceBetween: 16,
+      spaceBetween: 5,
       loop: false,
+      rtl: isRtl,
       navigation: (nextEl && prevEl) ? { nextEl: nextEl, prevEl: prevEl } : false,
       pagination: pagEl ? { el: pagEl, clickable: true } : false
     });
@@ -189,20 +274,25 @@
       return;
     }
     var ph = root.querySelector('.sl-fbt-fetch-placeholder');
-    var jsonUrl = rootPath + 'recommendations/products.json?product_id=' + productId + '&limit=10&intent=complementary';
-    console.log('[FBT] Fetching:', jsonUrl);
+    function fetchAndRender(intent) {
+      var url = rootPath + 'recommendations/products.json?product_id=' + productId + '&limit=10&intent=' + intent;
+      return fetch(url).then(function(r) {
+        if (!r.ok) return null;
+        return r.json();
+      }).then(function(data) {
+        if (!data || !ph) return [];
+        return (data.products || []);
+      });
+    }
 
-    fetch(jsonUrl).then(function(r) {
-      if (!r.ok) { console.log('[FBT] HTTP', r.status, r.statusText); return r.text().then(function() { if (ph) ph.textContent = ''; }); }
-      return r.json();
-    }).then(function(data) {
-      if (!data) return;
+    fetchAndRender('complementary').then(function(products) {
+      if (products.length === 0) return fetchAndRender('related');
+      return products;
+    }).then(function(products) {
       if (!ph) return;
-      var products = (data && data.products) || [];
-      console.log('[FBT] Products:', products.length, products);
-      if (products.length === 0) { ph.textContent = ''; return; }
+      if (!products || products.length === 0) { ph.textContent = ''; return; }
       var html = '<div class="sl-fbt-inner">' +
-        '<h2 class="sl-fbt-heading">Frequently Bought Together</h2>' +
+        '<h2 class="sl-fbt-heading">' + i18n.heading + '</h2>' +
         '<div class="sl-fbt-swiper swiper"><div class="swiper-wrapper">';
       for (var i = 0; i < products.length; i++) {
         html += buildCard(products[i], i, rootPath);
@@ -211,9 +301,9 @@
         '<div class="swiper-button-prev"></div><div class="swiper-button-next"></div>' +
         '<div class="swiper-pagination"></div></div></div>';
       root.innerHTML = html;
+      setupAjaxAddToCart(root);
       loadSwiper(function() { initSwiper(root); });
-    }).catch(function(err) {
-      console.log('[FBT] Error:', err);
+    }).catch(function() {
       if (ph) ph.textContent = '';
     });
   }
