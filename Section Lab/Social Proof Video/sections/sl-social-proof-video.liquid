@@ -30,105 +30,72 @@
 {% unless has_videos %}
   {% comment %} No videos to show; section renders nothing (or placeholder in theme editor) {% endcomment %}
   {% if request.design_mode %}
-    <div id="sl-social-proof-{{ section.id }}" class="sl-social-proof-root" style="background: {{ section.settings.background_color }}; padding: 24px; text-align: center; border: 2px dashed #ccc;">
+    <div id="sl-spv-section-{{ section.id }}" class="sl-spv-block-root" style="background: {{ section.settings.background_color }}; padding: 24px; text-align: center; border: 2px dashed #ccc;">
       <p style="margin: 0; color: #666;">Social Proof Video — No videos. Add UGC Video metaobject entries to this product's <strong>Social proof videos</strong> metafield, or add Video slide blocks.</p>
     </div>
   {% endif %}
 {% else %}
-<div id="sl-social-proof-{{ section.id }}" class="sl-social-proof-root">
-  <div
-    class="sl-video-slider"
-    style="
-      background-color: {{ section.settings.background_color }};
-      padding-top: {{ section.settings.padding_top }}px;
-      padding-bottom: {{ section.settings.padding_bottom }}px;
-      {% unless section.settings.full_width %}
-        max-width: {{ section.settings.content_width }}px;
-        margin-left: auto;
-        margin-right: auto;
-      {% endunless %}
-    "
-  >
+<div id="sl-spv-section-{{ section.id }}" class="sl-spv-block-root" style="background-color: {{ section.settings.background_color }}; padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;">
+  <div class="sl-spv-inner" style="{% unless section.settings.full_width %}max-width: {{ section.settings.content_width }}px; margin-left: auto; margin-right: auto;{% endunless %} padding-left: 16px; padding-right: 16px;">
     {% if section.settings.section_heading != blank %}
-      <h2 class="sl-social-proof-heading" style="
-        text-align: {{ section.settings.heading_alignment }};
-        font-size: {% if section.settings.heading_size == 'small' %}20px{% elsif section.settings.heading_size == 'medium' %}24px{% else %}32px{% endif %};
-        color: {{ section.settings.heading_color }};
-        margin: 0 0 20px 0;
-        padding: 0 16px;
-      ">{{ section.settings.section_heading }}</h2>
+      <h2 class="sl-spv-heading" style="text-align: {{ section.settings.heading_alignment }}; font-size: {% if section.settings.heading_size == 'small' %}20px{% elsif section.settings.heading_size == 'medium' %}24px{% else %}32px{% endif %}; color: {{ section.settings.heading_color }}; margin: 0 0 16px 0;">{{ section.settings.section_heading }}</h2>
     {% endif %}
 
-    {% if section.settings.arrows_show_desktop or section.settings.arrows_show_mobile %}
-      <button type="button" class="sl-nav sl-nav-left" aria-label="Previous slide">
-        <span style="color: {{ section.settings.arrow_icon_color }}; background-color: {{ section.settings.arrow_bg_color }};">‹</span>
-      </button>
-    {% endif %}
-
-    <div
-      class="sl-video-slider-track"
-      style="--slides-visible: {{ section.settings.slides_visible_desktop }}; gap: {{ section.settings.slide_gap }}px;"
-    >
+    <div class="sl-spv-swiper swiper" data-slides-desktop="{{ section.settings.slides_visible_desktop }}" data-slides-mobile="{{ section.settings.slides_visible_mobile }}" data-gap="{{ section.settings.slide_gap }}">
+      <div class="swiper-wrapper">
       {% if use_metaobject %}
         {% for entry in ugc_videos %}
           {% assign video_file = entry.video %}
           {% if video_file != blank %}
+            {% assign video_url = nil %}
+            {% assign video_mtag = video_file | metafield_tag %}
+            {% assign file_obj = video_file.value | default: video_file %}
             {% assign mp4_source = video_file.sources | where: 'format', 'mp4' | first %}
             {% if mp4_source and mp4_source.url != blank %}
-              <div
-                class="sl-video-slide {{ section.settings.aspect_ratio }}{% if section.settings.staggered_slides %} sl-slide-staggered{% endif %}"
-                style="
-                  border-radius: {{ section.settings.border_radius }}px;
-                  border-width: {{ section.settings.border_thickness }}px;
-                  border-color: {{ section.settings.border_color }};
-                  {% if section.settings.slide_gap == 0 %}
-                    width: calc(100% / var(--slides-visible));
-                  {% else %}
-                    width: calc((100% - (var(--slides-visible) - 1) * {{ section.settings.slide_gap }}px) / var(--slides-visible));
-                  {% endif %}
-                "
-              >
-                <video
-                  src="{{ mp4_source.url }}"
-                  poster="{% if video_file.preview_image %}{{ video_file.preview_image | image_url: width: 800 }}{% endif %}"
-                  muted
-                  loop
-                  playsinline
-                  {% if section.settings.lazy_load %}loading="lazy"{% endif %}
-                  preload="metadata"
-                  class="sl-overlay"
-                ></video>
-
-                {% if section.settings.show_caption and (entry.caption != blank or entry.username != blank) %}
-                  <div class="sl-social-proof-caption" style="color: {{ section.settings.caption_color }};">
-                    {% if entry.username != blank %}<span class="sl-caption-username">{{ entry.username }}</span>{% endif %}
-                    {% if entry.caption != blank %}<span class="sl-caption-text">{{ entry.caption }}</span>{% endif %}
+              {% assign video_url = mp4_source.url %}
+            {% elsif video_file.url != blank %}
+              {% assign video_url = video_file.url %}
+            {% elsif file_obj.url != blank %}
+              {% assign video_url = file_obj.url %}
+            {% endif %}
+            {% if video_url != blank %}
+              <div class="swiper-slide sl-spv-slide">
+                <div class="sl-spv-card {{ section.settings.aspect_ratio }}" style="border-radius: {{ section.settings.border_radius }}px;{% if section.settings.border_thickness > 0 %} border: {{ section.settings.border_thickness }}px solid {{ section.settings.border_color }};{% endif %}">
+                  <video
+                    {% if forloop.first %}src="{{ video_url }}" autoplay{% else %}data-src="{{ video_url }}"{% endif %}
+                    poster="{% if video_file.preview_image %}{{ video_file.preview_image | image_url: width: 1200 }}{% endif %}"
+                    muted loop playsinline
+                    preload="{% if forloop.first %}auto{% else %}metadata{% endif %}"
+                    class="sl-spv-video"
+                  ></video>
+                  <div class="sl-spv-footer">
+                    {% if section.settings.show_caption and (entry.caption != blank or entry.username != blank) %}
+                      <div class="sl-spv-caption" style="color: {{ section.settings.caption_color }};">
+                        {% if entry.username != blank %}<span class="sl-spv-caption-username">{{ entry.username }}</span>{% endif %}
+                        {% if entry.caption != blank %}<span class="sl-spv-caption-text">{{ entry.caption }}</span>{% endif %}
+                      </div>
+                    {% endif %}
+                    <div class="sl-spv-controls">
+                      <button type="button" class="sl-spv-mute" data-state="muted" aria-label="Mute / Unmute"><span class="mute-icon">🔇</span><span class="unmute-icon">🔊</span></button>
+                    </div>
                   </div>
-                {% endif %}
-
-                <div class="sl-video-controls" style="--control-size: {{ section.settings.control_button_size }}px;">
-                  <button type="button" class="sl-mute-toggle" data-state="muted" style="color: {{ section.settings.mute_button_color }};" aria-label="Mute / Unmute">
-                    {% if section.settings.icon_mute != blank %}
-                      <img src="{{ section.settings.icon_mute | image_url: width: 48 }}" alt="" class="mute-icon" width="20" height="20">
+                </div>
+              </div>
+            {% elsif video_mtag != blank %}
+              <div class="swiper-slide sl-spv-slide">
+                <div class="sl-spv-card sl-spv-metafield {{ section.settings.aspect_ratio }}" style="border-radius: {{ section.settings.border_radius }}px;{% if section.settings.border_thickness > 0 %} border: {{ section.settings.border_thickness }}px solid {{ section.settings.border_color }};{% endif %}">
+                  <div class="sl-spv-metafield-wrap">{{ video_mtag }}</div>
+                  <div class="sl-spv-footer">
+                    {% if section.settings.show_caption and (entry.caption != blank or entry.username != blank) %}
+                      <div class="sl-spv-caption" style="color: {{ section.settings.caption_color }};">
+                        {% if entry.username != blank %}<span class="sl-spv-caption-username">{{ entry.username }}</span>{% endif %}
+                        {% if entry.caption != blank %}<span class="sl-spv-caption-text">{{ entry.caption }}</span>{% endif %}
+                      </div>
                     {% endif %}
-                    {% if section.settings.icon_unmute != blank %}
-                      <img src="{{ section.settings.icon_unmute | image_url: width: 48 }}" alt="" class="unmute-icon" width="20" height="20">
-                    {% endif %}
-                    {% if section.settings.icon_mute == blank and section.settings.icon_unmute == blank %}
-                      <span class="fallback-icon" aria-hidden="true">🔇</span>
-                    {% endif %}
-                  </button>
-                  <button type="button" class="sl-play-toggle" data-state="paused" style="color: {{ section.settings.play_button_color }};" aria-label="Play / Pause">
-                    {% if section.settings.icon_play != blank %}
-                      <img src="{{ section.settings.icon_play | image_url: width: 48 }}" alt="" class="play-icon" width="20" height="20">
-                    {% endif %}
-                    {% if section.settings.icon_pause != blank %}
-                      <img src="{{ section.settings.icon_pause | image_url: width: 48 }}" alt="" class="pause-icon" width="20" height="20">
-                    {% endif %}
-                    {% if section.settings.icon_play == blank and section.settings.icon_pause == blank %}
-                      <span class="fallback-icon" aria-hidden="true">▶</span>
-                    {% endif %}
-                  </button>
+                    <div class="sl-spv-controls">
+                      <button type="button" class="sl-spv-mute" data-state="muted" aria-label="Mute / Unmute"><span class="mute-icon">🔇</span><span class="unmute-icon">🔊</span></button>
+                    </div>
+                  </div>
                 </div>
               </div>
             {% endif %}
@@ -139,430 +106,220 @@
           {% assign video_file = block.settings.video_file %}
           {% assign mp4_source = video_file.sources | where: 'format', 'mp4' | first %}
           {% if mp4_source and mp4_source.url != blank %}
-            <div
-              class="sl-video-slide {{ section.settings.aspect_ratio }}{% if section.settings.staggered_slides %} sl-slide-staggered{% endif %}"
-              {{ block.shopify_attributes }}
-              style="
-                border-radius: {{ section.settings.border_radius }}px;
-                border-width: {{ section.settings.border_thickness }}px;
-                border-color: {{ section.settings.border_color }};
-                {% if section.settings.slide_gap == 0 %}
-                  width: calc(100% / var(--slides-visible));
-                {% else %}
-                  width: calc((100% - (var(--slides-visible) - 1) * {{ section.settings.slide_gap }}px) / var(--slides-visible));
-                {% endif %}
-              "
-            >
-              <video
-                src="{{ mp4_source.url }}"
-                poster="{% if video_file.preview_image %}{{ video_file.preview_image | image_url: width: 800 }}{% endif %}"
-                muted
-                loop
-                playsinline
-                {% if section.settings.lazy_load %}loading="lazy"{% endif %}
-                preload="metadata"
-                class="sl-overlay"
-              ></video>
-
-              <div class="sl-video-controls" style="--control-size: {{ section.settings.control_button_size }}px;">
-                <button type="button" class="sl-mute-toggle" data-state="muted" style="color: {{ section.settings.mute_button_color }};" aria-label="Mute / Unmute">
-                  {% if section.settings.icon_mute != blank %}
-                    <img src="{{ section.settings.icon_mute | image_url: width: 48 }}" alt="" class="mute-icon" width="20" height="20">
-                  {% endif %}
-                  {% if section.settings.icon_unmute != blank %}
-                    <img src="{{ section.settings.icon_unmute | image_url: width: 48 }}" alt="" class="unmute-icon" width="20" height="20">
-                  {% endif %}
-                  {% if section.settings.icon_mute == blank and section.settings.icon_unmute == blank %}
-                    <span class="fallback-icon" aria-hidden="true">🔇</span>
-                  {% endif %}
-                </button>
-                <button type="button" class="sl-play-toggle" data-state="paused" style="color: {{ section.settings.play_button_color }};" aria-label="Play / Pause">
-                  {% if section.settings.icon_play != blank %}
-                    <img src="{{ section.settings.icon_play | image_url: width: 48 }}" alt="" class="play-icon" width="20" height="20">
-                  {% endif %}
-                  {% if section.settings.icon_pause != blank %}
-                    <img src="{{ section.settings.icon_pause | image_url: width: 48 }}" alt="" class="pause-icon" width="20" height="20">
-                  {% endif %}
-                  {% if section.settings.icon_play == blank and section.settings.icon_pause == blank %}
-                    <span class="fallback-icon" aria-hidden="true">▶</span>
-                  {% endif %}
-                </button>
+            <div class="swiper-slide sl-spv-slide" {{ block.shopify_attributes }}>
+              <div class="sl-spv-card {{ section.settings.aspect_ratio }}" style="border-radius: {{ section.settings.border_radius }}px;{% if section.settings.border_thickness > 0 %} border: {{ section.settings.border_thickness }}px solid {{ section.settings.border_color }};{% endif %}">
+                <video
+                  {% if forloop.first %}src="{{ mp4_source.url }}" autoplay{% else %}data-src="{{ mp4_source.url }}"{% endif %}
+                  poster="{% if video_file.preview_image %}{{ video_file.preview_image | image_url: width: 1200 }}{% endif %}"
+                  muted loop playsinline
+                  preload="{% if forloop.first %}auto{% else %}metadata{% endif %}"
+                  class="sl-spv-video"
+                ></video>
+                <div class="sl-spv-footer">
+                  <div class="sl-spv-controls">
+                    <button type="button" class="sl-spv-mute" data-state="muted" aria-label="Mute / Unmute"><span class="mute-icon">🔇</span><span class="unmute-icon">🔊</span></button>
+                  </div>
+                </div>
               </div>
             </div>
           {% endif %}
         {% endfor %}
       {% endif %}
+      </div>
+      <div class="swiper-button-prev"></div>
+      <div class="swiper-button-next"></div>
     </div>
-
-    {% if section.settings.arrows_show_desktop or section.settings.arrows_show_mobile %}
-      <button type="button" class="sl-nav sl-nav-right" aria-label="Next slide">
-        <span style="color: {{ section.settings.arrow_icon_color }}; background-color: {{ section.settings.arrow_bg_color }};">›</span>
-      </button>
-    {% endif %}
   </div>
 </div>
 
 <style>
-  #sl-social-proof-{{ section.id }} .sl-video-slider {
-    position: relative;
-    overflow: hidden;
-  }
-
-  #sl-social-proof-{{ section.id }} .sl-video-slider-track {
-    display: flex;
-    scroll-snap-type: x mandatory;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scroll-behavior: smooth;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    padding-left: var(--slider-padding-left, 0);
-    padding-right: var(--slider-padding-right, 0);
-  }
-
-  #sl-social-proof-{{ section.id }} .sl-video-slider-track::-webkit-scrollbar {
-    display: none;
-  }
-
-  #sl-social-proof-{{ section.id }} .sl-video-slide {
-    flex: 0 0 auto;
-    scroll-snap-align: center;
+  #sl-spv-section-{{ section.id }}.sl-spv-block-root { width: 100%; margin: 0; }
+  #sl-spv-section-{{ section.id }} .sl-spv-inner { padding: 0; }
+  #sl-spv-section-{{ section.id }} .sl-spv-swiper { overflow: hidden; position: relative; }
+  #sl-spv-section-{{ section.id }} .swiper-slide { opacity: 1 !important; filter: none !important; }
+  #sl-spv-section-{{ section.id }} .swiper-wrapper { display: flex; gap: 0; }
+  #sl-spv-section-{{ section.id }} .swiper-slide { flex-shrink: 0; height: auto; box-sizing: border-box; }
+  #sl-spv-section-{{ section.id }} .sl-spv-card {
     position: relative;
     overflow: hidden;
     background: #000;
-    border-style: solid;
-    aspect-ratio: inherit;
-    box-sizing: border-box;
-  }
-
-  #sl-social-proof-{{ section.id }} .sl-video-slide video {
-    width: 100%;
-    height: 100%;
-    aspect-ratio: inherit;
-    object-fit: cover;
-    display: block;
-    border-radius: inherit;
-  }
-
-  #sl-social-proof-{{ section.id }} .sl-slide-staggered {
-    transform: scale(0.92);
-    transition: transform 0.3s ease;
-  }
-
-  #sl-social-proof-{{ section.id }} .sl-slide-active {
-    transform: scale(1);
-  }
-
-  #sl-social-proof-{{ section.id }} .sl-video-controls {
-    position: absolute;
-    bottom: 0.5rem;
-    right: 0.5rem;
-    display: none;
-    gap: 0.5rem;
-    z-index: 2;
-  }
-
-  #sl-social-proof-{{ section.id }} .sl-slide-active .sl-video-controls {
-    display: flex;
-  }
-
-  #sl-social-proof-{{ section.id }} .sl-video-controls button {
-    background: rgba(255, 255, 255, 0.9);
-    border: none;
-    border-radius: 50%;
-    width: var(--control-size);
-    height: var(--control-size);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0;
     cursor: pointer;
-  }
-
-  #sl-social-proof-{{ section.id }} .sl-video-controls img {
-    width: 20px;
-    height: 20px;
-  }
-
-  #sl-social-proof-{{ section.id }} .sl-video-controls .fallback-icon {
-    font-size: 18px;
-    line-height: 1;
-    color: currentColor;
-  }
-
-  #sl-social-proof-{{ section.id }} .sl-social-proof-caption {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding: 12px 10px 50px;
-    background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
-    font-size: 12px;
-    line-height: 1.4;
-    z-index: 1;
-  }
-
-  #sl-social-proof-{{ section.id }} .sl-caption-username {
-    font-weight: 600;
-    display: block;
-  }
-
-  #sl-social-proof-{{ section.id }} .sl-nav {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    border: none;
-    z-index: 5;
-    cursor: pointer;
-    padding: 0;
-    background: none;
-    width: {{ section.settings.arrow_size }}px;
-    height: {{ section.settings.arrow_size }}px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  #sl-social-proof-{{ section.id }} .sl-nav span {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
     height: 100%;
-    border-radius: 50%;
-    font-size: calc({{ section.settings.arrow_size }}px * 0.65);
-    font-weight: bold;
-    line-height: 1;
-    padding-bottom: 4px;
   }
-
-  #sl-social-proof-{{ section.id }} .sl-nav-left { left: 10px; }
-  #sl-social-proof-{{ section.id }} .sl-nav-right { right: 10px; }
-
-  #sl-social-proof-{{ section.id }} .sl-arrow-hidden {
-    opacity: 0;
-    pointer-events: none;
+  #sl-spv-section-{{ section.id }} .sl-spv-metafield-wrap { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #sl-spv-section-{{ section.id }} .sl-spv-video,
+  #sl-spv-section-{{ section.id }} .sl-spv-card video {
+    width: 100%; height: 100%; object-fit: cover; display: block; border-radius: inherit; pointer-events: none;
   }
-
-  #sl-social-proof-{{ section.id }} .aspect-16-9 { aspect-ratio: 16 / 9; }
-  #sl-social-proof-{{ section.id }} .aspect-9-16 { aspect-ratio: 9 / 16; }
-  #sl-social-proof-{{ section.id }} .aspect-1-1 { aspect-ratio: 1 / 1; }
-
+  #sl-spv-section-{{ section.id }} .sl-spv-card video::-webkit-media-controls { display: none !important; }
+  #sl-spv-section-{{ section.id }} .swiper-slide-active .sl-spv-footer { display: flex; }
+  #sl-spv-section-{{ section.id }} .sl-spv-footer {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    display: none; align-items: flex-end; justify-content: space-between; gap: 0.5rem;
+    padding: 0.75rem 0.5rem 0.5rem;
+    background: linear-gradient(to top, rgba(255,255,255,0.3), transparent);
+    z-index: 10; pointer-events: none;
+  }
+  #sl-spv-section-{{ section.id }} .sl-spv-footer .sl-spv-controls { pointer-events: auto; }
+  #sl-spv-section-{{ section.id }} .sl-spv-caption { flex: 1; min-width: 0; font-size: 12px; line-height: 1.4; z-index: 1; }
+  #sl-spv-section-{{ section.id }} .sl-spv-caption-username { font-weight: 600; display: block; }
+  #sl-spv-section-{{ section.id }} .sl-spv-controls { display: flex; gap: 0.25rem; flex-shrink: 0; }
+  #sl-spv-section-{{ section.id }} .sl-spv-controls button {
+    background: transparent; border: none; padding: 0.25rem;
+    width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
+    font-size: 0; color: #000; cursor: pointer; pointer-events: auto;
+  }
+  #sl-spv-section-{{ section.id }} .sl-spv-controls .mute-icon, #sl-spv-section-{{ section.id }} .sl-spv-controls .unmute-icon { font-size: 14px; color: inherit; }
+  #sl-spv-section-{{ section.id }} .sl-spv-mute[data-state="muted"] .unmute-icon { display: none; }
+  #sl-spv-section-{{ section.id }} .sl-spv-mute[data-state="unmuted"] .mute-icon { display: none; }
+  #sl-spv-section-{{ section.id }} .swiper-button-prev, #sl-spv-section-{{ section.id }} .swiper-button-next,
+  #sl-spv-section-{{ section.id }} .swiper-button-prev::after, #sl-spv-section-{{ section.id }} .swiper-button-next::after { color: #000 !important; }
+  #sl-spv-section-{{ section.id }} .swiper-pagination { display: none !important; }
+  #sl-spv-section-{{ section.id }} .aspect-16-9 { aspect-ratio: 16 / 9; }
+  #sl-spv-section-{{ section.id }} .aspect-9-16 { aspect-ratio: 9 / 16; }
+  #sl-spv-section-{{ section.id }} .aspect-1-1 { aspect-ratio: 1 / 1; }
+  {% unless section.settings.arrows_show_mobile %}
   @media (max-width: 768px) {
-    #sl-social-proof-{{ section.id }} .sl-video-slider {
-      padding-left: 15px;
-      padding-right: 15px;
-    }
-    #sl-social-proof-{{ section.id }} .sl-video-slider-track {
-      --slides-visible: {{ section.settings.slides_visible_mobile }};
-    }
-    {% unless section.settings.arrows_show_mobile %}
-    #sl-social-proof-{{ section.id }} .sl-nav { display: none !important; }
-    {% endunless %}
-  }
-
-  {% unless section.settings.arrows_show_desktop %}
-  @media (min-width: 769px) {
-    #sl-social-proof-{{ section.id }} .sl-nav { display: none !important; }
+    #sl-spv-section-{{ section.id }} .swiper-button-prev, #sl-spv-section-{{ section.id }} .swiper-button-next { display: none !important; }
   }
   {% endunless %}
-
-  #sl-social-proof-{{ section.id }} .sl-mute-toggle[data-state="muted"] .mute-icon { display: inline; }
-  #sl-social-proof-{{ section.id }} .sl-mute-toggle[data-state="muted"] .unmute-icon { display: none; }
-  #sl-social-proof-{{ section.id }} .sl-mute-toggle[data-state="unmuted"] .mute-icon { display: none; }
-  #sl-social-proof-{{ section.id }} .sl-mute-toggle[data-state="unmuted"] .unmute-icon { display: inline; }
-
-  #sl-social-proof-{{ section.id }} .sl-play-toggle[data-state="paused"] .play-icon { display: inline; }
-  #sl-social-proof-{{ section.id }} .sl-play-toggle[data-state="paused"] .pause-icon { display: none; }
-  #sl-social-proof-{{ section.id }} .sl-play-toggle[data-state="playing"] .play-icon { display: none; }
-  #sl-social-proof-{{ section.id }} .sl-play-toggle[data-state="playing"] .pause-icon { display: inline; }
+  {% unless section.settings.arrows_show_desktop %}
+  @media (min-width: 769px) {
+    #sl-spv-section-{{ section.id }} .swiper-button-prev, #sl-spv-section-{{ section.id }} .swiper-button-next { display: none !important; }
+  }
+  {% endunless %}
 </style>
 
 <script>
 (function() {
-  document.addEventListener('DOMContentLoaded', function() {
-    var root = document.getElementById('sl-social-proof-{{ section.id }}');
-    if (!root) return;
+  var sectionId = '{{ section.id }}';
+  var root = document.getElementById('sl-spv-section-' + sectionId);
+  if (!root) return;
+  var SWIPER_CSS = 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css';
+  var SWIPER_JS = 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js';
+  var slidesDesktop = {{ section.settings.slides_visible_desktop }};
+  var slidesMobile = {{ section.settings.slides_visible_mobile }};
+  var gap = {{ section.settings.slide_gap }};
+  var autoplaySetting = {{ section.settings.autoplay_active | json }};
 
-    var slides = Array.from(root.querySelectorAll('.sl-video-slide'));
-    var track = root.querySelector('.sl-video-slider-track');
-    var prevButton = root.querySelector('.sl-nav-left');
-    var nextButton = root.querySelector('.sl-nav-right');
-    var autoplay = {{ section.settings.autoplay_active | json }};
+  function ensureVideoSrc(v) {
+    if (!v) return;
+    var src = v.getAttribute('data-src');
+    if (src && !v.src) v.src = src;
+  }
+
+  function loadSwiper(cb) {
+    if (typeof Swiper !== 'undefined') { cb(); return; }
+    var link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = SWIPER_CSS;
+    document.head.appendChild(link);
+    var s = document.createElement('script');
+    s.src = SWIPER_JS;
+    s.onload = cb;
+    document.head.appendChild(s);
+  }
+
+  function run() {
+    var r = document.getElementById('sl-spv-section-' + sectionId);
+    if (!r) return;
+    var swiperEl = r.querySelector('.sl-spv-swiper');
+    var slides = r.querySelectorAll('.sl-spv-card');
+    if (!swiperEl || slides.length === 0) return;
+
+    var autoplay = autoplaySetting;
     var isMuted = true;
+    var swiperInstance = null;
 
-    function smoothScrollBy(container, distance, duration) {
-      duration = duration || 500;
-      var start = container.scrollLeft;
-      var startTime = performance.now();
-      function scrollStep(currentTime) {
-        var elapsed = currentTime - startTime;
-        var progress = Math.min(elapsed / duration, 1);
-        var ease = 0.5 - Math.cos(progress * Math.PI) / 2;
-        container.scrollLeft = start + distance * ease;
-        if (progress < 1) requestAnimationFrame(scrollStep);
+    function playFocusedVideo() {
+      if (!swiperInstance) return;
+      var idx = swiperInstance.activeIndex;
+      var activeSlide = swiperInstance.slides[idx];
+      var focusedCard = activeSlide ? activeSlide.querySelector('.sl-spv-card') : null;
+      var focusedVideo = focusedCard ? focusedCard.querySelector('video') : null;
+
+      r.querySelectorAll('.sl-spv-card video').forEach(function(v) { if (v) v.pause(); });
+
+      if (focusedVideo && autoplay) {
+        ensureVideoSrc(focusedVideo);
+        focusedVideo.muted = isMuted;
+        var src = focusedVideo.src || focusedVideo.currentSrc || focusedVideo.getAttribute('data-src');
+        var sourceEl = focusedVideo.querySelector('source');
+        if (sourceEl && !src) src = sourceEl.src || sourceEl.getAttribute('src');
+        if (src && !focusedVideo.src) focusedVideo.src = src;
+        var hasSrc = focusedVideo.src || focusedVideo.currentSrc || (sourceEl && sourceEl.src);
+        if (hasSrc) {
+          var doPlay = function() {
+            focusedVideo.muted = isMuted;
+            if (!isMuted) focusedVideo.volume = 1;
+            focusedVideo.play().catch(function(){});
+          };
+          if (focusedVideo.readyState >= 2) doPlay();
+          else {
+            focusedVideo.addEventListener('loadeddata', doPlay, { once: true });
+            focusedVideo.addEventListener('canplay', doPlay, { once: true });
+            focusedVideo.load();
+          }
+        }
       }
-      requestAnimationFrame(scrollStep);
     }
 
-    function getSlidesVisible() {
-      return window.innerWidth <= 768 ? {{ section.settings.slides_visible_mobile }} : {{ section.settings.slides_visible_desktop }};
-    }
-
-    function updateSliderPadding() {
-      var visibleSlides = getSlidesVisible();
-      var slide = slides[0];
-      if (!slide || !track) return;
-      var slideWidth = slide.offsetWidth;
-      var totalWidth = track.clientWidth;
-      var sidePadding = Math.max(0, (totalWidth - slideWidth) / 2);
-      track.style.setProperty('--slider-padding-left', sidePadding + 'px');
-      track.style.setProperty('--slider-padding-right', sidePadding + 'px');
-    }
-
-    function updateVideosOnScrollOrClick() {
-      if (!track) return;
-      var center = track.scrollLeft + track.clientWidth / 2;
-      var closest = null;
-      var minDist = Infinity;
-      slides.forEach(function(slide) {
-        var slideCenter = slide.offsetLeft + slide.offsetWidth / 2;
-        var dist = Math.abs(center - slideCenter);
-        if (dist < minDist) {
-          minDist = dist;
-          closest = slide;
+    loadSwiper(function() {
+      if (swiperEl.swiper) return;
+      var slidesPerView = window.innerWidth <= 768 ? slidesMobile : slidesDesktop;
+      swiperInstance = new Swiper(swiperEl, {
+        slidesPerView: slidesPerView,
+        spaceBetween: gap,
+        slidesOffsetAfter: 60,
+        slidesOffsetBefore: 0,
+        watchSlidesProgress: false,
+        loop: false,
+        navigation: {
+          nextEl: r.querySelector('.swiper-button-next'),
+          prevEl: r.querySelector('.swiper-button-prev')
+        },
+        on: {
+          slideChange: function() { playFocusedVideo(); },
+          init: function() { setTimeout(playFocusedVideo, 50); }
         }
       });
-      slides.forEach(function(slide) {
-        var video = slide.querySelector('video');
-        if (slide === closest) {
-          slide.classList.add('sl-slide-active');
-          if (autoplay && video && video.src) {
-            if (video.readyState > 0) {
-              video.muted = isMuted;
-              video.play().catch(function() {});
-            } else {
-              video.addEventListener('loadedmetadata', function() {
-                video.muted = isMuted;
-                video.play().catch(function() {});
-              }, { once: true });
-            }
-          }
-        } else {
-          slide.classList.remove('sl-slide-active');
-          if (video) video.pause();
-        }
-      });
-    }
 
-    function updateArrowVisibility() {
-      if (!track) return;
-      var scrollLeft = track.scrollLeft;
-      var maxScrollLeft = track.scrollWidth - track.clientWidth;
-      if (prevButton) prevButton.classList.toggle('sl-arrow-hidden', scrollLeft <= 5);
-      if (nextButton) nextButton.classList.toggle('sl-arrow-hidden', scrollLeft >= maxScrollLeft - 5);
-    }
-
-    slides.forEach(function(slide) {
-      slide.addEventListener('click', function() {
-        var video = slide.querySelector('video');
-        slides.forEach(function(s) {
-          var v = s.querySelector('video');
-          s.classList.remove('sl-slide-active');
-          if (v) v.pause();
-        });
-        slide.classList.add('sl-slide-active');
-        if (video && video.src) {
-          video.muted = isMuted;
-          video.readyState > 0 ? video.play().catch(function() {}) : video.addEventListener('loadedmetadata', function() { video.play(); }, { once: true });
-        }
+      var ro = new ResizeObserver(function() {
+        if (!swiperInstance) return;
+        var spv = window.innerWidth <= 768 ? slidesMobile : slidesDesktop;
+        swiperInstance.params.slidesPerView = spv;
+        swiperInstance.params.spaceBetween = gap;
+        swiperInstance.params.slidesOffsetAfter = 60;
+        swiperInstance.update();
       });
-    });
+      if (swiperEl.parentElement) ro.observe(swiperEl.parentElement);
 
-    root.querySelectorAll('.sl-mute-toggle').forEach(function(button) {
-      button.addEventListener('click', function() {
-        isMuted = !isMuted;
-        var state = isMuted ? 'muted' : 'unmuted';
-        var activeSlide = root.querySelector('.sl-slide-active');
-        var activeVideo = activeSlide ? activeSlide.querySelector('video') : null;
-        if (activeVideo) {
-          activeVideo.muted = isMuted;
-          if (!isMuted && !activeVideo.paused) {
-            try {
-              activeVideo.pause();
-              activeVideo.muted = false;
-              activeVideo.play();
-            } catch (e) {}
-          }
-        }
-        root.querySelectorAll('.sl-mute-toggle').forEach(function(btn) { btn.setAttribute('data-state', state); });
-      });
-    });
-
-    root.querySelectorAll('.sl-play-toggle').forEach(function(button) {
-      button.addEventListener('click', function(e) {
-        e.stopPropagation();
-        var slide = button.closest('.sl-video-slide');
-        var video = slide ? slide.querySelector('video') : null;
-        if (!video || !video.src) return;
-        slides.forEach(function(s) {
-          var v = s.querySelector('video');
-          if (v && v !== video) {
-            v.pause();
-            s.classList.remove('sl-slide-active');
-            var ob = s.querySelector('.sl-play-toggle');
-            if (ob) ob.setAttribute('data-state', 'paused');
-          }
-        });
-        if (video.paused) {
-          video.muted = false;
-          video.play().then(function() {
-            slide.classList.add('sl-slide-active');
-            button.setAttribute('data-state', 'playing');
-          }).catch(function() {});
-        } else {
-          video.pause();
-          button.setAttribute('data-state', 'paused');
-        }
-      });
-    });
-
-    if (prevButton) {
-      prevButton.addEventListener('click', function() {
-        smoothScrollBy(track, -track.clientWidth / getSlidesVisible(), 500);
-        setTimeout(updateArrowVisibility, 600);
-      });
-    }
-    if (nextButton) {
-      nextButton.addEventListener('click', function() {
-        smoothScrollBy(track, track.clientWidth / getSlidesVisible(), 500);
-        setTimeout(updateArrowVisibility, 600);
-      });
-    }
-
-    if (track) {
-      track.addEventListener('scroll', function() {
-        requestAnimationFrame(function() {
-          updateVideosOnScrollOrClick();
-          updateArrowVisibility();
+      slides.forEach(function(card) {
+        card.addEventListener('click', function(e) {
+          if (e.target.closest('.sl-spv-controls')) return;
+          isMuted = !isMuted;
+          r.querySelectorAll('.sl-spv-mute').forEach(function(b) { b.setAttribute('data-state', isMuted ? 'muted' : 'unmuted'); });
+          var av = r.querySelector('.swiper-slide-active video');
+          if (av) { av.muted = isMuted; if (!isMuted) av.volume = 1; }
         });
       });
-    }
 
-    track.style.setProperty('--slides-visible', getSlidesVisible());
-    updateSliderPadding();
-    setTimeout(function() {
-      updateVideosOnScrollOrClick();
-      updateArrowVisibility();
-    }, 300);
+      r.querySelectorAll('.sl-spv-mute').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          e.preventDefault();
+          isMuted = !isMuted;
+          r.querySelectorAll('.sl-spv-mute').forEach(function(b) { b.setAttribute('data-state', isMuted ? 'muted' : 'unmuted'); });
+          var av = r.querySelector('.swiper-slide-active video');
+          if (av) { av.muted = isMuted; if (!isMuted) av.volume = 1; }
+        });
+      });
 
-    window.addEventListener('resize', function() {
-      track.style.setProperty('--slides-visible', getSlidesVisible());
-      updateVideosOnScrollOrClick();
-      updateArrowVisibility();
-      updateSliderPadding();
     });
-  });
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
 })();
 </script>
 {% endunless %}
@@ -690,7 +447,7 @@
       "type": "color",
       "id": "caption_color",
       "label": "Caption color",
-      "default": "#ffffff"
+      "default": "#000000"
     },
     {
       "type": "header",
@@ -700,6 +457,7 @@
       "type": "range",
       "id": "border_radius",
       "label": "Slide border radius (px)",
+      "info": "Matches FBT at 12px for consistency.",
       "min": 0,
       "max": 40,
       "step": 1,
@@ -727,8 +485,8 @@
       "id": "aspect_ratio",
       "label": "Media aspect ratio",
       "options": [
+        { "label": "9:16 (Portrait, tall)", "value": "aspect-9-16" },
         { "label": "16:9 (Landscape)", "value": "aspect-16-9" },
-        { "label": "9:16 (Portrait)", "value": "aspect-9-16" },
         { "label": "1:1 (Square)", "value": "aspect-1-1" }
       ],
       "default": "aspect-9-16"

@@ -3,359 +3,328 @@
   Use in product info via Custom Liquid block.
   Usage: {% render 'sl-social-proof-video', product: product, block_id: block.id %}
   Requires product.metafields.custom.social_proof_videos (UGC Video metaobjects).
-  See README.md for metaobject setup.
+  Uses Swiper (same as FBT). See README.md for metaobject setup.
 {% endcomment %}
 
 {% assign block_id = block_id | default: 'spv' %}
 {% assign prod = product | default: nil %}
+{% assign show_debug = debug | default: false %}
+{% if request.design_mode %}
+  {% assign show_debug = true %}
+{% endif %}
 {% assign ugc_videos = prod.metafields.custom.social_proof_videos.value | default: nil %}
 {% assign has_videos = false %}
 {% if prod != blank and ugc_videos != blank and ugc_videos.size > 0 %}
   {% assign has_videos = true %}
 {% endif %}
 
+{% if show_debug %}
+  <div class="sl-spv-debug" style="padding:12px;margin:12px 0;background:#f5f5f5;border:1px solid #ccc;font-size:12px;font-family:monospace;">
+    <strong>Social Proof Video — Debug</strong>
+    <ul style="margin:8px 0 0 0;padding-left:18px;">
+      <li>product: {% if prod %}yes (id: {{ prod.id }}){% else %}no{% endif %}</li>
+      <li>ugc_videos: {% if ugc_videos %}yes, count {{ ugc_videos.size }}{% else %}no{% endif %}</li>
+    </ul>
+  </div>
+{% endif %}
+
 {% if has_videos %}
-<div id="sl-social-proof-{{ block_id }}" class="sl-social-proof-root">
-  <div class="sl-video-slider sl-video-slider--snippet">
-    <h2 class="sl-social-proof-heading sl-social-proof-heading--snippet">Real reviews</h2>
-    <button type="button" class="sl-nav sl-nav-left" aria-label="Previous slide"><span>‹</span></button>
-    <div class="sl-video-slider-track" data-slides-desktop="3" data-slides-mobile="1" data-gap="8" data-radius="12">
-      {% for entry in ugc_videos %}
-        {% assign video_file = entry.video %}
-        {% if video_file != blank %}
-          {% assign mp4_source = video_file.sources | where: 'format', 'mp4' | first %}
-          {% if mp4_source and mp4_source.url != blank %}
-            <div class="sl-video-slide aspect-9-16 sl-slide-staggered">
-              <video
-                data-src="{{ mp4_source.url }}"
-                poster="{% if video_file.preview_image %}{{ video_file.preview_image | image_url: width: 400 }}{% endif %}"
-                muted loop playsinline
-                preload="none"
-                class="sl-overlay"
-              ></video>
-              {% if entry.caption != blank or entry.username != blank %}
-                <div class="sl-social-proof-caption">
-                  {% if entry.username != blank %}<span class="sl-caption-username">{{ entry.username }}</span>{% endif %}
-                  {% if entry.caption != blank %}<span class="sl-caption-text">{{ entry.caption }}</span>{% endif %}
+<div id="sl-spv-block-{{ block_id }}" class="sl-spv-block-root">
+  <div class="sl-spv-inner">
+    <h2 class="sl-spv-heading">See It In Action</h2>
+    <div class="sl-spv-swiper swiper">
+      <div class="swiper-wrapper">
+        {% for entry in ugc_videos %}
+          {% assign video_file = entry.video %}
+          {% if video_file != blank %}
+            {% assign video_url = nil %}
+            {% assign video_mtag = video_file | metafield_tag %}
+            {% assign mp4_source = video_file.sources | where: 'format', 'mp4' | first %}
+            {% assign file_obj = video_file.value | default: video_file %}
+            {% if mp4_source and mp4_source.url != blank %}
+              {% assign video_url = mp4_source.url %}
+            {% elsif video_file.url != blank %}
+              {% assign video_url = video_file.url %}
+            {% elsif file_obj.url != blank %}
+              {% assign video_url = file_obj.url %}
+            {% endif %}
+            {% if video_url != blank %}
+              <div class="swiper-slide">
+                <div class="sl-spv-card sl-spv-slide">
+                  <video
+                    {% if forloop.first %}src="{{ video_url }}" autoplay{% else %}data-src="{{ video_url }}"{% endif %}
+                    poster="{% if video_file.preview_image %}{{ video_file.preview_image | image_url: width: 1200 }}{% endif %}"
+                    muted loop playsinline
+                    preload="{% if forloop.first %}auto{% else %}metadata{% endif %}"
+                    class="sl-spv-video"
+                  ></video>
+                  <div class="sl-spv-footer">
+                    {% if entry.caption != blank or entry.username != blank %}
+                      <div class="sl-spv-caption">
+                        {% if entry.username != blank %}<span class="sl-spv-caption-username">{{ entry.username }}</span>{% endif %}
+                        {% if entry.caption != blank %}<span class="sl-spv-caption-text">{{ entry.caption }}</span>{% endif %}
+                      </div>
+                    {% endif %}
+                    <div class="sl-spv-controls">
+                      <button type="button" class="sl-spv-mute" data-state="muted" aria-label="Mute / Unmute"><span class="mute-icon">🔇</span><span class="unmute-icon">🔊</span></button>
+                    </div>
+                  </div>
                 </div>
-              {% endif %}
-              <div class="sl-video-controls">
-                <button type="button" class="sl-mute-toggle" data-state="muted" aria-label="Mute / Unmute">
-                  <span class="mute-icon fallback-icon">🔇</span>
-                  <span class="unmute-icon fallback-icon">🔊</span>
-                </button>
-                <button type="button" class="sl-play-toggle" data-state="paused" aria-label="Play / Pause">
-                  <span class="play-icon fallback-icon">▶</span>
-                  <span class="pause-icon fallback-icon">⏸</span>
-                </button>
               </div>
-            </div>
+            {% elsif video_mtag != blank %}
+              <div class="swiper-slide">
+                <div class="sl-spv-card sl-spv-slide sl-spv-metafield">
+                  <div class="sl-spv-metafield-wrap">{{ video_mtag }}</div>
+                  <div class="sl-spv-footer">
+                    {% if entry.caption != blank or entry.username != blank %}
+                      <div class="sl-spv-caption">
+                        {% if entry.username != blank %}<span class="sl-spv-caption-username">{{ entry.username }}</span>{% endif %}
+                        {% if entry.caption != blank %}<span class="sl-spv-caption-text">{{ entry.caption }}</span>{% endif %}
+                      </div>
+                    {% endif %}
+                    <div class="sl-spv-controls">
+                      <button type="button" class="sl-spv-mute" data-state="muted" aria-label="Mute / Unmute"><span class="mute-icon">🔇</span><span class="unmute-icon">🔊</span></button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {% endif %}
           {% endif %}
-        {% endif %}
-      {% endfor %}
+        {% endfor %}
+      </div>
+      <div class="swiper-button-prev"></div>
+      <div class="swiper-button-next"></div>
     </div>
-    <button type="button" class="sl-nav sl-nav-right" aria-label="Next slide"><span>›</span></button>
   </div>
 </div>
 
 <style>
-  #sl-social-proof-{{ block_id }}.sl-social-proof-root {
+  #sl-spv-block-{{ block_id }}.sl-spv-block-root {
     width: 100%;
     margin: 16px 0;
+    --sl-spv-slide-width: 220px;
   }
-  #sl-social-proof-{{ block_id }} .sl-video-slider--snippet {
+  #sl-spv-block-{{ block_id }} .sl-spv-inner { padding: 24px 0; }
+  #sl-spv-block-{{ block_id }} .sl-spv-heading { font-size: 24px; margin: 0 0 16px 0; }
+  #sl-spv-block-{{ block_id }} .sl-spv-swiper { overflow: hidden; position: relative; }
+  #sl-spv-block-{{ block_id }} .swiper-slide { opacity: 1 !important; filter: none !important; }
+  #sl-spv-block-{{ block_id }} .swiper-wrapper { display: flex; gap: 5px; }
+  #sl-spv-block-{{ block_id }} .swiper-slide {
+    flex-shrink: 0;
+    width: var(--sl-spv-slide-width) !important;
+    height: auto;
+  }
+  #sl-spv-block-{{ block_id }} .sl-spv-card {
     position: relative;
-    overflow: hidden;
-    padding: 16px 0;
-  }
-  #sl-social-proof-{{ block_id }} .sl-social-proof-heading--snippet {
-    text-align: center;
-    font-size: 20px;
-    margin: 0 0 16px 0;
-    padding: 0;
-  }
-  #sl-social-proof-{{ block_id }} .sl-video-slider-track {
-    display: flex;
-    scroll-snap-type: x mandatory;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scroll-behavior: smooth;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    padding-left: var(--slider-padding-left, 0);
-    padding-right: var(--slider-padding-right, 0);
-    gap: 8px;
-  }
-  #sl-social-proof-{{ block_id }} .sl-video-slider-track::-webkit-scrollbar { display: none; }
-  #sl-social-proof-{{ block_id }} .sl-video-slide {
-    flex: 0 0 auto;
-    scroll-snap-align: center;
-    position: relative;
+    aspect-ratio: 9 / 16;
     overflow: hidden;
     background: #000;
-    border: none;
     border-radius: 12px;
-    box-sizing: border-box;
-    width: calc((100% - 2 * 8px) / 3);
+    cursor: pointer;
   }
-  @media (max-width: 768px) {
-    #sl-social-proof-{{ block_id }} .sl-video-slider-track { gap: 8px; }
-    #sl-social-proof-{{ block_id }} .sl-video-slide { width: calc(100% - 16px); }
+  #sl-spv-block-{{ block_id }} .sl-spv-metafield-wrap {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
   }
-  #sl-social-proof-{{ block_id }} .sl-video-slide video {
-    width: 100%; height: 100%;
+  #sl-spv-block-{{ block_id }} .sl-spv-video,
+  #sl-spv-block-{{ block_id }} .sl-spv-card video {
+    width: 100%;
+    height: 100%;
     object-fit: cover;
     display: block;
     border-radius: inherit;
+    pointer-events: none;
   }
-  #sl-social-proof-{{ block_id }} .sl-slide-staggered {
-    transform: scale(0.92);
-    transition: transform 0.3s ease;
-  }
-  #sl-social-proof-{{ block_id }} .sl-slide-active { transform: scale(1); }
-  #sl-social-proof-{{ block_id }} .sl-video-controls {
-    position: absolute;
-    bottom: 0.5rem;
-    right: 0.5rem;
-    display: none;
-    gap: 0.5rem;
-    z-index: 2;
-  }
-  #sl-social-proof-{{ block_id }} .sl-slide-active .sl-video-controls { display: flex; }
-  #sl-social-proof-{{ block_id }} .sl-video-controls button {
-    background: rgba(255,255,255,0.9);
-    border: none;
-    border-radius: 50%;
-    width: 36px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0;
-    cursor: pointer;
-  }
-  #sl-social-proof-{{ block_id }} .sl-video-controls .fallback-icon {
-    font-size: 16px;
-    line-height: 1;
-    color: #000;
-  }
-  #sl-social-proof-{{ block_id }} .sl-social-proof-caption {
+  #sl-spv-block-{{ block_id }} .sl-spv-card video::-webkit-media-controls { display: none !important; }
+  #sl-spv-block-{{ block_id }} .swiper-slide-active .sl-spv-footer { display: flex; }
+  #sl-spv-block-{{ block_id }} .sl-spv-footer {
     position: absolute;
     bottom: 0;
     left: 0;
     right: 0;
-    padding: 12px 10px 50px;
-    background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+    display: none;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.75rem 0.5rem 0.5rem;
+    background: linear-gradient(to top, rgba(255,255,255,0.3), transparent);
+    z-index: 10;
+    pointer-events: none;
+  }
+  #sl-spv-block-{{ block_id }} .sl-spv-footer .sl-spv-controls { pointer-events: auto; }
+  #sl-spv-block-{{ block_id }} .sl-spv-caption {
+    flex: 1;
+    min-width: 0;
     font-size: 12px;
     line-height: 1.4;
-    color: #fff;
+    color: #000;
     z-index: 1;
   }
-  #sl-social-proof-{{ block_id }} .sl-caption-username { font-weight: 600; display: block; }
-  #sl-social-proof-{{ block_id }} .sl-nav {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
+  #sl-spv-block-{{ block_id }} .sl-spv-caption-username { font-weight: 600; display: block; }
+  #sl-spv-block-{{ block_id }} .sl-spv-controls {
+    display: flex;
+    gap: 0.25rem;
+    flex-shrink: 0;
+  }
+  #sl-spv-block-{{ block_id }} .sl-spv-controls button {
+    background: transparent;
     border: none;
-    z-index: 5;
+    padding: 0.25rem;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0;
+    color: #000;
     cursor: pointer;
-    padding: 0;
-    background: none;
-    width: 36px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    pointer-events: auto;
   }
-  #sl-social-proof-{{ block_id }} .sl-nav span {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    background: #000;
-    color: #fff;
-    font-size: 24px;
-    font-weight: bold;
-    line-height: 1;
-    padding-bottom: 4px;
-  }
-  #sl-social-proof-{{ block_id }} .sl-nav-left { left: 10px; }
-  #sl-social-proof-{{ block_id }} .sl-nav-right { right: 10px; }
-  #sl-social-proof-{{ block_id }} .sl-arrow-hidden { opacity: 0; pointer-events: none; }
-  #sl-social-proof-{{ block_id }} .aspect-9-16 { aspect-ratio: 9 / 16; }
-  #sl-social-proof-{{ block_id }} .sl-mute-toggle[data-state="muted"] .mute-icon { display: inline; }
-  #sl-social-proof-{{ block_id }} .sl-mute-toggle[data-state="muted"] .unmute-icon { display: none; }
-  #sl-social-proof-{{ block_id }} .sl-mute-toggle[data-state="unmuted"] .mute-icon { display: none; }
-  #sl-social-proof-{{ block_id }} .sl-mute-toggle[data-state="unmuted"] .unmute-icon { display: inline; }
-  #sl-social-proof-{{ block_id }} .sl-play-toggle[data-state="paused"] .play-icon { display: inline; }
-  #sl-social-proof-{{ block_id }} .sl-play-toggle[data-state="paused"] .pause-icon { display: none; }
-  #sl-social-proof-{{ block_id }} .sl-play-toggle[data-state="playing"] .play-icon { display: none; }
-  #sl-social-proof-{{ block_id }} .sl-play-toggle[data-state="playing"] .pause-icon { display: inline; }
+  #sl-spv-block-{{ block_id }} .sl-spv-controls .mute-icon,
+  #sl-spv-block-{{ block_id }} .sl-spv-controls .unmute-icon { font-size: 14px; color: inherit; }
+  #sl-spv-block-{{ block_id }} .sl-spv-mute[data-state="muted"] .unmute-icon { display: none; }
+  #sl-spv-block-{{ block_id }} .sl-spv-mute[data-state="unmuted"] .mute-icon { display: none; }
+  #sl-spv-block-{{ block_id }} .swiper-button-prev,
+  #sl-spv-block-{{ block_id }} .swiper-button-next,
+  #sl-spv-block-{{ block_id }} .swiper-button-prev::after,
+  #sl-spv-block-{{ block_id }} .swiper-button-next::after { color: #000 !important; }
+  #sl-spv-block-{{ block_id }} .swiper-pagination { display: none !important; }
 </style>
 
 <script>
 (function() {
   var blockId = '{{ block_id }}';
-  var root = document.getElementById('sl-social-proof-' + blockId);
+  var root = document.getElementById('sl-spv-block-' + blockId);
   if (!root) return;
+  var SWIPER_CSS = 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css';
+  var SWIPER_JS = 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js';
+
   function ensureVideoSrc(v) {
     if (!v) return;
     var src = v.getAttribute('data-src');
     if (src && !v.src) { v.src = src; }
   }
+
+  function loadSwiper(cb) {
+    if (typeof Swiper !== 'undefined') { cb(); return; }
+    var link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = SWIPER_CSS;
+    document.head.appendChild(link);
+    var s = document.createElement('script');
+    s.src = SWIPER_JS;
+    s.onload = cb;
+    document.head.appendChild(s);
+  }
+
   function run() {
-    var r = document.getElementById('sl-social-proof-' + blockId);
-    if (!r) { setTimeout(run, 50); return; }
-    var slides = Array.from(r.querySelectorAll('.sl-video-slide'));
-    var track = r.querySelector('.sl-video-slider-track');
-    var prevBtn = r.querySelector('.sl-nav-left');
-    var nextBtn = r.querySelector('.sl-nav-right');
-    if (!track || slides.length === 0) return;
-    var slidesDesktop = parseInt(track.getAttribute('data-slides-desktop') || '3', 10);
-    var slidesMobile = parseInt(track.getAttribute('data-slides-mobile') || '1', 10);
+    var r = document.getElementById('sl-spv-block-' + blockId);
+    if (!r) return;
+    var swiperEl = r.querySelector('.sl-spv-swiper');
+    var slides = r.querySelectorAll('.sl-spv-card');
+    if (!swiperEl || slides.length === 0) return;
+
     var autoplay = true;
     var isMuted = true;
 
-    function getVisible() { return window.innerWidth <= 768 ? slidesMobile : slidesDesktop; }
-    function smoothScroll(container, dist, dur) {
-      dur = dur || 400;
-      var start = container.scrollLeft;
-      var t0 = performance.now();
-      function step(t) {
-        var p = Math.min((t - t0) / dur, 1);
-        container.scrollLeft = start + dist * (0.5 - Math.cos(p * Math.PI) / 2);
-        if (p < 1) requestAnimationFrame(step);
-      }
-      requestAnimationFrame(step);
-    }
-    function updatePadding() {
-      var slide = slides[0];
-      if (!slide || !track) return;
-      var sw = slide.offsetWidth;
-      var tw = track.clientWidth;
-      var pad = Math.max(0, (tw - sw) / 2);
-      track.style.setProperty('--slider-padding-left', pad + 'px');
-      track.style.setProperty('--slider-padding-right', pad + 'px');
-    }
-    function updateActive() {
-      if (!track) return;
-      var center = track.scrollLeft + track.clientWidth / 2;
-      var closest = null, minD = Infinity;
-      slides.forEach(function(s) {
-        var sc = s.offsetLeft + s.offsetWidth / 2;
-        var d = Math.abs(center - sc);
-        if (d < minD) { minD = d; closest = s; }
-      });
-      slides.forEach(function(s) {
-        var v = s.querySelector('video');
-        if (s === closest) {
-          s.classList.add('sl-slide-active');
-          ensureVideoSrc(v);
-          if (autoplay && v) {
-            v.muted = isMuted;
-            if (v.src) v.readyState > 0 ? v.play().catch(function(){}) : v.addEventListener('loadedmetadata', function() { v.muted = isMuted; v.play().catch(function(){}); }, { once: true });
+    var swiperInstance = null;
+
+    function playFocusedVideo() {
+      if (!swiperInstance) return;
+      var idx = swiperInstance.activeIndex;
+      var activeSlide = swiperInstance.slides[idx];
+      var focusedCard = activeSlide ? activeSlide.querySelector('.sl-spv-card') : null;
+      var focusedVideo = focusedCard ? focusedCard.querySelector('video') : null;
+
+      r.querySelectorAll('.sl-spv-card video').forEach(function(v) { if (v) v.pause(); });
+
+      if (focusedVideo && autoplay) {
+        ensureVideoSrc(focusedVideo);
+        focusedVideo.muted = isMuted;
+        var src = focusedVideo.src || focusedVideo.currentSrc || focusedVideo.getAttribute('data-src');
+        var sourceEl = focusedVideo.querySelector('source');
+        if (sourceEl && !src) src = sourceEl.src || sourceEl.getAttribute('src');
+        if (src && !focusedVideo.src) focusedVideo.src = src;
+        var hasSrc = focusedVideo.src || focusedVideo.currentSrc || (sourceEl && sourceEl.src);
+        if (hasSrc) {
+          var doPlay = function() {
+            focusedVideo.muted = isMuted;
+            if (!isMuted) focusedVideo.volume = 1;
+            focusedVideo.play().catch(function(){});
+          };
+          if (focusedVideo.readyState >= 2) {
+            doPlay();
+          } else {
+            focusedVideo.addEventListener('loadeddata', doPlay, { once: true });
+            focusedVideo.addEventListener('canplay', doPlay, { once: true });
+            focusedVideo.load();
           }
-        } else {
-          s.classList.remove('sl-slide-active');
-          if (v) v.pause();
         }
-      });
-    }
-    function updateArrows() {
-      if (!track) return;
-      var max = track.scrollWidth - track.clientWidth;
-      if (prevBtn) prevBtn.classList.toggle('sl-arrow-hidden', track.scrollLeft <= 5);
-      if (nextBtn) nextBtn.classList.toggle('sl-arrow-hidden', track.scrollLeft >= max - 5);
-    }
-    slides.forEach(function(s) {
-      s.addEventListener('click', function() {
-        var v = s.querySelector('video');
-        ensureVideoSrc(v);
-        slides.forEach(function(x) { x.classList.remove('sl-slide-active'); var xv = x.querySelector('video'); if (xv) xv.pause(); });
-        s.classList.add('sl-slide-active');
-        if (v && v.src) { v.muted = isMuted; v.readyState > 0 ? v.play().catch(function(){}) : v.addEventListener('loadedmetadata', function() { v.muted = isMuted; v.play(); }, { once: true }); }
-      });
-    });
-    r.querySelectorAll('.sl-mute-toggle').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        isMuted = !isMuted;
-        var st = isMuted ? 'muted' : 'unmuted';
-        r.querySelectorAll('.sl-mute-toggle').forEach(function(b) { b.setAttribute('data-state', st); });
-        var av = r.querySelector('.sl-slide-active video');
-        if (av) { av.muted = isMuted; if (!isMuted && !av.paused) { av.pause(); av.muted = false; av.play(); } }
-      });
-    });
-    r.querySelectorAll('.sl-play-toggle').forEach(function(btn) {
-      btn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        var s = btn.closest('.sl-video-slide');
-        var v = s ? s.querySelector('video') : null;
-        ensureVideoSrc(v);
-        if (!v || !v.src) return;
-        slides.forEach(function(x) { var xv = x.querySelector('video'); if (xv) xv.pause(); x.classList.remove('sl-slide-active'); });
-        if (v.paused) { v.muted = false; v.play().then(function() { s.classList.add('sl-slide-active'); btn.setAttribute('data-state', 'playing'); }).catch(function(){}); }
-        else { v.pause(); btn.setAttribute('data-state', 'paused'); }
-      });
-    });
-    if (prevBtn) prevBtn.addEventListener('click', function() { smoothScroll(track, -track.clientWidth / getVisible(), 400); setTimeout(updateArrows, 450); });
-    if (nextBtn) nextBtn.addEventListener('click', function() { smoothScroll(track, track.clientWidth / getVisible(), 400); setTimeout(updateArrows, 450); });
-    if (track) track.addEventListener('scroll', function() { requestAnimationFrame(function() { updateActive(); updateArrows(); }); });
-    updatePadding();
-    setTimeout(function() { updateActive(); updateArrows(); }, 200);
-    window.addEventListener('resize', function() { updateActive(); updateArrows(); updatePadding(); });
-  }
-  function initWhenReady() {
-    if (document.readyState !== 'loading') {
-      if ('requestIdleCallback' in window) {
-        requestIdleCallback(function() { initWhenVisible(); }, { timeout: 1500 });
-      } else {
-        setTimeout(initWhenVisible, 0);
       }
-    } else {
-      document.addEventListener('DOMContentLoaded', function() {
-        if ('requestIdleCallback' in window) {
-          requestIdleCallback(function() { initWhenVisible(); }, { timeout: 1500 });
-        } else {
-          setTimeout(initWhenVisible, 0);
+    }
+
+    loadSwiper(function() {
+      if (swiperEl.swiper) return;
+      swiperInstance = new Swiper(swiperEl, {
+        slidesPerView: 'auto',
+        spaceBetween: 5,
+        slidesOffsetAfter: 100,
+        slidesOffsetBefore: 0,
+        watchSlidesProgress: false,
+        loop: false,
+        navigation: {
+          nextEl: r.querySelector('.swiper-button-next'),
+          prevEl: r.querySelector('.swiper-button-prev')
+        },
+        on: {
+          slideChange: function() { playFocusedVideo(); },
+          init: function() {
+            setTimeout(playFocusedVideo, 50);
+          }
         }
       });
-    }
+
+      slides.forEach(function(card) {
+        card.addEventListener('click', function(e) {
+          if (e.target.closest('.sl-spv-controls')) return;
+          isMuted = !isMuted;
+          r.querySelectorAll('.sl-spv-mute').forEach(function(b) { b.setAttribute('data-state', isMuted ? 'muted' : 'unmuted'); });
+          var av = r.querySelector('.swiper-slide-active video');
+          if (av) {
+            av.muted = isMuted;
+            if (!isMuted) av.volume = 1;
+          }
+        });
+      });
+
+      r.querySelectorAll('.sl-spv-mute').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          e.preventDefault();
+          isMuted = !isMuted;
+          r.querySelectorAll('.sl-spv-mute').forEach(function(b) { b.setAttribute('data-state', isMuted ? 'muted' : 'unmuted'); });
+          var av = r.querySelector('.swiper-slide-active video');
+          if (av) {
+            av.muted = isMuted;
+            if (!isMuted) av.volume = 1;
+          }
+        });
+      });
+
+    });
   }
-  var didInit = false;
-  function initWhenVisible() {
-    var el = document.getElementById('sl-social-proof-' + blockId);
-    if (!el || typeof el.nodeType === 'undefined') {
-      setTimeout(function() { if (!didInit) { didInit = true; run(); } }, 200);
-      return;
-    }
-    if ('IntersectionObserver' in window) {
-      var io = new IntersectionObserver(function(entries) {
-        if (entries && entries[0] && entries[0].isIntersecting && !didInit) {
-          didInit = true;
-          io.disconnect();
-          run();
-        }
-      }, { rootMargin: '100px', threshold: 0 });
-      try {
-        io.observe(el);
-      } catch (e) {
-        if (!didInit) { didInit = true; run(); }
-        return;
-      }
-      setTimeout(function() {
-        if (!didInit) { didInit = true; io.disconnect(); run(); }
-      }, 3000);
-    } else {
-      if (!didInit) { didInit = true; run(); }
-    }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', run);
+  } else {
+    run();
   }
-  initWhenReady();
 })();
 </script>
 {% elsif request.design_mode and prod != blank %}
-  <div id="sl-social-proof-{{ block_id }}" class="sl-social-proof-root" style="padding: 12px; color: #666; border: 1px dashed #ccc;">
+  <div id="sl-spv-block-{{ block_id }}" class="sl-spv-block-root" style="padding: 12px; color: #666; border: 1px dashed #ccc;">
     <p style="margin: 0;">Social Proof Video — No videos. Add UGC Video entries to this product's <strong>Social proof videos</strong> metafield.</p>
   </div>
 {% endif %}
