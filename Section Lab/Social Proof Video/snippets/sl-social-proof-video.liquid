@@ -1,0 +1,307 @@
+{% comment %}
+  SL - Social Proof Video (Snippet)
+  Use in product info via Custom Liquid block.
+  Usage: {% render 'sl-social-proof-video', product: product, block_id: block.id %}
+  Requires product.metafields.custom.social_proof_videos (UGC Video metaobjects).
+  See README.md for metaobject setup.
+{% endcomment %}
+
+{% assign block_id = block_id | default: 'spv' %}
+{% assign prod = product | default: nil %}
+{% assign ugc_videos = prod.metafields.custom.social_proof_videos.value | default: nil %}
+
+{% if prod == blank or ugc_videos == blank or ugc_videos.size == 0 %}
+  {% if request.design_mode and prod != blank %}
+    <div id="sl-social-proof-{{ block_id }}" class="sl-social-proof-root" style="padding: 12px; color: #666; border: 1px dashed #ccc;">
+      <p style="margin: 0;">Social Proof Video — No videos. Add UGC Video entries to this product's <strong>Social proof videos</strong> metafield.</p>
+    </div>
+  {% endif %}
+{% else %}
+<div id="sl-social-proof-{{ block_id }}" class="sl-social-proof-root">
+  <div class="sl-video-slider sl-video-slider--snippet">
+    <h2 class="sl-social-proof-heading sl-social-proof-heading--snippet">Real reviews</h2>
+    <button type="button" class="sl-nav sl-nav-left" aria-label="Previous slide"><span>‹</span></button>
+    <div class="sl-video-slider-track" data-slides-desktop="3" data-slides-mobile="1" data-gap="8" data-radius="12">
+      {% for entry in ugc_videos %}
+        {% assign video_file = entry.video %}
+        {% if video_file != blank %}
+          {% assign mp4_source = video_file.sources | where: 'format', 'mp4' | first %}
+          {% if mp4_source and mp4_source.url != blank %}
+            <div class="sl-video-slide aspect-9-16 sl-slide-staggered">
+              <video
+                src="{{ mp4_source.url }}"
+                poster="{% if video_file.preview_image %}{{ video_file.preview_image | image_url: width: 800 }}{% endif %}"
+                muted loop playsinline
+                loading="lazy" preload="metadata"
+                class="sl-overlay"
+              ></video>
+              {% if entry.caption != blank or entry.username != blank %}
+                <div class="sl-social-proof-caption">
+                  {% if entry.username != blank %}<span class="sl-caption-username">{{ entry.username }}</span>{% endif %}
+                  {% if entry.caption != blank %}<span class="sl-caption-text">{{ entry.caption }}</span>{% endif %}
+                </div>
+              {% endif %}
+              <div class="sl-video-controls">
+                <button type="button" class="sl-mute-toggle" data-state="muted" aria-label="Mute / Unmute">
+                  <span class="mute-icon fallback-icon">🔇</span>
+                  <span class="unmute-icon fallback-icon">🔊</span>
+                </button>
+                <button type="button" class="sl-play-toggle" data-state="paused" aria-label="Play / Pause">
+                  <span class="play-icon fallback-icon">▶</span>
+                  <span class="pause-icon fallback-icon">⏸</span>
+                </button>
+              </div>
+            </div>
+          {% endif %}
+        {% endif %}
+      {% endfor %}
+    </div>
+    <button type="button" class="sl-nav sl-nav-right" aria-label="Next slide"><span>›</span></button>
+  </div>
+</div>
+
+<style>
+  #sl-social-proof-{{ block_id }}.sl-social-proof-root {
+    width: 100%;
+    margin: 16px 0;
+  }
+  #sl-social-proof-{{ block_id }} .sl-video-slider--snippet {
+    position: relative;
+    overflow: hidden;
+    padding: 16px 0;
+  }
+  #sl-social-proof-{{ block_id }} .sl-social-proof-heading--snippet {
+    text-align: center;
+    font-size: 20px;
+    margin: 0 0 16px 0;
+    padding: 0;
+  }
+  #sl-social-proof-{{ block_id }} .sl-video-slider-track {
+    display: flex;
+    scroll-snap-type: x mandatory;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding-left: var(--slider-padding-left, 0);
+    padding-right: var(--slider-padding-right, 0);
+    gap: 8px;
+  }
+  #sl-social-proof-{{ block_id }} .sl-video-slider-track::-webkit-scrollbar { display: none; }
+  #sl-social-proof-{{ block_id }} .sl-video-slide {
+    flex: 0 0 auto;
+    scroll-snap-align: center;
+    position: relative;
+    overflow: hidden;
+    background: #000;
+    border: none;
+    border-radius: 12px;
+    box-sizing: border-box;
+    width: calc((100% - 2 * 8px) / 3);
+  }
+  @media (max-width: 768px) {
+    #sl-social-proof-{{ block_id }} .sl-video-slider-track { gap: 8px; }
+    #sl-social-proof-{{ block_id }} .sl-video-slide { width: calc(100% - 16px); }
+  }
+  #sl-social-proof-{{ block_id }} .sl-video-slide video {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+    border-radius: inherit;
+  }
+  #sl-social-proof-{{ block_id }} .sl-slide-staggered {
+    transform: scale(0.92);
+    transition: transform 0.3s ease;
+  }
+  #sl-social-proof-{{ block_id }} .sl-slide-active { transform: scale(1); }
+  #sl-social-proof-{{ block_id }} .sl-video-controls {
+    position: absolute;
+    bottom: 0.5rem;
+    right: 0.5rem;
+    display: none;
+    gap: 0.5rem;
+    z-index: 2;
+  }
+  #sl-social-proof-{{ block_id }} .sl-slide-active .sl-video-controls { display: flex; }
+  #sl-social-proof-{{ block_id }} .sl-video-controls button {
+    background: rgba(255,255,255,0.9);
+    border: none;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0;
+    cursor: pointer;
+  }
+  #sl-social-proof-{{ block_id }} .sl-video-controls .fallback-icon {
+    font-size: 16px;
+    line-height: 1;
+    color: #000;
+  }
+  #sl-social-proof-{{ block_id }} .sl-social-proof-caption {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 12px 10px 50px;
+    background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+    font-size: 12px;
+    line-height: 1.4;
+    color: #fff;
+    z-index: 1;
+  }
+  #sl-social-proof-{{ block_id }} .sl-caption-username { font-weight: 600; display: block; }
+  #sl-social-proof-{{ block_id }} .sl-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    z-index: 5;
+    cursor: pointer;
+    padding: 0;
+    background: none;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #sl-social-proof-{{ block_id }} .sl-nav span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: #000;
+    color: #fff;
+    font-size: 24px;
+    font-weight: bold;
+    line-height: 1;
+    padding-bottom: 4px;
+  }
+  #sl-social-proof-{{ block_id }} .sl-nav-left { left: 10px; }
+  #sl-social-proof-{{ block_id }} .sl-nav-right { right: 10px; }
+  #sl-social-proof-{{ block_id }} .sl-arrow-hidden { opacity: 0; pointer-events: none; }
+  #sl-social-proof-{{ block_id }} .aspect-9-16 { aspect-ratio: 9 / 16; }
+  #sl-social-proof-{{ block_id }} .sl-mute-toggle[data-state="muted"] .mute-icon { display: inline; }
+  #sl-social-proof-{{ block_id }} .sl-mute-toggle[data-state="muted"] .unmute-icon { display: none; }
+  #sl-social-proof-{{ block_id }} .sl-mute-toggle[data-state="unmuted"] .mute-icon { display: none; }
+  #sl-social-proof-{{ block_id }} .sl-mute-toggle[data-state="unmuted"] .unmute-icon { display: inline; }
+  #sl-social-proof-{{ block_id }} .sl-play-toggle[data-state="paused"] .play-icon { display: inline; }
+  #sl-social-proof-{{ block_id }} .sl-play-toggle[data-state="paused"] .pause-icon { display: none; }
+  #sl-social-proof-{{ block_id }} .sl-play-toggle[data-state="playing"] .play-icon { display: none; }
+  #sl-social-proof-{{ block_id }} .sl-play-toggle[data-state="playing"] .pause-icon { display: inline; }
+</style>
+
+<script>
+(function() {
+  var blockId = '{{ block_id }}';
+  var root = document.getElementById('sl-social-proof-' + blockId);
+  if (!root) return;
+  function run() {
+    var r = document.getElementById('sl-social-proof-' + blockId);
+    if (!r) { setTimeout(run, 50); return; }
+    var slides = Array.from(r.querySelectorAll('.sl-video-slide'));
+    var track = r.querySelector('.sl-video-slider-track');
+    var prevBtn = r.querySelector('.sl-nav-left');
+    var nextBtn = r.querySelector('.sl-nav-right');
+    var slidesDesktop = parseInt(track.getAttribute('data-slides-desktop') || '3', 10);
+    var slidesMobile = parseInt(track.getAttribute('data-slides-mobile') || '1', 10);
+    var gap = parseInt(track.getAttribute('data-gap') || '8', 10);
+    var autoplay = true;
+    var isMuted = true;
+
+    function getVisible() { return window.innerWidth <= 768 ? slidesMobile : slidesDesktop; }
+    function smoothScroll(container, dist, dur) {
+      dur = dur || 400;
+      var start = container.scrollLeft;
+      var t0 = performance.now();
+      function step(t) {
+        var p = Math.min((t - t0) / dur, 1);
+        container.scrollLeft = start + dist * (0.5 - Math.cos(p * Math.PI) / 2);
+        if (p < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
+    function updatePadding() {
+      var slide = slides[0];
+      if (!slide || !track) return;
+      var sw = slide.offsetWidth;
+      var tw = track.clientWidth;
+      var pad = Math.max(0, (tw - sw) / 2);
+      track.style.setProperty('--slider-padding-left', pad + 'px');
+      track.style.setProperty('--slider-padding-right', pad + 'px');
+    }
+    function updateActive() {
+      if (!track) return;
+      var center = track.scrollLeft + track.clientWidth / 2;
+      var closest = null, minD = Infinity;
+      slides.forEach(function(s) {
+        var sc = s.offsetLeft + s.offsetWidth / 2;
+        var d = Math.abs(center - sc);
+        if (d < minD) { minD = d; closest = s; }
+      });
+      slides.forEach(function(s) {
+        var v = s.querySelector('video');
+        if (s === closest) {
+          s.classList.add('sl-slide-active');
+          if (autoplay && v && v.src) {
+            v.muted = isMuted;
+            v.readyState > 0 ? v.play().catch(function(){}) : v.addEventListener('loadedmetadata', function() { v.muted = isMuted; v.play().catch(function(){}); }, { once: true });
+          }
+        } else {
+          s.classList.remove('sl-slide-active');
+          if (v) v.pause();
+        }
+      });
+    }
+    function updateArrows() {
+      if (!track) return;
+      var max = track.scrollWidth - track.clientWidth;
+      if (prevBtn) prevBtn.classList.toggle('sl-arrow-hidden', track.scrollLeft <= 5);
+      if (nextBtn) nextBtn.classList.toggle('sl-arrow-hidden', track.scrollLeft >= max - 5);
+    }
+    slides.forEach(function(s) {
+      s.addEventListener('click', function() {
+        var v = s.querySelector('video');
+        slides.forEach(function(x) { x.classList.remove('sl-slide-active'); var xv = x.querySelector('video'); if (xv) xv.pause(); });
+        s.classList.add('sl-slide-active');
+        if (v && v.src) { v.muted = isMuted; v.readyState > 0 ? v.play().catch(function(){}) : v.addEventListener('loadedmetadata', function() { v.play(); }, { once: true }); }
+      });
+    });
+    r.querySelectorAll('.sl-mute-toggle').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        isMuted = !isMuted;
+        var st = isMuted ? 'muted' : 'unmuted';
+        r.querySelectorAll('.sl-mute-toggle').forEach(function(b) { b.setAttribute('data-state', st); });
+        var av = r.querySelector('.sl-slide-active video');
+        if (av) { av.muted = isMuted; if (!isMuted && !av.paused) { av.pause(); av.muted = false; av.play(); } }
+      });
+    });
+    r.querySelectorAll('.sl-play-toggle').forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var s = btn.closest('.sl-video-slide');
+        var v = s ? s.querySelector('video') : null;
+        if (!v || !v.src) return;
+        slides.forEach(function(x) { var xv = x.querySelector('video'); if (xv) xv.pause(); x.classList.remove('sl-slide-active'); });
+        if (v.paused) { v.muted = false; v.play().then(function() { s.classList.add('sl-slide-active'); btn.setAttribute('data-state', 'playing'); }).catch(function(){}); }
+        else { v.pause(); btn.setAttribute('data-state', 'paused'); }
+      });
+    });
+    if (prevBtn) prevBtn.addEventListener('click', function() { smoothScroll(track, -track.clientWidth / getVisible(), 400); setTimeout(updateArrows, 450); });
+    if (nextBtn) nextBtn.addEventListener('click', function() { smoothScroll(track, track.clientWidth / getVisible(), 400); setTimeout(updateArrows, 450); });
+    if (track) track.addEventListener('scroll', function() { requestAnimationFrame(function() { updateActive(); updateArrows(); }); });
+    updatePadding();
+    setTimeout(function() { updateActive(); updateArrows(); }, 200);
+    window.addEventListener('resize', function() { updateActive(); updateArrows(); updatePadding(); });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+{% endif %}
