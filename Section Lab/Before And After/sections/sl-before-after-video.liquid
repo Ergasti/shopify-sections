@@ -1,0 +1,376 @@
+{% comment %}
+  SL - Before And After Video
+  Product-specific videos via metafield. Square aspect, Swiper, same play/mute strategy as Social Proof.
+  Requires product.metafields.custom.before_after_videos (list of UGC Video metaobjects).
+  See README.md for setup.
+{% endcomment %}
+
+{% assign videos = product.metafields.custom.before_after_videos.value | default: nil %}
+{% assign has_videos = false %}
+{% if product != blank and videos != blank and videos.size > 0 %}
+  {% assign has_videos = true %}
+{% endif %}
+
+{% unless has_videos %}
+  {% if request.design_mode %}
+    <div id="sl-ba-section-{{ section.id }}" class="sl-ba-block-root" style="padding: 24px; text-align: center; border: 2px dashed #ccc; background: {{ section.settings.background_color }};">
+      <p style="margin: 0; color: #666;">Before And After — No videos. Add UGC Video entries to this product's <strong>Before and after videos</strong> metafield.</p>
+    </div>
+  {% endif %}
+{% else %}
+<div id="sl-ba-section-{{ section.id }}" class="sl-ba-block-root" style="background: {{ section.settings.background_color }}; padding: {{ section.settings.padding_top }}px 0 {{ section.settings.padding_bottom }}px 0;">
+  <div class="sl-ba-inner" style="{% unless section.settings.full_width %}max-width: {{ section.settings.content_width }}px; margin-left: auto; margin-right: auto;{% endunless %} padding: 0 16px;">
+    {% if section.settings.section_heading != blank %}
+      <h2 class="sl-ba-heading" style="font-size: {{ section.settings.heading_size }}px; color: {{ section.settings.heading_color }}; margin: 0 0 16px 0; text-align: {{ section.settings.heading_alignment }};">{{ section.settings.section_heading }}</h2>
+    {% endif %}
+    <div class="sl-ba-swiper swiper" style="--sl-ba-slide-width: {{ section.settings.slide_width }}px;">
+      <div class="swiper-wrapper">
+        {% for entry in videos %}
+          {% assign video_file = entry.video %}
+          {% if video_file != blank %}
+            {% assign video_url = nil %}
+            {% assign video_mtag = video_file | metafield_tag %}
+            {% assign mp4_source = video_file.sources | where: 'format', 'mp4' | first %}
+            {% assign file_obj = video_file.value | default: video_file %}
+            {% if mp4_source and mp4_source.url != blank %}
+              {% assign video_url = mp4_source.url %}
+            {% elsif video_file.url != blank %}
+              {% assign video_url = video_file.url %}
+            {% elsif file_obj.url != blank %}
+              {% assign video_url = file_obj.url %}
+            {% endif %}
+            {% if video_url != blank %}
+              <div class="swiper-slide">
+                <div class="sl-ba-card sl-ba-video-wrapper">
+                  <span class="sl-ba-badge sl-ba-badge--before">{{ section.settings.before_label }}</span>
+                  <span class="sl-ba-badge sl-ba-badge--after">{{ section.settings.after_label }}</span>
+                  <video
+                    {% if forloop.first %}src="{{ video_url }}" autoplay{% else %}data-src="{{ video_url }}"{% endif %}
+                    poster="{% if video_file.preview_image %}{{ video_file.preview_image | image_url: width: 1200 }}{% endif %}"
+                    muted loop playsinline
+                    preload="{% if forloop.first %}auto{% else %}metadata{% endif %}"
+                    class="sl-ba-video"
+                  ></video>
+                  <div class="sl-ba-footer">
+                    <div class="sl-ba-controls">
+                      <button type="button" class="sl-ba-mute" data-state="muted" aria-label="Mute / Unmute"><span class="mute-icon">🔇</span><span class="unmute-icon">🔊</span></button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {% elsif video_mtag != blank %}
+              <div class="swiper-slide">
+                <div class="sl-ba-card sl-ba-video-wrapper sl-ba-metafield">
+                  <span class="sl-ba-badge sl-ba-badge--before">{{ section.settings.before_label }}</span>
+                  <span class="sl-ba-badge sl-ba-badge--after">{{ section.settings.after_label }}</span>
+                  <div class="sl-ba-metafield-wrap">{{ video_mtag }}</div>
+                  <div class="sl-ba-footer">
+                    <div class="sl-ba-controls">
+                      <button type="button" class="sl-ba-mute" data-state="muted" aria-label="Mute / Unmute"><span class="mute-icon">🔇</span><span class="unmute-icon">🔊</span></button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+      </div>
+      <div class="swiper-button-prev"></div>
+      <div class="swiper-button-next"></div>
+    </div>
+  </div>
+</div>
+
+<style>
+  #sl-ba-section-{{ section.id }} .sl-ba-swiper { overflow: hidden; position: relative; }
+  #sl-ba-section-{{ section.id }} .swiper-slide { opacity: 1 !important; filter: none !important; flex-shrink: 0; width: var(--sl-ba-slide-width) !important; height: auto; }
+  #sl-ba-section-{{ section.id }} .sl-ba-card {
+    position: relative; aspect-ratio: 1 / 1; overflow: hidden; background: #fff;
+    border-radius: 16px; box-shadow: 0 1px 1px 0 rgba(0,0,0,0.02), 0 4px 4px -1px rgba(0,0,0,0.02);
+    padding: 8px; cursor: pointer;
+  }
+  #sl-ba-section-{{ section.id }} .sl-ba-video-wrapper video,
+  #sl-ba-section-{{ section.id }} .sl-ba-card video {
+    width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 12px; pointer-events: none;
+  }
+  #sl-ba-section-{{ section.id }} .sl-ba-card video::-webkit-media-controls { display: none !important; }
+  #sl-ba-section-{{ section.id }} .sl-ba-metafield-wrap { position: absolute; inset: 8px; border-radius: 12px; overflow: hidden; }
+  #sl-ba-section-{{ section.id }} .sl-ba-metafield-wrap video { position: absolute; inset: 0; }
+  #sl-ba-section-{{ section.id }} .sl-ba-badge {
+    position: absolute; top: 16px; padding: 2px 12px; border-radius: 12px 0 0 0;
+    font-weight: 500; font-size: 12px; color: #fff; background: {{ section.settings.badge_color }}; z-index: 2;
+  }
+  #sl-ba-section-{{ section.id }} .sl-ba-badge--before { left: 16px; }
+  #sl-ba-section-{{ section.id }} .sl-ba-badge--after { right: 16px; left: auto; border-radius: 0 12px 0 0; }
+  #sl-ba-section-{{ section.id }} .swiper-slide-active .sl-ba-footer { display: flex; }
+  #sl-ba-section-{{ section.id }} .sl-ba-footer {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    display: none; align-items: flex-end; justify-content: flex-end; padding: 0.5rem;
+    background: linear-gradient(to top, rgba(255,255,255,0.3), transparent); z-index: 10; pointer-events: none;
+  }
+  #sl-ba-section-{{ section.id }} .sl-ba-footer .sl-ba-controls { pointer-events: auto; }
+  #sl-ba-section-{{ section.id }} .sl-ba-controls button {
+    background: transparent; border: none; padding: 0.25rem; width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center; font-size: 0; color: #000; cursor: pointer;
+  }
+  #sl-ba-section-{{ section.id }} .sl-ba-controls .mute-icon, #sl-ba-section-{{ section.id }} .sl-ba-controls .unmute-icon { font-size: 14px; color: inherit; }
+  #sl-ba-section-{{ section.id }} .sl-ba-mute[data-state="muted"] .unmute-icon { display: none; }
+  #sl-ba-section-{{ section.id }} .sl-ba-mute[data-state="unmuted"] .mute-icon { display: none; }
+  #sl-ba-section-{{ section.id }} .swiper-button-prev, #sl-ba-section-{{ section.id }} .swiper-button-next,
+  #sl-ba-section-{{ section.id }} .swiper-button-prev::after, #sl-ba-section-{{ section.id }} .swiper-button-next::after { color: #000 !important; }
+  #sl-ba-section-{{ section.id }} .swiper-pagination { display: none !important; }
+</style>
+
+<script>
+(function() {
+  var sectionId = '{{ section.id }}';
+  var root = document.getElementById('sl-ba-section-' + sectionId);
+  if (!root) return;
+  var SWIPER_CSS = 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css';
+  var SWIPER_JS = 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js';
+
+  function ensureVideoSrc(v) {
+    if (!v) return;
+    var src = v.getAttribute('data-src');
+    if (src && !v.src) v.src = src;
+  }
+
+  function loadSwiper(cb) {
+    if (typeof Swiper !== 'undefined') { cb(); return; }
+    var link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = SWIPER_CSS;
+    document.head.appendChild(link);
+    var s = document.createElement('script');
+    s.src = SWIPER_JS;
+    s.onload = cb;
+    document.head.appendChild(s);
+  }
+
+  function run() {
+    var r = document.getElementById('sl-ba-section-' + sectionId);
+    if (!r) return;
+    var swiperEl = r.querySelector('.sl-ba-swiper');
+    var slides = r.querySelectorAll('.sl-ba-card');
+    if (!swiperEl || slides.length === 0) return;
+
+    var autoplay = true;
+    var isMuted = true;
+    var swiperInstance = null;
+
+    function playFocusedVideo() {
+      if (!swiperInstance) return;
+      var idx = swiperInstance.activeIndex;
+      var activeSlide = swiperInstance.slides[idx];
+      var focusedCard = activeSlide ? activeSlide.querySelector('.sl-ba-card') : null;
+      var focusedVideo = focusedCard ? focusedCard.querySelector('video') : null;
+
+      r.querySelectorAll('.sl-ba-card video').forEach(function(v) { if (v) v.pause(); });
+
+      if (focusedVideo && autoplay) {
+        ensureVideoSrc(focusedVideo);
+        focusedVideo.muted = isMuted;
+        var src = focusedVideo.src || focusedVideo.currentSrc || focusedVideo.getAttribute('data-src');
+        var sourceEl = focusedVideo.querySelector('source');
+        if (sourceEl && !src) src = sourceEl.src || sourceEl.getAttribute('src');
+        if (src && !focusedVideo.src) focusedVideo.src = src;
+        var hasSrc = focusedVideo.src || focusedVideo.currentSrc || (sourceEl && sourceEl.src);
+        if (hasSrc) {
+          var doPlay = function() {
+            focusedVideo.muted = isMuted;
+            if (!isMuted) focusedVideo.volume = 1;
+            focusedVideo.play().catch(function(){});
+          };
+          if (focusedVideo.readyState >= 2) doPlay();
+          else {
+            focusedVideo.addEventListener('loadeddata', doPlay, { once: true });
+            focusedVideo.addEventListener('canplay', doPlay, { once: true });
+            focusedVideo.load();
+          }
+        }
+      }
+    }
+
+    loadSwiper(function() {
+      if (swiperEl.swiper) return;
+      swiperInstance = new Swiper(swiperEl, {
+        slidesPerView: 'auto',
+        spaceBetween: 10,
+        slidesOffsetAfter: 100,
+        slidesOffsetBefore: 0,
+        watchSlidesProgress: false,
+        loop: false,
+        navigation: {
+          nextEl: r.querySelector('.swiper-button-next'),
+          prevEl: r.querySelector('.swiper-button-prev')
+        },
+        on: {
+          slideChange: function() { playFocusedVideo(); },
+          init: function() { setTimeout(playFocusedVideo, 50); }
+        }
+      });
+
+      slides.forEach(function(card) {
+        card.addEventListener('click', function(e) {
+          if (e.target.closest('.sl-ba-controls')) return;
+          isMuted = !isMuted;
+          r.querySelectorAll('.sl-ba-mute').forEach(function(b) { b.setAttribute('data-state', isMuted ? 'muted' : 'unmuted'); });
+          var av = r.querySelector('.swiper-slide-active video');
+          if (av) { av.muted = isMuted; if (!isMuted) av.volume = 1; }
+        });
+      });
+
+      r.querySelectorAll('.sl-ba-mute').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          e.preventDefault();
+          isMuted = !isMuted;
+          r.querySelectorAll('.sl-ba-mute').forEach(function(b) { b.setAttribute('data-state', isMuted ? 'muted' : 'unmuted'); });
+          var av = r.querySelector('.swiper-slide-active video');
+          if (av) { av.muted = isMuted; if (!isMuted) av.volume = 1; }
+        });
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+{% endunless %}
+
+{% schema %}
+{
+  "name": "SL - Before And After",
+  "tag": "section",
+  "class": "sl-before-after-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Heading"
+    },
+    {
+      "type": "text",
+      "id": "section_heading",
+      "label": "Section heading",
+      "default": "Before And After"
+    },
+    {
+      "type": "select",
+      "id": "heading_alignment",
+      "label": "Heading alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "label": "Heading size",
+      "min": 16,
+      "max": 36,
+      "step": 2,
+      "default": 24,
+      "unit": "px"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Badges"
+    },
+    {
+      "type": "text",
+      "id": "before_label",
+      "label": "Before badge text",
+      "default": "Before"
+    },
+    {
+      "type": "text",
+      "id": "after_label",
+      "label": "After badge text",
+      "default": "After"
+    },
+    {
+      "type": "color",
+      "id": "badge_color",
+      "label": "Badge background color",
+      "default": "#F4209B"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "slide_width",
+      "label": "Slide width (px)",
+      "min": 180,
+      "max": 400,
+      "step": 10,
+      "default": 280,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Section"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "default": 24,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "default": 24,
+      "unit": "px"
+    },
+    {
+      "type": "checkbox",
+      "id": "full_width",
+      "label": "Full width",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "content_width",
+      "label": "Content width",
+      "min": 400,
+      "max": 1600,
+      "step": 20,
+      "default": 1200,
+      "unit": "px"
+    }
+  ],
+  "presets": [
+    {
+      "name": "SL - Before And After",
+      "category": "Media"
+    }
+  ],
+  "templates": ["product"]
+}
+{% endschema %}

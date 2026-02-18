@@ -1,0 +1,258 @@
+{% comment %}
+  SL - Before And After Video (Snippet)
+  Use in product info via Custom Liquid block.
+  Usage: {% render 'sl-before-after-video', product: product, block_id: block.id %}
+  Requires product.metafields.custom.before_after_videos (list of UGC Video metaobjects).
+  Uses Swiper, square aspect, same play/mute strategy as Social Proof Video.
+  See README.md for metafield setup.
+{% endcomment %}
+
+{% assign block_id = block_id | default: 'ba' %}
+{% assign prod = product | default: nil %}
+{% assign videos = prod.metafields.custom.before_after_videos.value | default: nil %}
+{% assign has_videos = false %}
+{% if prod != blank and videos != blank and videos.size > 0 %}
+  {% assign has_videos = true %}
+{% endif %}
+
+{% if has_videos %}
+<div id="sl-ba-block-{{ block_id }}" class="sl-ba-block-root">
+  <div class="sl-ba-inner">
+    <div class="sl-ba-swiper swiper">
+      <div class="swiper-wrapper">
+        {% for entry in videos %}
+          {% assign video_file = entry.video %}
+          {% if video_file != blank %}
+            {% assign video_url = nil %}
+            {% assign video_mtag = video_file | metafield_tag %}
+            {% assign mp4_source = video_file.sources | where: 'format', 'mp4' | first %}
+            {% assign file_obj = video_file.value | default: video_file %}
+            {% if mp4_source and mp4_source.url != blank %}
+              {% assign video_url = mp4_source.url %}
+            {% elsif video_file.url != blank %}
+              {% assign video_url = video_file.url %}
+            {% elsif file_obj.url != blank %}
+              {% assign video_url = file_obj.url %}
+            {% endif %}
+            {% if video_url != blank %}
+              <div class="swiper-slide">
+                <div class="sl-ba-card sl-ba-video-wrapper">
+                  <span class="sl-ba-badge sl-ba-badge--before">Before</span>
+                  <span class="sl-ba-badge sl-ba-badge--after">After</span>
+                  <video
+                    {% if forloop.first %}src="{{ video_url }}" autoplay{% else %}data-src="{{ video_url }}"{% endif %}
+                    poster="{% if video_file.preview_image %}{{ video_file.preview_image | image_url: width: 1200 }}{% endif %}"
+                    muted loop playsinline
+                    preload="{% if forloop.first %}auto{% else %}metadata{% endif %}"
+                    class="sl-ba-video"
+                  ></video>
+                  <div class="sl-ba-footer">
+                    <div class="sl-ba-controls">
+                      <button type="button" class="sl-ba-mute" data-state="muted" aria-label="Mute / Unmute"><span class="mute-icon">🔇</span><span class="unmute-icon">🔊</span></button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {% elsif video_mtag != blank %}
+              <div class="swiper-slide">
+                <div class="sl-ba-card sl-ba-video-wrapper sl-ba-metafield">
+                  <span class="sl-ba-badge sl-ba-badge--before">Before</span>
+                  <span class="sl-ba-badge sl-ba-badge--after">After</span>
+                  <div class="sl-ba-metafield-wrap">{{ video_mtag }}</div>
+                  <div class="sl-ba-footer">
+                    <div class="sl-ba-controls">
+                      <button type="button" class="sl-ba-mute" data-state="muted" aria-label="Mute / Unmute"><span class="mute-icon">🔇</span><span class="unmute-icon">🔊</span></button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+      </div>
+      <div class="swiper-button-prev"></div>
+      <div class="swiper-button-next"></div>
+    </div>
+  </div>
+</div>
+
+<style>
+  #sl-ba-block-{{ block_id }}.sl-ba-block-root { width: 100%; margin: 16px 0; --sl-ba-slide-width: 280px; }
+  #sl-ba-block-{{ block_id }} .sl-ba-inner { padding: 0; }
+  #sl-ba-block-{{ block_id }} .sl-ba-swiper { overflow: hidden; position: relative; }
+  #sl-ba-block-{{ block_id }} .swiper-slide { opacity: 1 !important; filter: none !important; }
+  #sl-ba-block-{{ block_id }} .swiper-slide { flex-shrink: 0; width: var(--sl-ba-slide-width) !important; height: auto; }
+  #sl-ba-block-{{ block_id }} .sl-ba-card {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    background: #000;
+    border-radius: 16px;
+    box-shadow: 0 1px 1px 0 rgba(0,0,0,0.02), 0 4px 4px -1px rgba(0,0,0,0.02);
+    padding: 8px;
+    cursor: pointer;
+  }
+  #sl-ba-block-{{ block_id }} .sl-ba-video-wrapper video,
+  #sl-ba-block-{{ block_id }} .sl-ba-card video {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+    border-radius: 12px; pointer-events: none;
+  }
+  #sl-ba-block-{{ block_id }} .sl-ba-card video::-webkit-media-controls { display: none !important; }
+  #sl-ba-block-{{ block_id }} .sl-ba-metafield-wrap { position: absolute; inset: 8px; border-radius: 12px; overflow: hidden; }
+  #sl-ba-block-{{ block_id }} .sl-ba-metafield-wrap video { position: absolute; inset: 0; }
+  #sl-ba-block-{{ block_id }} .sl-ba-badge {
+    position: absolute;
+    top: 16px;
+    padding: 2px 12px;
+    border-radius: 12px 0 0 0;
+    font-weight: 500;
+    font-size: 12px;
+    color: #fff;
+    background: #F4209B;
+    z-index: 2;
+  }
+  #sl-ba-block-{{ block_id }} .sl-ba-badge--before { left: 16px; }
+  #sl-ba-block-{{ block_id }} .sl-ba-badge--after { right: 16px; left: auto; border-radius: 0 12px 0 0; }
+  #sl-ba-block-{{ block_id }} .swiper-slide-active .sl-ba-footer { display: flex; }
+  #sl-ba-block-{{ block_id }} .sl-ba-footer {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    display: none; align-items: flex-end; justify-content: flex-end;
+    padding: 0.5rem; background: linear-gradient(to top, rgba(255,255,255,0.3), transparent);
+    z-index: 10; pointer-events: none;
+  }
+  #sl-ba-block-{{ block_id }} .sl-ba-footer .sl-ba-controls { pointer-events: auto; }
+  #sl-ba-block-{{ block_id }} .sl-ba-controls button {
+    background: transparent; border: none; padding: 0.25rem;
+    width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
+    font-size: 0; color: #000; cursor: pointer; pointer-events: auto;
+  }
+  #sl-ba-block-{{ block_id }} .sl-ba-controls .mute-icon,
+  #sl-ba-block-{{ block_id }} .sl-ba-controls .unmute-icon { font-size: 14px; color: inherit; }
+  #sl-ba-block-{{ block_id }} .sl-ba-mute[data-state="muted"] .unmute-icon { display: none; }
+  #sl-ba-block-{{ block_id }} .sl-ba-mute[data-state="unmuted"] .mute-icon { display: none; }
+  #sl-ba-block-{{ block_id }} .swiper-button-prev, #sl-ba-block-{{ block_id }} .swiper-button-next,
+  #sl-ba-block-{{ block_id }} .swiper-button-prev::after, #sl-ba-block-{{ block_id }} .swiper-button-next::after { color: #000 !important; }
+  #sl-ba-block-{{ block_id }} .swiper-pagination { display: none !important; }
+</style>
+
+<script>
+(function() {
+  var blockId = '{{ block_id }}';
+  var root = document.getElementById('sl-ba-block-' + blockId);
+  if (!root) return;
+  var SWIPER_CSS = 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css';
+  var SWIPER_JS = 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js';
+
+  function ensureVideoSrc(v) {
+    if (!v) return;
+    var src = v.getAttribute('data-src');
+    if (src && !v.src) v.src = src;
+  }
+
+  function loadSwiper(cb) {
+    if (typeof Swiper !== 'undefined') { cb(); return; }
+    var link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = SWIPER_CSS;
+    document.head.appendChild(link);
+    var s = document.createElement('script');
+    s.src = SWIPER_JS;
+    s.onload = cb;
+    document.head.appendChild(s);
+  }
+
+  function run() {
+    var r = document.getElementById('sl-ba-block-' + blockId);
+    if (!r) return;
+    var swiperEl = r.querySelector('.sl-ba-swiper');
+    var slides = r.querySelectorAll('.sl-ba-card');
+    if (!swiperEl || slides.length === 0) return;
+
+    var autoplay = true;
+    var isMuted = true;
+    var swiperInstance = null;
+
+    function playFocusedVideo() {
+      if (!swiperInstance) return;
+      var idx = swiperInstance.activeIndex;
+      var activeSlide = swiperInstance.slides[idx];
+      var focusedCard = activeSlide ? activeSlide.querySelector('.sl-ba-card') : null;
+      var focusedVideo = focusedCard ? focusedCard.querySelector('video') : null;
+
+      r.querySelectorAll('.sl-ba-card video').forEach(function(v) { if (v) v.pause(); });
+
+      if (focusedVideo && autoplay) {
+        ensureVideoSrc(focusedVideo);
+        focusedVideo.muted = isMuted;
+        var src = focusedVideo.src || focusedVideo.currentSrc || focusedVideo.getAttribute('data-src');
+        var sourceEl = focusedVideo.querySelector('source');
+        if (sourceEl && !src) src = sourceEl.src || sourceEl.getAttribute('src');
+        if (src && !focusedVideo.src) focusedVideo.src = src;
+        var hasSrc = focusedVideo.src || focusedVideo.currentSrc || (sourceEl && sourceEl.src);
+        if (hasSrc) {
+          var doPlay = function() {
+            focusedVideo.muted = isMuted;
+            if (!isMuted) focusedVideo.volume = 1;
+            focusedVideo.play().catch(function(){});
+          };
+          if (focusedVideo.readyState >= 2) doPlay();
+          else {
+            focusedVideo.addEventListener('loadeddata', doPlay, { once: true });
+            focusedVideo.addEventListener('canplay', doPlay, { once: true });
+            focusedVideo.load();
+          }
+        }
+      }
+    }
+
+    loadSwiper(function() {
+      if (swiperEl.swiper) return;
+      swiperInstance = new Swiper(swiperEl, {
+        slidesPerView: 'auto',
+        spaceBetween: 10,
+        slidesOffsetAfter: 100,
+        slidesOffsetBefore: 0,
+        watchSlidesProgress: false,
+        loop: false,
+        navigation: {
+          nextEl: r.querySelector('.swiper-button-next'),
+          prevEl: r.querySelector('.swiper-button-prev')
+        },
+        on: {
+          slideChange: function() { playFocusedVideo(); },
+          init: function() { setTimeout(playFocusedVideo, 50); }
+        }
+      });
+
+      slides.forEach(function(card) {
+        card.addEventListener('click', function(e) {
+          if (e.target.closest('.sl-ba-controls')) return;
+          isMuted = !isMuted;
+          r.querySelectorAll('.sl-ba-mute').forEach(function(b) { b.setAttribute('data-state', isMuted ? 'muted' : 'unmuted'); });
+          var av = r.querySelector('.swiper-slide-active video');
+          if (av) { av.muted = isMuted; if (!isMuted) av.volume = 1; }
+        });
+      });
+
+      r.querySelectorAll('.sl-ba-mute').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          e.preventDefault();
+          isMuted = !isMuted;
+          r.querySelectorAll('.sl-ba-mute').forEach(function(b) { b.setAttribute('data-state', isMuted ? 'muted' : 'unmuted'); });
+          var av = r.querySelector('.swiper-slide-active video');
+          if (av) { av.muted = isMuted; if (!isMuted) av.volume = 1; }
+        });
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+{% elsif request.design_mode and prod != blank %}
+  <div id="sl-ba-block-{{ block_id }}" class="sl-ba-block-root" style="padding: 12px; color: #666; border: 1px dashed #ccc;">
+    <p style="margin: 0;">Before And After — No videos. Add UGC Video entries to this product's <strong>Before and after videos</strong> metafield.</p>
+  </div>
+{% endif %}
