@@ -63,7 +63,9 @@ Product-specific UGC video slider for social proof. Uses **metaobjects** for per
 3. Add references to your UGC Video entries
 4. Save product
 
-### Step 5 — Add section to product template
+### Step 5 — Add to product template
+
+**Option A — Section**
 
 1. **Online Store** → **Themes** → **Customize**
 2. Go to a product page
@@ -71,6 +73,16 @@ Product-specific UGC video slider for social proof. Uses **metaobjects** for per
 4. Set **Video source** to **Product metaobject (per product)**
 5. Set heading (e.g. “Real reviews”) and styling
 6. Save
+
+**Option B — Snippet in product info** (Custom Liquid block)
+
+1. **Online Store** → **Themes** → **Customize**
+2. Go to a product page
+3. In the product form/info area, add a **Custom Liquid** block
+4. Paste: `{% render 'sl-social-proof-video', product: product, block_id: block.id %}`
+5. Save
+
+Copy `snippets/sl-social-proof-video.liquid` to your theme **snippets** folder.
 
 ---
 
@@ -89,6 +101,8 @@ Product-specific UGC video slider for social proof. Uses **metaobjects** for per
 Section Lab/Social Proof Video/
 ├── sections/
 │   └── sl-social-proof-video.liquid
+├── snippets/
+│   └── sl-social-proof-video.liquid   ← Use in Custom Liquid block
 └── README.md
 ```
 
@@ -96,9 +110,15 @@ Section Lab/Social Proof Video/
 
 ## Installation
 
+**Section:**
 1. Copy `sections/sl-social-proof-video.liquid` to your theme **sections** folder
-2. Follow the setup above for metaobjects
-3. Add the section to your product template
+2. Add the section to your product template
+
+**Snippet (product info block):**
+1. Copy `snippets/sl-social-proof-video.liquid` to your theme **snippets** folder
+2. Add a **Custom Liquid** block in product info and render: `{% render 'sl-social-proof-video', product: product, block_id: block.id %}`
+
+For both, complete the metaobject setup above first.
 
 ---
 
