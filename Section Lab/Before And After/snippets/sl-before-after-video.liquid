@@ -8,6 +8,10 @@
 {% endcomment %}
 
 {% assign block_id = block_id | default: 'ba' %}
+{% assign ba_heading = 'sections.sl_before_after.heading' | t | default: 'Before And After' %}
+{% assign ba_before = 'sections.sl_before_after.before_label' | t | default: 'Before' %}
+{% assign ba_after = 'sections.sl_before_after.after_label' | t | default: 'After' %}
+{% assign ba_no_videos = 'sections.sl_before_after.no_videos' | t | default: "No videos. Add UGC Video entries to this product's Before and after videos metafield." %}
 {% assign prod = product | default: nil %}
 {% assign videos = prod.metafields.custom.before_after_videos.value | default: nil %}
 {% assign has_videos = false %}
@@ -16,8 +20,12 @@
 {% endif %}
 
 {% if has_videos %}
-<div id="sl-ba-block-{{ block_id }}" class="sl-ba-block-root">
+{% assign locale_iso = request.locale.iso_code | default: 'en' %}
+{% assign is_rtl = false %}
+{% if locale_iso == 'ar' or locale_iso == 'he' or locale_iso == 'fa' %}{% assign is_rtl = true %}{% endif %}
+<div id="sl-ba-block-{{ block_id }}" class="sl-ba-block-root{% if is_rtl %} sl-ba-rtl{% endif %}"{% if is_rtl %} dir="rtl"{% endif %}>
   <div class="sl-ba-inner">
+    <h2 class="sl-ba-heading">{{ 'sections.sl_before_after.heading' | t }}</h2>
     <div class="sl-ba-swiper swiper">
       <div class="swiper-wrapper">
         {% for entry in videos %}
@@ -37,8 +45,8 @@
             {% if video_url != blank %}
               <div class="swiper-slide">
                 <div class="sl-ba-card sl-ba-video-wrapper">
-                  <span class="sl-ba-badge sl-ba-badge--before">Before</span>
-                  <span class="sl-ba-badge sl-ba-badge--after">After</span>
+                  <span class="sl-ba-badge sl-ba-badge--before">{{ 'sections.sl_before_after.before_label' | t }}</span>
+                  <span class="sl-ba-badge sl-ba-badge--after">{{ 'sections.sl_before_after.after_label' | t }}</span>
                   <video
                     {% if forloop.first %}src="{{ video_url }}" autoplay{% else %}data-src="{{ video_url }}"{% endif %}
                     poster="{% if video_file.preview_image %}{{ video_file.preview_image | image_url: width: 1200 }}{% endif %}"
@@ -56,8 +64,8 @@
             {% elsif video_mtag != blank %}
               <div class="swiper-slide">
                 <div class="sl-ba-card sl-ba-video-wrapper sl-ba-metafield">
-                  <span class="sl-ba-badge sl-ba-badge--before">Before</span>
-                  <span class="sl-ba-badge sl-ba-badge--after">After</span>
+                  <span class="sl-ba-badge sl-ba-badge--before">{{ 'sections.sl_before_after.before_label' | t }}</span>
+                  <span class="sl-ba-badge sl-ba-badge--after">{{ 'sections.sl_before_after.after_label' | t }}</span>
                   <div class="sl-ba-metafield-wrap">{{ video_mtag }}</div>
                   <div class="sl-ba-footer">
                     <div class="sl-ba-controls">
@@ -79,6 +87,7 @@
 <style>
   #sl-ba-block-{{ block_id }}.sl-ba-block-root { width: 100%; margin: 16px 0; --sl-ba-slide-width: 280px; }
   #sl-ba-block-{{ block_id }} .sl-ba-inner { padding: 0; }
+  #sl-ba-block-{{ block_id }} .sl-ba-heading { font-size: 24px; margin: 0 0 16px 0; }
   #sl-ba-block-{{ block_id }} .sl-ba-swiper { overflow: hidden; position: relative; }
   #sl-ba-block-{{ block_id }} .swiper-slide { opacity: 1 !important; filter: none !important; }
   #sl-ba-block-{{ block_id }} .swiper-slide { flex-shrink: 0; width: var(--sl-ba-slide-width) !important; height: auto; }
@@ -88,7 +97,6 @@
     overflow: hidden;
     background: #000;
     border-radius: 16px;
-    box-shadow: 0 1px 1px 0 rgba(0,0,0,0.02), 0 4px 4px -1px rgba(0,0,0,0.02);
     padding: 8px;
     cursor: pointer;
   }
@@ -252,7 +260,7 @@
 })();
 </script>
 {% elsif request.design_mode and prod != blank %}
-  <div id="sl-ba-block-{{ block_id }}" class="sl-ba-block-root" style="padding: 12px; color: #666; border: 1px dashed #ccc;">
-    <p style="margin: 0;">Before And After — No videos. Add UGC Video entries to this product's <strong>Before and after videos</strong> metafield.</p>
+  <div id="sl-ba-block-{{ block_id }}" class="sl-ba-block-root" style="padding: 12px; color: #666;">
+    <p style="margin: 0;">{{ 'sections.sl_before_after.heading' | t }} — {{ 'sections.sl_before_after.no_videos' | t }}</p>
   </div>
 {% endif %}

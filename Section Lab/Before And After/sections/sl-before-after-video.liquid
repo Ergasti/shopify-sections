@@ -13,16 +13,17 @@
 
 {% unless has_videos %}
   {% if request.design_mode %}
-    <div id="sl-ba-section-{{ section.id }}" class="sl-ba-block-root" style="padding: 24px; text-align: center; border: 2px dashed #ccc; background: {{ section.settings.background_color }};">
-      <p style="margin: 0; color: #666;">Before And After — No videos. Add UGC Video entries to this product's <strong>Before and after videos</strong> metafield.</p>
+    <div id="sl-ba-section-{{ section.id }}" class="sl-ba-block-root" style="padding: 24px; text-align: center; background: {{ section.settings.background_color }};">
+      <p style="margin: 0; color: #666;">{{ 'sections.sl_before_after.heading' | t }} — {{ 'sections.sl_before_after.no_videos' | t }}</p>
     </div>
   {% endif %}
 {% else %}
-<div id="sl-ba-section-{{ section.id }}" class="sl-ba-block-root" style="background: {{ section.settings.background_color }}; padding: {{ section.settings.padding_top }}px 0 {{ section.settings.padding_bottom }}px 0;">
+{% assign ba_locale = request.locale.iso_code | default: 'en' %}
+{% assign ba_is_rtl = false %}
+{% if ba_locale == 'ar' or ba_locale == 'he' or ba_locale == 'fa' %}{% assign ba_is_rtl = true %}{% endif %}
+<div id="sl-ba-section-{{ section.id }}" class="sl-ba-block-root{% if ba_is_rtl %} sl-ba-rtl{% endif %}"{% if ba_is_rtl %} dir="rtl"{% endif %} style="background: {{ section.settings.background_color }}; padding: {{ section.settings.padding_top }}px 0 {{ section.settings.padding_bottom }}px 0;">
   <div class="sl-ba-inner" style="{% unless section.settings.full_width %}max-width: {{ section.settings.content_width }}px; margin-left: auto; margin-right: auto;{% endunless %} padding: 0 16px;">
-    {% if section.settings.section_heading != blank %}
-      <h2 class="sl-ba-heading" style="font-size: {{ section.settings.heading_size }}px; color: {{ section.settings.heading_color }}; margin: 0 0 16px 0; text-align: {{ section.settings.heading_alignment }};">{{ section.settings.section_heading }}</h2>
-    {% endif %}
+    <h2 class="sl-ba-heading" style="font-size: {{ section.settings.heading_size }}px; color: {{ section.settings.heading_color }}; margin: 0 0 16px 0; text-align: {{ section.settings.heading_alignment }};">{% if section.settings.section_heading != blank %}{{ section.settings.section_heading }}{% else %}{{ 'sections.sl_before_after.heading' | t }}{% endif %}</h2>
     <div class="sl-ba-swiper swiper" style="--sl-ba-slide-width: {{ section.settings.slide_width }}px;">
       <div class="swiper-wrapper">
         {% for entry in videos %}
@@ -42,8 +43,8 @@
             {% if video_url != blank %}
               <div class="swiper-slide">
                 <div class="sl-ba-card sl-ba-video-wrapper">
-                  <span class="sl-ba-badge sl-ba-badge--before">{{ section.settings.before_label }}</span>
-                  <span class="sl-ba-badge sl-ba-badge--after">{{ section.settings.after_label }}</span>
+                  <span class="sl-ba-badge sl-ba-badge--before">{% if section.settings.before_label != blank %}{{ section.settings.before_label }}{% else %}{{ 'sections.sl_before_after.before_label' | t }}{% endif %}</span>
+                  <span class="sl-ba-badge sl-ba-badge--after">{% if section.settings.after_label != blank %}{{ section.settings.after_label }}{% else %}{{ 'sections.sl_before_after.after_label' | t }}{% endif %}</span>
                   <video
                     {% if forloop.first %}src="{{ video_url }}" autoplay{% else %}data-src="{{ video_url }}"{% endif %}
                     poster="{% if video_file.preview_image %}{{ video_file.preview_image | image_url: width: 1200 }}{% endif %}"
@@ -61,8 +62,8 @@
             {% elsif video_mtag != blank %}
               <div class="swiper-slide">
                 <div class="sl-ba-card sl-ba-video-wrapper sl-ba-metafield">
-                  <span class="sl-ba-badge sl-ba-badge--before">{{ section.settings.before_label }}</span>
-                  <span class="sl-ba-badge sl-ba-badge--after">{{ section.settings.after_label }}</span>
+                  <span class="sl-ba-badge sl-ba-badge--before">{% if section.settings.before_label != blank %}{{ section.settings.before_label }}{% else %}{{ 'sections.sl_before_after.before_label' | t }}{% endif %}</span>
+                  <span class="sl-ba-badge sl-ba-badge--after">{% if section.settings.after_label != blank %}{{ section.settings.after_label }}{% else %}{{ 'sections.sl_before_after.after_label' | t }}{% endif %}</span>
                   <div class="sl-ba-metafield-wrap">{{ video_mtag }}</div>
                   <div class="sl-ba-footer">
                     <div class="sl-ba-controls">
@@ -86,8 +87,7 @@
   #sl-ba-section-{{ section.id }} .swiper-slide { opacity: 1 !important; filter: none !important; flex-shrink: 0; width: var(--sl-ba-slide-width) !important; height: auto; }
   #sl-ba-section-{{ section.id }} .sl-ba-card {
     position: relative; aspect-ratio: 1 / 1; overflow: hidden; background: #fff;
-    border-radius: 16px; box-shadow: 0 1px 1px 0 rgba(0,0,0,0.02), 0 4px 4px -1px rgba(0,0,0,0.02);
-    padding: 8px; cursor: pointer;
+    border-radius: 16px; padding: 8px; cursor: pointer;
   }
   #sl-ba-section-{{ section.id }} .sl-ba-video-wrapper video,
   #sl-ba-section-{{ section.id }} .sl-ba-card video {

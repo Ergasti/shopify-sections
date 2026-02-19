@@ -75,6 +75,38 @@ Section Lab/Before And After/
 
 ---
 
+## Localization (Arabic / English)
+
+Add these keys to your theme locale files for Arabic/English support:
+
+**locales/en.default.json:**
+```json
+"sections": {
+  "sl_before_after": {
+    "heading": "Before And After",
+    "before_label": "Before",
+    "after_label": "After",
+    "no_videos": "No videos. Add UGC Video entries to this product's Before and after videos metafield."
+  }
+}
+```
+
+**locales/ar.json:**
+```json
+"sections": {
+  "sl_before_after": {
+    "heading": "قبل وبعد",
+    "before_label": "قبل",
+    "after_label": "بعد",
+    "no_videos": "لا توجد مقاطع فيديو. أضف إدخالات فيديو UGC إلى حقل ما بعد البيانات هذا للمنتج."
+  }
+}
+```
+
+RTL is applied automatically when locale is Arabic (`ar`), Hebrew (`he`), or Persian (`fa`).
+
+---
+
 ## Requirements
 
 - Metafield: `custom.before_after_videos`
