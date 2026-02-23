@@ -9,7 +9,7 @@ Toast-style **“social proof”** nudges: “Someone from [city] just bought [p
 ## Features
 
 - **Product list:** Pick up to 10 products; message shows a random product and random city.
-- **Cities:** Comma-separated list (e.g. Berlin, Munich, Hamburg).
+- **Cities:** Comma-separated list (e.g. Berlin, Munich, Hamburg). Both ASCII (,) and Arabic (،) commas are supported so one random city is shown per toast in all locales.
 - **Headline:** Custom text (e.g. “Someone just made a purchase!”).
 - **Preview mode:** One toast that stays open (for editing); when off, toasts auto-close and repeat.
 - **Styling:** Headline/text/highlight sizes and colors, background, border, shadow, position (top/bottom, left/center/right), max width, padding, close button.

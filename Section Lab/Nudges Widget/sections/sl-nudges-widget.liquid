@@ -49,7 +49,8 @@
 
     var productDataEl = document.getElementById("sales-nudge-products-{{ section.id }}");
     var products = productDataEl ? JSON.parse(productDataEl.textContent) : [];
-    var citiesRaw = {{ section.settings.city_names | split: ',' | json }};
+    {% comment %} Normalize Arabic comma (،) to ASCII comma so city list splits correctly in all locales {% endcomment %}
+    var citiesRaw = {{ section.settings.city_names | replace: '،', ',' | split: ',' | json }};
     var cities = [];
     if (citiesRaw && citiesRaw.length) {
       for (var c = 0; c < citiesRaw.length; c++) {
