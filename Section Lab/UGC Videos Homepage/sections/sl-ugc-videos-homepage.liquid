@@ -384,18 +384,21 @@
     </div>
     <div class="sl-ugc-hp-overlay-product">
       <div class="sl-ugc-hp-overlay-product-row">
-        <div id="sl-ugc-hp-overlay-photo-{{ section.id }}" class="sl-ugc-hp-overlay-photo">
+        <a id="sl-ugc-hp-overlay-photo-link-{{ section.id }}" class="sl-ugc-hp-overlay-photo" href="#" aria-label="{{ 'sections.sl_ugc_hp.view_product' | t | default: 'View product' }}">
           <img id="sl-ugc-hp-overlay-img-{{ section.id }}" src="" alt="" width="64" height="64" loading="lazy">
-        </div>
+        </a>
         <div class="sl-ugc-hp-overlay-product-info">
-          <p id="sl-ugc-hp-overlay-name-{{ section.id }}" class="sl-ugc-hp-overlay-name"></p>
-          <svg xmlns="http://www.w3.org/2000/svg" width="72" height="13" viewBox="0 0 72 13" fill="none" style="margin:5px 0;">
-            <path d="M6 0.5L7.34708 4.6459H11.7063L8.17963 7.2082L9.52671 11.3541L6 8.7918L2.47329 11.3541L3.82037 7.2082L0.293661 4.6459H4.65292L6 0.5Z" fill="#272E0F"/>
-            <path d="M21 0.5L22.3471 4.6459H26.7063L23.1796 7.2082L24.5267 11.3541L21 8.7918L17.4733 11.3541L18.8204 7.2082L15.2937 4.6459H19.6529L21 0.5Z" fill="#272E0F"/>
-            <path d="M36 0.5L37.3471 4.6459H41.7063L38.1796 7.2082L39.5267 11.3541L36 8.7918L32.4733 11.3541L33.8204 7.2082L30.2937 4.6459H34.6529L36 0.5Z" fill="#272E0F"/>
-            <path d="M51 0.5L52.3471 4.6459H56.7063L53.1796 7.2082L54.5267 11.3541L51 8.7918L47.4733 11.3541L48.8204 7.2082L45.2937 4.6459H49.6529L51 0.5Z" fill="#272E0F"/>
-            <path d="M66 0.5L67.3471 4.6459H71.7063L68.1796 7.2082L69.5267 11.3541L66 8.7918L62.4733 11.3541L63.8204 7.2082L60.2937 4.6459H64.6529L66 0.5Z" fill="#272E0F"/>
-          </svg>
+          <a id="sl-ugc-hp-overlay-name-{{ section.id }}" class="sl-ugc-hp-overlay-name" href="#"></a>
+          <div class="sl-ugc-hp-overlay-rating-row">
+            <svg xmlns="http://www.w3.org/2000/svg" width="72" height="13" viewBox="0 0 72 13" fill="none" class="sl-ugc-hp-overlay-stars" aria-hidden="true">
+              <path d="M6 0.5L7.34708 4.6459H11.7063L8.17963 7.2082L9.52671 11.3541L6 8.7918L2.47329 11.3541L3.82037 7.2082L0.293661 4.6459H4.65292L6 0.5Z" fill="#000"/>
+              <path d="M21 0.5L22.3471 4.6459H26.7063L23.1796 7.2082L24.5267 11.3541L21 8.7918L17.4733 11.3541L18.8204 7.2082L15.2937 4.6459H19.6529L21 0.5Z" fill="#000"/>
+              <path d="M36 0.5L37.3471 4.6459H41.7063L38.1796 7.2082L39.5267 11.3541L36 8.7918L32.4733 11.3541L33.8204 7.2082L30.2937 4.6459H34.6529L36 0.5Z" fill="#000"/>
+              <path d="M51 0.5L52.3471 4.6459H56.7063L53.1796 7.2082L54.5267 11.3541L51 8.7918L47.4733 11.3541L48.8204 7.2082L45.2937 4.6459H49.6529L51 0.5Z" fill="#000"/>
+              <path d="M66 0.5L67.3471 4.6459H71.7063L68.1796 7.2082L69.5267 11.3541L66 8.7918L62.4733 11.3541L63.8204 7.2082L60.2937 4.6459H64.6529L66 0.5Z" fill="#000"/>
+            </svg>
+            <span id="sl-ugc-hp-overlay-rating-{{ section.id }}" class="sl-ugc-hp-overlay-rating-text"></span>
+          </div>
           <div class="sl-ugc-hp-overlay-price-box">
             <span id="sl-ugc-hp-overlay-price-{{ section.id }}" class="sl-ugc-hp-overlay-price"></span>
             <span id="sl-ugc-hp-overlay-compare-{{ section.id }}" class="sl-ugc-hp-overlay-compare"></span>
@@ -636,19 +639,43 @@
     box-shadow: 0px -8px 32px 0px rgba(0,0,0,0.25);
     padding: 10px;
     border-radius: 16px 16px 24px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
   }
   #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-product-row {
     align-items: center;
     display: grid;
     grid-template-columns: 20% 80%;
   }
+  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-photo {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+  }
+  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-photo:hover { opacity: 0.9; }
   #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-photo img {
     width: 64px; height: 64px; object-fit: cover; border-radius: 100px;
   }
   #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-name {
     margin: 0 0 4px 0; font-size: 13px; font-weight: 500; color: #393938; line-height: 120%;
+    text-decoration: none;
+    display: inline-block;
   }
-  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-product-info svg { margin: 5px 0; display: block; }
+  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-name:hover { text-decoration: underline; color: #393938; }
+  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-rating-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin: 5px 0 2px 0;
+  }
+  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-rating-row .sl-ugc-hp-overlay-stars { flex-shrink: 0; }
+  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-rating-text {
+    font-size: 12px;
+    color: #545454;
+    font-weight: 500;
+  }
   #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-price-box { margin-top: 2px; }
   #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-price {
     color: {{ section.settings.price_color }};
@@ -656,23 +683,22 @@
   }
   #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-compare { margin-left: 6px; text-decoration: line-through; font-size: 13px; color: #666; }
   #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-cta {
-    display: flex;
-    width: 100%;
-    height: 48px;
-    padding: 9px 25px;
+    display: inline-flex;
+    width: auto;
+    height: 40px;
+    padding: 8px 18px;
     justify-content: center;
     align-items: center;
-    gap: 4px;
     flex-shrink: 0;
-    border-radius: 36px;
-    border: 1px solid rgba(255,255,255,0.12);
-    background: {{ section.settings.cta_bg }};
-    box-shadow: 0px 1px 1px 0px rgba(255,255,255,0.02) inset, 0px 6px 12px 0px rgba(255,255,255,0.12) inset, 0px 4px 8px 3px rgba(0,0,0,0.12), 0px 1px 3px 0px rgba(0,0,0,0.20);
-    color: {{ section.settings.cta_color }};
-    margin-top: 11px;
+    border-radius: 8px;
+    border: none;
+    background: #000;
+    color: #fff;
+    margin-top: 10px;
+    margin-left: auto;
     cursor: pointer;
     transition: opacity 0.2s;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
     text-decoration: none;
   }
@@ -823,13 +849,28 @@
         }
       }
 
-      var overlayPhoto = document.getElementById('sl-ugc-hp-overlay-photo-' + sectionId);
-      if (overlayPhoto) overlayPhoto.style.display = productImage ? '' : 'none';
+      var overlayPhotoLink = document.getElementById('sl-ugc-hp-overlay-photo-link-' + sectionId);
+      if (overlayPhotoLink) {
+        overlayPhotoLink.href = productUrl && productUrl !== '#' ? productUrl : '#';
+        overlayPhotoLink.style.display = productImage ? '' : 'none';
+      }
       if (overlayImg) {
         overlayImg.src = productImage;
         overlayImg.alt = productTitle;
       }
-      if (overlayName) overlayName.textContent = productTitle;
+      if (overlayName) {
+        overlayName.textContent = productTitle;
+        overlayName.href = productUrl && productUrl !== '#' ? productUrl : '#';
+      }
+      var overlayRating = document.getElementById('sl-ugc-hp-overlay-rating-' + sectionId);
+      if (overlayRating) {
+        var ratingStr = '';
+        if (productRating && productReviews) ratingStr = productRating + ' · ' + productReviews;
+        else if (productRating) ratingStr = productRating;
+        else if (productReviews) ratingStr = productReviews;
+        overlayRating.textContent = ratingStr;
+        overlayRating.style.display = ratingStr ? '' : 'none';
+      }
       if (overlayPrice) overlayPrice.textContent = productPrice;
       if (overlayCompare) {
         overlayCompare.textContent = productCompare;
@@ -1192,7 +1233,7 @@
       "type": "color",
       "id": "text_color",
       "label": "Product text color",
-      "default": "#272E0F"
+      "default": "#000"
     },
     {
       "type": "color",
@@ -1210,7 +1251,7 @@
       "type": "color",
       "id": "star_color",
       "label": "Star rating color",
-      "default": "#272E0F"
+      "default": "#000"
     },
     {
       "type": "text",
@@ -1228,13 +1269,13 @@
       "type": "color",
       "id": "cta_bg",
       "label": "CTA background",
-      "default": "#272E0F"
+      "default": "#000"
     },
     {
       "type": "color",
       "id": "cta_border",
       "label": "CTA border color",
-      "default": "#272E0F"
+      "default": "#000"
     },
     {
       "type": "header",
