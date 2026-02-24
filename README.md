@@ -2,14 +2,27 @@
 
 A comprehensive, categorized library of Shopify sections and snippets. Copy what you need into your theme.
 
-**Library last updated:** 2025-02-14
+**Library last updated:** 2025-02-24
+
+---
+
+## Contents
+
+- [Quick reference (by category)](#quick-reference-by-category)
+- [Section Lab (all sections)](#section-lab-all-sections)
+- [Folder structure](#folder-structure-per-section)
+- [Categories overview](#categories-overview)
+- [Source repositories](#source-repositories-included-in-this-library)
+- [Original sections (this repo)](#original-sections-this-repo)
+- [Plan and progress](#plan-and-progress)
+- [Authors & license](#authors--license)
 
 ---
 
 ## Quick reference (by category)
 
-| Category | Section / Snippet | Source | Last updated |
-|----------|-------------------|--------|--------------|
+| Category | Section / Snippet | Source | Updated |
+|----------|-------------------|--------|---------|
 | **Carousels & Sliders** | [Marquee Products](Marquee%20Products/README.md) | bstroshek/marquee-section | 2025-02-14 |
 | | [Fancy Slick Carousel](Fancy%20Slick%20Carousel/README.md) | patrickbolle/shopify-snippets | 2025-02-14 |
 | | [Hero Slider (rocklss)](Hero%20Slider%20(rocklss)/README.md) | rocklss/shopify_section | 2025-02-14 |
@@ -18,14 +31,20 @@ A comprehensive, categorized library of Shopify sections and snippets. Copy what
 | **Snippets & Utilities** | [Tabbed Description](Tabbed%20Description/README.md) | patrickbolle/shopify-snippets | 2025-02-14 |
 | | [Pagination With Numbers](Pagination%20With%20Numbers/README.md) | patrickbolle/shopify-snippets | 2025-02-14 |
 | | [IP Redirection](IP%20Redirection/README.md) | patrickbolle/shopify-snippets | 2025-02-14 |
-| **Product & Collection** | [SL Price Bubble Widget](Section%20Lab/Price%20Bubble%20Widget/README.md) | Section Lab (paid) | 2025-02-14 |
-| | [SL Icon List (Product Bullets)](Section%20Lab/Icon%20List/README.md) | Section Lab (paid) | 2025-02-14 |
-| | [SL Payment Icons](Section%20Lab/Payment%20Icons/README.md) | Section Lab (paid) | 2025-02-14 |
-| | [SL How to Use (section + snippet)](Section%20Lab/How%20To%20Use/README.md) | Section Lab (metaobjects) | 2025-02-24 |
+| **Product & Collection** | [SL – Bundle](Section%20Lab/Bundle/README.md) | Section Lab (this repo) | 2025-02-24 |
+| | [SL – How to Use](Section%20Lab/How%20To%20Use/README.md) | Section Lab (metaobjects) | 2025-02-24 |
+| | [SL – Price Bubble Widget](Section%20Lab/Price%20Bubble%20Widget/README.md) | Section Lab (paid) | 2025-02-14 |
+| | [SL – Icon List (Product Bullets)](Section%20Lab/Icon%20List/README.md) | Section Lab (paid) | 2025-02-14 |
+| | [SL – Payment Icons](Section%20Lab/Payment%20Icons/README.md) | Section Lab (paid) | 2025-02-14 |
+| | [SL – Frequently Bought Together](Section%20Lab/Frequently%20Bought%20Together/README.md) | Section Lab (paid) | 2025-02-14 |
 | | [Scarcity Bar](Scarcity%20Bar/README.md) | Custom (this repo) | 2025-02-14 |
 | | [Collection Page Swatches](Collection%20Page%20Swatches/README.md) | patrickbolle/shopify-snippets | 2025-02-14 |
 | **Media & Gallery** | [Image Gallery (BoldizArt)](Image%20Gallery%20(BoldizArt)/README.md) | BoldizArt/Shopify-Image-Gallery | 2025-02-14 |
-| **Video / Media** | [SL - Native Video Slider](Section%20Lab/Native%20Video%20Slider/README.md) | Section Lab (paid) | 2025-02-14 |
+| **Video & Media** | [SL – Native Video Slider](Section%20Lab/Native%20Video%20Slider/README.md) | Section Lab (paid) | 2025-02-14 |
+| | [SL – UGC Videos Homepage](Section%20Lab/UGC%20Videos%20Homepage/README.md) | Section Lab (paid) | 2025-02-14 |
+| | [SL – Social Proof Video](Section%20Lab/Social%20Proof%20Video/README.md) | Section Lab (paid) | 2025-02-14 |
+| | [SL – Before And After](Section%20Lab/Before%20And%20After/README.md) | Section Lab (paid) | 2025-02-14 |
+| | [SL – Real Results](Section%20Lab/Real%20Results/README.md) | Section Lab (paid) | 2025-02-14 |
 | | [Media Slider Snap](Media%20Slider%20Snap/README.md) | Custom (video-section2) | 2025-02-14 |
 | | [Videos Slider (Mixed Media Carousel)](Videos%20Slider/README.md) | Custom (SS section) | 2025-02-14 |
 | | [Video Slider](Video%20Slider/README.md) | Meetanshi blog | 2025-02-14 |
@@ -36,44 +55,75 @@ A comprehensive, categorized library of Shopify sections and snippets. Copy what
 | | [Quiz](Quiz/README.md) | Sections.Design (this repo) | 2025-02-14 |
 | | [Tooltips](Tooltips/README.md) | Sections.Design (this repo) | 2025-02-14 |
 | | [App Optimization](App%20Optimization/readme.md) | Sections.Design (this repo) | 2025-02-14 |
-| **Navigation / Content** | [SL Story Navigation](Section%20Lab/Story%20Navigation/README.md) | Section Lab (paid) | 2025-02-14 |
-| **Promotional** | [SL Announcement Bar](Section%20Lab/Announcement%20Bar/README.md) | Section Lab (paid) | 2025-02-14 |
-| | [SL Delivery Countdown](Section%20Lab/Delivery%20Countdown/README.md) | Section Lab (paid) | 2025-02-14 |
-| **Marketing** | [SL Face Proof Bubble](Section%20Lab/Face%20Proof%20Bubble/README.md) | Section Lab (paid) | 2025-02-14 |
-| | [SL Sales Nudge Widget](Section%20Lab/Nudges%20Widget/README.md) | Section Lab (paid) | 2025-02-14 |
+| **Navigation & Content** | [SL – Story Navigation](Section%20Lab/Story%20Navigation/README.md) | Section Lab (paid) | 2025-02-14 |
+| | [SL – Scrolling Content](Section%20Lab/Scrolling%20Content/) | Section Lab (paid) | 2025-02-14 |
+| **Promotional** | [SL – Announcement Bar](Section%20Lab/Announcement%20Bar/README.md) | Section Lab (paid) | 2025-02-14 |
+| | [SL – Delivery Countdown](Section%20Lab/Delivery%20Countdown/README.md) | Section Lab (paid) | 2025-02-14 |
+| **Marketing & Social Proof** | [SL – Face Proof Bubble](Section%20Lab/Face%20Proof%20Bubble/README.md) | Section Lab (paid) | 2025-02-14 |
+| | [SL – Sales Nudge Widget](Section%20Lab/Nudges%20Widget/README.md) | Section Lab (paid) | 2025-02-14 |
 | **Maps & Local** | [Shop by State Map](Shop%20by%20State%20Map/README.md) | bhoomikakanwarchouhan2104-cpu/shop-by-state-Map-Feature- | 2025-02-14 |
+
+---
+
+## Section Lab (all sections)
+
+Section Lab sections live under `Section Lab/`. Each has a `sections/` folder and often `snippets/` and/or `locales/`.
+
+| Section | Description |
+|---------|-------------|
+| [SL – Bundle](Section%20Lab/Bundle/README.md) | Bundle included products grid + product detail popups (Yves Rocher style). Metafield or blocks. |
+| [SL – How to Use](Section%20Lab/How%20To%20Use/README.md) | Product “how to use” steps from metaobject or manual blocks. |
+| [SL – Frequently Bought Together](Section%20Lab/Frequently%20Bought%20Together/README.md) | Product slider (recommendations or manual products). |
+| [SL – Price Bubble Widget](Section%20Lab/Price%20Bubble%20Widget/README.md) | Price bubble / badge. |
+| [SL – Icon List](Section%20Lab/Icon%20List/README.md) | Product bullets / icon list. |
+| [SL – Payment Icons](Section%20Lab/Payment%20Icons/README.md) | Payment method icons. |
+| [SL – Announcement Bar](Section%20Lab/Announcement%20Bar/README.md) | Top announcement bar. |
+| [SL – Delivery Countdown](Section%20Lab/Delivery%20Countdown/README.md) | Delivery countdown timer. |
+| [SL – Face Proof Bubble](Section%20Lab/Face%20Proof%20Bubble/README.md) | Social proof bubble. |
+| [SL – Sales Nudge Widget](Section%20Lab/Nudges%20Widget/README.md) | Sales nudge / urgency widget. |
+| [SL – Story Navigation](Section%20Lab/Story%20Navigation/README.md) | Story-style navigation. |
+| [SL – Scrolling Content](Section%20Lab/Scrolling%20Content/) | Horizontal scrolling content. |
+| [SL – Native Video Slider](Section%20Lab/Native%20Video%20Slider/README.md) | Native video slider. |
+| [SL – UGC Videos Homepage](Section%20Lab/UGC%20Videos%20Homepage/README.md) | UGC videos on homepage. |
+| [SL – Social Proof Video](Section%20Lab/Social%20Proof%20Video/README.md) | Social proof video section. |
+| [SL – Before And After](Section%20Lab/Before%20And%20After/README.md) | Before/after video or media. |
+| [SL – Real Results](Section%20Lab/Real%20Results/README.md) | Real results / testimonials. |
 
 ---
 
 ## Folder structure (per section)
 
-Each section or snippet group lives in its own folder:
+Each section or snippet group lives in its own folder. Section Lab sections use a shared parent folder:
 
 ```
-SectionName/
-├── sections/       # .liquid section files (if section)
-├── snippets/      # .liquid snippets (if used)
-├── assets/         # .js, .css (if used)
-└── README.md       # Description, install steps, source, last updated
+SectionName/                    # or Section Lab/SubSectionName/
+├── sections/                   # .liquid section files (if section)
+├── snippets/                   # .liquid snippets (if used)
+├── assets/                     # .js, .css (if used)
+├── locales/                    # .json translations (optional, e.g. Section Lab)
+└── README.md                   # Description, install steps, source, last updated
 ```
+
+**Using a section:** Copy the section’s `sections/` (and any `snippets/`, `assets/`, `locales/`) into your theme, then add the section via the theme editor or template JSON.
 
 ---
 
-## Categories
+## Categories overview
 
-- **Carousels & Sliders** — Marquee, hero sliders, carousels
-- **Content & Layout** — Double block, image/text, grids
-- **Forms & Contact** — Contact form builders
-- **Snippets & Utilities** — Tabbed description, pagination, IP redirect
-- **Product & Collection** — Swatches, variants, catalog
-- **Media & Gallery** — Image galleries, grid banners
-- **Product & Conversion** — Price bubble, swatches, variants
-- **Navigation / Content** — Story navigation, menus
-- **Promotional** — Announcement bar, countdown
-- **Marketing** — Sales nudge, social proof toasts
-- **Video** — YouTube, video carousels
-- **Specialized** — Timeline, pricing table, FAQ, quiz, tooltips, app optimization
-- **Maps & Local** — Shop by state/region
+| Category | Contents |
+|----------|----------|
+| **Carousels & Sliders** | Marquee, hero sliders, fancy carousels |
+| **Content & Layout** | Double block, image/text, grids |
+| **Forms & Contact** | Contact form builders |
+| **Snippets & Utilities** | Tabbed description, pagination, IP redirect |
+| **Product & Collection** | Bundle, how to use, price bubble, icon list, payment icons, FBT, scarcity bar, swatches |
+| **Media & Gallery** | Image galleries, grid banners |
+| **Video & Media** | Native video slider, UGC, social proof video, before/after, real results, media snap, video sliders, YouTube |
+| **Specialized** | Timeline, pricing table, FAQ, quiz, tooltips, app optimization |
+| **Navigation & Content** | Story navigation, scrolling content |
+| **Promotional** | Announcement bar, delivery countdown |
+| **Marketing & Social Proof** | Face proof bubble, sales nudge |
+| **Maps & Local** | Shop by state/region |
 
 ---
 
@@ -95,7 +145,7 @@ SectionName/
 | [iShopifyExpert/custom-slider](https://github.com/iShopifyExpert/custom-slider) | Custom / gallery slider (reference) |
 | [uxhacks/shopify-sections](https://github.com/uxhacks/shopify-sections) | Sections (reference) |
 | [jydykun/Shopify-Sections](https://github.com/jydykun/Shopify-Sections) | Skeleton theme (reference) |
-| **Section Lab** (paid bundle) | Price Bubble, Story Navigation, Native Video Slider, Announcement Bar, Sales Nudge, Icon List, Delivery Countdown, Face Proof Bubble, Payment Icons; internal use only |
+| **Section Lab** (this repo / paid bundle) | Bundle, How to Use, FBT, Price Bubble, Icon List, Payment Icons, Announcement Bar, Delivery Countdown, Face Proof Bubble, Nudges, Story Navigation, Scrolling Content, Native Video Slider, UGC Videos, Social Proof Video, Before And After, Real Results |
 
 ---
 
@@ -114,11 +164,9 @@ See **[PLAN.md](PLAN.md)** for the build plan, repo mapping, and progress log.
 
 ---
 
-## Authors
+## Authors & license
 
 - **Mircea Piturca** — [Sections.Design](https://sections.design) (original sections)
-- Sections from other repos are attributed in each section’s README and in the table above.
+- Sections from other repos are attributed in each section’s README and in the tables above.
 
-## License
-
-This project is licensed under the MIT License. Individual section sources may have different licenses; see each section’s README and the source repository.
+**License:** This project is licensed under the MIT License. Individual section sources may have different licenses; see each section’s README and the source repository.
