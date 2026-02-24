@@ -1,23 +1,54 @@
-# SL - How to Use (Snippet)
+# SL - How to Use
 
-Product-level **“How to use it the right way”** steps, inspired by Yves Rocher. Each step shows a number, optional title, a **related product** (image + name, linked), and an expandable **description**. Data is stored in **metaobjects** and a **product metafield**, so each product can have its own steps.
+Product-level **“How to use it the right way”** steps, inspired by Yves Rocher. Each step shows a number, optional title, a **related product** (image + name, linked), and an expandable **description**. Available as a **section** (metaobject or manual steps) or a **snippet** (metaobject only, for Custom Liquid blocks).
 
 **Category:** Product / Content  
-**Use:** Rendered inside a **Custom Liquid** block in the product block (product info area).
+**Templates:** Product (section and snippet are used on product pages)
 
 ---
 
-## Features
+## Two ways to use it
 
-- **Per-product steps:** Each product has its own “how to use” steps via metafield.
-- **Metaobject-driven:** One metaobject type for a single step (product + description + optional title).
-- **Step layout:** Step number, optional step title, related product (image + title, link to product page), expandable description.
-- **No extra JS:** Description expand/collapse uses `<details>` / `<summary>`.
-- **Theme-agnostic:** Styling is scoped; link goes to product URL (no dependency on a specific popup).
+| Use | Data source | When to use |
+|-----|-------------|-------------|
+| **Section** | Product metaobject **or** manual step blocks | Add section to product template; choose per-product steps (metaobject) or same steps for all (blocks). |
+| **Snippet** | Product metaobject only | Add a Custom Liquid block in product info and render the snippet; steps come from the product’s metafield. |
 
 ---
 
-## Setup: Metaobjects and product metafield
+## Section: Step source
+
+The section has two modes:
+
+1. **Product metaobject (per product)**  
+   Steps come from the current product’s metafield `custom.how_to_use_steps` (list of How to use step metaobjects). Each product can have different steps.
+
+2. **Manual steps (section blocks)**  
+   You add **Step** blocks in the theme editor. Each block has: related product, optional step title, and description. Same steps for every product that uses this section.
+
+**Section settings:** Optional heading, heading alignment/size/color, step styling (background/text color, gap), section background, padding, full width / content width.
+
+**Install section:** Copy `sections/sl-how-to-use.liquid` into your theme **sections** folder. In **Customize** → product template → **Add section** → **SL - How to Use**. Choose **Step source** (Product metaobject or Manual steps). If Manual steps, add **Step** blocks and set product, title, and description for each.
+
+---
+
+## Snippet: Custom Liquid block
+
+Use when you want “how to use” inside the product info area (e.g. inside an accordion), with steps from the product’s metaobject only.
+
+**Usage:** In a **Custom Liquid** block in the product block:
+
+```liquid
+{% render 'sl-how-to-use', product: product, block_id: block.id %}
+```
+
+**Install snippet:** Copy `snippets/sl-how-to-use.liquid` into your theme **snippets** folder.
+
+---
+
+## Setup: Metaobjects (for metaobject mode)
+
+Only needed if you use **Product metaobject** (section or snippet).
 
 ### Step 1 — Create the “How to use step” metaobject definition
 
@@ -25,8 +56,8 @@ Product-level **“How to use it the right way”** steps, inspired by Yves Roch
 2. Click **Add definition**
 3. Set:
    - **Name:** `How to use step`
-   - **Type:** `how_to_use_step` (this is the type you’ll reference in the metafield)
-   - **Storefront API access:** enabled (so the theme can read it)
+   - **Type:** `how_to_use_step`
+   - **Storefront API access:** enabled
 4. Add fields:
 
    | Field label   | Key          | Type              | Notes                          |
@@ -40,63 +71,22 @@ Product-level **“How to use it the right way”** steps, inspired by Yves Roch
 ### Step 2 — Create “How to use step” entries
 
 1. **Content** → **Metaobjects** → **How to use step**
-2. For each step, click **Add entry**:
-   - **Product:** Choose the product for this step (e.g. serum, cream, eye cream).
-   - **Description:** Full “how to use” text for this step.
-   - **Step title:** Optional. If left blank, the snippet uses “Step 1”, “Step 2”, etc.
-3. Save each entry.
+2. For each step: **Add entry** → set Product, Description, optional Step title → Save.
 
-### Step 3 — Add the product metafield (list of steps)
+### Step 3 — Add the product metafield
 
-1. **Settings** → **Custom data** → **Products**
-2. **Add definition**
-3. Set:
-   - **Name:** `How to use steps`
-   - **Namespace and key:** `custom.how_to_use_steps`
-   - **Type:** **List of metaobject references** → select **How to use step** (`how_to_use_step`)
-   - **Storefront API access:** enabled
-4. Save.
+1. **Settings** → **Custom data** → **Products** → **Add definition**
+2. **Name:** `How to use steps`  
+   **Namespace and key:** `custom.how_to_use_steps`  
+   **Type:** **List of metaobject references** → **How to use step**  
+   **Storefront API access:** enabled  
+3. Save.
 
 ### Step 4 — Assign steps to products
 
-1. **Products** → open the product that should show “how to use” steps (e.g. a routine or kit).
-2. In **Metafields**, find **How to use steps**
-3. Add references to your **How to use step** metaobject entries, in the order you want (Step 1, Step 2, …).
-4. Save the product.
-
-### Step 5 — Add the snippet in the product template
-
-1. **Online Store** → **Themes** → **Customize**
-2. Open a product page
-3. In the product form / product info area, add a **Custom Liquid** block
-4. In the block’s Liquid field, paste:
-
-   ```liquid
-   {% render 'sl-how-to-use', product: product, block_id: block.id %}
-   ```
-
-5. Save.
-
-Copy `snippets/sl-how-to-use.liquid` into your theme’s **snippets** folder (e.g. `Section Lab/How To Use/snippets/sl-how-to-use.liquid` → theme `snippets/sl-how-to-use.liquid`).
-
----
-
-## Usage (Custom Liquid block)
-
-In the product block, in a **Custom Liquid** block:
-
-```liquid
-{% render 'sl-how-to-use', product: product, block_id: block.id %}
-```
-
-- **product** — Usually the current product (`product`). Required so the snippet can read `product.metafields.custom.how_to_use_steps`.
-- **block_id** — Optional. Used for the wrapper `id` so multiple blocks don’t clash. Defaults to `htu` if omitted.
-
-Example with explicit block id:
-
-```liquid
-{% render 'sl-how-to-use', product: product, block_id: 'how-to-use-1' %}
-```
+1. **Products** → open a product → **Metafields** → **How to use steps**
+2. Add references to your How to use step entries in the desired order.
+3. Save.
 
 ---
 
@@ -104,8 +94,9 @@ Example with explicit block id:
 
 | What                | Where | Type / Notes |
 |---------------------|--------|--------------|
-| One step            | Metaobject `how_to_use_step` | Fields: `product`, `description`, `step_title` |
-| All steps for a product | Product metafield | `custom.how_to_use_steps` = list of metaobject references |
+| One step (metaobject) | Metaobject `how_to_use_step` | Fields: `product`, `description`, `step_title` |
+| Steps per product   | Product metafield | `custom.how_to_use_steps` = list of metaobject references |
+| Manual steps        | Section blocks   | Block type **Step**: product picker, step_title, description |
 
 ---
 
@@ -113,8 +104,10 @@ Example with explicit block id:
 
 ```
 Section Lab/How To Use/
+├── sections/
+│   └── sl-how-to-use.liquid   ← Section (metaobject or manual steps)
 ├── snippets/
-│   └── sl-how-to-use.liquid
+│   └── sl-how-to-use.liquid   ← Snippet (metaobject only; use in Custom Liquid)
 └── README.md
 ```
 
@@ -122,27 +115,19 @@ Section Lab/How To Use/
 
 ## Requirements
 
-- **Product metafield:** `custom.how_to_use_steps` (list of metaobject references).
-- **Metaobject type:** `how_to_use_step` with:
-  - `product` — Product reference  
-  - `description` — Multi-line text  
-  - `step_title` — Single line text (optional)
+- **Section:** Product template. For metaobject mode, product metafield and metaobject setup above. For manual mode, no metaobjects needed.
+- **Snippet:** Product template; product metafield `custom.how_to_use_steps` and metaobject type `how_to_use_step` (see above).
 
 ---
 
 ## Design mode
 
-If the product has no steps (metafield empty or not set), in the theme editor the snippet outputs a short message: *“How to Use — No steps. Add entries to this product’s How to use steps metafield.”*
+- **Section:** If there are no steps (empty metafield and no blocks, or metaobject chosen but metafield empty), the section shows a short message: add steps via metafield or add Step blocks.
+- **Snippet:** If the product has no steps, it shows a message to add the **How to use steps** metafield.
 
 ---
 
 ## Styling
 
-CSS is scoped to `#sl-htu-block-{{ block_id }}`. You can override with CSS variables:
-
-- `--sl-htu-bg` — Background for step number and product pill (default `#EEEFE8`)
-- `--sl-htu-text` — Text color (default `#272E0F`)
-- `--sl-htu-radius` — Step number circle radius (default `44px`)
-- `--sl-htu-step-gap` — Vertical gap between steps (default `24px`)
-
-Place overrides in your theme’s CSS or in a separate asset included on the product template.
+- **Section:** CSS is scoped to `#sl-htu-section-{{ section.id }}`. Step colors and gap are in section settings (step background, step text color, gap between steps).
+- **Snippet:** CSS is scoped to `#sl-htu-block-{{ block_id }}`. Override with CSS variables: `--sl-htu-bg`, `--sl-htu-text`, `--sl-htu-radius`, `--sl-htu-step-gap`.

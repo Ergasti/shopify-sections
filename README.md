@@ -21,7 +21,7 @@ A comprehensive, categorized library of Shopify sections and snippets. Copy what
 | **Product & Collection** | [SL Price Bubble Widget](Section%20Lab/Price%20Bubble%20Widget/README.md) | Section Lab (paid) | 2025-02-14 |
 | | [SL Icon List (Product Bullets)](Section%20Lab/Icon%20List/README.md) | Section Lab (paid) | 2025-02-14 |
 | | [SL Payment Icons](Section%20Lab/Payment%20Icons/README.md) | Section Lab (paid) | 2025-02-14 |
-| | [SL How to Use (snippet)](Section%20Lab/How%20To%20Use/README.md) | Section Lab (metaobjects) | 2025-02-24 |
+| | [SL How to Use (section + snippet)](Section%20Lab/How%20To%20Use/README.md) | Section Lab (metaobjects) | 2025-02-24 |
 | | [Scarcity Bar](Scarcity%20Bar/README.md) | Custom (this repo) | 2025-02-14 |
 | | [Collection Page Swatches](Collection%20Page%20Swatches/README.md) | patrickbolle/shopify-snippets | 2025-02-14 |
 | **Media & Gallery** | [Image Gallery (BoldizArt)](Image%20Gallery%20(BoldizArt)/README.md) | BoldizArt/Shopify-Image-Gallery | 2025-02-14 |
