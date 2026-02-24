@@ -1,0 +1,275 @@
+{% comment %}
+  SL - Scrolling Content (Rolling marquee)
+  Yves Rocher–style horizontal scrolling text with optional divider between lines.
+  Add blocks for each line of text; section scrolls continuously.
+{% endcomment %}
+
+{% assign scroll_id = 'sl-scrolling-content-' | append: section.id %}
+{% assign divider = section.settings.divider | default: '✦' %}
+{% assign speed = section.settings.speed | default: 30 %}
+{% if speed < 5 %}
+  {% assign speed = 5 %}
+{% elsif speed > 120 %}
+  {% assign speed = 120 %}
+{% endif %}
+{% assign direction = section.settings.direction | default: 'left' %}
+
+<div
+  id="{{ scroll_id }}"
+  class="sl-scrolling-content shopify-section"
+  style="
+    --sl-scroll-color: {{ section.settings.text_color }};
+    --sl-scroll-border: {{ section.settings.border_color | default: section.settings.text_color }};
+    --sl-scroll-duration: {{ speed }}s;
+    --sl-scroll-direction: {{ direction }};
+    --sl-scroll-spacing: clamp({{ section.settings.spacing_min }}px, calc({{ section.settings.spacing_min }}px + ({{ section.settings.spacing_max | minus: section.settings.spacing_min }} * ((100vw - 375px) / (1400 - 375)))), {{ section.settings.spacing_max }}px);
+    --sl-scroll-gap: clamp(10px, calc(10px + (16 - 10) * ((100vw - 375px) / (1400 - 375))), 16px);
+    --sl-scroll-font-size: clamp({{ section.settings.font_size_min }}px, calc({{ section.settings.font_size_min }}px + ({{ section.settings.font_size_max | minus: section.settings.font_size_min }} * ((100vw - 375px) / (1400 - 375)))), {{ section.settings.font_size_max }}px);
+  "
+>
+  <style>
+    #{{ scroll_id }} {
+      font-size: var(--sl-scroll-font-size);
+    }
+    #{{ scroll_id }} .sl-scroll-main {
+      border-top: 1px solid var(--sl-scroll-border);
+      border-bottom: 1px solid var(--sl-scroll-border);
+      padding-block-start: var(--sl-scroll-spacing);
+      padding-block-end: var(--sl-scroll-spacing);
+      background: {{ section.settings.background_color }};
+    }
+    #{{ scroll_id }} .sl-scroll-track {
+      display: flex;
+      width: max-content;
+      white-space: nowrap;
+      user-select: none;
+      -webkit-user-select: none;
+      animation: sl-scroll-{{ section.id | replace: '-', '_' }} var(--sl-scroll-duration) linear infinite;
+    }
+    #{{ scroll_id }} .sl-scroll-track[data-direction="right"] {
+      animation-direction: reverse;
+    }
+    #{{ scroll_id }} .sl-scroll-track:hover {
+      animation-play-state: paused;
+    }
+    @keyframes sl-scroll-{{ section.id | replace: '-', '_' }} {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    #{{ scroll_id }} .sl-scroll-item {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: var(--sl-scroll-gap);
+    }
+    #{{ scroll_id }} .sl-scroll-content {
+      overflow: hidden;
+      position: relative;
+      display: block;
+    }
+    #{{ scroll_id }} .sl-scroll-item * {
+      color: var(--sl-scroll-color);
+      font-family: {{ section.settings.font_family }}, sans-serif;
+      font-size: inherit;
+      font-style: italic;
+      font-weight: {{ section.settings.font_weight }};
+      line-height: normal;
+      text-transform: uppercase;
+      letter-spacing: {{ section.settings.letter_spacing }}em;
+      margin: 0;
+    }
+    #{{ scroll_id }} .sl-scroll-item .sl-scroll-divider {
+      font-style: normal !important;
+    }
+    @media (max-width: 768px) {
+      #{{ scroll_id }} .sl-scroll-item * {
+        font-size: {{ section.settings.font_size_min }}px;
+      }
+    }
+  </style>
+
+  <div class="sl-scroll-main sl-scroll-content">
+    <div class="sl-scroll-track" data-direction="{{ direction }}" aria-hidden="false">
+      <div class="sl-scroll-item">
+        {% for block in section.blocks %}
+          {% if block.settings.text != blank %}
+            <p class="sl-scroll-text heading">{{ block.settings.text }}</p>
+            {% unless forloop.last %}
+              <span class="sl-scroll-divider">{{ divider }}</span>
+            {% endunless %}
+          {% endif %}
+        {% endfor %}
+        {% if section.blocks.size == 0 %}
+          <p class="sl-scroll-text heading">Add text blocks in the theme editor</p>
+        {% endif %}
+      </div>
+      <div class="sl-scroll-item" aria-hidden="true">
+        {% for block in section.blocks %}
+          {% if block.settings.text != blank %}
+            <p class="sl-scroll-text heading">{{ block.settings.text }}</p>
+            {% unless forloop.last %}
+              <span class="sl-scroll-divider">{{ divider }}</span>
+            {% endunless %}
+          {% endif %}
+        {% endfor %}
+        {% if section.blocks.size == 0 %}
+          <p class="sl-scroll-text heading">Add text blocks in the theme editor</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "SL - Scrolling Content",
+  "tag": "section",
+  "class": "shopify-section--scrolling-content",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "divider",
+      "label": "Divider between lines",
+      "default": "✦"
+    },
+    {
+      "type": "range",
+      "id": "speed",
+      "label": "Scroll speed",
+      "info": "Duration for one full loop (seconds)",
+      "min": 15,
+      "max": 90,
+      "step": 5,
+      "default": 40,
+      "unit": "s"
+    },
+    {
+      "type": "select",
+      "id": "direction",
+      "label": "Scroll direction",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "text",
+      "id": "font_family",
+      "label": "Font family",
+      "default": "Montserrat"
+    },
+    {
+      "type": "range",
+      "id": "font_weight",
+      "label": "Font weight",
+      "min": 300,
+      "max": 700,
+      "step": 100,
+      "default": 300
+    },
+    {
+      "type": "range",
+      "id": "font_size_min",
+      "label": "Font size (mobile) min",
+      "min": 14,
+      "max": 28,
+      "step": 2,
+      "default": 20,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "font_size_max",
+      "label": "Font size (desktop) max",
+      "min": 20,
+      "max": 48,
+      "step": 2,
+      "default": 32,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "letter_spacing",
+      "label": "Letter spacing",
+      "min": 0,
+      "max": 0.2,
+      "step": 0.01,
+      "default": 0.0
+    },
+    {
+      "type": "header",
+      "content": "Colors & spacing"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text and border color",
+      "default": "#7d8f3e"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border color (optional)",
+      "info": "Leave blank to use text color"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "spacing_min",
+      "label": "Vertical spacing (mobile) min",
+      "min": 4,
+      "max": 24,
+      "step": 2,
+      "default": 8,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "spacing_max",
+      "label": "Vertical spacing (desktop) max",
+      "min": 8,
+      "max": 40,
+      "step": 2,
+      "default": 15,
+      "unit": "px"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "line",
+      "name": "Text line",
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "SL - Scrolling Content",
+      "category": "Section Lab",
+      "blocks": [
+        { "type": "line", "settings": { "text": "All beauty products are made in France" } },
+        { "type": "line", "settings": { "text": "N.1 beauty brand in France*" } }
+      ]
+    }
+  ]
+}
+{% endschema %}
