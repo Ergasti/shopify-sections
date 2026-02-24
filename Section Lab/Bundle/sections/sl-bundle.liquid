@@ -1,8 +1,9 @@
 {% comment %}
   SL - Bundle (Section)
-  Displays included products in a bundle (Yves Rocher style): grid of product cubes + clickable popup with product info.
-  Bundle items from: product metafield custom.bundle_products (list.product_reference) OR section blocks.
-  Add to product template for bundle product page, or use "Bundle product" setting to show a specific bundle elsewhere.
+  Conditional: (1) If product IS a bundle → included products grid + popups.
+  (2) If product is PART OF bundle(s) → "Bundle Up and Save!" related bundles carousel.
+  (3) Otherwise → nothing (or design-mode hint).
+  Bundle items: custom.bundle_products. Part-of: custom.part_of_bundles (list of bundle products) OR Related bundle blocks.
 {% endcomment %}
 
 {% assign bundle_source = section.settings.bundle_source | default: 'product_metafield' %}
@@ -14,6 +15,7 @@
   {% assign use_product = product %}
 {% endif %}
 
+{% comment %} Is this product a bundle? (has included items) {% endcomment %}
 {% assign bundle_products = nil %}
 {% assign use_blocks = false %}
 {% if bundle_source == 'product_metafield' and use_product != blank %}
@@ -21,46 +23,99 @@
   {% if meta_val != blank and meta_val.size > 0 %}
     {% assign bundle_products = meta_val %}
   {% endif %}
-{% elsif bundle_source == 'section_blocks' and section.blocks.size > 0 %}
-  {% assign use_blocks = true %}
+{% elsif bundle_source == 'section_blocks' %}
+  {% for block in section.blocks %}
+    {% if block.type == 'product' %}
+      {% assign use_blocks = true %}
+      {% break %}
+    {% endif %}
+  {% endfor %}
 {% endif %}
 
-{% assign has_bundle = false %}
+{% assign is_bundle = false %}
 {% if bundle_products != nil and bundle_products.size > 0 %}
-  {% assign has_bundle = true %}
+  {% assign is_bundle = true %}
 {% elsif use_blocks %}
-  {% assign has_bundle = true %}
+  {% assign is_bundle = true %}
+{% endif %}
+
+{% comment %} Is this product part of one or more bundles? (related bundles to show) {% endcomment %}
+{% assign related_bundles = nil %}
+{% assign related_from_blocks = false %}
+{% if use_product != blank %}
+  {% assign part_of = use_product.metafields.custom.part_of_bundles.value %}
+  {% if part_of != blank and part_of.size > 0 %}
+    {% assign related_bundles = part_of %}
+  {% endif %}
+{% endif %}
+{% if related_bundles == nil or related_bundles.size == 0 %}
+  {% for block in section.blocks %}
+    {% if block.type == 'related_bundle' and block.settings.product != blank %}
+      {% assign related_from_blocks = true %}
+      {% break %}
+    {% endif %}
+  {% endfor %}
 {% endif %}
 
 {% assign subtitle_template = section.settings.subtitle | default: 'This set includes X products' %}
 
-{% if has_bundle == false %}
+{% if is_bundle %}
+  {% comment %} Mode 1: Product IS a bundle — show included products {% endcomment %}
+  <div id="sl-bundle-section-{{ section.id }}" class="sl-bundle-section-root" style="width: 100%; background: {{ section.settings.background_color }}; padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;">
+    <div class="sl-bundle-section-inner" style="{% unless section.settings.full_width %}max-width: {{ section.settings.content_width }}px; margin-left: auto; margin-right: auto;{% endunless %} padding-left: {{ section.settings.padding_inline }}px; padding-right: {{ section.settings.padding_inline }}px;">
+      {% if section.settings.heading != blank %}
+        <h2 class="sl-bundle-section-heading" style="text-align: {{ section.settings.heading_alignment }}; font-size: {{ section.settings.heading_size }}px; color: {{ section.settings.heading_color }}; margin: 0 0 10px 0;">{{ section.settings.heading }}</h2>
+      {% endif %}
+      {% if section.settings.subheading != blank %}
+        <p class="sl-bundle-section-subheading" style="text-align: {{ section.settings.heading_alignment }}; color: {{ section.settings.subheading_color }}; margin: 0 0 24px 0;">{{ section.settings.subheading }}</p>
+      {% endif %}
+      {% render 'sl-bundle',
+        bundle_products: bundle_products,
+        bundle_section: section,
+        use_block_products: use_blocks,
+        section_id: section.id,
+        subtitle: subtitle_template,
+        border_color: section.settings.border_color,
+        hover_text: section.settings.hover_text
+      %}
+    </div>
+  </div>
+{% elsif related_bundles != nil and related_bundles.size > 0 %}
+  {% comment %} Mode 2: Product is PART OF bundle(s) — show related bundles carousel {% endcomment %}
+  <div id="sl-bundle-section-{{ section.id }}" class="sl-bundle-section-root" style="width: 100%; background: {{ section.settings.background_color }}; padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;">
+    <div class="sl-bundle-section-inner" style="{% unless section.settings.full_width %}max-width: {{ section.settings.content_width }}px; margin-left: auto; margin-right: auto;{% endunless %} padding-left: {{ section.settings.padding_inline }}px; padding-right: {{ section.settings.padding_inline }}px;">
+      {% render 'sl-bundle-related',
+        related_bundles: related_bundles,
+        current_product_title: use_product.title,
+        section_id: section.id,
+        title: section.settings.related_title,
+        subtitle: section.settings.related_subtitle,
+        quick_add_label: section.settings.related_quick_add_label
+      %}
+    </div>
+  </div>
+{% elsif related_from_blocks %}
+  {% comment %} Mode 2 (blocks): related bundles from section blocks {% endcomment %}
+  <div id="sl-bundle-section-{{ section.id }}" class="sl-bundle-section-root" style="width: 100%; background: {{ section.settings.background_color }}; padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;">
+    <div class="sl-bundle-section-inner" style="{% unless section.settings.full_width %}max-width: {{ section.settings.content_width }}px; margin-left: auto; margin-right: auto;{% endunless %} padding-left: {{ section.settings.padding_inline }}px; padding-right: {{ section.settings.padding_inline }}px;">
+      {% render 'sl-bundle-related',
+        related_bundles: nil,
+        related_section: section,
+        use_related_blocks: true,
+        current_product_title: use_product.title,
+        section_id: section.id,
+        title: section.settings.related_title,
+        subtitle: section.settings.related_subtitle,
+        quick_add_label: section.settings.related_quick_add_label
+      %}
+    </div>
+  </div>
+{% else %}
   {% if request.design_mode %}
     <div id="sl-bundle-section-{{ section.id }}" class="sl-bundle-section-root" style="padding: 24px; background: #f5f5f5; border: 2px dashed #ccc; text-align: center;">
-      <p style="margin: 0; color: #666;">Bundle — No products. Set <strong>Bundle source</strong> to Product metafield and add <code>custom.bundle_products</code> (list of products) to this product, or add Product blocks below.</p>
+      <p style="margin: 0; color: #666;">Bundle — This product is not a bundle and has no related bundles. Add <code>custom.bundle_products</code> (bundle), or <code>custom.part_of_bundles</code> / Related bundle blocks (part of bundle).</p>
     </div>
   {% endif %}
-{% else %}
-<div id="sl-bundle-section-{{ section.id }}" class="sl-bundle-section-root" style="width: 100%; background: {{ section.settings.background_color }}; padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;">
-  <div class="sl-bundle-section-inner" style="{% unless section.settings.full_width %}max-width: {{ section.settings.content_width }}px; margin-left: auto; margin-right: auto;{% endunless %} padding-left: {{ section.settings.padding_inline }}px; padding-right: {{ section.settings.padding_inline }}px;">
-    {% if section.settings.heading != blank %}
-      <h2 class="sl-bundle-section-heading" style="text-align: {{ section.settings.heading_alignment }}; font-size: {{ section.settings.heading_size }}px; color: {{ section.settings.heading_color }}; margin: 0 0 10px 0;">{{ section.settings.heading }}</h2>
-    {% endif %}
-    {% if section.settings.subheading != blank %}
-      <p class="sl-bundle-section-subheading" style="text-align: {{ section.settings.heading_alignment }}; color: {{ section.settings.subheading_color }}; margin: 0 0 24px 0;">{{ section.settings.subheading }}</p>
-    {% endif %}
-
-    {% render 'sl-bundle',
-      bundle_products: bundle_products,
-      bundle_section: section,
-      use_block_products: use_blocks,
-      section_id: section.id,
-      subtitle: subtitle_template,
-      border_color: section.settings.border_color,
-      hover_text: section.settings.hover_text
-    %}
-  </div>
-</div>
 {% endif %}
 
 {% schema %}
@@ -147,7 +202,7 @@
     },
     {
       "type": "header",
-      "content": "Product cubes"
+      "content": "Product cubes (when product is a bundle)"
     },
     {
       "type": "color",
@@ -160,6 +215,29 @@
       "id": "hover_text",
       "label": "Hover label",
       "default": "More Details"
+    },
+    {
+      "type": "header",
+      "content": "Related bundles (when product is part of a bundle)"
+    },
+    {
+      "type": "text",
+      "id": "related_title",
+      "label": "Related bundles heading",
+      "default": "Bundle Up and Save!"
+    },
+    {
+      "type": "text",
+      "id": "related_subtitle",
+      "label": "Related bundles subtitle",
+      "info": "Use [product] as placeholder for current product title.",
+      "default": "Bundle [product] to complete the routine."
+    },
+    {
+      "type": "text",
+      "id": "related_quick_add_label",
+      "label": "Card button label",
+      "default": "View"
     },
     {
       "type": "header",
@@ -221,12 +299,25 @@
   "blocks": [
     {
       "type": "product",
-      "name": "Product",
+      "name": "Bundle item",
+      "limit": 20,
       "settings": [
         {
           "type": "product",
           "id": "product",
-          "label": "Bundle item"
+          "label": "Product (included in this bundle)"
+        }
+      ]
+    },
+    {
+      "type": "related_bundle",
+      "name": "Related bundle",
+      "limit": 10,
+      "settings": [
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Bundle product (that contains current product)"
         }
       ]
     }
@@ -235,15 +326,13 @@
     {
       "name": "SL - Bundle",
       "settings": {
-        "bundle_source": "section_blocks",
+        "bundle_source": "product_metafield",
         "heading": "Included in this set",
-        "subtitle": "This set includes X products"
+        "subtitle": "This set includes X products",
+        "related_title": "Bundle Up and Save!",
+        "related_subtitle": "Bundle [product] to complete the routine."
       },
-      "blocks": [
-        { "type": "product" },
-        { "type": "product" },
-        { "type": "product" }
-      ]
+      "blocks": []
     }
   ]
 }

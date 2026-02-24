@@ -1,0 +1,287 @@
+{% comment %}
+  SL - Bundle Related (snippet)
+  "Bundle Up and Save!" — horizontal carousel of bundles that contain the current product.
+  related_bundles: array of product objects. OR use_related_blocks + related_section to use blocks.
+{% endcomment %}
+
+{% assign bundles = related_bundles | default: nil %}
+{% assign use_related_blocks = use_related_blocks | default: false %}
+{% assign related_sec = related_section | default: nil %}
+{% assign current_title = current_product_title | default: product.title | default: '' %}
+{% assign sid = section_id | default: 'sl-bundle-related' %}
+{% assign title_text = title | default: 'Bundle Up and Save!' %}
+{% assign subtitle_text = subtitle | default: 'Bundle [product] to complete the routine.' | replace: '[product]', current_title %}
+
+{% assign bundle_count = 0 %}
+{% if use_related_blocks and related_sec != blank %}
+  {% for block in related_sec.blocks %}
+    {% if block.type == 'related_bundle' and block.settings.product != blank %}
+      {% assign bundle_count = bundle_count | plus: 1 %}
+    {% endif %}
+  {% endfor %}
+{% elsif bundles != nil and bundles.size > 0 %}
+  {% assign bundle_count = bundles.size %}
+{% endif %}
+
+{% if bundle_count == 0 %}
+  {% if request.design_mode %}
+    <p class="sl-bundle-related-empty" style="padding:16px;color:#666;">Related bundles — Add products via <code>custom.part_of_bundles</code> or Related bundle blocks.</p>
+  {% endif %}
+{% else %}
+
+<div id="sl-bundle-related-{{ sid }}" class="related-bundles-container sl-bundle-related-root">
+  <p class="bundle-title sl-bundle-related-title">{{ title_text }}</p>
+  <p class="bundle-subtitle sl-bundle-related-subtitle">{{ subtitle_text }}</p>
+
+  <div class="bundle-cards-container sl-bundle-related-carousel" data-sl-bundle-related-id="{{ sid }}">
+    <button type="button" class="bundle-carousel-prev-button sl-bundle-related-prev" aria-label="Previous">
+      <svg xmlns="http://www.w3.org/2000/svg" width="7" height="10" viewBox="0 0 10 15" fill="none"><path d="M8.13171 1.84937L1.27731 7.56137L8.13171 13.2734" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+    </button>
+    <button type="button" class="bundle-carousel-next-button sl-bundle-related-next" aria-label="Next">
+      <svg xmlns="http://www.w3.org/2000/svg" width="7" height="10" viewBox="0 0 10 15" fill="none"><path d="M1.27734 13.2734L8.13174 7.56144L1.27734 1.84944" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+    </button>
+
+    <div id="bundle-cards-container-overflow-{{ sid }}" class="bundle-cards-container-overflow sl-bundle-related-track">
+      {% if bundles != nil and bundles.size > 0 %}
+        {% for bundle_product in bundles %}
+          {% if bundle_product != blank %}
+            <div class="sl-bundle-related-card product-card yr-product-card">
+              <div class="product-card__figure">
+                <a href="{{ bundle_product.url }}" class="product-card__media">
+                  {% if bundle_product.featured_image %}
+                    <img src="{{ bundle_product.featured_image | image_url: width: 400 }}" alt="{{ bundle_product.featured_image.alt | default: bundle_product.title | escape }}" width="200" height="200" loading="lazy" class="product-card__image">
+                  {% else %}
+                    {{ 'product-1' | placeholder_svg_tag: 'sl-bundle-related-placeholder' }}
+                  {% endif %}
+                </a>
+              </div>
+              <div class="product-card__info wd-product-card-main-info">
+                <div class="wd-product-card-title-price">
+                  <a href="{{ bundle_product.url }}" class="product-title h6">{{ bundle_product.title }}</a>
+                  <div class="price-list">
+                    {% if bundle_product.compare_at_price > bundle_product.price %}
+                      <span class="sale-price">{{ bundle_product.price | money }}</span>
+                      <span class="compare-at-price">{{ bundle_product.compare_at_price | money }}</span>
+                    {% else %}
+                      <span class="sale-price">{{ bundle_product.price | money }}</span>
+                    {% endif %}
+                  </div>
+                </div>
+                <a href="{{ bundle_product.url }}" class="product-card__quick-add-button">{{ quick_add_label | default: 'View' }}</a>
+              </div>
+            </div>
+          {% endif %}
+        {% endfor %}
+      {% else %}
+        {% for block in related_sec.blocks %}
+          {% if block.type == 'related_bundle' %}
+            {% assign bundle_product = block.settings.product %}
+            {% if bundle_product != blank %}
+              <div class="sl-bundle-related-card product-card yr-product-card" {{ block.shopify_attributes }}>
+                <div class="product-card__figure">
+                  <a href="{{ bundle_product.url }}" class="product-card__media">
+                    {% if bundle_product.featured_image %}
+                      <img src="{{ bundle_product.featured_image | image_url: width: 400 }}" alt="{{ bundle_product.featured_image.alt | default: bundle_product.title | escape }}" width="200" height="200" loading="lazy" class="product-card__image">
+                    {% else %}
+                      {{ 'product-1' | placeholder_svg_tag: 'sl-bundle-related-placeholder' }}
+                    {% endif %}
+                  </a>
+                </div>
+                <div class="product-card__info wd-product-card-main-info">
+                  <div class="wd-product-card-title-price">
+                    <a href="{{ bundle_product.url }}" class="product-title h6">{{ bundle_product.title }}</a>
+                    <div class="price-list">
+                      {% if bundle_product.compare_at_price > bundle_product.price %}
+                        <span class="sale-price">{{ bundle_product.price | money }}</span>
+                        <span class="compare-at-price">{{ bundle_product.compare_at_price | money }}</span>
+                      {% else %}
+                        <span class="sale-price">{{ bundle_product.price | money }}</span>
+                      {% endif %}
+                    </div>
+                  </div>
+                  <a href="{{ bundle_product.url }}" class="product-card__quick-add-button">{{ quick_add_label | default: 'View' }}</a>
+                </div>
+              </div>
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    var sid = '{{ sid }}';
+    var track = document.getElementById('bundle-cards-container-overflow-' + sid);
+    var carousel = track && track.closest('.sl-bundle-related-carousel');
+    if (!track || !carousel) return;
+    var prev = carousel.querySelector('.sl-bundle-related-prev');
+    var next = carousel.querySelector('.sl-bundle-related-next');
+    var cards = track.querySelectorAll('.sl-bundle-related-card');
+    var cardCount = cards.length;
+    var cardWidth = 260;
+    var gap = 10;
+    var scrollAmount = (cardWidth + gap) * 2;
+    function updateButtons() {
+      var maxScroll = track.scrollWidth - track.clientWidth;
+      if (prev) { prev.classList.toggle('swiper-button-disabled', track.scrollLeft <= 0); prev.style.display = (track.scrollLeft <= 0 ? 'none' : 'grid'); }
+      if (next) { next.classList.toggle('swiper-button-disabled', maxScroll <= 1); next.style.display = (maxScroll <= 1 ? 'none' : 'grid'); }
+    }
+    if (prev) prev.addEventListener('click', function() { track.scrollLeft -= scrollAmount; updateButtons(); });
+    if (next) next.addEventListener('click', function() { track.scrollLeft += scrollAmount; updateButtons(); });
+    track.addEventListener('scroll', updateButtons);
+    if (cardCount === 1) track.style.width = '100%';
+    else track.style.width = (cardCount * cardWidth + (cardCount - 1) * gap) + 'px';
+    track.style.gridTemplateColumns = 'repeat(' + cardCount + ', ' + cardWidth + 'px)';
+    updateButtons();
+  })();
+</script>
+
+<style>
+  #sl-bundle-related-{{ sid }}.sl-bundle-related-root {
+    margin-top: 65px;
+  }
+  #sl-bundle-related-{{ sid }} .sl-bundle-related-title {
+    color: #272E0F;
+    font-family: Montserrat, sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: normal;
+    letter-spacing: 0.16px;
+    text-transform: uppercase;
+    margin: 0 0 10px 0;
+  }
+  #sl-bundle-related-{{ sid }} .sl-bundle-related-subtitle {
+    color: #272E0F;
+    font-family: Montserrat, sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 150%;
+    letter-spacing: 0.28px;
+    margin: 0 0 10px 0;
+  }
+  #sl-bundle-related-{{ sid }} .sl-bundle-related-carousel {
+    width: 100%;
+    overflow: auto;
+    position: relative;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  #sl-bundle-related-{{ sid }} .sl-bundle-related-carousel::-webkit-scrollbar { display: none; }
+  #sl-bundle-related-{{ sid }} .sl-bundle-related-track {
+    display: grid;
+    gap: 10px;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding: 4px 0;
+  }
+  #sl-bundle-related-{{ sid }} .sl-bundle-related-track::-webkit-scrollbar { display: none; }
+  #sl-bundle-related-{{ sid }} .sl-bundle-related-card {
+    padding: 13px;
+    border-radius: 16px;
+    border: 0.5px solid #EBEBEB;
+    background: rgba(255, 255, 255, 0.90);
+    box-shadow: 0 1px 1px rgba(0,0,0,0.02), 0 4px 4px -1px rgba(0,0,0,0.02);
+    display: grid;
+    grid-template-columns: 30% 67%;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+    min-width: 0;
+  }
+  #sl-bundle-related-{{ sid }} .sl-bundle-related-card .product-card__figure { margin: 0; }
+  #sl-bundle-related-{{ sid }} .sl-bundle-related-card .product-card__media { display: block; }
+  #sl-bundle-related-{{ sid }} .sl-bundle-related-card .product-card__image {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+    aspect-ratio: 1;
+    object-fit: cover;
+  }
+  #sl-bundle-related-{{ sid }} .sl-bundle-related-card .product-card__info {
+    display: block;
+    text-align: left;
+  }
+  #sl-bundle-related-{{ sid }} .sl-bundle-related-card .wd-product-card-title-price {
+    display: block;
+    width: 100%;
+  }
+  #sl-bundle-related-{{ sid }} .sl-bundle-related-card .product-title {
+    color: #272E0F;
+    font-family: Montserrat, sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: normal;
+    text-decoration: none;
+    display: block;
+    margin-bottom: 6px;
+    width: 80%;
+    min-height: 38px;
+  }
+  #sl-bundle-related-{{ sid }} .sl-bundle-related-card .product-title:hover { text-decoration: underline; }
+  #sl-bundle-related-{{ sid }} .sl-bundle-related-card .price-list {
+    display: block;
+    margin-bottom: 10px;
+  }
+  #sl-bundle-related-{{ sid }} .sl-bundle-related-card .sale-price {
+    color: #272E0F;
+    font-family: Montserrat, sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  #sl-bundle-related-{{ sid }} .sl-bundle-related-card .compare-at-price {
+    color: #545454;
+    font-size: 13px;
+    text-decoration: line-through;
+    margin-left: 6px;
+  }
+  #sl-bundle-related-{{ sid }} .sl-bundle-related-card .product-card__quick-add-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: #fff;
+    box-shadow: 0 1px 1px rgba(255,255,255,0.02) inset, 0 4px 8px 3px rgba(0,0,0,0.15);
+    color: #545454;
+    font-family: Montserrat, sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    text-transform: uppercase;
+    text-decoration: none;
+    max-width: 80px;
+  }
+  #sl-bundle-related-{{ sid }} .sl-bundle-related-prev,
+  #sl-bundle-related-{{ sid }} .sl-bundle-related-next {
+    background: #272E0F;
+    color: #fff;
+    width: 30px;
+    height: 30px;
+    border-radius: 32px;
+    display: grid;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+  }
+  #sl-bundle-related-{{ sid }} .sl-bundle-related-prev { left: 7px; }
+  #sl-bundle-related-{{ sid }} .sl-bundle-related-next { right: 7px; }
+  #sl-bundle-related-{{ sid }} .sl-bundle-related-prev.swiper-button-disabled,
+  #sl-bundle-related-{{ sid }} .sl-bundle-related-next.swiper-button-disabled { display: none !important; }
+  #sl-bundle-related-{{ sid }} .sl-bundle-related-prev svg,
+  #sl-bundle-related-{{ sid }} .sl-bundle-related-next svg { margin: 0 auto; }
+  @media (max-width: 800px) {
+    #sl-bundle-related-{{ sid }} .sl-bundle-related-prev,
+    #sl-bundle-related-{{ sid }} .sl-bundle-related-next { display: none !important; }
+  }
+</style>
+{% endif %}

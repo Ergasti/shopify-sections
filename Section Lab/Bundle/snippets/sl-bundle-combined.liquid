@@ -1,0 +1,125 @@
+{% comment %}
+  SL - Bundle Combined (snippet)
+  No section required. Use this snippet alone (e.g. in a Custom Liquid block on the product template).
+  Renders: (1) Included products when product has custom.bundle_products, (2) Related bundles when product has custom.part_of_bundles.
+  Pass product to use metafields, or pass bundle_products / related_bundles explicitly.
+  Set debug: true to show debug info (or open theme editor for auto debug).
+  Usage (e.g. in product template or a Custom Liquid block where product is available):
+    {% render 'sl-bundle-combined', product: product, section_id: 'bundle-combined' %}
+    {% render 'sl-bundle-combined', product: product, section_id: 'bundle-combined', debug: true %}
+  If you don't have section.id, use any unique string for section_id (e.g. 'bundle-combined').
+{% endcomment %}
+
+{% assign prod = product | default: nil %}
+{% assign sid = section_id | default: 'sl-bundle-combined' %}
+{% assign show_debug = debug | default: false %}
+{% if request.design_mode %}
+  {% assign show_debug = true %}
+{% endif %}
+
+{% assign included_list = bundle_products | default: nil %}
+{% assign related_list = related_bundles | default: nil %}
+{% assign current_title = current_product_title | default: '' %}
+
+{% if prod != blank %}
+  {% if current_title == blank %}
+    {% assign current_title = prod.title %}
+  {% endif %}
+  {% if included_list == nil %}
+    {% assign meta_bundle = prod.metafields.custom.bundle_products %}
+    {% if meta_bundle != blank %}
+      {% assign included_list = meta_bundle.value %}
+    {% endif %}
+  {% endif %}
+  {% if related_list == nil %}
+    {% assign meta_part = prod.metafields.custom.part_of_bundles %}
+    {% if meta_part != blank %}
+      {% assign related_list = meta_part.value %}
+    {% endif %}
+  {% endif %}
+{% endif %}
+
+{% assign included_count = 0 %}
+{% if included_list != nil %}
+  {% assign included_count = included_list.size %}
+{% endif %}
+
+{% assign related_count = 0 %}
+{% if related_list != nil %}
+  {% assign related_count = related_list.size %}
+{% endif %}
+
+{% assign has_included = false %}
+{% if included_count > 0 %}
+  {% assign has_included = true %}
+{% endif %}
+
+{% assign has_related = false %}
+{% if related_count > 0 %}
+  {% assign has_related = true %}
+{% endif %}
+
+{% capture sid_included %}{{ sid }}-inc{% endcapture %}
+{% capture sid_related %}{{ sid }}-rel{% endcapture %}
+
+{% comment %} Always output wrapper so snippet is visible; show content or "no data" message {% endcomment %}
+<div id="sl-bundle-combined-{{ sid }}" class="sl-bundle-combined-root" data-sl-bundle-combined="true">
+  {% if show_debug %}
+    <div class="sl-bundle-combined-debug" style="margin-bottom: 16px; padding: 12px; background: #f0f4f8; border: 1px solid #c5d0de; border-radius: 8px; font-family: monospace; font-size: 12px; line-height: 1.5; color: #333;">
+      <strong style="display: block; margin-bottom: 8px;">SL Bundle Combined — Debug</strong>
+      <div>product: {{ prod | default: 'not set' | replace: 'nil', 'not set' }}</div>
+      <div>product.title: {{ current_title | default: '(blank)' }}</div>
+      <div>bundle_products (included): {{ included_count }} item(s) {% if bundle_products != nil %}(passed in){% elsif prod != blank %}from metafield custom.bundle_products{% else %}— no product{% endif %}</div>
+      <div>part_of_bundles (related): {{ related_count }} item(s) {% if related_bundles != nil %}(passed in){% elsif prod != blank %}from metafield custom.part_of_bundles{% else %}— no product{% endif %}</div>
+      <div>has_included: {{ has_included }} | has_related: {{ has_related }}</div>
+      <div style="margin-top: 8px; font-size: 11px; color: #666;">Add custom.bundle_products (list of products) to show "included". Add custom.part_of_bundles (list of bundle products) to show "related". Or pass bundle_products / related_bundles into the render.</div>
+    </div>
+  {% endif %}
+
+  {% if has_included or has_related %}
+    {% if has_included %}
+      <div class="sl-bundle-combined-block sl-bundle-combined-included">
+        {% render 'sl-bundle',
+          bundle_products: included_list,
+          section_id: sid_included,
+          subtitle: subtitle | default: 'This set includes X products',
+          border_color: border_color | default: '#FE2C55',
+          hover_text: hover_text | default: 'More Details'
+        %}
+      </div>
+    {% endif %}
+
+    {% if has_related %}
+      <div class="sl-bundle-combined-block sl-bundle-combined-related">
+        {% render 'sl-bundle-related',
+          related_bundles: related_list,
+          current_product_title: current_title,
+          section_id: sid_related,
+          title: related_title | default: 'Bundle Up and Save!',
+          subtitle: related_subtitle | default: 'Bundle [product] to complete the routine.',
+          quick_add_label: related_quick_add_label | default: 'View'
+        %}
+      </div>
+    {% endif %}
+  {% else %}
+    <div class="sl-bundle-combined-empty" style="padding: 16px; color: #666; font-size: 14px; text-align: center;">
+      <p style="margin: 0;">No bundle data for this product. Add <code>custom.bundle_products</code> (products in this bundle) and/or <code>custom.part_of_bundles</code> (bundles that contain this product), or pass <code>bundle_products</code> / <code>related_bundles</code> into the snippet.</p>
+    </div>
+  {% endif %}
+</div>
+
+<style>
+  #sl-bundle-combined-{{ sid }}.sl-bundle-combined-root {
+    display: block;
+    width: 100%;
+  }
+  #sl-bundle-combined-{{ sid }} .sl-bundle-combined-block {
+    width: 100%;
+  }
+  #sl-bundle-combined-{{ sid }} .sl-bundle-combined-related {
+    margin-top: 48px;
+  }
+  #sl-bundle-combined-{{ sid }} .sl-bundle-combined-included + .sl-bundle-combined-related {
+    margin-top: 48px;
+  }
+</style>
