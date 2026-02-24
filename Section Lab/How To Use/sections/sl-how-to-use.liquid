@@ -123,6 +123,7 @@
     --sl-htu-text: {{ section.settings.step_text_color | default: '#272E0F' }};
     --sl-htu-radius: 44px;
     --sl-htu-step-gap: {{ section.settings.step_gap }}px;
+    --sl-htu-steps-per-row: {{ section.settings.horizontal_steps_per_row | default: 3 }};
     box-sizing: border-box;
   }
   #sl-htu-section-{{ section.id }} .sl-htu-section-inner {
@@ -160,8 +161,8 @@
     padding-top: 0;
   }
   #sl-htu-section-{{ section.id }} .sl-htu-container--horizontal .sl-htu-step {
-    flex: 1 1 {{ section.settings.horizontal_step_min_width | default: 280 }}px;
-    min-width: min(100%, {{ section.settings.horizontal_step_min_width | default: 280 }}px);
+    flex: 0 0 calc((100% - (var(--sl-htu-steps-per-row) - 1) * var(--sl-htu-step-gap)) / var(--sl-htu-steps-per-row));
+    max-width: calc((100% - (var(--sl-htu-steps-per-row) - 1) * var(--sl-htu-step-gap)) / var(--sl-htu-steps-per-row));
     margin-top: 0;
     box-sizing: border-box;
   }
@@ -322,13 +323,13 @@
     },
     {
       "type": "range",
-      "id": "horizontal_step_min_width",
-      "label": "Min width per step (horizontal layout)",
-      "min": 220,
-      "max": 480,
-      "step": 20,
-      "default": 280,
-      "unit": "px"
+      "id": "horizontal_steps_per_row",
+      "label": "Steps per row (horizontal layout)",
+      "info": "Number of steps shown in one row on desktop. On mobile, steps stack to one per row.",
+      "min": 2,
+      "max": 5,
+      "step": 1,
+      "default": 3
     },
     {
       "type": "color",
