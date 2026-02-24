@@ -10,38 +10,38 @@ A comprehensive, categorized library of Shopify sections and snippets. Copy what
 
 | Category | Section / Snippet | Source | Last updated |
 |----------|-------------------|--------|--------------|
-| **Carousels & Sliders** | Marquee Products | bstroshek/marquee-section | 2025-02-14 |
-| | Fancy Slick Carousel | patrickbolle/shopify-snippets | 2025-02-14 |
-| | Hero Slider (rocklss) | rocklss/shopify_section | 2025-02-14 |
-| **Content & Layout** | Double Block Section | patrickbolle/shopify-snippets | 2025-02-14 |
-| **Forms & Contact** | Sectioned Contact Form | patrickbolle/shopify-snippets | 2025-02-14 |
-| **Snippets & Utilities** | Tabbed Description | patrickbolle/shopify-snippets | 2025-02-14 |
-| | Pagination With Numbers | patrickbolle/shopify-snippets | 2025-02-14 |
-| | IP Redirection | patrickbolle/shopify-snippets | 2025-02-14 |
-| **Product & Collection** | SL Price Bubble Widget | Section Lab (paid) | 2025-02-14 |
-| | SL Icon List (Product Bullets) | Section Lab (paid) | 2025-02-14 |
-| | SL Payment Icons | Section Lab (paid) | 2025-02-14 |
-| | SL How to Use (snippet) | Section Lab (metaobjects) | 2025-02-24 |
-| | Scarcity Bar | Custom (this repo) | 2025-02-14 |
-| | Collection Page Swatches | patrickbolle/shopify-snippets | 2025-02-14 |
-| **Media & Gallery** | Image Gallery (BoldizArt) | BoldizArt/Shopify-Image-Gallery | 2025-02-14 |
-| **Video / Media** | SL - Native Video Slider | Section Lab (paid) | 2025-02-14 |
-| | Media Slider Snap | Custom (video-section2) | 2025-02-14 |
-| | Videos Slider (Mixed Media Carousel) | Custom (SS section) | 2025-02-14 |
-| | Video Slider | Meetanshi blog | 2025-02-14 |
-| | YouTube Section | prowebcoder/shopify-sections-youtube | 2025-02-14 |
-| **Specialized** | Timeline (rocklss) | rocklss/shopify_section | 2025-02-14 |
-| | Pricing Table (rocklss) | rocklss/shopify_section | 2025-02-14 |
-| | FAQ | Sections.Design (this repo) | 2025-02-14 |
-| | Quiz | Sections.Design (this repo) | 2025-02-14 |
-| | Tooltips | Sections.Design (this repo) | 2025-02-14 |
-| | App Optimization | Sections.Design (this repo) | 2025-02-14 |
-| **Navigation / Content** | SL Story Navigation | Section Lab (paid) | 2025-02-14 |
-| **Promotional** | SL Announcement Bar | Section Lab (paid) | 2025-02-14 |
-| | SL Delivery Countdown | Section Lab (paid) | 2025-02-14 |
-| **Marketing** | SL Face Proof Bubble | Section Lab (paid) | 2025-02-14 |
-| | SL Sales Nudge Widget | Section Lab (paid) | 2025-02-14 |
-| **Maps & Local** | Shop by State Map | bhoomikakanwarchouhan2104-cpu/shop-by-state-Map-Feature- | 2025-02-14 |
+| **Carousels & Sliders** | [Marquee Products](Marquee%20Products/README.md) | bstroshek/marquee-section | 2025-02-14 |
+| | [Fancy Slick Carousel](Fancy%20Slick%20Carousel/README.md) | patrickbolle/shopify-snippets | 2025-02-14 |
+| | [Hero Slider (rocklss)](Hero%20Slider%20(rocklss)/README.md) | rocklss/shopify_section | 2025-02-14 |
+| **Content & Layout** | [Double Block Section](Double%20Block%20Section/README.md) | patrickbolle/shopify-snippets | 2025-02-14 |
+| **Forms & Contact** | [Sectioned Contact Form](Sectioned%20Contact%20Form/README.md) | patrickbolle/shopify-snippets | 2025-02-14 |
+| **Snippets & Utilities** | [Tabbed Description](Tabbed%20Description/README.md) | patrickbolle/shopify-snippets | 2025-02-14 |
+| | [Pagination With Numbers](Pagination%20With%20Numbers/README.md) | patrickbolle/shopify-snippets | 2025-02-14 |
+| | [IP Redirection](IP%20Redirection/README.md) | patrickbolle/shopify-snippets | 2025-02-14 |
+| **Product & Collection** | [SL Price Bubble Widget](Section%20Lab/Price%20Bubble%20Widget/README.md) | Section Lab (paid) | 2025-02-14 |
+| | [SL Icon List (Product Bullets)](Section%20Lab/Icon%20List/README.md) | Section Lab (paid) | 2025-02-14 |
+| | [SL Payment Icons](Section%20Lab/Payment%20Icons/README.md) | Section Lab (paid) | 2025-02-14 |
+| | [SL How to Use (snippet)](Section%20Lab/How%20To%20Use/README.md) | Section Lab (metaobjects) | 2025-02-24 |
+| | [Scarcity Bar](Scarcity%20Bar/README.md) | Custom (this repo) | 2025-02-14 |
+| | [Collection Page Swatches](Collection%20Page%20Swatches/README.md) | patrickbolle/shopify-snippets | 2025-02-14 |
+| **Media & Gallery** | [Image Gallery (BoldizArt)](Image%20Gallery%20(BoldizArt)/README.md) | BoldizArt/Shopify-Image-Gallery | 2025-02-14 |
+| **Video / Media** | [SL - Native Video Slider](Section%20Lab/Native%20Video%20Slider/README.md) | Section Lab (paid) | 2025-02-14 |
+| | [Media Slider Snap](Media%20Slider%20Snap/README.md) | Custom (video-section2) | 2025-02-14 |
+| | [Videos Slider (Mixed Media Carousel)](Videos%20Slider/README.md) | Custom (SS section) | 2025-02-14 |
+| | [Video Slider](Video%20Slider/README.md) | Meetanshi blog | 2025-02-14 |
+| | [YouTube Section](YouTube%20Section/README.md) | prowebcoder/shopify-sections-youtube | 2025-02-14 |
+| **Specialized** | [Timeline (rocklss)](Timeline%20(rocklss)/README.md) | rocklss/shopify_section | 2025-02-14 |
+| | [Pricing Table (rocklss)](Pricing%20Table%20(rocklss)/README.md) | rocklss/shopify_section | 2025-02-14 |
+| | [FAQ](FAQ/readme.md) | Sections.Design (this repo) | 2025-02-14 |
+| | [Quiz](Quiz/README.md) | Sections.Design (this repo) | 2025-02-14 |
+| | [Tooltips](Tooltips/README.md) | Sections.Design (this repo) | 2025-02-14 |
+| | [App Optimization](App%20Optimization/readme.md) | Sections.Design (this repo) | 2025-02-14 |
+| **Navigation / Content** | [SL Story Navigation](Section%20Lab/Story%20Navigation/README.md) | Section Lab (paid) | 2025-02-14 |
+| **Promotional** | [SL Announcement Bar](Section%20Lab/Announcement%20Bar/README.md) | Section Lab (paid) | 2025-02-14 |
+| | [SL Delivery Countdown](Section%20Lab/Delivery%20Countdown/README.md) | Section Lab (paid) | 2025-02-14 |
+| **Marketing** | [SL Face Proof Bubble](Section%20Lab/Face%20Proof%20Bubble/README.md) | Section Lab (paid) | 2025-02-14 |
+| | [SL Sales Nudge Widget](Section%20Lab/Nudges%20Widget/README.md) | Section Lab (paid) | 2025-02-14 |
+| **Maps & Local** | [Shop by State Map](Shop%20by%20State%20Map/README.md) | bhoomikakanwarchouhan2104-cpu/shop-by-state-Map-Feature- | 2025-02-14 |
 
 ---
 
