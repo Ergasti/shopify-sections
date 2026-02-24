@@ -28,7 +28,7 @@ The section has two modes:
 2. **Manual steps (section blocks)**  
    You add **Step** blocks in the theme editor. Each block has: related product; step title and description in **English** and **Arabic** (optional fallback). Same steps for every product that uses this section.
 
-**Section settings:** Optional heading in **English** and **Arabic** (plus fallback), heading alignment/size/color, step styling (background/text color, gap), section background, padding, full width / content width.
+**Section settings:** Optional heading (EN/AR + fallback), alignment/size/color; step styling (background/text color, gap); **Steps layout** (Vertical = stacked column, Horizontal = row with wrap); **Section layout**: full width (screen width) by default, padding top/bottom and left/right, optional content max width when not full width.
 
 **Install section:** Copy `sections/sl-how-to-use.liquid` into your theme **sections** folder. In **Customize** → product template → **Add section** → **SL - How to Use**. Choose **Step source** (Product metaobject or Manual steps). If Manual steps, add **Step** blocks and set product, title, and description for each.
 

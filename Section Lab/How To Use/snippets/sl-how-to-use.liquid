@@ -61,17 +61,7 @@
 
       {% if step_description != blank %}
         <div class="sl-htu-step-descriptions">
-          <details class="sl-htu-details">
-            <summary class="sl-htu-summary">
-              <span class="sl-htu-summary-text">{{ step_description | strip_html | truncate: 120 }}</span>
-              <svg class="sl-htu-chevron" xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8" fill="none" aria-hidden="true">
-                <path d="M11 1L6 7L1 1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </summary>
-            <div class="sl-htu-step-descriptions-inner prose">
-              {{ step_description }}
-            </div>
-          </details>
+          <div class="sl-htu-step-descriptions-inner prose">{{ step_description }}</div>
         </div>
       {% endif %}
     </div>
@@ -163,36 +153,8 @@
   #sl-htu-block-{{ block_id }} .sl-htu-step-descriptions {
     margin-top: 16px;
   }
-  #sl-htu-block-{{ block_id }} .sl-htu-details {
-    border: none;
-    padding: 0;
-    margin: 0;
-  }
-  #sl-htu-block-{{ block_id }} .sl-htu-summary {
-    list-style: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    color: var(--sl-htu-text);
-    font-size: 14px;
-    font-weight: 400;
-    line-height: 1.5;
-    letter-spacing: 0.02em;
-  }
-  #sl-htu-block-{{ block_id }} .sl-htu-summary::-webkit-details-marker {
-    display: none;
-  }
-  #sl-htu-block-{{ block_id }} .sl-htu-summary .sl-htu-chevron {
-    flex-shrink: 0;
-    transition: transform 0.2s;
-  }
-  #sl-htu-block-{{ block_id }} .sl-htu-details[open] .sl-htu-chevron {
-    transform: rotate(180deg);
-  }
   #sl-htu-block-{{ block_id }} .sl-htu-step-descriptions-inner {
-    margin-top: 12px;
+    margin-top: 0;
     color: var(--sl-htu-text);
     font-size: 14px;
     font-weight: 400;
