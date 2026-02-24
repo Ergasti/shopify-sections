@@ -21,6 +21,7 @@ A comprehensive, categorized library of Shopify sections and snippets. Copy what
 | **Product & Collection** | SL Price Bubble Widget | Section Lab (paid) | 2025-02-14 |
 | | SL Icon List (Product Bullets) | Section Lab (paid) | 2025-02-14 |
 | | SL Payment Icons | Section Lab (paid) | 2025-02-14 |
+| | SL How to Use (snippet) | Section Lab (metaobjects) | 2025-02-24 |
 | | Scarcity Bar | Custom (this repo) | 2025-02-14 |
 | | Collection Page Swatches | patrickbolle/shopify-snippets | 2025-02-14 |
 | **Media & Gallery** | Image Gallery (BoldizArt) | BoldizArt/Shopify-Image-Gallery | 2025-02-14 |
