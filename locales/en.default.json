@@ -10,6 +10,15 @@
       "heading": "Real Results",
       "no_highlights": "No highlights. Add Product Highlight entries to this product's Real results highlights metafield.",
       "close": "Close"
+    },
+    "sl_ugc_hp": {
+      "close_video": "Close video",
+      "loading": "Loading the video...",
+      "reviews": "reviews",
+      "add_to_cart": "Add to cart",
+      "adding": "Adding…",
+      "added": "Added",
+      "sold_out": "Sold out"
     }
   }
 }

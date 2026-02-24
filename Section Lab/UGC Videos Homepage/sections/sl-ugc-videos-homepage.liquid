@@ -1,0 +1,1335 @@
+{% comment %}
+  SL - UGC Videos Homepage
+  Home page section: Swiper of UGC video cards, each with a related product.
+  Clicking a card opens an overlay with full video + product CTA.
+  Data: section blocks (video + product per block) OR product metafield (videos from products).
+  See README.md.
+{% endcomment %}
+
+{% assign video_source = section.settings.video_source | default: 'section_blocks' %}
+{% assign has_videos = false %}
+
+{% if video_source == 'product_metafield' %}
+  {% assign metafield_key = section.settings.videos_metafield | default: 'custom.social_proof_videos' %}
+  {% for prod in section.settings.products %}
+    {% assign ugc_list = prod.metafields.custom.social_proof_videos.value %}
+    {% if metafield_key == 'custom.before_after_videos' %}
+      {% assign ugc_list = prod.metafields.custom.before_after_videos.value %}
+    {% endif %}
+    {% if ugc_list != blank and ugc_list.size > 0 %}
+      {% for entry in ugc_list %}
+        {% assign vf = entry.video %}
+        {% if vf != blank %}
+          {% assign video_url_check = nil %}
+          {% assign file_obj = vf.value | default: vf %}
+          {% assign mp4_src = vf.sources | where: 'format', 'mp4' | first %}
+          {% if mp4_src and mp4_src.url != blank %}
+            {% assign video_url_check = mp4_src.url %}
+          {% elsif vf.url != blank %}
+            {% assign video_url_check = vf.url %}
+          {% elsif file_obj.url != blank %}
+            {% assign video_url_check = file_obj.url %}
+          {% endif %}
+          {% if video_url_check != blank %}
+            {% assign has_videos = true %}
+            {% break %}
+          {% endif %}
+          {% assign mtag_check = vf | metafield_tag %}
+          {% if mtag_check != blank %}
+            {% assign has_videos = true %}
+            {% break %}
+          {% endif %}
+        {% endif %}
+      {% endfor %}
+      {% if has_videos %}{% break %}{% endif %}
+    {% endif %}
+  {% endfor %}
+{% else %}
+  {% for block in section.blocks %}
+    {% assign vf = block.settings.video_file %}
+    {% assign mp4 = vf.sources | where: 'format', 'mp4' | first %}
+    {% if mp4 and mp4.url != blank %}
+      {% assign has_videos = true %}
+      {% break %}
+    {% endif %}
+  {% endfor %}
+{% endif %}
+
+{% unless has_videos %}
+  {% if request.design_mode %}
+    <div id="sl-ugc-hp-{{ section.id }}" class="sl-ugc-hp-root" style="padding: 24px; background: #f5f5f5; font-family: monospace; font-size: 12px;">
+      <p style="margin: 0 0 12px 0; color: #666;">UGC Videos Homepage — {% if video_source == 'product_metafield' %}Pick products with videos in their metafield (Social proof videos or Before and after videos).{% else %}Add "Video + product" blocks with a video and related product.{% endif %}</p>
+      {% comment %} Debug (design mode, empty section) {% endcomment %}
+      <details style="margin-top: 12px; padding: 12px; background: #fff; border: 1px solid #ddd; border-radius: 6px; text-align: left;">
+        <summary style="cursor: pointer; font-weight: 600; color: #333;">Debug info</summary>
+        <ul style="margin: 8px 0 0 0; padding-left: 20px; color: #333;">
+          <li><strong>Video source:</strong> {{ video_source }}</li>
+          {% if video_source == 'product_metafield' %}
+            {% assign mf_setting = section.settings.videos_metafield | default: 'custom.social_proof_videos' %}
+            <li><strong>Metafield setting:</strong> {{ mf_setting }}</li>
+            {% assign products_list = section.settings.products %}
+            <li><strong>Products selected:</strong> {{ products_list.size | default: 0 }}</li>
+            {% for prod in products_list %}
+              {% assign ugc_val = prod.metafields.custom.social_proof_videos.value %}
+              {% if mf_setting == 'custom.before_after_videos' %}
+                {% assign ugc_val = prod.metafields.custom.before_after_videos.value %}
+              {% endif %}
+              <li style="margin-top: 8px;">
+                <strong>Product "{{ prod.title | escape }}":</strong>
+                <ul style="margin: 4px 0 0 0; padding-left: 16px;">
+                  <li>Metafield present: {% if ugc_val != blank %}yes{% else %}no{% endif %}</li>
+                  <li>Entries count: {{ ugc_val.size | default: 0 }}</li>
+                  {% if ugc_val != blank and ugc_val.size > 0 %}
+                    {% for entry in ugc_val %}
+                      {% assign v = entry.video %}
+                      {% assign video_mtag_debug = v | metafield_tag %}
+                      <li>Entry {{ forloop.index }}: video {% if v != blank %}present{% else %}missing{% endif %}
+                        {% if v != blank %}
+                          {% assign fo = v.value | default: v %}
+                          {% assign src = v.sources | where: 'format', 'mp4' | first %}
+                          — mp4: {% if src != blank and src.url != blank %}yes{% else %}no{% endif %}
+                          | v.url: {% if v.url != blank %}yes{% else %}no{% endif %}
+                          | v.value.url: {% if fo.url != blank %}yes{% else %}no{% endif %}
+                          | metafield_tag: {% if video_mtag_debug != blank %}yes (use this){% else %}no{% endif %}
+                          {% if forloop.first %} — first entry v.value type: {{ v.value | json | slice: 0, 120 }}…{% endif %}
+                        {% endif %}
+                      </li>
+                    {% endfor %}
+                  {% endif %}
+                </ul>
+              </li>
+            {% endfor %}
+            {% if products_list == blank or products_list.size == 0 %}
+              <li style="margin-top: 8px; color: #c00;">No products selected in section settings.</li>
+            {% endif %}
+          {% else %}
+            <li><strong>Blocks count:</strong> {{ section.blocks.size }}</li>
+          {% endif %}
+        </ul>
+      </details>
+    </div>
+  {% endif %}
+{% else %}
+{% assign locale_iso = request.locale.iso_code | default: 'en' %}
+{% assign is_rtl = false %}
+{% if locale_iso == 'ar' or locale_iso == 'he' or locale_iso == 'fa' %}{% assign is_rtl = true %}{% endif %}
+
+<div id="sl-ugc-hp-{{ section.id }}" class="sl-ugc-hp-root{% if is_rtl %} sl-ugc-hp-rtl{% endif %}"{% if is_rtl %} dir="rtl"{% endif %} style="background: {{ section.settings.background_color }}; padding: {{ section.settings.padding_top }}px 0 {{ section.settings.padding_bottom }}px 0; --sl-ugc-slide-gap: {{ section.settings.slide_gap | default: 16 }}px; --sl-ugc-slides-per-view: {{ section.settings.slides_desktop | default: 5 }};">
+  <div class="sl-ugc-hp-inner" style="{% unless section.settings.full_width %}max-width: {{ section.settings.content_width }}px; margin-left: auto; margin-right: auto;{% endunless %} padding: 0 16px;">
+    <div class="sl-ugc-hp-title">
+      {% if section.settings.heading != blank %}<h2 class="sl-ugc-hp-heading" style="font-size: {{ section.settings.heading_size }}px; color: {{ section.settings.heading_color }}; margin: 0;">{{ section.settings.heading }}</h2>{% endif %}
+      {% if section.settings.subheading != blank %}<p class="sl-ugc-hp-subheading" style="font-size: {{ section.settings.subheading_size }}px; color: {{ section.settings.subheading_color }}; margin: 8px 0 0 0;">{{ section.settings.subheading }}</p>{% endif %}
+    </div>
+
+    <div class="sl-ugc-hp-swiper swiper">
+      <div class="swiper-wrapper">
+        {% if video_source == 'product_metafield' %}
+          {% assign mf_key = section.settings.videos_metafield | default: 'custom.social_proof_videos' %}
+          {% assign max_videos = section.settings.max_videos | default: 0 %}
+          {% assign max_per_product = section.settings.max_videos_per_product | default: 0 %}
+          {% assign videos_output = 0 %}
+          {% for prod in section.settings.products %}
+            {% if max_videos > 0 and videos_output >= max_videos %}{% break %}{% endif %}
+            {% assign ugc_list = prod.metafields.custom.social_proof_videos.value %}
+            {% if mf_key == 'custom.before_after_videos' %}
+              {% assign ugc_list = prod.metafields.custom.before_after_videos.value %}
+            {% endif %}
+            {% if ugc_list != blank %}
+              {% assign videos_from_product = 0 %}
+              {% for entry in ugc_list %}
+                {% if max_videos > 0 and videos_output >= max_videos %}{% break %}{% endif %}
+                {% if max_per_product > 0 and videos_from_product >= max_per_product %}{% break %}{% endif %}
+                {% assign video_file = entry.video %}
+                {% if video_file != blank %}
+                  {% assign full_video_url = nil %}
+                  {% assign file_obj = video_file.value | default: video_file %}
+                  {% assign mp4_src = video_file.sources | where: 'format', 'mp4' | first %}
+                  {% if mp4_src and mp4_src.url != blank %}
+                    {% assign full_video_url = mp4_src.url %}
+                  {% elsif video_file.url != blank %}
+                    {% assign full_video_url = video_file.url %}
+                  {% elsif file_obj.url != blank %}
+                    {% assign full_video_url = file_obj.url %}
+                  {% endif %}
+                  {% assign video_mtag = video_file | metafield_tag %}
+                  {% assign card_seed = prod.id | plus: forloop.index %}
+                  {% assign r_mod = card_seed | modulo: 5 %}
+                  {% assign rating_display = '4.6' %}{% if r_mod == 1 %}{% assign rating_display = '4.7' %}{% elsif r_mod == 2 %}{% assign rating_display = '4.8' %}{% elsif r_mod == 3 %}{% assign rating_display = '4.9' %}{% elsif r_mod == 4 %}{% assign rating_display = '5.0' %}{% endif %}
+                  {% assign review_count = 100 | plus: card_seed | modulo: 401 %}
+                  {% if full_video_url != blank %}
+                  {% assign preview_url = full_video_url %}
+                  <div class="swiper-slide sl-ugc-hp-slide">
+                    <div class="sl-ugc-hp-card"
+                      data-full-video="{{ full_video_url | escape }}"
+                      data-product-url="{{ prod.url | default: '#' | escape }}"
+                      data-product-title="{{ prod.title | default: '' | escape }}"
+                      data-product-image="{% if prod.featured_image %}{{ prod.featured_image | image_url: width: 360 }}{% endif %}"
+                      data-product-price="{{ prod.price | money | strip_html | escape }}"
+                      data-product-compare="{% if prod.compare_at_price and prod.compare_at_price > prod.price %}{{ prod.compare_at_price | money | strip_html | escape }}{% endif %}"
+                      data-product-rating="{{ rating_display | escape }}"
+                      data-product-reviews="{{ review_count }} {{ 'sections.sl_ugc_hp.reviews' | t }}"
+                      data-variant-id="{{ prod.selected_or_first_available_variant.id | default: '' }}"
+                      data-cta-text="{{ section.settings.cta_text | default: 'Add to cart' | escape }}"
+                      role="button"
+                      tabindex="0">
+                      <div class="sl-ugc-hp-video-wrap">
+                        <video
+                          data-src="{{ preview_url }}"
+                          poster="{% if video_file.preview_image %}{{ video_file.preview_image | image_url: width: 600 }}{% endif %}"
+                          muted loop playsinline
+                          preload="none"
+                          loading="lazy"
+                          class="sl-ugc-hp-video"
+                        ></video>
+                      </div>
+                      <div class="sl-ugc-hp-product short">
+                        <div class="sl-ugc-hp-product-photo">
+                          {% if prod.featured_image %}
+                            <img src="{{ prod.featured_image | image_url: width: 120 }}" alt="{{ prod.title | escape }}" width="60" height="60" loading="lazy" decoding="async">
+                          {% else %}
+                            <div class="sl-ugc-hp-product-placeholder"></div>
+                          {% endif %}
+                        </div>
+                        <div class="sl-ugc-hp-product-details">
+                          <div class="sl-ugc-hp-name-rating-row">
+                            <p class="sl-ugc-hp-product-name">{{ prod.title | default: 'Product' }}</p>
+                            <div class="sl-ugc-hp-stars" aria-hidden="true">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="72" height="13" viewBox="0 0 72 13" fill="none">
+                                <path d="M6 0.5L7.34708 4.6459H11.7063L8.17963 7.2082L9.52671 11.3541L6 8.7918L2.47329 11.3541L3.82037 7.2082L0.293661 4.6459H4.65292L6 0.5Z" fill="{{ section.settings.star_color }}"/>
+                                <path d="M21 0.5L22.3471 4.6459H26.7063L23.1796 7.2082L24.5267 11.3541L21 8.7918L17.4733 11.3541L18.8204 7.2082L15.2937 4.6459H19.6529L21 0.5Z" fill="{{ section.settings.star_color }}"/>
+                                <path d="M36 0.5L37.3471 4.6459H41.7063L38.1796 7.2082L39.5267 11.3541L36 8.7918L32.4733 11.3541L33.8204 7.2082L30.2937 4.6459H34.6529L36 0.5Z" fill="{{ section.settings.star_color }}"/>
+                                <path d="M51 0.5L52.3471 4.6459H56.7063L53.1796 7.2082L54.5267 11.3541L51 8.7918L47.4733 11.3541L48.8204 7.2082L45.2937 4.6459H49.6529L51 0.5Z" fill="{{ section.settings.star_color }}"/>
+                                <path d="M66 0.5L67.3471 4.6459H71.7063L68.1796 7.2082L69.5267 11.3541L66 8.7918L62.4733 11.3541L63.8204 7.2082L60.2937 4.6459H64.6529L66 0.5Z" fill="{{ section.settings.star_color }}"/>
+                              </svg>
+                            </div>
+                          </div>
+                          <div class="sl-ugc-hp-price-btn-row">
+                            <div class="sl-ugc-hp-price-block">
+                              <span class="sl-ugc-hp-product-price" style="color: {{ section.settings.price_color }};">{{ prod.price | money }}</span>
+                              {% if prod.compare_at_price and prod.compare_at_price > prod.price %}
+                                <span class="sl-ugc-hp-product-compare" style="color: {{ section.settings.compare_color }};">{{ prod.compare_at_price | money }}</span>
+                              {% endif %}
+                            </div>
+                            {% form 'product', prod, class: 'sl-ugc-hp-add-form' %}
+                              <input type="hidden" name="quantity" value="1">
+                              <input type="hidden" name="id" value="{{ prod.selected_or_first_available_variant.id }}">
+                              <button type="submit" class="sl-ugc-hp-add-btn" {% unless prod.available %}disabled{% endunless %} style="color: {{ section.settings.cta_color }}; background: {{ section.settings.cta_bg }};">{% if prod.available %}{{ section.settings.cta_text | default: 'Add to cart' }}{% else %}{{ 'sections.sl_ugc_hp.sold_out' | t }}{% endif %}</button>
+                            {% endform %}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  {% assign videos_from_product = videos_from_product | plus: 1 %}
+                  {% assign videos_output = videos_output | plus: 1 %}
+                {% elsif video_mtag != blank %}
+                  <div class="swiper-slide sl-ugc-hp-slide">
+                    <div class="sl-ugc-hp-card sl-ugc-hp-card--metafield"
+                      data-full-video=""
+                      data-product-url="{{ prod.url | default: '#' | escape }}"
+                      data-product-title="{{ prod.title | default: '' | escape }}"
+                      data-product-image="{% if prod.featured_image %}{{ prod.featured_image | image_url: width: 360 }}{% endif %}"
+                      data-product-price="{{ prod.price | money | strip_html | escape }}"
+                      data-product-compare="{% if prod.compare_at_price and prod.compare_at_price > prod.price %}{{ prod.compare_at_price | money | strip_html | escape }}{% endif %}"
+                      data-product-rating="{{ rating_display | escape }}"
+                      data-product-reviews="{{ review_count }} {{ 'sections.sl_ugc_hp.reviews' | t }}"
+                      data-variant-id="{{ prod.selected_or_first_available_variant.id | default: '' }}"
+                      data-cta-text="{{ section.settings.cta_text | default: 'Add to cart' | escape }}"
+                      role="button"
+                      tabindex="0">
+                      <div class="sl-ugc-hp-video-wrap sl-ugc-hp-metafield-wrap">
+                        {{ video_mtag }}
+                      </div>
+                      <div class="sl-ugc-hp-product short">
+                        <div class="sl-ugc-hp-product-photo">
+                          {% if prod.featured_image %}
+                            <img src="{{ prod.featured_image | image_url: width: 120 }}" alt="{{ prod.title | escape }}" width="60" height="60" loading="lazy" decoding="async">
+                          {% else %}
+                            <div class="sl-ugc-hp-product-placeholder"></div>
+                          {% endif %}
+                        </div>
+                        <div class="sl-ugc-hp-product-details">
+                          <div class="sl-ugc-hp-name-rating-row">
+                            <p class="sl-ugc-hp-product-name">{{ prod.title | default: 'Product' }}</p>
+                            <div class="sl-ugc-hp-stars" aria-hidden="true">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="72" height="13" viewBox="0 0 72 13" fill="none">
+                                <path d="M6 0.5L7.34708 4.6459H11.7063L8.17963 7.2082L9.52671 11.3541L6 8.7918L2.47329 11.3541L3.82037 7.2082L0.293661 4.6459H4.65292L6 0.5Z" fill="{{ section.settings.star_color }}"/>
+                                <path d="M21 0.5L22.3471 4.6459H26.7063L23.1796 7.2082L24.5267 11.3541L21 8.7918L17.4733 11.3541L18.8204 7.2082L15.2937 4.6459H19.6529L21 0.5Z" fill="{{ section.settings.star_color }}"/>
+                                <path d="M36 0.5L37.3471 4.6459H41.7063L38.1796 7.2082L39.5267 11.3541L36 8.7918L32.4733 11.3541L33.8204 7.2082L30.2937 4.6459H34.6529L36 0.5Z" fill="{{ section.settings.star_color }}"/>
+                                <path d="M51 0.5L52.3471 4.6459H56.7063L53.1796 7.2082L54.5267 11.3541L51 8.7918L47.4733 11.3541L48.8204 7.2082L45.2937 4.6459H49.6529L51 0.5Z" fill="{{ section.settings.star_color }}"/>
+                                <path d="M66 0.5L67.3471 4.6459H71.7063L68.1796 7.2082L69.5267 11.3541L66 8.7918L62.4733 11.3541L63.8204 7.2082L60.2937 4.6459H64.6529L66 0.5Z" fill="{{ section.settings.star_color }}"/>
+                              </svg>
+                            </div>
+                          </div>
+                          <div class="sl-ugc-hp-price-btn-row">
+                            <div class="sl-ugc-hp-price-block">
+                              <span class="sl-ugc-hp-product-price" style="color: {{ section.settings.price_color }};">{{ prod.price | money }}</span>
+                              {% if prod.compare_at_price and prod.compare_at_price > prod.price %}
+                                <span class="sl-ugc-hp-product-compare" style="color: {{ section.settings.compare_color }};">{{ prod.compare_at_price | money }}</span>
+                              {% endif %}
+                            </div>
+                            {% form 'product', prod, class: 'sl-ugc-hp-add-form' %}
+                              <input type="hidden" name="quantity" value="1">
+                              <input type="hidden" name="id" value="{{ prod.selected_or_first_available_variant.id }}">
+                              <button type="submit" class="sl-ugc-hp-add-btn" {% unless prod.available %}disabled{% endunless %} style="color: {{ section.settings.cta_color }}; background: {{ section.settings.cta_bg }};">{% if prod.available %}{{ section.settings.cta_text | default: 'Add to cart' }}{% else %}{{ 'sections.sl_ugc_hp.sold_out' | t }}{% endif %}</button>
+                            {% endform %}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  {% assign videos_from_product = videos_from_product | plus: 1 %}
+                  {% assign videos_output = videos_output | plus: 1 %}
+                {% endif %}
+                {% endif %}
+              {% endfor %}
+            {% endif %}
+          {% endfor %}
+        {% else %}
+        {% assign max_videos_blocks = section.settings.max_videos | default: 0 %}
+        {% assign videos_output_blocks = 0 %}
+        {% for block in section.blocks %}
+          {% if max_videos_blocks > 0 and videos_output_blocks >= max_videos_blocks %}{% break %}{% endif %}
+          {% assign video_file = block.settings.video_file %}
+          {% assign prod = block.settings.product %}
+          {% assign mp4 = video_file.sources | where: 'format', 'mp4' | first %}
+          {% if mp4 and mp4.url != blank %}
+            {% assign full_video_url = mp4.url %}
+            {% assign preview_url = full_video_url %}
+            {% assign block_seed = prod.id | plus: forloop.index %}
+            {% assign b_r_mod = block_seed | modulo: 5 %}
+            {% assign block_rating = '4.6' %}{% if b_r_mod == 1 %}{% assign block_rating = '4.7' %}{% elsif b_r_mod == 2 %}{% assign block_rating = '4.8' %}{% elsif b_r_mod == 3 %}{% assign block_rating = '4.9' %}{% elsif b_r_mod == 4 %}{% assign block_rating = '5.0' %}{% endif %}
+            {% assign block_review_count = 100 | plus: block_seed | modulo: 401 %}
+            {% assign block_rating_display = block.settings.rating | default: block_rating %}
+            {% assign block_count_display = block.settings.review_count | default: block_review_count %}
+            <div class="swiper-slide sl-ugc-hp-slide" {{ block.shopify_attributes }}>
+              <div class="sl-ugc-hp-card"
+                data-full-video="{{ full_video_url | escape }}"
+                data-product-url="{{ prod.url | default: '#' | escape }}"
+                data-product-title="{{ prod.title | default: '' | escape }}"
+                data-product-image="{% if prod.featured_image %}{{ prod.featured_image | image_url: width: 360 }}{% endif %}"
+                data-product-price="{{ prod.price | money | strip_html | escape }}"
+                data-product-compare="{% if prod.compare_at_price and prod.compare_at_price > prod.price %}{{ prod.compare_at_price | money | strip_html | escape }}{% endif %}"
+                data-product-rating="{{ block_rating_display | escape }}"
+                data-product-reviews="{{ block_count_display }} {{ 'sections.sl_ugc_hp.reviews' | t }}"
+                data-variant-id="{{ prod.selected_or_first_available_variant.id | default: '' }}"
+                data-cta-text="{{ section.settings.cta_text | default: 'Add to cart' | escape }}"
+                role="button"
+                tabindex="0">
+                <div class="sl-ugc-hp-video-wrap">
+                  <video
+                    data-src="{{ preview_url }}"
+                    poster="{% if video_file.preview_image %}{{ video_file.preview_image | image_url: width: 600 }}{% endif %}"
+                    muted loop playsinline
+                    preload="none"
+                    loading="lazy"
+                    class="sl-ugc-hp-video"
+                  ></video>
+                </div>
+                <div class="sl-ugc-hp-product short">
+                  <div class="sl-ugc-hp-product-photo">
+                    {% if prod.featured_image %}
+                      <img src="{{ prod.featured_image | image_url: width: 120 }}" alt="{{ prod.title | escape }}" width="60" height="60" loading="lazy" decoding="async">
+                    {% else %}
+                      <div class="sl-ugc-hp-product-placeholder"></div>
+                    {% endif %}
+                  </div>
+                  <div class="sl-ugc-hp-product-details">
+                    <div class="sl-ugc-hp-name-rating-row">
+                      <p class="sl-ugc-hp-product-name">{{ prod.title | default: 'Product' }}</p>
+                      <div class="sl-ugc-hp-stars" aria-hidden="true">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="72" height="13" viewBox="0 0 72 13" fill="none">
+                          <path d="M6 0.5L7.34708 4.6459H11.7063L8.17963 7.2082L9.52671 11.3541L6 8.7918L2.47329 11.3541L3.82037 7.2082L0.293661 4.6459H4.65292L6 0.5Z" fill="{{ section.settings.star_color }}"/>
+                          <path d="M21 0.5L22.3471 4.6459H26.7063L23.1796 7.2082L24.5267 11.3541L21 8.7918L17.4733 11.3541L18.8204 7.2082L15.2937 4.6459H19.6529L21 0.5Z" fill="{{ section.settings.star_color }}"/>
+                          <path d="M36 0.5L37.3471 4.6459H41.7063L38.1796 7.2082L39.5267 11.3541L36 8.7918L32.4733 11.3541L33.8204 7.2082L30.2937 4.6459H34.6529L36 0.5Z" fill="{{ section.settings.star_color }}"/>
+                          <path d="M51 0.5L52.3471 4.6459H56.7063L53.1796 7.2082L54.5267 11.3541L51 8.7918L47.4733 11.3541L48.8204 7.2082L45.2937 4.6459H49.6529L51 0.5Z" fill="{{ section.settings.star_color }}"/>
+                          <path d="M66 0.5L67.3471 4.6459H71.7063L68.1796 7.2082L69.5267 11.3541L66 8.7918L62.4733 11.3541L63.8204 7.2082L60.2937 4.6459H64.6529L66 0.5Z" fill="{{ section.settings.star_color }}"/>
+                        </svg>
+                      </div>
+                    </div>
+                    <div class="sl-ugc-hp-price-btn-row">
+                      <div class="sl-ugc-hp-price-block">
+                        <span class="sl-ugc-hp-product-price" style="color: {{ section.settings.price_color }};">{{ prod.price | money }}</span>
+                        {% if prod.compare_at_price and prod.compare_at_price > prod.price %}
+                          <span class="sl-ugc-hp-product-compare" style="color: {{ section.settings.compare_color }};">{{ prod.compare_at_price | money }}</span>
+                        {% endif %}
+                      </div>
+                      {% form 'product', prod, class: 'sl-ugc-hp-add-form' %}
+                        <input type="hidden" name="quantity" value="1">
+                        <input type="hidden" name="id" value="{{ prod.selected_or_first_available_variant.id }}">
+                        <button type="submit" class="sl-ugc-hp-add-btn" {% unless prod.available %}disabled{% endunless %} style="color: {{ section.settings.cta_color }}; background: {{ section.settings.cta_bg }};">{% if prod.available %}{{ section.settings.cta_text | default: 'Add to cart' }}{% else %}{{ 'sections.sl_ugc_hp.sold_out' | t }}{% endif %}</button>
+                      {% endform %}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% assign videos_output_blocks = videos_output_blocks | plus: 1 %}
+          {% endif %}
+        {% endfor %}
+        {% endif %}
+      </div>
+      <div class="swiper-button-prev"></div>
+      <div class="swiper-button-next"></div>
+    </div>
+  </div>
+</div>
+
+{% comment %} Video overlay (frosted glass popup) {% endcomment %}
+<div id="sl-ugc-hp-overlay-{{ section.id }}" class="sl-ugc-hp-overlay{% if is_rtl %} sl-ugc-hp-rtl{% endif %}" role="dialog" aria-modal="true" aria-label="{{ 'sections.sl_ugc_hp.close_video' | t }}" hidden>
+  <span class="sl-ugc-hp-overlay-close" id="sl-ugc-hp-overlay-close-{{ section.id }}" aria-label="{{ 'sections.sl_ugc_hp.close_video' | t }}"></span>
+  <div class="sl-ugc-hp-full-container">
+    <div id="sl-ugc-hp-overlay-video-slot-{{ section.id }}" class="sl-ugc-hp-overlay-video-slot">
+      <video id="sl-ugc-hp-full-video-{{ section.id }}" class="sl-ugc-hp-full-video" autoplay playsinline loop controls></video>
+    </div>
+    <div class="sl-ugc-hp-overlay-product">
+      <div class="sl-ugc-hp-overlay-product-row">
+        <div id="sl-ugc-hp-overlay-photo-{{ section.id }}" class="sl-ugc-hp-overlay-photo">
+          <img id="sl-ugc-hp-overlay-img-{{ section.id }}" src="" alt="" width="64" height="64" loading="lazy">
+        </div>
+        <div class="sl-ugc-hp-overlay-product-info">
+          <p id="sl-ugc-hp-overlay-name-{{ section.id }}" class="sl-ugc-hp-overlay-name"></p>
+          <svg xmlns="http://www.w3.org/2000/svg" width="72" height="13" viewBox="0 0 72 13" fill="none" style="margin:5px 0;">
+            <path d="M6 0.5L7.34708 4.6459H11.7063L8.17963 7.2082L9.52671 11.3541L6 8.7918L2.47329 11.3541L3.82037 7.2082L0.293661 4.6459H4.65292L6 0.5Z" fill="#272E0F"/>
+            <path d="M21 0.5L22.3471 4.6459H26.7063L23.1796 7.2082L24.5267 11.3541L21 8.7918L17.4733 11.3541L18.8204 7.2082L15.2937 4.6459H19.6529L21 0.5Z" fill="#272E0F"/>
+            <path d="M36 0.5L37.3471 4.6459H41.7063L38.1796 7.2082L39.5267 11.3541L36 8.7918L32.4733 11.3541L33.8204 7.2082L30.2937 4.6459H34.6529L36 0.5Z" fill="#272E0F"/>
+            <path d="M51 0.5L52.3471 4.6459H56.7063L53.1796 7.2082L54.5267 11.3541L51 8.7918L47.4733 11.3541L48.8204 7.2082L45.2937 4.6459H49.6529L51 0.5Z" fill="#272E0F"/>
+            <path d="M66 0.5L67.3471 4.6459H71.7063L68.1796 7.2082L69.5267 11.3541L66 8.7918L62.4733 11.3541L63.8204 7.2082L60.2937 4.6459H64.6529L66 0.5Z" fill="#272E0F"/>
+          </svg>
+          <div class="sl-ugc-hp-overlay-price-box">
+            <span id="sl-ugc-hp-overlay-price-{{ section.id }}" class="sl-ugc-hp-overlay-price"></span>
+            <span id="sl-ugc-hp-overlay-compare-{{ section.id }}" class="sl-ugc-hp-overlay-compare"></span>
+          </div>
+        </div>
+      </div>
+      <button type="button" id="sl-ugc-hp-overlay-add-{{ section.id }}" class="sl-ugc-hp-overlay-cta sl-ugc-hp-overlay-add-btn" data-variant-id="">{{ section.settings.cta_text | default: 'Add to cart' }}</button>
+    </div>
+    <div id="sl-ugc-hp-loading-{{ section.id }}" class="sl-ugc-hp-loading" hidden>{{ 'sections.sl_ugc_hp.loading' | t }}</div>
+  </div>
+</div>
+
+<style>
+  /* ===== SWIPER / SLIDE LAYOUT (stable before JS to prevent layout shift) ===== */
+  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-swiper { overflow: hidden; position: relative; padding: 20px 0 48px; min-height: 340px; }
+  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-title { margin-bottom: 16px; text-align: {{ section.settings.heading_alignment }}; }
+  #sl-ugc-hp-{{ section.id }} .swiper-wrapper {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: var(--sl-ugc-slide-gap, 16px);
+  }
+  #sl-ugc-hp-{{ section.id }} .swiper-slide {
+    height: auto;
+    box-sizing: border-box;
+    flex: 0 0 auto;
+    width: calc((100% - (var(--sl-ugc-slide-gap, 16px) * (var(--sl-ugc-slides-per-view, 5) - 1))) / var(--sl-ugc-slides-per-view, 5));
+    min-width: 0;
+  }
+  @media (max-width: 768px) {
+    #sl-ugc-hp-{{ section.id }} .swiper-slide {
+      width: calc((100% - (var(--sl-ugc-slide-gap, 16px) * ({{ section.settings.slides_mobile | default: 1 }} - 1))) / {{ section.settings.slides_mobile | default: 1 }});
+    }
+  }
+  #sl-ugc-hp-{{ section.id }} .swiper-slide .sl-ugc-hp-video-wrap img { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+  /* ===== CARD CONTAINER ===== */
+  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-card {
+    position: relative;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+  }
+  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-card .sl-ugc-hp-video-wrap {
+    aspect-ratio: 9 / 16;
+    background: #000;
+    position: relative;
+    flex-shrink: 0;
+    border-radius: {{ section.settings.card_radius }}px {{ section.settings.card_radius }}px 0 0;
+    overflow: hidden;
+    min-height: 180px;
+  }
+  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-video-wrap .sl-ugc-hp-video {
+    background: #000;
+  }
+  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-metafield-wrap {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+  }
+  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-metafield-wrap video,
+  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-metafield-wrap iframe {
+    width: 100%; height: 100%; object-fit: cover; display: block; position: absolute; inset: 0;
+  }
+  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-video {
+    width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none;
+  }
+
+  /* ===== PRODUCT STRIP (footer/caption below video) ===== */
+  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-product.short {
+    position: relative;
+    margin-top: -24px;
+    margin-bottom: 0;
+    background: {{ section.settings.card_bg }};
+    box-shadow: 0px -8px 32px 0px rgba(0,0,0,0.25);
+    padding: 10px 12px 12px;
+    padding-top: 0;
+    border-radius: 16px 16px 20px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    flex-shrink: 0;
+  }
+  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-product-photo {
+    margin-top: -32px;
+    text-align: center;
+    margin-bottom: 6px;
+    background: {{ section.settings.card_bg }};
+    border-radius: 100px;
+    width: 60px;
+    height: 60px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-product-photo img {
+    border-radius: 100px;
+    display: inline;
+    border: 2px solid #fff;
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+  }
+  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-product-placeholder {
+    width: 60px; height: 60px; background: #eee; border-radius: 100px; display: inline-block; border: 2px solid #fff;
+  }
+  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-product-details {
+    width: 100%;
+  }
+  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-name-rating-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 6px;
+  }
+  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-product-name {
+    margin: 0;
+    color: {{ section.settings.text_color }};
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 120%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-stars { display: flex; flex-shrink: 0; }
+  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-stars svg { width: 72px; height: 13px; }
+  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-price-btn-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    width: 100%;
+  }
+  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-price-block {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+    flex-shrink: 0;
+  }
+  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-product-price {
+    font-size: 13px;
+    font-weight: 600;
+    color: {{ section.settings.price_color }};
+    white-space: nowrap;
+    line-height: 1.2;
+  }
+  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-product-compare {
+    display: block;
+    font-size: 11px;
+    font-weight: 400;
+    text-decoration: line-through;
+    opacity: 0.85;
+    line-height: 1.2;
+    margin-top: 1px;
+  }
+
+  /* ===== ADD TO CART (FBT-style) ===== */
+  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-add-form { margin: 0; flex: 1; min-width: 0; }
+  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-add-btn {
+    display: flex;
+    width: 100%;
+    padding: 10px 16px;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-add-btn:hover:not(:disabled) { opacity: 0.9; }
+  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-add-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  @keyframes sl-ugc-hp-pulse { 0%, 100% { opacity: 0.8; } 50% { opacity: 0.5; } }
+  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-add-btn.is-loading { animation: sl-ugc-hp-pulse 0.8s ease-in-out infinite; pointer-events: none; }
+
+  #sl-ugc-hp-{{ section.id }} .swiper-button-prev, #sl-ugc-hp-{{ section.id }} .swiper-button-next,
+  #sl-ugc-hp-{{ section.id }} .swiper-button-prev::after, #sl-ugc-hp-{{ section.id }} .swiper-button-next::after { color: {{ section.settings.arrow_color }} !important; }
+
+  /* ===== OVERLAY (frosted glass) ===== */
+  #sl-ugc-hp-overlay-{{ section.id }}.sl-ugc-hp-overlay {
+    position: fixed; inset: 0; z-index: 99999999;
+    background: rgba(255, 255, 255, 0.8);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    display: block;
+  }
+  #sl-ugc-hp-overlay-{{ section.id }}.sl-ugc-hp-overlay[hidden] { display: none !important; }
+  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-close {
+    position: absolute; top: 10px; right: 10px; z-index: 10001; width: 32px; height: 32px;
+    cursor: pointer; background: rgba(0,0,0,0.08); border-radius: 50%; transition: background 0.2s;
+  }
+  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-close:hover { background: rgba(0,0,0,0.15); }
+  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-close::before,
+  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-close::after {
+    content: ''; position: absolute; left: 50%; top: 50%; width: 16px; height: 2px; background: #333; transform: translate(-50%,-50%) rotate(45deg);
+  }
+  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-close::after { transform: translate(-50%,-50%) rotate(-45deg); }
+  #sl-ugc-hp-overlay-{{ section.id }}.sl-ugc-hp-rtl .sl-ugc-hp-overlay-close { right: auto; left: 10px; }
+
+  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-full-container {
+    width: 400px;
+    max-width: 95%;
+    margin: 2px auto;
+    position: relative;
+    height: calc(100% - 76px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-video-slot {
+    position: relative;
+    width: 100%;
+  }
+  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-full-video {
+    border-radius: 30px;
+    width: 100%;
+    display: block;
+  }
+  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-video-slot .sl-ugc-hp-overlay-metafield-clone {
+    width: 100%; position: relative;
+  }
+  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-video-slot .sl-ugc-hp-overlay-metafield-clone video {
+    border-radius: 30px; width: 100%; display: block;
+  }
+  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-video-slot .sl-ugc-hp-overlay-metafield-clone iframe {
+    width: 100%; aspect-ratio: 9/16; border-radius: 30px; display: block;
+  }
+
+  /* ===== OVERLAY PRODUCT STRIP ===== */
+  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-product {
+    position: relative;
+    margin-top: -160px;
+    background: #fff;
+    box-shadow: 0px -8px 32px 0px rgba(0,0,0,0.25);
+    padding: 10px;
+    border-radius: 16px 16px 24px 24px;
+  }
+  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-product-row {
+    align-items: center;
+    display: grid;
+    grid-template-columns: 20% 80%;
+  }
+  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-photo img {
+    width: 64px; height: 64px; object-fit: cover; border-radius: 100px;
+  }
+  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-name {
+    margin: 0 0 4px 0; font-size: 13px; font-weight: 500; color: #393938; line-height: 120%;
+  }
+  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-product-info svg { margin: 5px 0; display: block; }
+  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-price-box { margin-top: 2px; }
+  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-price {
+    color: {{ section.settings.price_color }};
+    font-size: 13px; font-weight: 500;
+  }
+  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-compare { margin-left: 6px; text-decoration: line-through; font-size: 13px; color: #666; }
+  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-cta {
+    display: flex;
+    width: 100%;
+    height: 48px;
+    padding: 9px 25px;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+    border-radius: 36px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: {{ section.settings.cta_bg }};
+    box-shadow: 0px 1px 1px 0px rgba(255,255,255,0.02) inset, 0px 6px 12px 0px rgba(255,255,255,0.12) inset, 0px 4px 8px 3px rgba(0,0,0,0.12), 0px 1px 3px 0px rgba(0,0,0,0.20);
+    color: {{ section.settings.cta_color }};
+    margin-top: 11px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-cta:hover:not(:disabled) { opacity: 0.9; }
+  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-cta:disabled { opacity: 0.6; cursor: not-allowed; }
+  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-cta.is-loading { animation: sl-ugc-hp-pulse 0.8s ease-in-out infinite; pointer-events: none; }
+  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-loading {
+    display: none;
+    position: absolute; left: 50%; top: 40%; transform: translate(-50%,-50%);
+    color: #999; font-size: 14px;
+  }
+  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-loading:not([hidden]) { display: block; }
+</style>
+
+<script>
+(function() {
+  var sectionId = '{{ section.id }}';
+  var root = document.getElementById('sl-ugc-hp-' + sectionId);
+  if (!root) return;
+  var SWIPER_CSS = 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css';
+  var SWIPER_JS = 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js';
+
+  function loadSwiper(cb) {
+    if (typeof Swiper !== 'undefined') { cb(); return; }
+    var link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = SWIPER_CSS;
+    document.head.appendChild(link);
+    var s = document.createElement('script');
+    s.src = SWIPER_JS;
+    s.onload = cb;
+    s.onerror = function() { cb(); };
+    document.head.appendChild(s);
+  }
+
+  function ensureVideoSrc(v) {
+    if (!v) return;
+    var src = v.getAttribute('data-src');
+    if (src && !v.src) v.src = src;
+  }
+
+  function playVisibleVideos(swiper) {
+    if (!swiper || !swiper.slides) return;
+    var activeIdx = swiper.activeIndex || 0;
+    var perView = swiper.params.slidesPerView || 1;
+    swiper.slides.forEach(function(slide, i) {
+      var v = slide.querySelector('.sl-ugc-hp-video');
+      if (!v) return;
+      if (i >= activeIdx && i < activeIdx + Math.ceil(perView)) {
+        ensureVideoSrc(v);
+        v.muted = true;
+        v.loop = true;
+        v.play().catch(function(){});
+      } else {
+        v.pause();
+      }
+    });
+  }
+
+  function run() {
+    var r = document.getElementById('sl-ugc-hp-' + sectionId);
+    if (!r) return;
+    var swiperEl = r.querySelector('.sl-ugc-hp-swiper');
+    var cards = r.querySelectorAll('.sl-ugc-hp-card');
+    var overlay = document.getElementById('sl-ugc-hp-overlay-' + sectionId);
+    var overlayVideo = document.getElementById('sl-ugc-hp-full-video-' + sectionId);
+    var overlayClose = document.getElementById('sl-ugc-hp-overlay-close-' + sectionId);
+    var overlayImg = document.getElementById('sl-ugc-hp-overlay-img-' + sectionId);
+    var overlayName = document.getElementById('sl-ugc-hp-overlay-name-' + sectionId);
+    var overlayPrice = document.getElementById('sl-ugc-hp-overlay-price-' + sectionId);
+    var overlayCompare = document.getElementById('sl-ugc-hp-overlay-compare-' + sectionId);
+    var overlayLoading = document.getElementById('sl-ugc-hp-loading-' + sectionId);
+    var rootPath = (window.Shopify && window.Shopify.routes && window.Shopify.routes.root) || '/';
+    var i18nAdd = {
+      add: {{ 'sections.sl_ugc_hp.add_to_cart' | t | json }},
+      adding: {{ 'sections.sl_ugc_hp.adding' | t | json }},
+      added: {{ 'sections.sl_ugc_hp.added' | t | json }}
+    };
+
+    function openOverlay(card) {
+      var fullVideo = card.getAttribute('data-full-video') || '';
+      var productUrl = card.getAttribute('data-product-url') || '#';
+      var productTitle = card.getAttribute('data-product-title') || '';
+      var productImage = card.getAttribute('data-product-image') || '';
+      var productPrice = card.getAttribute('data-product-price') || '';
+      var productCompare = card.getAttribute('data-product-compare') || '';
+      var productRating = card.getAttribute('data-product-rating') || '';
+      var productReviews = card.getAttribute('data-product-reviews') || '';
+      var ctaText = card.getAttribute('data-cta-text') || 'Add to cart';
+      var variantId = card.getAttribute('data-variant-id') || '';
+
+      if (!overlay || !overlayVideo) return;
+
+      r.querySelectorAll('.sl-ugc-hp-video').forEach(function(v) { v.pause(); });
+
+      var overlaySlot = document.getElementById('sl-ugc-hp-overlay-video-slot-' + sectionId);
+      if (overlaySlot) {
+        var prev = overlaySlot.querySelector('.sl-ugc-hp-overlay-metafield-clone');
+        if (prev) prev.remove();
+      }
+
+      overlay.removeAttribute('hidden');
+      document.body.style.overflow = 'hidden';
+
+      function hideOverlayLoading() {
+        if (overlayLoading) overlayLoading.setAttribute('hidden', '');
+      }
+
+      if (fullVideo) {
+        if (overlayLoading) overlayLoading.removeAttribute('hidden');
+        overlayVideo.style.display = '';
+        overlayVideo.muted = true;
+        overlayVideo.volume = 0;
+        overlayVideo.loop = true;
+        overlayVideo.src = fullVideo;
+        overlayVideo.load();
+        overlayVideo.play().catch(function() {});
+        var loadHide = setTimeout(hideOverlayLoading, 1500);
+        function onReady() {
+          clearTimeout(loadHide);
+          hideOverlayLoading();
+          overlayVideo.muted = false;
+          overlayVideo.volume = 1;
+        }
+        overlayVideo.addEventListener('playing', onReady, { once: true });
+        overlayVideo.addEventListener('canplay', function() { clearTimeout(loadHide); hideOverlayLoading(); }, { once: true });
+      } else {
+        hideOverlayLoading();
+        var metafieldWrap = card.querySelector('.sl-ugc-hp-metafield-wrap');
+        if (overlaySlot && metafieldWrap && metafieldWrap.innerHTML.trim()) {
+          overlayVideo.style.display = 'none';
+          var wrap = document.createElement('div');
+          wrap.className = 'sl-ugc-hp-overlay-metafield-clone';
+          wrap.innerHTML = metafieldWrap.innerHTML;
+          overlaySlot.appendChild(wrap);
+          var cloneVideo = wrap.querySelector('video');
+          if (cloneVideo) { cloneVideo.muted = false; cloneVideo.controls = true; cloneVideo.loop = true; cloneVideo.play().catch(function() {}); }
+          var cloneIframe = wrap.querySelector('iframe');
+          if (cloneIframe) { cloneIframe.style.width = '100%'; cloneIframe.style.height = '100%'; }
+        } else {
+          if (productUrl && productUrl !== '#') {
+            closeOverlay();
+            window.location.href = productUrl;
+            return;
+          }
+          overlayVideo.style.display = '';
+          overlayVideo.removeAttribute('src');
+        }
+      }
+
+      var overlayPhoto = document.getElementById('sl-ugc-hp-overlay-photo-' + sectionId);
+      if (overlayPhoto) overlayPhoto.style.display = productImage ? '' : 'none';
+      if (overlayImg) {
+        overlayImg.src = productImage;
+        overlayImg.alt = productTitle;
+      }
+      if (overlayName) overlayName.textContent = productTitle;
+      if (overlayPrice) overlayPrice.textContent = productPrice;
+      if (overlayCompare) {
+        overlayCompare.textContent = productCompare;
+        overlayCompare.style.display = productCompare ? '' : 'none';
+      }
+      var overlayAddBtn = document.getElementById('sl-ugc-hp-overlay-add-' + sectionId);
+      if (overlayAddBtn) {
+        overlayAddBtn.setAttribute('data-variant-id', variantId);
+        overlayAddBtn.textContent = ctaText;
+        overlayAddBtn.disabled = !variantId;
+      }
+
+    }
+
+    function closeOverlay() {
+      if (overlay) {
+        overlay.setAttribute('hidden', '');
+        document.body.style.overflow = '';
+      }
+      if (overlayVideo) {
+        overlayVideo.pause();
+        overlayVideo.removeAttribute('src');
+        overlayVideo.style.display = '';
+      }
+      var overlaySlot = document.getElementById('sl-ugc-hp-overlay-video-slot-' + sectionId);
+      if (overlaySlot) {
+        var cloneContainer = overlaySlot.querySelector('.sl-ugc-hp-overlay-metafield-clone');
+        if (cloneContainer) cloneContainer.remove();
+      }
+      r.querySelectorAll('.sl-ugc-hp-video').forEach(function(v) {
+        v.muted = true;
+        v.loop = true;
+        v.play().catch(function(){});
+      });
+    }
+
+    loadSwiper(function() {
+      if (swiperEl.swiper) return;
+      var slidesPerView = window.innerWidth <= 768 ? {{ section.settings.slides_mobile }} : {{ section.settings.slides_desktop }};
+      if (typeof Swiper !== 'undefined') {
+        try {
+          new Swiper(swiperEl, {
+            slidesPerView: slidesPerView,
+            spaceBetween: {{ section.settings.slide_gap }},
+            loop: false,
+            navigation: {
+              nextEl: r.querySelector('.swiper-button-next'),
+              prevEl: r.querySelector('.swiper-button-prev')
+            },
+            on: {
+              init: function(swiper) {
+                playVisibleVideos(swiper);
+              },
+              slideChangeTransitionEnd: function(swiper) {
+                playVisibleVideos(swiper);
+              }
+            }
+          });
+        } catch (e) {}
+      }
+      if (!swiperEl.swiper) {
+        var wrapper = swiperEl.querySelector('.swiper-wrapper');
+        if (wrapper) {
+          swiperEl.style.overflowX = 'auto';
+          swiperEl.style.overflowY = 'visible';
+          wrapper.style.display = 'flex';
+          wrapper.style.gap = '{{ section.settings.slide_gap }}px';
+          wrapper.style.flexWrap = 'nowrap';
+        }
+        var next = r.querySelector('.swiper-button-next');
+        var prev = r.querySelector('.swiper-button-prev');
+        if (next) next.style.display = 'none';
+        if (prev) prev.style.display = 'none';
+      }
+      r.querySelectorAll('.sl-ugc-hp-card video').forEach(function(v) {
+        ensureVideoSrc(v);
+        v.muted = true;
+        v.loop = true;
+        v.play().catch(function(){});
+      });
+
+      function refreshCartCount(count) {
+        var sel = '.cart-count-bubble, .cart-count, [data-cart-count], .header__icon--cart .count, [data-header-cart-count], .cart-icon__count';
+        document.querySelectorAll(sel).forEach(function(el) { el.textContent = count; });
+      }
+      function updateCartFromSections(sections) {
+        if (!sections || typeof sections !== 'object') return;
+        for (var id in sections) {
+          var html = sections[id];
+          if (!html) continue;
+          var sel = id.replace(/_/g, '-');
+          var el = document.querySelector('[id*="' + sel + '"]') || document.querySelector('[id*="' + id + '"]');
+          if (el) el.innerHTML = html;
+        }
+      }
+      function doAjaxAddToCart(variantId, btn) {
+        if (!variantId || !btn) return;
+        btn.disabled = true;
+        if (btn.classList) btn.classList.add('is-loading');
+        var origText = btn.textContent;
+        btn.textContent = i18nAdd.adding;
+        var sectionsToRender = 'cart-icon-bubble,cart-drawer,cart-live-region-text';
+        fetch(rootPath.replace(/\/$/, '') + '/cart/add.js', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify({
+            items: [{ id: parseInt(variantId, 10), quantity: 1 }],
+            sections: sectionsToRender,
+            sections_url: window.location.pathname
+          })
+        }).then(function(res) { return res.json(); }).then(function(data) {
+          if (data.status === 422 || (data.status && data.status >= 400)) throw new Error(data.description || data.message || 'Error');
+          if (btn.classList) btn.classList.remove('is-loading');
+          btn.textContent = i18nAdd.added;
+          if (data.sections) updateCartFromSections(data.sections);
+          fetch(rootPath.replace(/\/$/, '') + '/cart.js').then(function(res) { return res.json(); }).then(function(c) { refreshCartCount(c.item_count || 0); }).catch(function() {});
+          document.dispatchEvent(new CustomEvent('cart:refresh'));
+          if (typeof window.theme !== 'undefined' && window.theme.refreshCart) window.theme.refreshCart();
+          setTimeout(function() { btn.disabled = false; btn.textContent = origText; }, 2000);
+        }).catch(function() {
+          if (btn.classList) btn.classList.remove('is-loading');
+          btn.disabled = false;
+          btn.textContent = origText;
+        });
+      }
+      r.addEventListener('submit', function(e) {
+        var form = e.target;
+        if (!form || !form.classList.contains('sl-ugc-hp-add-form')) return;
+        e.preventDefault();
+        var idInput = form.querySelector('input[name="id"]');
+        var variantId = idInput ? idInput.value : '';
+        var btn = form.querySelector('.sl-ugc-hp-add-btn');
+        doAjaxAddToCart(variantId, btn);
+      });
+      var overlayAddBtn = document.getElementById('sl-ugc-hp-overlay-add-' + sectionId);
+      if (overlayAddBtn) {
+        overlayAddBtn.addEventListener('click', function() {
+          var vid = overlayAddBtn.getAttribute('data-variant-id');
+          doAjaxAddToCart(vid, overlayAddBtn);
+        });
+      }
+      cards.forEach(function(card) {
+        card.addEventListener('click', function(e) {
+          if (e.target.closest('a') || e.target.closest('form') || e.target.closest('.sl-ugc-hp-add-btn')) return;
+          e.preventDefault();
+          openOverlay(card);
+        });
+        card.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openOverlay(card); }
+        });
+      });
+
+      if (overlayClose) overlayClose.addEventListener('click', closeOverlay);
+      overlay.addEventListener('click', function(e) {
+        if (e.target === overlay) closeOverlay();
+      });
+    });
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && overlay && !overlay.hasAttribute('hidden')) closeOverlay();
+    });
+  }
+
+  function startWhenVisible() {
+    var r = document.getElementById('sl-ugc-hp-' + sectionId);
+    if (!r) return;
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function(entries) {
+        if (!entries[0].isIntersecting) return;
+        io.disconnect();
+        run();
+      }, { rootMargin: '120px', threshold: 0 });
+      io.observe(r);
+    } else {
+      run();
+    }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', startWhenVisible);
+  else startWhenVisible();
+})();
+</script>
+{% endunless %}
+
+{% schema %}
+{
+  "name": "SL - UGC Videos Homepage",
+  "tag": "section",
+  "class": "sl-ugc-videos-homepage",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Video source"
+    },
+    {
+      "type": "select",
+      "id": "video_source",
+      "label": "Video source",
+      "info": "Section blocks = add videos manually. Product metafield = pull videos from products' UGC metafield.",
+      "options": [
+        { "value": "section_blocks", "label": "Section blocks (manual)" },
+        { "value": "product_metafield", "label": "Product metafield" }
+      ],
+      "default": "section_blocks"
+    },
+    {
+      "type": "product_list",
+      "id": "products",
+      "label": "Products (for metafield source)",
+      "info": "When using Product metafield, pick products. Videos come from each product's Social proof videos metafield. The product is shown as the related product.",
+      "limit": 20
+    },
+    {
+      "type": "select",
+      "id": "videos_metafield",
+      "label": "Videos metafield",
+      "info": "Which product metafield to use for videos.",
+      "options": [
+        { "value": "custom.social_proof_videos", "label": "Social proof videos" },
+        { "value": "custom.before_after_videos", "label": "Before and after videos" }
+      ],
+      "default": "custom.social_proof_videos"
+    },
+    {
+      "type": "range",
+      "id": "max_videos",
+      "label": "Max videos per section",
+      "info": "Limit total videos shown. 0 = no limit.",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "max_videos_per_product",
+      "label": "Max videos per product (metafield source)",
+      "info": "When using Product metafield, limit how many videos to show from each product so the carousel mixes products. 0 = no limit.",
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "default": 2
+    },
+    {
+      "type": "header",
+      "content": "Heading"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Real Products. In Real Life"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading"
+    },
+    {
+      "type": "select",
+      "id": "heading_alignment",
+      "label": "Heading alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "label": "Heading size",
+      "min": 18,
+      "max": 42,
+      "step": 2,
+      "default": 28,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "subheading_size",
+      "label": "Subheading size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "default": 16,
+      "unit": "px"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "default": "#171717"
+    },
+    {
+      "type": "color",
+      "id": "subheading_color",
+      "label": "Subheading color",
+      "default": "#545454"
+    },
+    {
+      "type": "header",
+      "content": "Slider"
+    },
+    {
+      "type": "range",
+      "id": "slides_desktop",
+      "label": "Slides per view (desktop)",
+      "min": 2,
+      "max": 7,
+      "step": 1,
+      "default": 5
+    },
+    {
+      "type": "range",
+      "id": "slides_mobile",
+      "label": "Slides per view (mobile)",
+      "min": 1,
+      "max": 3,
+      "step": 1,
+      "default": 1
+    },
+    {
+      "type": "range",
+      "id": "slide_gap",
+      "label": "Gap between slides",
+      "min": 8,
+      "max": 32,
+      "step": 4,
+      "default": 16,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Cards & product strip"
+    },
+    {
+      "type": "range",
+      "id": "card_radius",
+      "label": "Card border radius",
+      "min": 0,
+      "max": 24,
+      "step": 2,
+      "default": 12,
+      "unit": "px"
+    },
+    {
+      "type": "color",
+      "id": "card_bg",
+      "label": "Card background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "card_border",
+      "label": "Card border color",
+      "default": "#eeeeee"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Product text color",
+      "default": "#272E0F"
+    },
+    {
+      "type": "color",
+      "id": "price_color",
+      "label": "Price color",
+      "default": "#545454"
+    },
+    {
+      "type": "color",
+      "id": "compare_color",
+      "label": "Compare at price color",
+      "default": "#cc0000"
+    },
+    {
+      "type": "color",
+      "id": "star_color",
+      "label": "Star rating color",
+      "default": "#272E0F"
+    },
+    {
+      "type": "text",
+      "id": "cta_text",
+      "label": "CTA button text",
+      "default": "Add to cart"
+    },
+    {
+      "type": "color",
+      "id": "cta_color",
+      "label": "CTA text color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "cta_bg",
+      "label": "CTA background",
+      "default": "#272E0F"
+    },
+    {
+      "type": "color",
+      "id": "cta_border",
+      "label": "CTA border color",
+      "default": "#272E0F"
+    },
+    {
+      "type": "header",
+      "content": "Section"
+    },
+    {
+      "type": "color",
+      "id": "arrow_color",
+      "label": "Arrow color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "default": 40,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "default": 40,
+      "unit": "px"
+    },
+    {
+      "type": "checkbox",
+      "id": "full_width",
+      "label": "Full width",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "content_width",
+      "label": "Content max width",
+      "min": 800,
+      "max": 1600,
+      "step": 40,
+      "default": 1400,
+      "unit": "px"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "video_product",
+      "name": "Video + product",
+      "settings": [
+        {
+          "type": "video",
+          "id": "video_file",
+          "label": "Video"
+        },
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Related product"
+        },
+        {
+          "type": "text",
+          "id": "rating",
+          "label": "Rating (e.g. 4.8)",
+          "info": "Optional. Displayed next to stars."
+        },
+        {
+          "type": "text",
+          "id": "review_count",
+          "label": "Review count (e.g. 421)",
+          "info": "Optional. Shown as 'X reviews' next to rating."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "SL - UGC Videos Homepage",
+      "category": "Media",
+      "blocks": [
+        { "type": "video_product" },
+        { "type": "video_product" },
+        { "type": "video_product" }
+      ]
+    }
+  ],
+  "templates": ["index"]
+}
+{% endschema %}
