@@ -1,0 +1,250 @@
+{% comment %}
+  SL - Bundle (Section)
+  Displays included products in a bundle (Yves Rocher style): grid of product cubes + clickable popup with product info.
+  Bundle items from: product metafield custom.bundle_products (list.product_reference) OR section blocks.
+  Add to product template for bundle product page, or use "Bundle product" setting to show a specific bundle elsewhere.
+{% endcomment %}
+
+{% assign bundle_source = section.settings.bundle_source | default: 'product_metafield' %}
+{% assign bundle_product = section.settings.bundle_product | default: nil %}
+{% assign use_product = product | default: nil %}
+{% if section.settings.bundle_product != blank %}
+  {% assign use_product = section.settings.bundle_product %}
+{% elsif product != blank %}
+  {% assign use_product = product %}
+{% endif %}
+
+{% assign bundle_products = nil %}
+{% assign use_blocks = false %}
+{% if bundle_source == 'product_metafield' and use_product != blank %}
+  {% assign meta_val = use_product.metafields.custom.bundle_products.value %}
+  {% if meta_val != blank and meta_val.size > 0 %}
+    {% assign bundle_products = meta_val %}
+  {% endif %}
+{% elsif bundle_source == 'section_blocks' and section.blocks.size > 0 %}
+  {% assign use_blocks = true %}
+{% endif %}
+
+{% assign has_bundle = false %}
+{% if bundle_products != nil and bundle_products.size > 0 %}
+  {% assign has_bundle = true %}
+{% elsif use_blocks %}
+  {% assign has_bundle = true %}
+{% endif %}
+
+{% assign subtitle_template = section.settings.subtitle | default: 'This set includes X products' %}
+
+{% if has_bundle == false %}
+  {% if request.design_mode %}
+    <div id="sl-bundle-section-{{ section.id }}" class="sl-bundle-section-root" style="padding: 24px; background: #f5f5f5; border: 2px dashed #ccc; text-align: center;">
+      <p style="margin: 0; color: #666;">Bundle — No products. Set <strong>Bundle source</strong> to Product metafield and add <code>custom.bundle_products</code> (list of products) to this product, or add Product blocks below.</p>
+    </div>
+  {% endif %}
+{% else %}
+<div id="sl-bundle-section-{{ section.id }}" class="sl-bundle-section-root" style="width: 100%; background: {{ section.settings.background_color }}; padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;">
+  <div class="sl-bundle-section-inner" style="{% unless section.settings.full_width %}max-width: {{ section.settings.content_width }}px; margin-left: auto; margin-right: auto;{% endunless %} padding-left: {{ section.settings.padding_inline }}px; padding-right: {{ section.settings.padding_inline }}px;">
+    {% if section.settings.heading != blank %}
+      <h2 class="sl-bundle-section-heading" style="text-align: {{ section.settings.heading_alignment }}; font-size: {{ section.settings.heading_size }}px; color: {{ section.settings.heading_color }}; margin: 0 0 10px 0;">{{ section.settings.heading }}</h2>
+    {% endif %}
+    {% if section.settings.subheading != blank %}
+      <p class="sl-bundle-section-subheading" style="text-align: {{ section.settings.heading_alignment }}; color: {{ section.settings.subheading_color }}; margin: 0 0 24px 0;">{{ section.settings.subheading }}</p>
+    {% endif %}
+
+    {% render 'sl-bundle',
+      bundle_products: bundle_products,
+      bundle_section: section,
+      use_block_products: use_blocks,
+      section_id: section.id,
+      subtitle: subtitle_template,
+      border_color: section.settings.border_color,
+      hover_text: section.settings.hover_text
+    %}
+  </div>
+</div>
+{% endif %}
+
+{% schema %}
+{
+  "name": "SL - Bundle",
+  "tag": "section",
+  "class": "sl-bundle-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Bundle source"
+    },
+    {
+      "type": "select",
+      "id": "bundle_source",
+      "label": "Bundle source",
+      "info": "Product metafield = use product's custom.bundle_products (list of products). Manual = add Product blocks below.",
+      "options": [
+        { "value": "product_metafield", "label": "Product metafield (custom.bundle_products)" },
+        { "value": "section_blocks", "label": "Manual (section blocks)" }
+      ],
+      "default": "product_metafield"
+    },
+    {
+      "type": "product",
+      "id": "bundle_product",
+      "label": "Bundle product",
+      "info": "Optional. Use when this section is not on a product page. Leave blank to use the current page product."
+    },
+    {
+      "type": "header",
+      "content": "Heading"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Included in this set"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Included products subtitle",
+      "info": "Use 'X' as placeholder for the number of products.",
+      "default": "This set includes X products"
+    },
+    {
+      "type": "select",
+      "id": "heading_alignment",
+      "label": "Heading alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "label": "Heading size",
+      "min": 16,
+      "max": 36,
+      "step": 2,
+      "default": 24,
+      "unit": "px"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "default": "#272E0F"
+    },
+    {
+      "type": "color",
+      "id": "subheading_color",
+      "label": "Subheading color",
+      "default": "#272E0F"
+    },
+    {
+      "type": "header",
+      "content": "Product cubes"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Product image border color",
+      "default": "#FE2C55"
+    },
+    {
+      "type": "text",
+      "id": "hover_text",
+      "label": "Hover label",
+      "default": "More Details"
+    },
+    {
+      "type": "header",
+      "content": "Section layout"
+    },
+    {
+      "type": "checkbox",
+      "id": "full_width",
+      "label": "Full width",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "content_width",
+      "label": "Content max width",
+      "min": 600,
+      "max": 1400,
+      "step": 20,
+      "default": 1200,
+      "unit": "px"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Section background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "default": 48,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "default": 48,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_inline",
+      "label": "Padding left & right",
+      "min": 8,
+      "max": 80,
+      "step": 4,
+      "default": 16,
+      "unit": "px"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "product",
+      "name": "Product",
+      "settings": [
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Bundle item"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "SL - Bundle",
+      "settings": {
+        "bundle_source": "section_blocks",
+        "heading": "Included in this set",
+        "subtitle": "This set includes X products"
+      },
+      "blocks": [
+        { "type": "product" },
+        { "type": "product" },
+        { "type": "product" }
+      ]
+    }
+  ]
+}
+{% endschema %}

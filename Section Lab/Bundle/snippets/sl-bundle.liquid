@@ -1,0 +1,338 @@
+{% comment %}
+  SL - Bundle (snippet)
+  Renders Yves Rocher–style included products grid + product detail popups.
+  Usage: {% render 'sl-bundle', bundle_products: product_list, section_id: section.id, ... %}
+  OR with blocks: {% render 'sl-bundle', bundle_section: section, use_block_products: true, section_id: section.id, ... %}
+  bundle_products: array of product objects (from metafield). When use_block_products is true, products come from bundle_section.blocks.
+{% endcomment %}
+
+{% assign products = bundle_products | default: nil %}
+{% assign use_block_products = use_block_products | default: false %}
+{% assign bundle_sec = bundle_section | default: nil %}
+{% assign sid = section_id | default: 'sl-bundle' %}
+{% assign sub = subtitle | default: nil %}
+{% assign border_clr = border_color | default: '#FE2C55' %}
+{% assign hover_label = hover_text | default: 'More Details' %}
+
+{% if use_block_products and bundle_sec != blank and bundle_sec.blocks.size > 0 %}
+  {% assign product_count = 0 %}
+  {% for block in bundle_sec.blocks %}
+    {% if block.type == 'product' and block.settings.product != blank %}
+      {% assign product_count = product_count | plus: 1 %}
+    {% endif %}
+  {% endfor %}
+  {% if product_count == 0 %}
+    {% assign products = nil %}
+  {% endif %}
+{% endif %}
+
+{% if products == nil and product_count == 0 or products.size == 0 and product_count == 0 %}
+  {% if request.design_mode %}
+    <p class="sl-bundle-empty" style="padding:16px;color:#666;">Bundle — Add products via section blocks or product metafield <code>custom.bundle_products</code>.</p>
+  {% endif %}
+{% else %}
+
+<div id="sl-bundle-{{ sid }}" class="sl-bundle-root">
+  {% if sub != blank %}
+    <p class="sl-bundle-subtitle">{{ sub | replace: 'X', products.size }}</p>
+  {% endif %}
+  <div class="sl-bundle-container">
+    <div class="sl-bundle-grid">
+      {% for prod in products %}
+        {% if prod != blank %}
+          <div class="sl-bundle-cube" onclick="slBundleOpenPopup('sl-bundle-popup-{{ sid }}-{{ prod.id }}')" role="button" tabindex="0" data-popup-id="sl-bundle-popup-{{ sid }}-{{ prod.id }}">
+            <div class="sl-bundle-pink-border">
+              {% if prod.featured_image %}
+                <img src="{{ prod.featured_image | image_url: width: 400 }}" alt="{{ prod.featured_image.alt | default: prod.title | escape }}" width="200" height="200" loading="lazy">
+              {% else %}
+                {{ 'product-1' | placeholder_svg_tag: 'sl-bundle-placeholder-img' }}
+              {% endif %}
+              <div class="sl-bundle-cube-hover">{{ hover_label }}</div>
+            </div>
+            <span class="sl-bundle-product-name">{{ prod.title }}</span>
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+
+  {% comment %} Popups: one per product {% endcomment %}
+  {% for prod in products %}
+    {% if prod != blank %}
+      <div id="sl-bundle-popup-{{ sid }}-{{ prod.id }}" class="sl-bundle-overlay" aria-hidden="true">
+        <div class="sl-bundle-overlay-background">
+          <div class="sl-bundle-close-row">
+            <span class="sl-bundle-x" onclick="slBundleClosePopup('sl-bundle-popup-{{ sid }}-{{ prod.id }}')" role="button" tabindex="0" aria-label="Close"></span>
+          </div>
+          <div class="sl-bundle-popup-scroll">
+            {% if prod.featured_image %}
+              <img class="sl-bundle-popup-main-image" src="{{ prod.featured_image | image_url: width: 600 }}" alt="{{ prod.title | escape }}">
+            {% endif %}
+            <h4 class="sl-bundle-popup-title">{{ prod.title }}</h4>
+
+            {% if prod.description != blank %}
+              <div class="sl-bundle-popup-divider"></div>
+              <h5 class="sl-bundle-popup-heading">About the product</h5>
+              <div class="sl-bundle-popup-description sl-bundle-popup-desc-short">
+                <div class="sl-bundle-desc-inner">{{ prod.description | strip_html | truncate: 200 }}</div>
+                <span class="sl-bundle-more-details" onclick="slBundleShowMore(this)">Show more</span>
+              </div>
+              <div class="sl-bundle-popup-description sl-bundle-popup-description-full" style="display:none;">
+                <div class="sl-bundle-desc-inner">{{ prod.description }}</div>
+                <span class="sl-bundle-more-details" onclick="slBundleShowMore(this)">Show less</span>
+              </div>
+            {% endif %}
+
+            <div class="sl-bundle-popup-divider"></div>
+            <a class="sl-bundle-popup-link" href="{{ prod.url }}">View product</a>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  {% endfor %}
+</div>
+
+<script>
+  (function() {
+    var root = document.getElementById('sl-bundle-{{ sid }}');
+    if (!root) return;
+    function openPopup(id) {
+      var el = document.getElementById(id);
+      if (el) { el.style.display = 'block'; el.setAttribute('aria-hidden', 'false'); document.body.style.overflow = 'hidden'; }
+    }
+    function closePopup(id) {
+      var el = document.getElementById(id);
+      if (el) { el.style.display = 'none'; el.setAttribute('aria-hidden', 'true'); document.body.style.overflow = ''; }
+    }
+    window.slBundleOpenPopup = function(id) { openPopup(id); };
+    window.slBundleClosePopup = function(id) { closePopup(id); };
+    window.slBundleShowMore = function(btn) {
+      var scroll = btn.closest('.sl-bundle-popup-scroll');
+      if (!scroll) return;
+      var short = scroll.querySelector('.sl-bundle-popup-desc-short');
+      var full = scroll.querySelector('.sl-bundle-popup-description-full');
+      if (btn.textContent.trim().toLowerCase().indexOf('more') !== -1) {
+        if (short) short.style.display = 'none';
+        if (full) full.style.display = 'block';
+        btn.textContent = 'Show less';
+      } else {
+        if (short) short.style.display = 'block';
+        if (full) full.style.display = 'none';
+        btn.textContent = 'Show more';
+      }
+    };
+    root.querySelectorAll('.sl-bundle-cube').forEach(function(cube) {
+      cube.addEventListener('keydown', function(e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); var id = cube.getAttribute('data-popup-id'); if (id) openPopup(id); } });
+    });
+    root.querySelectorAll('.sl-bundle-overlay').forEach(function(overlay) {
+      overlay.addEventListener('click', function(e) { if (e.target === overlay) closePopup(overlay.id); });
+    });
+  })();
+</script>
+
+<style>
+  #sl-bundle-{{ sid }}.sl-bundle-root {
+    --sl-bundle-border: {{ border_clr }};
+    box-sizing: border-box;
+  }
+  #sl-bundle-{{ sid }} .sl-bundle-subtitle {
+    color: #272E0F;
+    font-family: Montserrat, sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 150%;
+    letter-spacing: 0.28px;
+    margin: 0 0 16px 0;
+  }
+  #sl-bundle-{{ sid }} .sl-bundle-container { width: 100%; }
+  #sl-bundle-{{ sid }} .sl-bundle-grid {
+    width: 100%;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 5%;
+    padding-bottom: 15px;
+  }
+  #sl-bundle-{{ sid }} .sl-bundle-cube {
+    position: relative;
+    cursor: pointer;
+    margin-block-start: 0;
+    text-align: center;
+  }
+  #sl-bundle-{{ sid }} .sl-bundle-pink-border {
+    border: 1px solid var(--sl-bundle-border);
+    border-radius: 100px;
+    position: relative;
+    margin: 0 auto;
+    overflow: hidden;
+    aspect-ratio: 1;
+    max-width: 200px;
+  }
+  #sl-bundle-{{ sid }} .sl-bundle-pink-border img,
+  #sl-bundle-{{ sid }} .sl-bundle-placeholder-img {
+    border: 2px solid white;
+    border-radius: 100px;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  #sl-bundle-{{ sid }} .sl-bundle-cube-hover {
+    position: absolute;
+    top: 0; right: 0; left: 0; bottom: 0;
+    border-radius: 104px;
+    background: rgba(255, 255, 255, 0.8);
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-family: Montserrat, sans-serif;
+    font-weight: 500;
+    display: none;
+    margin-block-start: 0;
+  }
+  #sl-bundle-{{ sid }} .sl-bundle-pink-border:hover .sl-bundle-cube-hover { display: flex; }
+  #sl-bundle-{{ sid }} .sl-bundle-product-name {
+    color: #272E0F;
+    text-align: center;
+    font-family: Montserrat, sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: normal;
+    display: block;
+    margin-top: 20px;
+  }
+
+  /* Popup */
+  #sl-bundle-{{ sid }} .sl-bundle-overlay {
+    display: none;
+    position: fixed;
+    top: 0; right: 0; left: 0; bottom: 0;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 99999;
+    padding: 0 15px;
+    align-items: flex-start;
+    justify-content: center;
+    overflow-y: auto;
+  }
+  #sl-bundle-{{ sid }} .sl-bundle-overlay-background {
+    background: #fff;
+    width: 377px;
+    max-width: 100%;
+    flex-shrink: 0;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+    margin: 50px auto 24px;
+    overflow: hidden;
+  }
+  #sl-bundle-{{ sid }} .sl-bundle-close-row {
+    text-align: right;
+    padding: 11px 0;
+    border-bottom: 1px solid #E8EAE5;
+    position: relative;
+    height: 56px;
+    margin: 0 10px;
+  }
+  #sl-bundle-{{ sid }} .sl-bundle-x {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none'%3E%3Cpath d='M18 6L6 18' stroke='%23111111' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M6 6L18 18' stroke='%23111111' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    width: 24px;
+    height: 24px;
+    display: block;
+    background-size: contain;
+    position: absolute;
+    right: 0;
+    top: 16px;
+    cursor: pointer;
+    background-repeat: no-repeat;
+  }
+  #sl-bundle-{{ sid }} .sl-bundle-popup-scroll {
+    max-height: 620px;
+    overflow-y: auto;
+    padding: 0 15px 16px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  #sl-bundle-{{ sid }} .sl-bundle-popup-scroll::-webkit-scrollbar { display: none; }
+  #sl-bundle-{{ sid }} .sl-bundle-popup-main-image {
+    border-radius: 16px;
+    margin-bottom: 24px;
+    width: 100%;
+    height: auto;
+  }
+  #sl-bundle-{{ sid }} .sl-bundle-popup-title {
+    color: #272E0F;
+    font-family: Montserrat, sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.48;
+    letter-spacing: 0.32px;
+    margin: 0 0 16px 0;
+  }
+  #sl-bundle-{{ sid }} .sl-bundle-popup-divider {
+    margin-top: 24px;
+    height: 1px;
+    background: rgba(207, 209, 201, 0.4);
+  }
+  #sl-bundle-{{ sid }} .sl-bundle-popup-heading {
+    margin-top: 24px;
+    margin-bottom: 12px;
+    color: #272E0F;
+    font-family: Montserrat, sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  #sl-bundle-{{ sid }} .sl-bundle-popup-description {
+    color: #272E0F;
+    font-family: Montserrat, sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 150%;
+    letter-spacing: 0.28px;
+    position: relative;
+  }
+  #sl-bundle-{{ sid }} .sl-bundle-more-details {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    background: #fff;
+    width: 100%;
+    text-decoration: underline;
+    font-family: Montserrat, sans-serif;
+    font-size: 14px;
+    color: #878787;
+    text-transform: capitalize;
+    cursor: pointer;
+  }
+  #sl-bundle-{{ sid }} .sl-bundle-popup-desc-short {
+    height: 85px;
+    overflow: hidden;
+  }
+  #sl-bundle-{{ sid }} .sl-bundle-desc-inner p { margin: 0 0 0.5em 0; }
+  #sl-bundle-{{ sid }} .sl-bundle-desc-inner p:last-child { margin-bottom: 0; }
+  #sl-bundle-{{ sid }} .sl-bundle-popup-link {
+    display: block;
+    padding: 10px;
+    color: #fff;
+    background: #000;
+    text-align: center;
+    border-radius: 28px;
+    font-family: Montserrat, sans-serif;
+    font-weight: 500;
+    margin: 24px 0 20px 0;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  #sl-bundle-{{ sid }} .sl-bundle-popup-link:hover { color: #fff; opacity: 0.9; }
+
+  @media (max-width: 600px) {
+    #sl-bundle-{{ sid }} .sl-bundle-grid {
+      grid-template-columns: 1fr;
+      gap: 24px;
+      padding-left: 0;
+    }
+    #sl-bundle-{{ sid }} .sl-bundle-overlay-background { max-width: 100%; }
+  }
+</style>
+{% endif %}
