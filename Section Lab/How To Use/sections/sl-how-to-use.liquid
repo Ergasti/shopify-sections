@@ -18,6 +18,18 @@
   {% assign has_steps = true %}
 {% endif %}
 
+{% assign locale_iso = request.locale.iso_code | downcase %}
+{% assign is_ar = false %}
+{% if locale_iso == 'ar' %}
+  {% assign is_ar = true %}
+{% endif %}
+
+{% if is_ar %}
+  {% assign section_heading_text = section.settings.heading_ar | default: section.settings.heading_en | default: section.settings.heading %}
+{% else %}
+  {% assign section_heading_text = section.settings.heading_en | default: section.settings.heading_ar | default: section.settings.heading %}
+{% endif %}
+
 {% unless has_steps %}
   {% if request.design_mode %}
     <div id="sl-htu-section-{{ section.id }}" class="sl-htu-section-root" style="padding: 24px; background: #f5f5f5; border: 2px dashed #ccc; text-align: center;">
@@ -27,20 +39,25 @@
 {% else %}
 <div id="sl-htu-section-{{ section.id }}" class="sl-htu-section-root" style="background: {{ section.settings.background_color }}; padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;">
   <div class="sl-htu-section-inner" style="{% unless section.settings.full_width %}max-width: {{ section.settings.content_width }}px; margin-left: auto; margin-right: auto;{% endunless %} padding-left: 16px; padding-right: 16px;">
-    {% if section.settings.heading != blank %}
-      <h2 class="sl-htu-section-heading" style="text-align: {{ section.settings.heading_alignment }}; font-size: {{ section.settings.heading_size }}px; color: {{ section.settings.heading_color }}; margin: 0 0 24px 0;">{{ section.settings.heading }}</h2>
+    {% if section_heading_text != blank %}
+      <h2 class="sl-htu-section-heading" style="text-align: {{ section.settings.heading_alignment }}; font-size: {{ section.settings.heading_size }}px; color: {{ section.settings.heading_color }}; margin: 0 0 24px 0;"{% if is_ar %} dir="rtl"{% endif %}>{{ section_heading_text }}</h2>
     {% endif %}
 
-    <div class="sl-htu-container">
+    <div class="sl-htu-container"{% if is_ar %} dir="rtl"{% endif %}>
       {% if use_metaobject %}
         {% for entry in steps_meta %}
           {% assign step_product = entry.product.value | default: entry.product %}
           {% assign step_num = forloop.index %}
-          {% assign step_title_text = entry.step_title | default: nil %}
+          {% if is_ar %}
+            {% assign step_title_text = entry.step_title_ar | default: entry.step_title_en | default: entry.step_title %}
+            {% assign step_description = entry.description_ar | default: entry.description_en | default: entry.description %}
+          {% else %}
+            {% assign step_title_text = entry.step_title_en | default: entry.step_title_ar | default: entry.step_title %}
+            {% assign step_description = entry.description_en | default: entry.description_ar | default: entry.description %}
+          {% endif %}
           {% if step_title_text == blank %}
             {% capture step_title_text %}Step {{ step_num }}{% endcapture %}
           {% endif %}
-          {% assign step_description = entry.description | default: '' %}
           <div class="sl-htu-step" data-step="{{ step_num }}">
             <div class="sl-htu-step-title-container">
               <span class="sl-htu-step-no">{{ step_num }}</span>
@@ -70,11 +87,16 @@
           {% if block.type == 'step' %}
             {% assign step_product = block.settings.product %}
             {% assign step_num = forloop.index %}
-            {% assign step_title_text = block.settings.step_title | default: nil %}
+            {% if is_ar %}
+              {% assign step_title_text = block.settings.step_title_ar | default: block.settings.step_title_en | default: block.settings.step_title %}
+              {% assign step_description = block.settings.description_ar | default: block.settings.description_en | default: block.settings.description %}
+            {% else %}
+              {% assign step_title_text = block.settings.step_title_en | default: block.settings.step_title_ar | default: block.settings.step_title %}
+              {% assign step_description = block.settings.description_en | default: block.settings.description_ar | default: block.settings.description %}
+            {% endif %}
             {% if step_title_text == blank %}
               {% capture step_title_text %}Step {{ step_num }}{% endcapture %}
             {% endif %}
-            {% assign step_description = block.settings.description | default: '' %}
             <div class="sl-htu-step" data-step="{{ step_num }}" {{ block.shopify_attributes }}>
               <div class="sl-htu-step-title-container">
                 <span class="sl-htu-step-no">{{ step_num }}</span>
@@ -181,13 +203,24 @@
     },
     {
       "type": "header",
-      "content": "Heading"
+      "content": "Heading (English & Arabic)"
+    },
+    {
+      "type": "text",
+      "id": "heading_en",
+      "label": "Heading (English)",
+      "default": "How to use it the right way"
+    },
+    {
+      "type": "text",
+      "id": "heading_ar",
+      "label": "Heading (Arabic)"
     },
     {
       "type": "text",
       "id": "heading",
-      "label": "Section heading",
-      "default": "How to use it the right way"
+      "label": "Heading (fallback if locale not en/ar)",
+      "info": "Optional. Used when locale is neither English nor Arabic."
     },
     {
       "type": "select",
@@ -300,16 +333,46 @@
           "label": "Related product"
         },
         {
+          "type": "header",
+          "content": "Step title (English & Arabic)"
+        },
+        {
+          "type": "text",
+          "id": "step_title_en",
+          "label": "Step title (English)",
+          "info": "Optional. Defaults to \"Step 1\", \"Step 2\", etc."
+        },
+        {
+          "type": "text",
+          "id": "step_title_ar",
+          "label": "Step title (Arabic)"
+        },
+        {
           "type": "text",
           "id": "step_title",
-          "label": "Step title",
-          "info": "Optional. Defaults to \"Step 1\", \"Step 2\", etc."
+          "label": "Step title (fallback)",
+          "info": "Used when locale is neither en nor ar."
+        },
+        {
+          "type": "header",
+          "content": "Description (English & Arabic)"
+        },
+        {
+          "type": "textarea",
+          "id": "description_en",
+          "label": "Description (English)",
+          "info": "How to use instructions for this step."
+        },
+        {
+          "type": "textarea",
+          "id": "description_ar",
+          "label": "Description (Arabic)"
         },
         {
           "type": "textarea",
           "id": "description",
-          "label": "Description",
-          "info": "How to use instructions for this step."
+          "label": "Description (fallback)",
+          "info": "Used when locale is neither en nor ar."
         }
       ]
     }
@@ -318,11 +381,11 @@
     {
       "name": "SL - How to Use",
       "category": "Product",
-      "settings": { "step_source": "section_blocks" },
+      "settings": { "step_source": "section_blocks", "heading_en": "How to use it the right way" },
       "blocks": [
-        { "type": "step", "settings": { "step_title": "Step 1", "description": "Apply in the morning to cleansed skin." } },
-        { "type": "step", "settings": { "step_title": "Step 2", "description": "Follow with your preferred moisturizer." } },
-        { "type": "step", "settings": { "step_title": "Step 3", "description": "Use daily for best results." } }
+        { "type": "step", "settings": { "step_title_en": "Step 1", "description_en": "Apply in the morning to cleansed skin." } },
+        { "type": "step", "settings": { "step_title_en": "Step 2", "description_en": "Follow with your preferred moisturizer." } },
+        { "type": "step", "settings": { "step_title_en": "Step 3", "description_en": "Use daily for best results." } }
       ]
     }
   ],

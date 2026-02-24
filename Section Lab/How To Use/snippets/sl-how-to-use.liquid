@@ -1,10 +1,9 @@
 {% comment %}
   SL - How to Use (Snippet)
-  Inspired by Yves Rocher "How to use it the right way".
   Use in product info via Custom Liquid block.
   Usage: {% render 'sl-how-to-use', product: product, block_id: block.id %}
   Requires product.metafields.custom.how_to_use_steps (list of How to use step metaobjects).
-  Each step metaobject: product (product reference), description (multi-line), step_title (optional).
+  Metaobject fields: product; step_title_en, step_title_ar; description_en, description_ar.
   See README.md for metaobject and metafield setup.
 {% endcomment %}
 
@@ -16,6 +15,12 @@
   {% assign has_steps = true %}
 {% endif %}
 
+{% assign locale_iso = request.locale.iso_code | downcase %}
+{% assign is_ar = false %}
+{% if locale_iso == 'ar' %}
+  {% assign is_ar = true %}
+{% endif %}
+
 {% if request.design_mode and prod != blank and has_steps == false %}
   <div id="sl-htu-block-{{ block_id }}" class="sl-htu-block-root" style="padding: 12px; color: #666; border: 1px dashed #ccc;">
     <p style="margin: 0;">How to Use — No steps. Add entries to this product's <strong>How to use steps</strong> metafield (<code>custom.how_to_use_steps</code>).</p>
@@ -23,15 +28,20 @@
 {% endif %}
 
 {% if has_steps %}
-<div id="sl-htu-block-{{ block_id }}" class="sl-htu-block-root sl-htu-container">
+<div id="sl-htu-block-{{ block_id }}" class="sl-htu-block-root sl-htu-container"{% if is_ar %} dir="rtl"{% endif %}>
   {% for entry in steps %}
     {% assign step_product = entry.product.value | default: entry.product %}
     {% assign step_num = forloop.index %}
-    {% assign step_title_text = entry.step_title | default: nil %}
+    {% if is_ar %}
+      {% assign step_title_text = entry.step_title_ar | default: entry.step_title_en | default: entry.step_title %}
+      {% assign step_description = entry.description_ar | default: entry.description_en | default: entry.description %}
+    {% else %}
+      {% assign step_title_text = entry.step_title_en | default: entry.step_title_ar | default: entry.step_title %}
+      {% assign step_description = entry.description_en | default: entry.description_ar | default: entry.description %}
+    {% endif %}
     {% if step_title_text == blank %}
       {% capture step_title_text %}Step {{ step_num }}{% endcapture %}
     {% endif %}
-    {% assign step_description = entry.description | default: '' %}
 
     <div class="sl-htu-step" data-step="{{ step_num }}">
       <div class="sl-htu-step-title-container">
