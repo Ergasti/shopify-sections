@@ -24,8 +24,17 @@
 {% assign is_rtl = false %}
 {% if locale_iso == 'ar' or locale_iso == 'he' or locale_iso == 'fa' %}{% assign is_rtl = true %}{% endif %}
 <div id="sl-ba-block-{{ block_id }}" class="sl-ba-block-root{% if is_rtl %} sl-ba-rtl{% endif %}"{% if is_rtl %} dir="rtl"{% endif %}>
-  <div class="sl-ba-inner">
-    <h2 class="sl-ba-heading">{{ 'sections.sl_before_after.heading' | t }}</h2>
+  <details class="accordion group" open>
+    <summary>
+      <span class="accordion__toggle h6">
+        <span>{{ 'sections.sl_before_after.heading' | t }}</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8" fill="none" class="icon icon-wd-arrow" aria-hidden="true">
+          <path d="M11 1L6 7L1 1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+    </summary>
+    <div class="accordion__content">
+    <div class="sl-ba-inner">
     <div class="sl-ba-swiper swiper">
       <div class="swiper-wrapper">
         {% for entry in videos %}
@@ -82,12 +91,19 @@
       <div class="swiper-button-next"></div>
     </div>
   </div>
+    </div>
+  </details>
 </div>
 
 <style>
   #sl-ba-block-{{ block_id }}.sl-ba-block-root { width: 100%; margin: 16px 0; --sl-ba-slide-width: 280px; }
+  #sl-ba-block-{{ block_id }} details summary { list-style: none; }
+  #sl-ba-block-{{ block_id }} details summary::-webkit-details-marker { display: none; }
+  #sl-ba-block-{{ block_id }} .accordion__toggle { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 18px; font-weight: 400; }
+  #sl-ba-block-{{ block_id }} .accordion .icon { transition: transform 0.2s; }
+  #sl-ba-block-{{ block_id }} .accordion[open] .icon { transform: rotate(180deg); }
+  #sl-ba-block-{{ block_id }} .accordion__content { margin-top: 12px; }
   #sl-ba-block-{{ block_id }} .sl-ba-inner { padding: 0; }
-  #sl-ba-block-{{ block_id }} .sl-ba-heading { font-size: 24px; margin: 0 0 16px 0; }
   #sl-ba-block-{{ block_id }} .sl-ba-swiper { overflow: hidden; position: relative; }
   #sl-ba-block-{{ block_id }} .swiper-slide { opacity: 1 !important; filter: none !important; }
   #sl-ba-block-{{ block_id }} .swiper-slide { flex-shrink: 0; width: var(--sl-ba-slide-width) !important; height: auto; }

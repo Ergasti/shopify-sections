@@ -52,8 +52,10 @@
   {% assign has_visible_content = true %}
 {% endif %}
 
-{% comment %} Always render accordion; use empty state (with message + debug) when nothing to show {% endcomment %}
+{% comment %} Only render when there is visible content. In design mode, show debug/empty state. {% endcomment %}
 {% assign accordion_heading = accordion_heading | default: "RESULTS YOU'LL SEE" %}
+
+{% if has_visible_content %}
 <div id="sl-rr-block-{{ block_id }}" class="sl-rr-root sl-rr-accordion">
   <details class="accordion group" {% if accordion_open != false %}open{% endif %}>
     <summary>
@@ -67,7 +69,6 @@
     <div class="accordion__content prose">
       <div class="how-it-affects-container sl-rr-how-it-affects">
         <div class="how-it-affects-box">
-          {% if has_visible_content %}
           <div class="affect-image sl-rr-media-wrap" {% if rr_video_url != blank %}data-sl-rr-video-trigger{% endif %}>
             {% if rr_video_url != blank %}
               <video
@@ -113,69 +114,36 @@
               </p>
             {% endif %}
             {% if rr_description != blank %}<p class="description">{{ rr_description }}</p>{% endif %}
-            <div class="sl-rr-debug" style="margin-top:16px;padding:12px;background:#f8f8f8;border:1px solid #ddd;border-radius:8px;font-size:12px;font-family:monospace;">
-              <strong>SL Real Results debug</strong><br>
-              Product: {% if prod %}{{ prod.id }} — {{ prod.title }}{% else %}none{% endif %}<br>
-              Highlights count: {{ highlights.size | default: 0 }}<br>
-              entry: {% if entry != blank %}present (type={{ entry.system.type | default: 'unknown' }}){% else %}nil{% endif %}<br>
-              entry.title raw: [{{ entry.title }}]<br>
-              entry.title.value raw: [{{ entry.title.value }}]<br>
-              rr_title resolved: [{{ rr_title }}]<br>
-              entry.description raw: [{{ entry.description | truncate: 40 }}]<br>
-              entry.description.value raw: [{{ entry.description.value | truncate: 40 }}]<br>
-              rr_description resolved: {{ rr_description | size }} chars<br>
-              entry.image raw: [{{ entry.image }}]<br>
-              entry.image.value raw: [{{ entry.image.value }}]<br>
-              rr_image resolved: {% if rr_image != blank %}yes{% else %}no{% endif %}<br>
-              entry.video raw: [{{ entry.video }}]<br>
-              entry.video.value raw: [{{ entry.video.value }}]<br>
-              rr_video_url resolved: {% if rr_video_url != blank %}{{ rr_video_url }}{% else %}none{% endif %}<br>
-              entry.bubbles raw: [{{ entry.bubbles | truncate: 40 }}]<br>
-              entry.bubbles.value raw: [{{ entry.bubbles.value | truncate: 40 }}]<br>
-              has_visible_content: {{ has_visible_content }}<br>
-              <em>Remove this debug block once working. Check entry.title.value — if blank, the metaobject field key may differ from "title".</em>
-            </div>
           </div>
-          {% else %}
-          {% comment %} No visible content — show empty state + message + debug so user always sees what to do {% endcomment %}
-          <div class="affect-image sl-rr-media-wrap">
-            <div class="sl-rr-placeholder" style="aspect-ratio: 1; background: #f4f0e9; border-radius: 12px;"></div>
-          </div>
-          <div class="how-it-affect-text-box">
-            <p class="title" style="color: #666; font-size: 14px;">Results you'll see</p>
-            <p class="description" style="font-size: 12px; color: #888;">
-              {% if has_content %}This product has highlights but the first entry has no title, description, image or video. Check that your Product Highlight metaobject has fields: <strong>title</strong> (or headline), <strong>description</strong>, <strong>image</strong>, <strong>video</strong>, and fill them on the first entry.{% else %}Add <strong>Real results highlights</strong> to this product (Settings → Custom data → Products). Create a Product Highlight metaobject with title, description, image or video, then assign it to this product.{% endif %}
-            </p>
-            <div class="sl-rr-debug" style="margin-top:16px;padding:12px;background:#f8f8f8;border:1px solid #ddd;border-radius:8px;font-size:12px;font-family:monospace;">
-              <strong>SL Real Results debug (empty state)</strong><br>
-              Product: {% if prod %}{{ prod.id }} — {{ prod.title }}{% else %}none{% endif %}<br>
-              Highlights count: {{ highlights.size | default: 0 }}<br>
-              entry: {% if entry != blank %}present{% else %}nil{% endif %}<br>
-              {% if entry != blank %}
-                entry.title raw: [{{ entry.title }}]<br>
-                entry.title.value raw: [{{ entry.title.value }}]<br>
-                entry.description.value raw: [{{ entry.description.value | truncate: 40 }}]<br>
-                entry.image.value raw: [{{ entry.image.value }}]<br>
-                entry.video.value raw: [{{ entry.video.value }}]<br>
-                entry.bubbles.value raw: [{{ entry.bubbles.value | truncate: 40 }}]<br>
-              {% endif %}
-              has_content: {{ has_content }} | has_visible_content: {{ has_visible_content }}<br>
-              <em>If entry.title.value is blank but the entry is present, check the field key in the metaobject definition — it may not be "title". Enable Storefront API on both the metaobject and metafield.</em>
-            </div>
-          </div>
-          {% endif %}
         </div>
       </div>
     </div>
   </details>
 </div>
+{% elsif request.design_mode %}
+<div id="sl-rr-block-{{ block_id }}" class="sl-rr-root sl-rr-accordion" style="padding: 12px; border: 1px dashed #ccc; border-radius: 8px;">
+  <p style="margin: 0 0 8px; font-size: 14px; color: #666;"><strong>{{ accordion_heading }}</strong> — No highlights to show. This block is hidden on the storefront.</p>
+  <p style="font-size: 12px; color: #888; margin: 0 0 8px;">
+    {% if has_content %}This product has highlights but the first entry has no title, description, image or video. Check that your Product Highlight metaobject fields are filled.{% else %}Add <strong>Real results highlights</strong> to this product (Settings → Custom data → Products). Create a Product Highlight metaobject with title, description, image or video, then assign it to this product.{% endif %}
+  </p>
+  {% if show_debug %}
+  <div style="padding:10px;background:#f8f8f8;border:1px solid #ddd;border-radius:6px;font-size:11px;font-family:monospace;">
+    <strong>Debug</strong><br>
+    Product: {% if prod %}{{ prod.id }} — {{ prod.title }}{% else %}none{% endif %}<br>
+    Highlights count: {{ highlights.size | default: 0 }}<br>
+    entry: {% if entry != blank %}present{% else %}nil{% endif %}<br>
+    has_content: {{ has_content }} | has_visible_content: {{ has_visible_content }}
+  </div>
+  {% endif %}
+</div>
+{% endif %}
 
 <style>
-  #sl-rr-block-{{ block_id }} .accordion__toggle { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+  #sl-rr-block-{{ block_id }} .accordion__toggle { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 18px; }
   #sl-rr-block-{{ block_id }} .accordion .icon { transition: transform 0.2s; }
   #sl-rr-block-{{ block_id }} .accordion[open] .icon { transform: rotate(180deg); }
   #sl-rr-block-{{ block_id }} .how-it-affects-container { border-radius: 16px; border: 0.5px solid #EBEBEB; background: #FFF; box-shadow: 0 4px 4px -1px rgba(0, 0, 0, 0.02); padding: 20px; }
-  #sl-rr-block-{{ block_id }} .how-it-affects-container p.title { color: #272E0F; font-size: 14px; font-weight: 600; line-height: 140%; letter-spacing: 0.16px; margin: 0 0 10px 0; }
+  #sl-rr-block-{{ block_id }} .how-it-affects-container p.title { color: #272E0F; font-size: 24px; font-weight: 600; line-height: 140%; letter-spacing: 0.16px; margin: 0 0 10px 0; }
   #sl-rr-block-{{ block_id }} .affect-image { position: relative; cursor: pointer; overflow: hidden; border-radius: 13px; }
   #sl-rr-block-{{ block_id }} .affect-image.sl-rr-media-wrap { aspect-ratio: 1; display: block; }
   #sl-rr-block-{{ block_id }} .affect-image .sl-rr-video,
