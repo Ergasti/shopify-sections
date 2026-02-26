@@ -415,22 +415,16 @@
   /* ===== SWIPER / SLIDE LAYOUT (stable before JS to prevent layout shift) ===== */
   #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-swiper { overflow: hidden; position: relative; padding: 20px 0 48px; min-height: 340px; }
   #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-title { margin-bottom: 16px; text-align: {{ section.settings.heading_alignment }}; }
+  /* Let Swiper control slide dimensions and spacing (spaceBetween). No gap here or slides drift on mobile. */
   #sl-ugc-hp-{{ section.id }} .swiper-wrapper {
     display: flex;
     flex-wrap: nowrap;
-    gap: var(--sl-ugc-slide-gap, 16px);
   }
   #sl-ugc-hp-{{ section.id }} .swiper-slide {
     height: auto;
     box-sizing: border-box;
     flex: 0 0 auto;
-    width: calc((100% - (var(--sl-ugc-slide-gap, 16px) * (var(--sl-ugc-slides-per-view, 5) - 1))) / var(--sl-ugc-slides-per-view, 5));
     min-width: 0;
-  }
-  @media (max-width: 768px) {
-    #sl-ugc-hp-{{ section.id }} .swiper-slide {
-      width: calc((100% - (var(--sl-ugc-slide-gap, 16px) * ({{ section.settings.slides_mobile | default: 1 }} - 1))) / {{ section.settings.slides_mobile | default: 1 }});
-    }
   }
   #sl-ugc-hp-{{ section.id }} .swiper-slide .sl-ugc-hp-video-wrap img { display: block; width: 100%; height: 100%; object-fit: cover; }
 
@@ -916,6 +910,10 @@
             slidesPerView: slidesPerView,
             spaceBetween: {{ section.settings.slide_gap }},
             loop: false,
+            breakpoints: {
+              320: { slidesPerView: {{ section.settings.slides_mobile }} },
+              769: { slidesPerView: {{ section.settings.slides_desktop }} }
+            },
             navigation: {
               nextEl: r.querySelector('.swiper-button-next'),
               prevEl: r.querySelector('.swiper-button-prev')
