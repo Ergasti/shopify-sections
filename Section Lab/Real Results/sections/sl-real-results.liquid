@@ -10,7 +10,7 @@
 {% if section.blocks.size > 0 %}
   {% assign has_blocks = true %}
 {% endif %}
-{% assign highlights = product.metafields.custom.real_results_highlights.value | default: nil %}
+{% assign highlights = product.metafields.custom.real_results_highlights.value | default: product.metafields.custom.real_results_highlights | default: nil %}
 {% if product != blank and highlights != blank and highlights.size > 0 and has_blocks == false %}
   {% assign has_blocks = true %}
 {% endif %}

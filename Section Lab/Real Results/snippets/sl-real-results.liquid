@@ -1,24 +1,58 @@
 {% comment %}
   SL - Real Results (Snippet) — "Results you'll see" accordion + how-it-affects box.
   Usage: {% render 'sl-real-results', product: product, block_id: block.id %}
-  Uses first entry from product.metafields.custom.real_results_highlights, or pass block-level content via section.
-  For block-based content use the section instead.
+  Optional: debug: true — show debug panel. accordion_heading, accordion_open.
+  Uses first entry from product.metafields.custom.real_results_highlights (Product Highlight: title, description, image, video, bubbles).
 {% endcomment %}
 
 {% assign block_id = block_id | default: 'rr' %}
 {% assign prod = product | default: nil %}
-{% assign highlights = prod.metafields.custom.real_results_highlights.value | default: nil %}
+{% assign show_debug = debug | default: false %}
+{% if request.design_mode %}{% assign show_debug = true %}{% endif %}
+
+{% assign highlights = prod.metafields.custom.real_results_highlights.value | default: prod.metafields.custom.real_results_highlights | default: nil %}
 {% assign has_content = false %}
+{% assign entry = nil %}
+{% assign rr_title = '' %}
+{% assign rr_description = '' %}
+{% assign rr_image = nil %}
+{% assign rr_video_url = nil %}
+{% assign rr_bubbles_list = nil %}
+
 {% if prod != blank and highlights != blank and highlights.size > 0 %}
+  {% comment %} Use for loop to get first entry — highlights[0] returns nil for some metafield list types {% endcomment %}
+  {% for h in highlights limit: 1 %}
+    {% assign entry = h %}
+  {% endfor %}
+
+  {% if entry != blank %}
+    {% assign rr_title = entry.title.value | default: entry.title | default: entry.headline.value | default: entry.headline | default: entry.name | default: '' | strip %}
+    {% assign rr_description = entry.description.value | default: entry.description | default: '' | strip %}
+    {% assign rr_image = entry.image.value | default: entry.image | default: nil %}
+    {% assign rr_video_raw = entry.video.value | default: entry.video | default: nil %}
+    {% if rr_video_raw != blank %}
+      {% if rr_video_raw.sources != blank and rr_video_raw.sources[0].url != blank %}
+        {% assign rr_video_url = rr_video_raw.sources[0].url %}
+      {% elsif rr_video_raw contains 'http' %}
+        {% assign rr_video_url = rr_video_raw %}
+      {% endif %}
+    {% endif %}
+    {% assign bubbles_text = entry.bubbles.value | default: entry.bubbles | default: entry.tags.value | default: entry.tags | default: '' | strip %}
+    {% if bubbles_text != blank %}
+      {% assign bubbles_normalized = bubbles_text | replace: ', ', '
+' | replace: ',', '
+' %}
+      {% assign rr_bubbles_list = bubbles_normalized | newline_to_br | split: '<br />' %}
+    {% endif %}
+  {% endif %}
   {% assign has_content = true %}
-  {% assign entry = highlights[0] %}
-  {% assign rr_title = entry.title | default: entry.headline %}
-  {% assign rr_description = entry.description | default: '' %}
-  {% assign rr_image = entry.image | default: nil %}
-  {% assign rr_video = entry.video | default: nil %}
+{% endif %}
+{% assign has_visible_content = false %}
+{% if rr_title != blank or rr_description != blank or rr_image != blank or rr_video_url != blank or rr_bubbles_list != blank %}
+  {% assign has_visible_content = true %}
 {% endif %}
 
-{% if has_content %}
+{% comment %} Always render accordion; use empty state (with message + debug) when nothing to show {% endcomment %}
 {% assign accordion_heading = accordion_heading | default: "RESULTS YOU'LL SEE" %}
 <div id="sl-rr-block-{{ block_id }}" class="sl-rr-root sl-rr-accordion">
   <details class="accordion group" {% if accordion_open != false %}open{% endif %}>
@@ -33,21 +67,103 @@
     <div class="accordion__content prose">
       <div class="how-it-affects-container sl-rr-how-it-affects">
         <div class="how-it-affects-box">
-          <div class="affect-image" data-sl-rr-video-trigger>
-            {% if rr_video != blank %}
-              <video playsinline muted autoplay loop width="100%" class="sl-rr-video" data-sl-rr-video>
-                <source src="{{ rr_video.sources[0].url | default: rr_video }}" type="video/mp4">
+          {% if has_visible_content %}
+          <div class="affect-image sl-rr-media-wrap" {% if rr_video_url != blank %}data-sl-rr-video-trigger{% endif %}>
+            {% if rr_video_url != blank %}
+              <video
+                playsinline
+                muted
+                autoplay
+                loop
+                width="600"
+                height="600"
+                class="sl-rr-video"
+                data-sl-rr-video
+                {% if rr_image != blank %}poster="{{ rr_image | image_url: width: 600, height: 600 }}"{% endif %}
+                style="width: 100%; height: auto; display: block;"
+              >
+                <source src="{{ rr_video_url }}" type="video/mp4">
               </video>
             {% elsif rr_image != blank %}
-              <img src="{{ rr_image | image_url: width: 600, height: 600 }}" alt="" width="600" height="600" loading="lazy" class="sl-rr-poster" style="width: 100%; height: auto;">
+              <img
+                src="{{ rr_image | image_url: width: 600, height: 600 }}"
+                alt="{{ rr_title | escape }}"
+                width="600"
+                height="600"
+                loading="lazy"
+                class="sl-rr-poster"
+              >
             {% else %}
               <div class="sl-rr-placeholder" style="aspect-ratio: 1; background: #f4f0e9; border-radius: 12px;"></div>
             {% endif %}
           </div>
           <div class="how-it-affect-text-box">
             {% if rr_title != blank %}<p class="title">{{ rr_title }}</p>{% endif %}
+            {% if rr_bubbles_list != blank and rr_bubbles_list.size > 0 %}
+              <p class="bubles">
+                {% for b in rr_bubbles_list %}
+                  {% assign b_strip = b | strip %}
+                  {% if b_strip != '' %}
+                    <span>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="9" viewBox="0 0 12 9" fill="none" aria-hidden="true"><path d="M1 4.53651L4.04336 7.6L10.6 1" stroke="#7D8F3E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      {{ b_strip }}
+                    </span>
+                  {% endif %}
+                {% endfor %}
+              </p>
+            {% endif %}
             {% if rr_description != blank %}<p class="description">{{ rr_description }}</p>{% endif %}
+            <div class="sl-rr-debug" style="margin-top:16px;padding:12px;background:#f8f8f8;border:1px solid #ddd;border-radius:8px;font-size:12px;font-family:monospace;">
+              <strong>SL Real Results debug</strong><br>
+              Product: {% if prod %}{{ prod.id }} — {{ prod.title }}{% else %}none{% endif %}<br>
+              Highlights count: {{ highlights.size | default: 0 }}<br>
+              entry: {% if entry != blank %}present (type={{ entry.system.type | default: 'unknown' }}){% else %}nil{% endif %}<br>
+              entry.title raw: [{{ entry.title }}]<br>
+              entry.title.value raw: [{{ entry.title.value }}]<br>
+              rr_title resolved: [{{ rr_title }}]<br>
+              entry.description raw: [{{ entry.description | truncate: 40 }}]<br>
+              entry.description.value raw: [{{ entry.description.value | truncate: 40 }}]<br>
+              rr_description resolved: {{ rr_description | size }} chars<br>
+              entry.image raw: [{{ entry.image }}]<br>
+              entry.image.value raw: [{{ entry.image.value }}]<br>
+              rr_image resolved: {% if rr_image != blank %}yes{% else %}no{% endif %}<br>
+              entry.video raw: [{{ entry.video }}]<br>
+              entry.video.value raw: [{{ entry.video.value }}]<br>
+              rr_video_url resolved: {% if rr_video_url != blank %}{{ rr_video_url }}{% else %}none{% endif %}<br>
+              entry.bubbles raw: [{{ entry.bubbles | truncate: 40 }}]<br>
+              entry.bubbles.value raw: [{{ entry.bubbles.value | truncate: 40 }}]<br>
+              has_visible_content: {{ has_visible_content }}<br>
+              <em>Remove this debug block once working. Check entry.title.value — if blank, the metaobject field key may differ from "title".</em>
+            </div>
           </div>
+          {% else %}
+          {% comment %} No visible content — show empty state + message + debug so user always sees what to do {% endcomment %}
+          <div class="affect-image sl-rr-media-wrap">
+            <div class="sl-rr-placeholder" style="aspect-ratio: 1; background: #f4f0e9; border-radius: 12px;"></div>
+          </div>
+          <div class="how-it-affect-text-box">
+            <p class="title" style="color: #666; font-size: 14px;">Results you'll see</p>
+            <p class="description" style="font-size: 12px; color: #888;">
+              {% if has_content %}This product has highlights but the first entry has no title, description, image or video. Check that your Product Highlight metaobject has fields: <strong>title</strong> (or headline), <strong>description</strong>, <strong>image</strong>, <strong>video</strong>, and fill them on the first entry.{% else %}Add <strong>Real results highlights</strong> to this product (Settings → Custom data → Products). Create a Product Highlight metaobject with title, description, image or video, then assign it to this product.{% endif %}
+            </p>
+            <div class="sl-rr-debug" style="margin-top:16px;padding:12px;background:#f8f8f8;border:1px solid #ddd;border-radius:8px;font-size:12px;font-family:monospace;">
+              <strong>SL Real Results debug (empty state)</strong><br>
+              Product: {% if prod %}{{ prod.id }} — {{ prod.title }}{% else %}none{% endif %}<br>
+              Highlights count: {{ highlights.size | default: 0 }}<br>
+              entry: {% if entry != blank %}present{% else %}nil{% endif %}<br>
+              {% if entry != blank %}
+                entry.title raw: [{{ entry.title }}]<br>
+                entry.title.value raw: [{{ entry.title.value }}]<br>
+                entry.description.value raw: [{{ entry.description.value | truncate: 40 }}]<br>
+                entry.image.value raw: [{{ entry.image.value }}]<br>
+                entry.video.value raw: [{{ entry.video.value }}]<br>
+                entry.bubbles.value raw: [{{ entry.bubbles.value | truncate: 40 }}]<br>
+              {% endif %}
+              has_content: {{ has_content }} | has_visible_content: {{ has_visible_content }}<br>
+              <em>If entry.title.value is blank but the entry is present, check the field key in the metaobject definition — it may not be "title". Enable Storefront API on both the metaobject and metafield.</em>
+            </div>
+          </div>
+          {% endif %}
         </div>
       </div>
     </div>
@@ -60,13 +176,14 @@
   #sl-rr-block-{{ block_id }} .accordion[open] .icon { transform: rotate(180deg); }
   #sl-rr-block-{{ block_id }} .how-it-affects-container { border-radius: 16px; border: 0.5px solid #EBEBEB; background: #FFF; box-shadow: 0 4px 4px -1px rgba(0, 0, 0, 0.02); padding: 20px; }
   #sl-rr-block-{{ block_id }} .how-it-affects-container p.title { color: #272E0F; font-size: 14px; font-weight: 600; line-height: 140%; letter-spacing: 0.16px; margin: 0 0 10px 0; }
-  #sl-rr-block-{{ block_id }} .affect-image { position: relative; cursor: pointer; }
+  #sl-rr-block-{{ block_id }} .affect-image { position: relative; cursor: pointer; overflow: hidden; border-radius: 13px; }
+  #sl-rr-block-{{ block_id }} .affect-image.sl-rr-media-wrap { aspect-ratio: 1; display: block; }
+  #sl-rr-block-{{ block_id }} .affect-image .sl-rr-video,
+  #sl-rr-block-{{ block_id }} .affect-image .sl-rr-poster { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 13px; }
   #sl-rr-block-{{ block_id }} .how-it-affects-container p.bubles { margin: 10px 0 0 0; }
   #sl-rr-block-{{ block_id }} .how-it-affects-container p.bubles span { border-radius: 28px; background: #F4F0E9; display: inline-flex; padding: 2px 4px; align-items: center; gap: 4px; margin-right: 6px; margin-bottom: 4px; color: #878787; font-size: 13px; font-weight: 400; }
   #sl-rr-block-{{ block_id }} .how-it-affects-container .how-it-affects-box { display: grid; gap: 16px; }
   #sl-rr-block-{{ block_id }} .how-it-affects-container .how-it-affect-text-box .description { color: #272E0F; font-size: 14px; font-weight: 400; line-height: 150%; letter-spacing: 0.28px; margin: 10px 0 0 0; }
-  #sl-rr-block-{{ block_id }} .how-it-affects-container video { border-radius: 13px; }
-  #sl-rr-block-{{ block_id }} .how-it-affects-container .sl-rr-poster { border-radius: 13px; }
 </style>
 
 <script>
@@ -85,4 +202,3 @@
   });
 })();
 </script>
-{% endif %}
