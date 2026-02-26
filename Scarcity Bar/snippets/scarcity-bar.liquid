@@ -1,0 +1,177 @@
+{% comment %}
+  Scarcity Bar — snippet for use as a Liquid block (e.g. Custom Liquid in product info).
+  Usage: {% render 'scarcity-bar', product: product, block_id: block.id, min_stock: 10, max_stock: 20 %}
+  Optional: use_product_inventory, bar_style (stock_level | urgency), text_en, text_ar, margin_top,
+  margin_bottom, font_size, track_height, track_color, fill_color_start, fill_color_end, text_color, pulse_color
+{% endcomment %}
+
+{% assign _bid = block_id | default: 'b' %}
+{% assign _pid = product.id | default: '0' %}
+{% assign sb_id_raw = _bid | append: '-' | append: _pid | replace: ' ', '-' | replace: '.', '-' %}
+{% assign sb_id = sb_id_raw | replace: ':', '-' | replace: '/', '-' | replace: '"', '' %}
+{% assign min_stock = min_stock | default: 10 %}
+{% assign max_stock = max_stock | default: 20 %}
+{% assign use_inventory = use_product_inventory | default: false %}
+{% assign inventory_qty = nil %}
+{% if product != blank and use_inventory and product.variants.size > 0 %}
+  {% assign inventory_qty = product.variants | map: 'inventory_quantity' | sum %}
+{% endif %}
+
+{% assign text_en = text_en | default: "<span class='pulse-dot'></span> Only <strong class='scarcity-qty'></strong> items left" %}
+{% assign text_ar = text_ar | default: "<span class='pulse-dot'></span> باقي <strong class='scarcity-qty'></strong> قطعة فقط" %}
+
+{% assign margin_top = margin_top | default: 14 %}
+{% assign margin_bottom = margin_bottom | default: 0 %}
+{% assign font_size = font_size | default: 14 %}
+{% assign track_height = track_height | default: 8 %}
+{% assign track_color = track_color | default: '#eeeeee' %}
+{% assign fill_color_start = fill_color_start | default: '#ff4d4d' %}
+{% assign fill_color_end = fill_color_end | default: '#ff9f43' %}
+{% assign text_color = text_color | default: '#d63031' %}
+{% assign pulse_color = pulse_color | default: '#ff3b30' %}
+{% assign bar_style = bar_style | default: 'stock_level' %}
+
+<div
+  id="scarcity-bar-{{ sb_id }}"
+  class="scarcity-bar-wrapper"
+  data-min="{{ min_stock }}"
+  data-max="{{ max_stock }}"
+  data-bar-style="{{ bar_style }}"
+  {% if inventory_qty != nil %}data-inventory="{{ inventory_qty }}"{% endif %}
+  data-en="{{ text_en | escape }}"
+  data-ar="{{ text_ar | escape }}"
+>
+  <div class="scarcity-bar">
+    <div class="scarcity-bar__track">
+      <div class="scarcity-bar__fill">
+        <div class="scarcity-bar__stripes"></div>
+      </div>
+    </div>
+    <p class="scarcity-bar__text">
+      <span class="scarcity-qty"></span>
+    </p>
+  </div>
+</div>
+
+<style>
+  #scarcity-bar-{{ sb_id }}.scarcity-bar-wrapper {
+    margin-top: {{ margin_top }}px;
+    margin-bottom: {{ margin_bottom }}px;
+  }
+
+  #scarcity-bar-{{ sb_id }} .scarcity-bar {
+    font-size: {{ font_size }}px;
+  }
+
+  #scarcity-bar-{{ sb_id }} .scarcity-bar__track {
+    width: 100%;
+    height: {{ track_height }}px;
+    background: {{ track_color }};
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  #scarcity-bar-{{ sb_id }} .scarcity-bar__fill {
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, {{ fill_color_start }}, {{ fill_color_end }});
+    position: relative;
+    transition: width 0.5s ease;
+  }
+
+  #scarcity-bar-{{ sb_id }} .scarcity-bar__stripes {
+    position: absolute;
+    inset: 0;
+    background-image: linear-gradient(
+      45deg,
+      rgba(255,255,255,0.25) 25%,
+      transparent 25%,
+      transparent 50%,
+      rgba(255,255,255,0.25) 50%,
+      rgba(255,255,255,0.25) 75%,
+      transparent 75%,
+      transparent
+    );
+    background-size: 14px 14px;
+    animation: scarcity-stripes-sb-{{ sb_id }} 1s linear infinite;
+  }
+
+  @keyframes scarcity-stripes-sb-{{ sb_id }} {
+    from { background-position: 0 0; }
+    to   { background-position: 14px 0; }
+  }
+
+  #scarcity-bar-{{ sb_id }} .scarcity-bar__text {
+    margin-top: 6px;
+    color: {{ text_color }};
+    font-weight: 500;
+  }
+
+  #scarcity-bar-{{ sb_id }} .pulse-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    margin-inline-end: 6px;
+    border-radius: 50%;
+    background: {{ pulse_color }};
+    position: relative;
+  }
+
+  #scarcity-bar-{{ sb_id }} .pulse-dot::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: {{ pulse_color }};
+    opacity: 0.6;
+    animation: scarcity-pulse-sb-{{ sb_id }} 1.4s ease-out infinite;
+  }
+
+  @keyframes scarcity-pulse-sb-{{ sb_id }} {
+    0% { transform: scale(1); opacity: 0.8; }
+    70% { transform: scale(2.4); opacity: 0; }
+    100% { transform: scale(2.4); opacity: 0; }
+  }
+</style>
+
+<script>
+(function() {
+  var wrapper = document.getElementById("scarcity-bar-{{ sb_id }}");
+  if (!wrapper) return;
+
+  var min = parseInt(wrapper.getAttribute("data-min"), 10) || 5;
+  var max = parseInt(wrapper.getAttribute("data-max"), 10) || 15;
+  if (min > max) { var t = min; min = max; max = t; }
+
+  var inventory = wrapper.getAttribute("data-inventory");
+  var qty;
+  if (inventory !== null && inventory !== "") {
+    qty = parseInt(inventory, 10);
+    if (isNaN(qty) || qty < 0) qty = min;
+    else if (qty > max) qty = max;
+  } else {
+    qty = Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  var fill = wrapper.querySelector(".scarcity-bar__fill");
+  var textEl = wrapper.querySelector(".scarcity-bar__text");
+  if (fill && max > 0) {
+    var isUrgency = (wrapper.getAttribute("data-bar-style") || "").toLowerCase() === "urgency";
+    var fillPct = isUrgency
+      ? ((max - qty + 1) / max) * 100
+      : (qty / max) * 100;
+    fillPct = Math.min(100, Math.max(0, fillPct));
+    requestAnimationFrame(function() { fill.style.width = fillPct + "%"; });
+  }
+
+  var lang = (document.documentElement.getAttribute("lang") || "").toLowerCase();
+  var template = (lang.indexOf("ar") !== -1 && wrapper.getAttribute("data-ar"))
+    ? wrapper.getAttribute("data-ar")
+    : (wrapper.getAttribute("data-en") || "Only <strong class=\"scarcity-qty\"></strong> items left");
+  if (textEl) {
+    textEl.innerHTML = template;
+    var strong = textEl.querySelector(".scarcity-qty");
+    if (strong) strong.textContent = qty;
+  }
+})();
+</script>

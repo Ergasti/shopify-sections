@@ -1,215 +1,149 @@
 {% comment %}
-  SL - Real Results (Product highlights)
-  Product-specific highlights via metafield. Swiper cards stack effect.
-  Requires product.metafields.custom.real_results_highlights (list of Product Highlight metaobjects).
-  Metaobject: title, description (optional), icon (image file, optional).
-  See README.md for setup.
+  SL - Real Results (Results you'll see)
+  Accordion with "how it affects" boxes: video, title, bubbles (pills with checkmark), description.
+  Block-based: add "Result box" blocks with video URL, title, bubbles, description.
+  Optional: product metafield custom.real_results_highlights for product-specific content (first entry used).
 {% endcomment %}
 
+{% assign accordion_heading = section.settings.accordion_heading | default: "RESULTS YOU'LL SEE" %}
+{% assign has_blocks = false %}
+{% if section.blocks.size > 0 %}
+  {% assign has_blocks = true %}
+{% endif %}
 {% assign highlights = product.metafields.custom.real_results_highlights.value | default: nil %}
-{% assign has_highlights = false %}
-{% if product != blank and highlights != blank and highlights.size > 0 %}
-  {% assign has_highlights = true %}
+{% if product != blank and highlights != blank and highlights.size > 0 and has_blocks == false %}
+  {% assign has_blocks = true %}
 {% endif %}
 
-{% unless has_highlights %}
+{% unless has_blocks %}
   {% if request.design_mode %}
-    <div id="sl-rr-section-{{ section.id }}" class="sl-rr-root" style="padding: 24px; text-align: center; background: {{ section.settings.background_color }};">
+    <div id="sl-rr-section-{{ section.id }}" class="sl-rr-root" style="padding: 24px; text-align: center; background: #fff;">
       <p style="margin: 0; color: #666;">{{ 'sections.sl_real_results.no_highlights' | t }}</p>
     </div>
   {% endif %}
 {% else %}
-{% assign rr_locale = request.locale.iso_code | default: 'en' %}
-{% assign rr_rtl = false %}
-{% if rr_locale == 'ar' or rr_locale == 'he' or rr_locale == 'fa' %}{% assign rr_rtl = true %}{% endif %}
-<div id="sl-rr-section-{{ section.id }}" class="sl-rr-root{% if rr_rtl %} sl-rr-rtl{% endif %}"{% if rr_rtl %} dir="rtl"{% endif %} style="background: {{ section.settings.background_color }}; padding: {{ section.settings.padding_top }}px 0 {{ section.settings.padding_bottom }}px 0;">
-  <div class="sl-rr-inner" style="{% unless section.settings.full_width %}max-width: {{ section.settings.content_width }}px; margin-left: auto; margin-right: auto;{% endunless %} padding: 0 16px;">
-    <h2 class="sl-rr-heading" style="font-size: {{ section.settings.heading_size }}px; color: {{ section.settings.heading_color }}; margin: 0 0 20px 0; text-align: {{ section.settings.heading_alignment }};">{% if section.settings.section_heading != blank %}{{ section.settings.section_heading }}{% else %}{{ 'sections.sl_real_results.heading' | t }}{% endif %}</h2>
-
-    <div class="sl-rr-swiper swiper">
-      <div class="swiper-wrapper">
-        {% for entry in highlights %}
-          {% assign title = entry.title | default: entry.headline %}
-          {% if title != blank %}
-            <div class="swiper-slide">
-              <div class="sl-rr-card" data-title="{{ title | escape }}" data-description="{{ entry.description | default: '' | escape }}" data-image="{% if entry.image %}{{ entry.image | image_url: width: 600 }}{% endif %}">
-                <div class="sl-rr-card-inner">
-                  <div class="sl-rr-header">
-                    <div class="sl-rr-icon">
-                      {% if entry.icon != blank %}
-                        <img src="{{ entry.icon | image_url: width: 48 }}" alt="" width="24" height="24" loading="lazy">
-                      {% else %}
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2L14.5 8.5L21 9L16 13.5L17.5 20L12 17L6.5 20L8 13.5L3 9L9.5 8.5L12 2Z" fill="currentColor"/></svg>
-                      {% endif %}
-                    </div>
-                    <h3 class="sl-rr-title">{{ title }}</h3>
-                  </div>
-                  {% if entry.description != blank %}<p class="sl-rr-desc-preview">{{ entry.description | strip_html | truncate: 80 }}</p>{% endif %}
+{% assign rr_id = section.id %}
+<div id="sl-rr-section-{{ rr_id }}" class="sl-rr-root sl-rr-accordion">
+  <details class="accordion group" is="accordion-disclosure" aria-expanded="true" {% if section.settings.accordion_open %}open{% endif %}>
+    <summary>
+      <span class="accordion__toggle h6">
+        <span>{{ accordion_heading }}</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8" fill="none" class="group-expanded:rotate icon icon-wd-arrow" aria-hidden="true">
+          <path d="M11 1L6 7L1 1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+    </summary>
+    <div class="accordion__content prose">
+      <div class="how-it-affects-container sl-rr-how-it-affects">
+        {% if section.blocks.size > 0 %}
+          {% for block in section.blocks %}
+            {% if block.type == 'result_box' %}
+              <div class="how-it-affects-box" {{ block.shopify_attributes }}>
+                <div class="affect-image" data-sl-rr-video-trigger>
+                  {% if block.settings.video_url != blank %}
+                    <video playsinline muted autoplay loop width="100%" class="sl-rr-video" data-sl-rr-video>
+                      <source src="{{ block.settings.video_url }}" type="video/mp4">
+                    </video>
+                  {% elsif block.settings.image != blank %}
+                    <img src="{{ block.settings.image | image_url: width: 600, height: 600 }}" alt="" width="600" height="600" loading="lazy" class="sl-rr-poster" style="width: 100%; height: auto;">
+                  {% else %}
+                    <div class="sl-rr-placeholder" style="aspect-ratio: 1; background: #f4f0e9; border-radius: 12px;"></div>
+                  {% endif %}
                 </div>
-                <span class="sl-rr-view-icon" aria-hidden="true">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                </span>
+                <div class="how-it-affect-text-box">
+                  {% if block.settings.title != blank %}
+                    <p class="title">{{ block.settings.title }}</p>
+                  {% endif %}
+                  {% assign bubbles_text = block.settings.bubbles | strip %}
+                  {% if bubbles_text != blank %}
+                    {% assign bubbles_normalized = bubbles_text | replace: ', ', '
+' | replace: ',', '
+' %}
+                    {% assign bubbles_list = bubbles_normalized | newline_to_br | split: '<br />' %}
+                    <p class="bubles">
+                      {% for b in bubbles_list %}
+                        {% assign b_strip = b | strip %}
+                        {% if b_strip != '' %}
+                          <span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="9" viewBox="0 0 12 9" fill="none" aria-hidden="true"><path d="M1 4.53651L4.04336 7.6L10.6 1" stroke="#7D8F3E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            {{ b_strip }}
+                          </span>
+                        {% endif %}
+                      {% endfor %}
+                    </p>
+                  {% endif %}
+                  {% if block.settings.description != blank %}
+                    <p class="description">{{ block.settings.description }}</p>
+                  {% endif %}
+                </div>
               </div>
+            {% endif %}
+          {% endfor %}
+        {% else %}
+          {% comment %} Fallback: first product highlight from metafield {% endcomment %}
+          {% assign entry = highlights[0] %}
+          {% assign title = entry.title | default: entry.headline %}
+          <div class="how-it-affects-box">
+            <div class="affect-image" data-sl-rr-video-trigger>
+              {% if entry.video != blank %}
+                <video playsinline muted autoplay loop width="100%" class="sl-rr-video" data-sl-rr-video>
+                  <source src="{{ entry.video.sources[0].url | default: entry.video }}" type="video/mp4">
+                </video>
+              {% elsif entry.image != blank %}
+                <img src="{{ entry.image | image_url: width: 600, height: 600 }}" alt="" width="600" height="600" loading="lazy" class="sl-rr-poster" style="width: 100%; height: auto;">
+              {% else %}
+                <div class="sl-rr-placeholder" style="aspect-ratio: 1; background: #f4f0e9; border-radius: 12px;"></div>
+              {% endif %}
             </div>
-          {% endif %}
-        {% endfor %}
+            <div class="how-it-affect-text-box">
+              {% if title != blank %}<p class="title">{{ title }}</p>{% endif %}
+              {% if entry.description != blank %}<p class="description">{{ entry.description }}</p>{% endif %}
+            </div>
+          </div>
+        {% endif %}
       </div>
-      <div class="swiper-button-prev"></div>
-      <div class="swiper-button-next"></div>
     </div>
-  </div>
-</div>
-
-<div id="sl-rr-popup-{{ section.id }}" class="sl-rr-popup" role="dialog" aria-modal="true" aria-labelledby="sl-rr-popup-title" hidden>
-  <div class="sl-rr-popup-backdrop"></div>
-  <div class="sl-rr-popup-content">
-    <button type="button" class="sl-rr-popup-close" aria-label="{{ 'sections.sl_real_results.close' | t }}">&times;</button>
-    <h2 id="sl-rr-popup-title" class="sl-rr-popup-title"></h2>
-    <div class="sl-rr-popup-image-wrap"></div>
-    <div class="sl-rr-popup-body"></div>
-  </div>
+  </details>
 </div>
 
 <style>
-  #sl-rr-section-{{ section.id }} .sl-rr-swiper { overflow: hidden; position: relative; padding: 20px 0 50px; }
-  #sl-rr-section-{{ section.id }} .swiper-slide { height: auto; box-sizing: border-box; }
-  #sl-rr-section-{{ section.id }} .sl-rr-card {
-    background: {{ section.settings.card_bg }};
-    border-radius: 16px;
-    padding: 20px;
-    padding-bottom: 36px;
-    min-height: 120px;
-    width: 100%;
-    box-sizing: border-box;
-    position: relative;
-    display: block;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04);
-    cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    border: 1px solid {{ section.settings.card_border }};
-  }
-  #sl-rr-section-{{ section.id }} .sl-rr-card:hover { box-shadow: 0 12px 32px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.06); transform: translateY(-2px); }
-  #sl-rr-section-{{ section.id }} .sl-rr-card-inner { width: 100%; min-width: 0; }
-  #sl-rr-section-{{ section.id }} .sl-rr-header { display: flex; align-items: center; gap: 12px; }
-  #sl-rr-section-{{ section.id }} .sl-rr-icon { color: {{ section.settings.icon_color }}; line-height: 0; flex-shrink: 0; }
-  #sl-rr-section-{{ section.id }} .sl-rr-icon img { width: 24px; height: 24px; object-fit: contain; }
-  #sl-rr-section-{{ section.id }} .sl-rr-icon svg { width: 24px; height: 24px; }
-  #sl-rr-section-{{ section.id }} .sl-rr-title { margin: 0; font-size: 14px; font-weight: 500; line-height: 1.35; color: {{ section.settings.text_color }}; letter-spacing: 0.02em; min-width: 0; word-wrap: break-word; overflow-wrap: break-word; }
-  #sl-rr-section-{{ section.id }} .sl-rr-desc-preview { margin: 8px 0 0 0; font-size: 12px; color: {{ section.settings.text_color }}; opacity: 0.8; line-height: 1.4; min-width: 0; word-wrap: break-word; overflow-wrap: break-word; }
-  #sl-rr-section-{{ section.id }} .sl-rr-view-icon { position: absolute; bottom: 10px; right: 12px; color: {{ section.settings.text_color }}; opacity: 0.6; line-height: 0; display: flex; align-items: center; justify-content: center; }
-  #sl-rr-section-{{ section.id }} .sl-rr-root.sl-rr-rtl .sl-rr-view-icon { right: auto; left: 12px; }
-  #sl-rr-section-{{ section.id }} .swiper-button-prev, #sl-rr-section-{{ section.id }} .swiper-button-next,
-  #sl-rr-section-{{ section.id }} .swiper-button-prev::after, #sl-rr-section-{{ section.id }} .swiper-button-next::after { color: {{ section.settings.arrow_color }} !important; }
-  #sl-rr-section-{{ section.id }} .swiper-pagination { display: none !important; }
-
-  #sl-rr-popup-{{ section.id }}.sl-rr-popup { position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
-  #sl-rr-popup-{{ section.id }}.sl-rr-popup[hidden] { display: none !important; }
-  #sl-rr-popup-{{ section.id }} .sl-rr-popup-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.4); }
-  #sl-rr-popup-{{ section.id }} .sl-rr-popup-content { position: relative; background: #fff; border-radius: 16px; max-width: 440px; width: 100%; max-height: 90vh; overflow: auto; padding: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
-  #sl-rr-popup-{{ section.id }} .sl-rr-popup-close { position: absolute; top: 12px; right: 12px; background: none; border: none; font-size: 24px; line-height: 1; cursor: pointer; color: #333; padding: 4px; }
-  #sl-rr-popup-{{ section.id }} .sl-rr-popup-title { margin: 0 0 12px 0; font-size: 18px; font-weight: 600; color: #111; }
-  #sl-rr-popup-{{ section.id }} .sl-rr-popup-image-wrap { margin-bottom: 12px; }
-  #sl-rr-popup-{{ section.id }} .sl-rr-popup-image-wrap img { width: 100%; height: auto; border-radius: 8px; }
-  #sl-rr-popup-{{ section.id }} .sl-rr-popup-body { font-size: 14px; line-height: 1.6; color: #333; }
+  #sl-rr-section-{{ rr_id }} .accordion__toggle { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+  #sl-rr-section-{{ rr_id }} .accordion .icon { transition: transform 0.2s; }
+  #sl-rr-section-{{ rr_id }} .accordion[open] .icon { transform: rotate(180deg); }
+  #sl-rr-section-{{ rr_id }} .how-it-affects-container { border-radius: 16px; border: 0.5px solid #EBEBEB; background: #FFF; box-shadow: 0 4px 4px -1px rgba(0, 0, 0, 0.02); padding: 20px; }
+  #sl-rr-section-{{ rr_id }} .how-it-affects-container .flex { display: flex; align-items: center; gap: 5px; margin-block-start: 0; padding-top: 4px; }
+  #sl-rr-section-{{ rr_id }} .how-it-affects-container p.title { color: #272E0F; font-size: 14px; font-style: normal; font-weight: 600; line-height: 140%; letter-spacing: 0.16px; margin: 0 0 10px 0; }
+  #sl-rr-section-{{ rr_id }} .affect-image { position: relative; cursor: pointer; }
+  #sl-rr-section-{{ rr_id }} .how-it-affects-container p.bubles { margin-block-start: 10px; margin: 10px 0 0 0; }
+  #sl-rr-section-{{ rr_id }} .how-it-affects-container p.bubles span { border-radius: 28px; background: #F4F0E9; display: inline-flex; padding: 2px 4px; align-items: center; gap: 4px; width: max-content; margin-right: 6px; margin-bottom: 4px; color: #878787; font-size: 13px; font-weight: 400; line-height: normal; letter-spacing: 0.13px; }
+  #sl-rr-section-{{ rr_id }} .how-it-affects-container .how-it-affects-box { display: grid; gap: 16px; }
+  #sl-rr-section-{{ rr_id }} .how-it-affects-container .how-it-affects-box svg { display: inline; vertical-align: middle; }
+  #sl-rr-section-{{ rr_id }} .how-it-affects-container .how-it-affect-text-box .description { color: #272E0F; font-size: 14px; font-weight: 400; line-height: 150%; letter-spacing: 0.28px; margin-block-start: 10px; margin: 10px 0 0 0; }
+  #sl-rr-section-{{ rr_id }} .how-it-affect-text-box { margin-block-start: 0 !important; }
+  #sl-rr-section-{{ rr_id }} .how-it-affects-container video { border-radius: 13px; display: block; }
+  #sl-rr-section-{{ rr_id }} .how-it-affects-container .sl-rr-poster { border-radius: 13px; }
+  #sl-rr-section-{{ rr_id }} .accordion__content { margin-top: 12px; }
+  #sl-rr-section-{{ rr_id }} .accordion__content.prose :first-child { margin-block-start: 0 !important; }
+  #sl-rr-section-{{ rr_id }} .accordion__content.prose :last-child { margin-block-end: 0 !important; }
 </style>
 
 <script>
 (function() {
-  var sectionId = '{{ section.id }}';
-  var root = document.getElementById('sl-rr-section-' + sectionId);
+  var root = document.getElementById('sl-rr-section-{{ rr_id }}');
   if (!root) return;
-  var SWIPER_CSS = 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css';
-  var SWIPER_JS = 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js';
-
-  function loadSwiper(cb) {
-    if (typeof Swiper !== 'undefined') { cb(); return; }
-    var link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = SWIPER_CSS;
-    document.head.appendChild(link);
-    var s = document.createElement('script');
-    s.src = SWIPER_JS;
-    s.onload = cb;
-    document.head.appendChild(s);
-  }
-
-  function run() {
-    var r = document.getElementById('sl-rr-section-' + sectionId);
-    if (!r) return;
-    var swiperEl = r.querySelector('.sl-rr-swiper');
-    var cards = r.querySelectorAll('.sl-rr-card');
-    if (!swiperEl || cards.length === 0) return;
-
-    var popup = document.getElementById('sl-rr-popup-' + sectionId);
-    var popupTitle = popup ? popup.querySelector('.sl-rr-popup-title') : null;
-    var popupBody = popup ? popup.querySelector('.sl-rr-popup-body') : null;
-    var popupImageWrap = popup ? popup.querySelector('.sl-rr-popup-image-wrap') : null;
-
-    function openPopup(card) {
-      var title = card.getAttribute('data-title');
-      var desc = card.getAttribute('data-description');
-      var img = card.getAttribute('data-image');
-      if (!popup) return;
-      if (popupTitle) popupTitle.textContent = title || '';
-      if (popupBody) popupBody.innerHTML = desc ? desc.replace(/\n/g, '<br>') : '';
-      if (popupImageWrap) {
-        popupImageWrap.innerHTML = img ? '<img src="' + img + '" alt="">' : '';
-      }
-      popup.removeAttribute('hidden');
-      document.body.style.overflow = 'hidden';
-    }
-
-    function closePopup() {
-      if (popup) {
-        popup.setAttribute('hidden', '');
-        document.body.style.overflow = '';
-      }
-    }
-
-    loadSwiper(function() {
-      if (swiperEl.swiper) return;
-      new Swiper(swiperEl, {
-        effect: 'cards',
-        grabCursor: true,
-        cardsEffect: {
-          perSlideOffset: 16,
-          perSlideRotate: 4,
-          slideShadows: true,
-          rotate: true,
-          shadowOffset: 12,
-          shadowScale: 0.94
-        },
-        navigation: {
-          nextEl: r.querySelector('.swiper-button-next'),
-          prevEl: r.querySelector('.swiper-button-prev')
-        },
-        slidesPerView: 1,
-        spaceBetween: 0,
-        loop: false
+  root.querySelectorAll('[data-sl-rr-video-trigger]').forEach(function(trigger) {
+    var video = trigger.querySelector('[data-sl-rr-video]');
+    if (video) {
+      trigger.addEventListener('click', function() {
+        video.classList.toggle('active');
+        if (video.classList.contains('active')) {
+          video.play && video.play();
+        } else {
+          video.pause && video.pause();
+        }
       });
-
-      cards.forEach(function(card) {
-        card.addEventListener('click', function() {
-          var desc = card.getAttribute('data-description');
-          if (desc && desc.length > 0) openPopup(card);
-        });
-      });
-
-      if (popup) {
-        var backdrop = popup.querySelector('.sl-rr-popup-backdrop');
-        var closeBtn = popup.querySelector('.sl-rr-popup-close');
-        if (backdrop) backdrop.addEventListener('click', closePopup);
-        if (closeBtn) closeBtn.addEventListener('click', closePopup);
-      }
-    });
-
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape') closePopup();
-    });
-  }
-
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
-  else run();
+    }
+  });
 })();
 </script>
 {% endunless %}
@@ -221,127 +155,70 @@
   "class": "sl-real-results-section",
   "settings": [
     {
-      "type": "header",
-      "content": "Heading"
-    },
-    {
       "type": "text",
-      "id": "section_heading",
-      "label": "Section heading",
-      "default": ""
-    },
-    {
-      "type": "select",
-      "id": "heading_alignment",
-      "label": "Heading alignment",
-      "options": [
-        { "value": "left", "label": "Left" },
-        { "value": "center", "label": "Center" },
-        { "value": "right", "label": "Right" }
-      ],
-      "default": "left"
-    },
-    {
-      "type": "range",
-      "id": "heading_size",
-      "label": "Heading size",
-      "min": 16,
-      "max": 36,
-      "step": 2,
-      "default": 24,
-      "unit": "px"
-    },
-    {
-      "type": "color",
-      "id": "heading_color",
-      "label": "Heading color",
-      "default": "#000000"
-    },
-    {
-      "type": "header",
-      "content": "Cards"
-    },
-    {
-      "type": "color",
-      "id": "card_bg",
-      "label": "Card background",
-      "default": "#ffffff"
-    },
-    {
-      "type": "color",
-      "id": "card_border",
-      "label": "Card border color",
-      "default": "#eeeeee"
-    },
-    {
-      "type": "color",
-      "id": "text_color",
-      "label": "Text color",
-      "default": "#272E0F"
-    },
-    {
-      "type": "color",
-      "id": "icon_color",
-      "label": "Icon color",
-      "default": "#7D8F3E"
-    },
-    {
-      "type": "color",
-      "id": "arrow_color",
-      "label": "Arrow color",
-      "default": "#000000"
-    },
-    {
-      "type": "header",
-      "content": "Section"
-    },
-    {
-      "type": "color",
-      "id": "background_color",
-      "label": "Background color",
-      "default": "#ffffff"
-    },
-    {
-      "type": "range",
-      "id": "padding_top",
-      "label": "Padding top",
-      "min": 0,
-      "max": 100,
-      "step": 4,
-      "default": 24,
-      "unit": "px"
-    },
-    {
-      "type": "range",
-      "id": "padding_bottom",
-      "label": "Padding bottom",
-      "min": 0,
-      "max": 100,
-      "step": 4,
-      "default": 24,
-      "unit": "px"
+      "id": "accordion_heading",
+      "label": "Accordion heading",
+      "default": "RESULTS YOU'LL SEE"
     },
     {
       "type": "checkbox",
-      "id": "full_width",
-      "label": "Full width",
-      "default": false
-    },
+      "id": "accordion_open",
+      "label": "Open by default",
+      "default": true
+    }
+  ],
+  "blocks": [
     {
-      "type": "range",
-      "id": "content_width",
-      "label": "Content width",
-      "min": 400,
-      "max": 1600,
-      "step": 20,
-      "default": 1200,
-      "unit": "px"
+      "type": "result_box",
+      "name": "Result box",
+      "settings": [
+        {
+          "type": "url",
+          "id": "video_url",
+          "label": "Video URL"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image (if no video)",
+          "info": "Shown when Video URL is blank"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Instant glow, silky-soft skin"
+        },
+        {
+          "type": "textarea",
+          "id": "bubbles",
+          "label": "Bubbles (one per line)",
+          "default": "Pearly Shimmer\nFast-Absorbing\nNon-Greasy Feel",
+          "info": "One bubble tag per line"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Description",
+          "default": "Designed to hydrate and leave a subtle, sun-kissed sheen that melts into skin."
+        }
+      ]
     }
   ],
   "presets": [
     {
       "name": "SL - Real Results",
-      "category": "Content"
+      "category": "Content",
+      "blocks": [
+        {
+          "type": "result_box",
+          "settings": {
+            "title": "Instant glow, silky-soft skin",
+            "bubbles": "Pearly Shimmer\nFast-Absorbing\nNon-Greasy Feel",
+            "description": "Designed to hydrate and leave a subtle, sun-kissed sheen that melts into skin."
+          }
+        }
+      ]
     }
   ],
   "templates": ["product"]

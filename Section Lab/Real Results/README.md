@@ -1,34 +1,70 @@
-# SL - Real Results
+# SL - Real Results (Results you'll see)
 
-Product highlights as a **card stack** (Swiper cards effect). Data comes from a product metafield. Each card shows an icon + title; cards with a description open a modal on click.
+**Accordion** section with heading “RESULTS YOU'LL SEE” and one or more **“how it affects”** boxes. Each box has: video (or image), title, bubble tags (with checkmark), and description. Clicking the video area toggles play/pause.
 
 **Category:** Content  
-**Metafield:** `custom.real_results_highlights` (list of Product Highlight metaobjects)
+**Templates:** Product
 
 ---
 
 ## Features
 
-- **Swiper cards effect** — stacked cards, swipe/arrows to navigate
-- **Per-product highlights** via metafield
-- **Icon + title** per card (optional description and image in modal)
-- **Modal** for highlights that have a description
-- **RTL** support (Arabic, Hebrew, Farsi)
-- Modern, minimal styling
+- **Accordion** — Collapsible “RESULTS YOU'LL SEE” (or custom heading) with arrow icon.
+- **Result boxes** — Each block = one box: video URL or image, title, bubbles (one per line), description.
+- **Bubbles** — Pill-style tags with green checkmark SVG (e.g. “Pearly Shimmer”, “Fast-Absorbing”).
+- **Video** — Optional autoplay muted loop; click area toggles play/pause.
+- **Styling** — Matches the provided design (border, radius, Montserrat-style typography, #F4F0E9 pills).
 
 ---
 
 ## Setup
 
+### Option A — Section (recommended, block-based)
+
+1. Copy `sections/sl-real-results.liquid` into your theme **sections** folder.
+2. **Online Store** → **Themes** → **Customize** → Product template.
+3. **Add section** → **SL - Real Results**.
+4. **Section settings:**
+   - **Accordion heading** — e.g. “RESULTS YOU'LL SEE” (default).
+   - **Open by default** — Accordion expanded on load.
+5. **Add blocks** — Click “Add block” → **Result box**. For each block set:
+   - **Video URL** — Link to MP4 (e.g. from Files or CDN). Optional.
+   - **Image** — Shown when Video URL is blank.
+   - **Title** — e.g. “Instant glow, silky-soft skin”.
+   - **Bubbles** — One tag per line, e.g.:
+     ```
+     Pearly Shimmer
+     Fast-Absorbing
+     Non-Greasy Feel
+     ```
+   - **Description** — Body text under the bubbles.
+6. Add more **Result box** blocks if you want multiple boxes in one accordion.
+7. Save.
+
+### Option B — Snippet (product metafield, one box)
+
+Uses the **first** entry from the product metafield `custom.real_results_highlights` (Product Highlight metaobject). Good when content is per product.
+
+1. Copy `snippets/sl-real-results.liquid` into your theme **snippets** folder.
+2. Create the **Product Highlight** metaobject and product metafield (see below).
+3. In the product template, add a **Custom Liquid** block and paste:
+   ```liquid
+   {% render 'sl-real-results', product: product, block_id: block.id %}
+   ```
+4. Optional: override accordion heading or open state:
+   ```liquid
+   {% render 'sl-real-results', product: product, block_id: block.id, accordion_heading: "RESULTS YOU'LL SEE", accordion_open: true %}
+   ```
+
+---
+
+## Metafield setup (for Option B / snippet)
+
 ### Step 1 — Product Highlight metaobject
 
 1. **Settings** → **Custom data** → **Metaobjects** → **Add definition**
 2. **Name:** `Product Highlight`
-3. Add fields:
-   - **Title** (Single line text) — required
-   - **Description** (Multi-line text) — optional; if set, clicking the card opens a modal
-   - **Icon** (File — Image) — optional; small image (e.g. 24×24). If blank, a default star icon is used
-   - **Image** (File — Image) — optional; shown in the modal
+3. Add fields: **Title** (single line), **Description** (multi-line), **Image** (file), **Video** (file or URL if your theme supports it)
 4. Save
 
 ### Step 2 — Product metafield
@@ -37,30 +73,16 @@ Product highlights as a **card stack** (Swiper cards effect). Data comes from a 
 2. **Name:** `Real results highlights`
 3. **Namespace and key:** `custom.real_results_highlights`
 4. **Type:** List of metaobject references → **Product Highlight**
-5. **Storefront access:** enabled
+5. **Storefront access:** enabled  
 6. Save
 
-### Step 3 — Assign highlights to products
+### Step 3 — Assign to products
 
-1. **Products** → open a product
-2. **Metafields** → **Real results highlights**
-3. Add Product Highlight entries (create metaobjects with title, optional description, icon, image)
-4. Save
-
-### Step 4 — Add to product template
-
-**Option A — Section**
-
-1. **Online Store** → **Themes** → **Customize**
-2. Product page → Add section **SL - Real Results**
-3. Configure heading, colors, padding
-4. Save
-
-**Option B — Snippet** (Custom Liquid block)
-
-1. Add **Custom Liquid** block in product info
-2. Paste: `{% render 'sl-real-results', product: product, block_id: block.id %}`
+1. **Products** → open a product → **Metafields** → **Real results highlights**
+2. Add at least one Product Highlight entry (title, description, image/video)
 3. Save
+
+The snippet uses the **first** entry only for the single “how it affects” box.
 
 ---
 
@@ -69,9 +91,9 @@ Product highlights as a **card stack** (Swiper cards effect). Data comes from a 
 ```
 Section Lab/Real Results/
 ├── sections/
-│   └── sl-real-results.liquid
+│   └── sl-real-results.liquid   ← Section (accordion + Result box blocks)
 ├── snippets/
-│   └── sl-real-results.liquid
+│   └── sl-real-results.liquid   ← Snippet (one box from metafield)
 ├── locales/
 │   ├── en.default.json
 │   └── ar.json
@@ -82,21 +104,14 @@ Section Lab/Real Results/
 
 ## Localization
 
-Translation keys (add to theme root `locales/en.default.json` and `locales/ar.json` if not using the Section Lab locale files):
-
-- `sections.sl_real_results.heading` — section heading (e.g. "Real Results")
-- `sections.sl_real_results.no_highlights` — message when no highlights (design mode)
-- `sections.sl_real_results.close` — modal close button label
+- `sections.sl_real_results.no_highlights` — Message in theme editor when the section has no blocks and no metafield data.
+- Accordion heading is set in section settings (or snippet parameter), not via locale.
 
 ---
 
-## Metaobject field names
+## Design notes
 
-The section expects the Product Highlight metaobject to have:
-
-- **title** (or **headline**) — single line
-- **description** — multi-line (optional)
-- **icon** — image file (optional)
-- **image** — image file for modal (optional)
-
-If your metaobject uses different keys, adjust the Liquid in the section/snippet (e.g. `entry.headline` is used as fallback for `entry.title`).
+- Accordion uses `<details>` / `<summary>`; arrow rotates when open.
+- Container: `.how-it-affects-container` (border, radius, padding, shadow).
+- Bubbles: `.bubles span` — pill background `#F4F0E9`, checkmark stroke `#7D8F3E`.
+- Video: click on `.affect-image` toggles `.active` on the video and play/pause.
