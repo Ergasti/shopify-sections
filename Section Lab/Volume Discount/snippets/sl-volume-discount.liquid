@@ -33,7 +33,7 @@
 <div id="sl-vd-block-{{ block_id }}" class="sl-vd-block-root{% if is_rtl %} sl-vd-rtl{% endif %}"{% if is_rtl %} dir="rtl"{% endif %}>
   <details class="accordion group" open>
     <summary>
-      <span class="accordion__toggle h6">
+      <span class="accordion__toggle">
         <span>{{ vd_heading }}</span>
         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8" fill="none" class="icon icon-wd-arrow" aria-hidden="true">
           <path d="M11 1L6 7L1 1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -69,7 +69,7 @@
               {% assign per_item_cents = display_cents | divided_by: qty %}
 
               <div class="swiper-slide">
-                <div class="sl-vd-card{% if forloop.first %} sl-vd-card--selected{% endif %}">
+                <div class="sl-vd-card">
                   <div class="sl-vd-card__figure">
                     {% if otype == 'free_items' and oval > 0 %}
                       <div class="sl-vd-dual-wrap">
@@ -137,14 +137,17 @@
 </div>
 
 <style>
-  #sl-vd-block-{{ block_id }}.sl-vd-block-root { width: 100%; margin: 16px 0; --sl-vd-card-bg: #fff; --sl-vd-card-border: #e5e5e5; --sl-vd-card-radius: 12px; --sl-vd-slide-width: 220px; }
-  #sl-vd-block-{{ block_id }} details summary { list-style: none; }
+  #sl-vd-block-{{ block_id }}.sl-vd-block-root { width: 100%; margin: 16px 0; border: none; --sl-vd-card-bg: #fff; --sl-vd-card-border: #e5e5e5; --sl-vd-card-radius: 12px; --sl-vd-slide-width: 220px; }
+  #sl-vd-block-{{ block_id }} details.accordion { border: none; margin: 0; padding: 0; }
+  #sl-vd-block-{{ block_id }} details summary { list-style: none; margin: 0; padding: 0; border: none; border-top: none; }
   #sl-vd-block-{{ block_id }} details summary::-webkit-details-marker { display: none; }
-  #sl-vd-block-{{ block_id }} .accordion__toggle { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 18px; font-weight: 400; }
+  #sl-vd-block-{{ block_id }} details summary::before,
+  #sl-vd-block-{{ block_id }} details summary::after { display: none !important; }
+  #sl-vd-block-{{ block_id }} .accordion__toggle { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 18px; font-weight: 400; margin: 0; padding: 0; }
   #sl-vd-block-{{ block_id }} .accordion .icon { transition: transform 0.2s; }
   #sl-vd-block-{{ block_id }} .accordion[open] .icon { transform: rotate(180deg); }
-  #sl-vd-block-{{ block_id }} .accordion__content { margin-top: 12px; }
-  #sl-vd-block-{{ block_id }} .sl-vd-inner { padding: 0; }
+  #sl-vd-block-{{ block_id }} .accordion__content { margin-top: 8px; padding: 0; }
+  #sl-vd-block-{{ block_id }} .sl-vd-inner { padding: 0; margin: 0; }
   #sl-vd-block-{{ block_id }} .sl-vd-swiper { overflow: hidden; position: relative; }
   #sl-vd-block-{{ block_id }} .swiper-wrapper { display: flex; gap: 5px; }
   #sl-vd-block-{{ block_id }} .swiper-slide { flex-shrink: 0; width: var(--sl-vd-slide-width) !important; height: auto; }
@@ -153,7 +156,6 @@
     background: var(--sl-vd-card-bg); box-shadow: 0 1px 3px rgba(0,0,0,0.06);
     display: flex; flex-direction: column; gap: 2px; height: 100%; box-sizing: border-box;
   }
-  #sl-vd-block-{{ block_id }} .sl-vd-card--selected { border: 2px solid #E91E63; }
   #sl-vd-block-{{ block_id }} .sl-vd-card__figure {
     position: relative; overflow: hidden; border-radius: calc(var(--sl-vd-card-radius) - 2px);
   }
@@ -172,7 +174,7 @@
   }
   #sl-vd-block-{{ block_id }}.sl-vd-rtl .sl-vd-off-badge { right: auto; left: 3px; }
   #sl-vd-block-{{ block_id }} .sl-vd-card__info {
-    display: flex; flex-direction: column; gap: 1px; flex: 1; min-height: 0; padding: 0 8px 8px;
+    display: flex; flex-direction: column; gap: 2px; flex: 1; min-height: 0; padding: 6px 8px 8px;
   }
   #sl-vd-block-{{ block_id }} .sl-vd-card__title {
     font-size: 14px; font-weight: 500; line-height: 1.3; margin: 0;
