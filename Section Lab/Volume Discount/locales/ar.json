@@ -1,0 +1,17 @@
+{
+  "sections": {
+    "sl_volume_discount": {
+      "heading": "اشتري أكثر ووفر أكثر",
+      "free": "مجاناً",
+      "per_item": "({{ price }} للقطعة)",
+      "buy_x_get_y_free": "اشتري {{ x }} واحصل على {{ y }} مجاناً",
+      "buy_x_get_y_percent": "اشتري {{ x }} واحصل على خصم {{ percent }}%",
+      "base_offer": "1 بالسعر العادي",
+      "offer_details": "تفاصيل العرض",
+      "get_x_off": "احصل على {{ x }} بخصم {{ percent }}%",
+      "off_badge": "-{{ percent }}%",
+      "buy_label": "اشتري {{ x }}",
+      "no_offers": "لا توجد عروض كمية لهذا المنتج."
+    }
+  }
+}

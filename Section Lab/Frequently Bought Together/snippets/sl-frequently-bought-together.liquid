@@ -35,8 +35,13 @@
     --sl-fbt-card-radius: 12px;
     --sl-fbt-slide-width: 220px;
   }
-  #sl-fbt-block-{{ block_id }} .sl-fbt-inner { padding: 24px 0; }
-  #sl-fbt-block-{{ block_id }} .sl-fbt-heading { font-size: 24px; margin: 0 0 16px 0; }
+  #sl-fbt-block-{{ block_id }} details summary { list-style: none; }
+  #sl-fbt-block-{{ block_id }} details summary::-webkit-details-marker { display: none; }
+  #sl-fbt-block-{{ block_id }} .accordion__toggle { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 18px; font-weight: 400; }
+  #sl-fbt-block-{{ block_id }} .accordion .icon { transition: transform 0.2s; }
+  #sl-fbt-block-{{ block_id }} .accordion[open] .icon { transform: rotate(180deg); }
+  #sl-fbt-block-{{ block_id }} .accordion__content { margin-top: 12px; }
+  #sl-fbt-block-{{ block_id }} .sl-fbt-inner { padding: 0; }
   #sl-fbt-block-{{ block_id }} .sl-fbt-swiper { overflow: hidden; position: relative; }
   #sl-fbt-block-{{ block_id }} .swiper-wrapper { display: flex; gap: 5px; }
   #sl-fbt-block-{{ block_id }} .swiper-slide {
@@ -375,15 +380,17 @@
     }).then(function(products) {
       if (!ph) return;
       if (!products || products.length === 0) { ph.style.display = 'none'; return; }
-      var html = '<div class="sl-fbt-inner">' +
-        '<h2 class="sl-fbt-heading">' + i18n.heading + '</h2>' +
+      var svgArrow = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8" fill="none" class="icon icon-wd-arrow" aria-hidden="true"><path d="M11 1L6 7L1 1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      var html = '<details class="accordion group" open>' +
+        '<summary><span class="accordion__toggle h6"><span>' + i18n.heading + '</span>' + svgArrow + '</span></summary>' +
+        '<div class="accordion__content"><div class="sl-fbt-inner">' +
         '<div class="sl-fbt-swiper swiper"><div class="swiper-wrapper">';
       for (var i = 0; i < products.length; i++) {
         html += buildCard(products[i], i, rootPath);
       }
       html += '</div>' +
         '<div class="swiper-button-prev"></div><div class="swiper-button-next"></div>' +
-        '</div></div>';
+        '</div></div></div></details>';
       root.innerHTML = html;
       setupAjaxAddToCart(root);
       loadSwiper(function() { initSwiper(root); });

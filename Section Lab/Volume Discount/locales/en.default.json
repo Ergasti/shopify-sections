@@ -1,0 +1,17 @@
+{
+  "sections": {
+    "sl_volume_discount": {
+      "heading": "Purchase More & Save",
+      "free": "FREE",
+      "per_item": "({{ price }} per item)",
+      "buy_x_get_y_free": "Buy {{ x }} Get {{ y }} Free",
+      "buy_x_get_y_percent": "Buy {{ x }} Get {{ percent }}% off",
+      "base_offer": "1 at regular price",
+      "offer_details": "Offer details",
+      "get_x_off": "Get {{ x }} off {{ percent }}%",
+      "off_badge": "-{{ percent }}%",
+      "buy_label": "Buy {{ x }}",
+      "no_offers": "No volume offers configured for this product."
+    }
+  }
+}
