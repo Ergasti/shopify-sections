@@ -41,10 +41,14 @@
 {% else %}
 <div id="sl-htu-section-{{ section.id }}" class="sl-htu-section-root sl-htu-layout-{{ layout }}" style="width: 100%; background: {{ section.settings.background_color }}; padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;">
   <div class="sl-htu-section-inner" style="{% unless section.settings.full_width %}max-width: {{ section.settings.content_width }}px; margin-left: auto; margin-right: auto;{% endunless %} padding-left: {{ section.settings.padding_inline | default: 16 }}px; padding-right: {{ section.settings.padding_inline | default: 16 }}px;">
-    {% if section_heading_text != blank %}
-      <h2 class="sl-htu-section-heading" style="text-align: {{ section.settings.heading_alignment }}; font-size: {{ section.settings.heading_size }}px; color: {{ section.settings.heading_color }}; margin: 0 0 24px 0;"{% if is_ar %} dir="rtl"{% endif %}>{{ section_heading_text }}</h2>
-    {% endif %}
-
+    <details class="accordion group" open>
+      <summary style="text-align: {{ section.settings.heading_alignment }};"{% if is_ar %} dir="rtl"{% endif %}>
+        <span class="accordion__toggle" style="color: {{ section.settings.heading_color }}; font-size: {% if section.settings.heading_size == 'small' %}20px{% elsif section.settings.heading_size == 'medium' %}24px{% else %}32px{% endif %}; margin-bottom: {{ section.settings.heading_spacing }}px;">
+          {% if section_heading_text != blank %}{{ section_heading_text }}{% else %}How to use{% endif %}
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8" fill="none" class="icon icon-wd-arrow" aria-hidden="true"><path d="M11 1L6 7L1 1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+      </summary>
+      <div class="accordion__content">
     <div class="sl-htu-container sl-htu-container--{{ layout }}"{% if is_ar %} dir="rtl"{% endif %}>
       {% if use_metaobject %}
         {% for entry in steps_meta %}
@@ -60,8 +64,14 @@
           {% if step_title_text == blank %}
             {% capture step_title_text %}Step {{ step_num }}{% endcapture %}
           {% endif %}
+          {% assign step_icon = entry.step_icon.value | default: entry.step_icon %}
           <div class="sl-htu-step" data-step="{{ step_num }}">
             <div class="sl-htu-step-title-container">
+              {% if step_icon != blank %}
+                <span class="sl-htu-step-icon-wrap">
+                  <img class="sl-htu-step-icon" src="{{ step_icon | image_url: width: 96 }}" alt="" width="48" height="48" loading="lazy">
+                </span>
+              {% endif %}
               <span class="sl-htu-step-no">{{ step_num }}</span>
               <span class="sl-htu-step-title">{{ step_title_text }}</span>
             </div>
@@ -93,8 +103,14 @@
             {% if step_title_text == blank %}
               {% capture step_title_text %}Step {{ step_num }}{% endcapture %}
             {% endif %}
+            {% assign step_icon = block.settings.step_icon %}
             <div class="sl-htu-step" data-step="{{ step_num }}" {{ block.shopify_attributes }}>
               <div class="sl-htu-step-title-container">
+                {% if step_icon != blank %}
+                  <span class="sl-htu-step-icon-wrap">
+                    <img class="sl-htu-step-icon" src="{{ step_icon | image_url: width: 96 }}" alt="" width="48" height="48" loading="lazy">
+                  </span>
+                {% endif %}
                 <span class="sl-htu-step-no">{{ step_num }}</span>
                 <span class="sl-htu-step-title">{{ step_title_text }}</span>
               </div>
@@ -114,10 +130,23 @@
         {% endfor %}
       {% endif %}
     </div>
+      </div>
+  </details>
   </div>
 </div>
 
 <style>
+  #sl-htu-section-{{ section.id }} details.accordion { border: none; margin: 0; padding: 0; }
+  #sl-htu-section-{{ section.id }} details summary { list-style: none; margin: 0; padding: 0; border: none; }
+  #sl-htu-section-{{ section.id }} details summary::-webkit-details-marker { display: none; }
+  #sl-htu-section-{{ section.id }} details summary::before,
+  #sl-htu-section-{{ section.id }} details summary::after { display: none !important; }
+  #sl-htu-section-{{ section.id }} .accordion__toggle {
+    display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 400; margin: 0; padding: 0;
+  }
+  #sl-htu-section-{{ section.id }} .accordion .icon { transition: transform 0.2s; }
+  #sl-htu-section-{{ section.id }} .accordion[open] .icon { transform: rotate(180deg); }
+  #sl-htu-section-{{ section.id }} .accordion__content { margin-top: 8px; padding: 0; }
   #sl-htu-section-{{ section.id }}.sl-htu-section-root {
     --sl-htu-bg: {{ section.settings.step_bg_color | default: '#EEEFE8' }};
     --sl-htu-text: {{ section.settings.step_text_color | default: '#272E0F' }};
@@ -174,6 +203,17 @@
     display: flex;
     align-items: center;
   }
+  #sl-htu-section-{{ section.id }} .sl-htu-step-icon-wrap {
+    flex-shrink: 0;
+    margin-inline-end: 10px;
+  }
+  #sl-htu-section-{{ section.id }} .sl-htu-step-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+  }
   #sl-htu-section-{{ section.id }} .sl-htu-step-no {
     display: flex; width: 32px; height: 32px; justify-content: center; align-items: center; flex-shrink: 0;
     border-radius: var(--sl-htu-radius); background: var(--sl-htu-bg); color: var(--sl-htu-text);
@@ -181,11 +221,11 @@
   }
   #sl-htu-section-{{ section.id }} .sl-htu-step-title {
     color: var(--sl-htu-text); font-size: 16px; font-weight: 700; line-height: 1.2;
-    letter-spacing: 0.01em; text-transform: uppercase; padding-left: 12px;
+    letter-spacing: 0.01em; text-transform: uppercase; padding-inline-start: 12px;
   }
   #sl-htu-section-{{ section.id }} .sl-htu-step-product-container {
     display: grid; align-items: center; grid-template-columns: auto 1fr; gap: 8px;
-    padding: 10px 20px 10px 10px; border-radius: 40px; max-width: fit-content; margin-top: 8px;
+    padding-block: 10px; padding-inline: 10px 20px; border-radius: 40px; max-width: fit-content; margin-top: 8px;
     background: var(--sl-htu-bg); text-decoration: none; color: inherit; cursor: pointer; transition: opacity 0.2s;
   }
   #sl-htu-section-{{ section.id }} .sl-htu-step-product-container:hover { opacity: 0.85; }
@@ -265,20 +305,31 @@
       "default": "left"
     },
     {
-      "type": "range",
+      "type": "select",
       "id": "heading_size",
       "label": "Heading size",
-      "min": 16,
-      "max": 36,
-      "step": 2,
-      "default": 24,
-      "unit": "px"
+      "options": [
+        { "value": "small", "label": "Small" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "large", "label": "Large" }
+      ],
+      "default": "medium"
     },
     {
       "type": "color",
       "id": "heading_color",
       "label": "Heading color",
-      "default": "#272E0F"
+      "default": "#1c1c1c"
+    },
+    {
+      "type": "range",
+      "id": "heading_spacing",
+      "label": "Heading bottom spacing",
+      "min": 0,
+      "max": 48,
+      "step": 4,
+      "default": 24,
+      "unit": "px"
     },
     {
       "type": "header",
@@ -390,6 +441,12 @@
       "type": "step",
       "name": "Step",
       "settings": [
+        {
+          "type": "image_picker",
+          "id": "step_icon",
+          "label": "Step icon (optional)",
+          "info": "Small image or icon shown next to the step number."
+        },
         {
           "type": "product",
           "id": "product",

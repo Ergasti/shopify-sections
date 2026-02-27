@@ -3,7 +3,7 @@
   Use in product info via Custom Liquid block.
   Usage: {% render 'sl-how-to-use', product: product, block_id: block.id %}
   Requires product.metafields.custom.how_to_use_steps (list of How to use step metaobjects).
-  Metaobject fields: product; step_title_en, step_title_ar; description_en, description_ar.
+  Metaobject fields: product; step_icon (optional image); step_title_en, step_title_ar; description_en, description_ar.
   See README.md for metaobject and metafield setup.
 {% endcomment %}
 
@@ -28,7 +28,16 @@
 {% endif %}
 
 {% if has_steps %}
-<div id="sl-htu-block-{{ block_id }}" class="sl-htu-block-root sl-htu-container"{% if is_ar %} dir="rtl"{% endif %}>
+<div id="sl-htu-block-{{ block_id }}" class="sl-htu-block-root"{% if is_ar %} dir="rtl"{% endif %}>
+  <details class="accordion group" open>
+    <summary>
+      <span class="accordion__toggle">
+        <span>How to use it the right way</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8" fill="none" class="icon icon-wd-arrow" aria-hidden="true"><path d="M11 1L6 7L1 1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+    </summary>
+    <div class="accordion__content">
+  <div class="sl-htu-container"{% if is_ar %} dir="rtl"{% endif %}>
   {% for entry in steps %}
     {% assign step_product = entry.product.value | default: entry.product %}
     {% assign step_num = forloop.index %}
@@ -42,9 +51,15 @@
     {% if step_title_text == blank %}
       {% capture step_title_text %}Step {{ step_num }}{% endcapture %}
     {% endif %}
+    {% assign step_icon = entry.step_icon.value | default: entry.step_icon %}
 
     <div class="sl-htu-step" data-step="{{ step_num }}">
       <div class="sl-htu-step-title-container">
+        {% if step_icon != blank %}
+          <span class="sl-htu-step-icon-wrap">
+            <img class="sl-htu-step-icon" src="{{ step_icon | image_url: width: 96 }}" alt="" width="48" height="48" loading="lazy">
+          </span>
+        {% endif %}
         <span class="sl-htu-step-no">{{ step_num }}</span>
         <span class="sl-htu-step-title">{{ step_title_text }}</span>
       </div>
@@ -66,9 +81,23 @@
       {% endif %}
     </div>
   {% endfor %}
+  </div>
+    </div>
+  </details>
 </div>
 
 <style>
+  #sl-htu-block-{{ block_id }} details.accordion { border: none; margin: 0; padding: 0; }
+  #sl-htu-block-{{ block_id }} details summary { list-style: none; margin: 0; padding: 0; border: none; }
+  #sl-htu-block-{{ block_id }} details summary::-webkit-details-marker { display: none; }
+  #sl-htu-block-{{ block_id }} details summary::before,
+  #sl-htu-block-{{ block_id }} details summary::after { display: none !important; }
+  #sl-htu-block-{{ block_id }} .accordion__toggle {
+    display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 18px; font-weight: 400; margin: 0; padding: 0; color: #1c1c1c;
+  }
+  #sl-htu-block-{{ block_id }} .accordion .icon { transition: transform 0.2s; }
+  #sl-htu-block-{{ block_id }} .accordion[open] .icon { transform: rotate(180deg); }
+  #sl-htu-block-{{ block_id }} .accordion__content { margin-top: 8px; padding: 0; }
   #sl-htu-block-{{ block_id }}.sl-htu-block-root {
     --sl-htu-bg: #EEEFE8;
     --sl-htu-text: #272E0F;
@@ -89,6 +118,17 @@
     align-items: center;
     margin-top: var(--sl-htu-step-gap);
     margin-block-start: var(--sl-htu-step-gap) !important;
+  }
+  #sl-htu-block-{{ block_id }} .sl-htu-step-icon-wrap {
+    flex-shrink: 0;
+    margin-inline-end: 10px;
+  }
+  #sl-htu-block-{{ block_id }} .sl-htu-step-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
   }
   #sl-htu-block-{{ block_id }} .sl-htu-step-no {
     display: flex;
@@ -113,14 +153,15 @@
     line-height: 1.2;
     letter-spacing: 0.01em;
     text-transform: uppercase;
-    padding-left: 12px;
+    padding-inline-start: 12px;
   }
   #sl-htu-block-{{ block_id }} .sl-htu-step-product-container {
     display: grid;
     align-items: center;
     grid-template-columns: auto 1fr;
     gap: 8px;
-    padding: 10px 20px 10px 10px;
+    padding-block: 10px;
+    padding-inline: 10px 20px;
     border-radius: 40px;
     max-width: fit-content;
     margin-top: 8px;
@@ -154,7 +195,7 @@
     margin-top: 16px;
   }
   #sl-htu-block-{{ block_id }} .sl-htu-step-descriptions-inner {
-    margin-top: 0;
+    margin-top: 12px;
     color: var(--sl-htu-text);
     font-size: 14px;
     font-weight: 400;

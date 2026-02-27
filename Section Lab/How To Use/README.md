@@ -30,7 +30,7 @@ The section has two modes:
 
 **Section settings:** Optional heading (EN/AR + fallback), alignment/size/color; step styling (background/text color, gap); **Steps layout** (Vertical = stacked column, Horizontal = row); **Steps per row** (horizontal only): choose 2–5 steps per row on desktop (mobile always 1 per row); **Section layout**: full width (screen width) by default, padding top/bottom and left/right, optional content max width when not full width.
 
-**Install section:** Copy `sections/sl-how-to-use.liquid` into your theme **sections** folder. In **Customize** → product template → **Add section** → **SL - How to Use**. Choose **Step source** (Product metaobject or Manual steps). If Manual steps, add **Step** blocks and set product, title, and description for each.
+**Install section:** Copy `sections/sl-how-to-use.liquid` into your theme **sections** folder. In **Customize** → product template → **Add section** → **SL - How to Use**. Choose **Step source** (Product metaobject or Manual steps). If Manual steps, add **Step** blocks and set optional **Step icon** (image), product, title, and description for each.
 
 ---
 
@@ -65,6 +65,7 @@ Only needed if you use **Product metaobject** (section or snippet).
    | Field label      | Key             | Type              | Notes                                    |
    |------------------|-----------------|-------------------|------------------------------------------|
    | Product          | `product`       | Product reference | Product to show for this step            |
+   | Step icon        | `step_icon`     | File (image)      | Optional. Icon/image shown next to step number. |
    | Step title (EN)  | `step_title_en` | Single line text  | Optional, e.g. "Step 1"                  |
    | Step title (AR)  | `step_title_ar` | Single line text  | Optional                                  |
    | Step title       | `step_title`    | Single line text  | Optional fallback (other locales)        |
@@ -77,7 +78,7 @@ Only needed if you use **Product metaobject** (section or snippet).
 ### Step 2 — Create “How to use step” entries
 
 1. **Content** → **Metaobjects** → **How to use step**
-2. For each step: **Add entry** → set Product; **Step title (EN)** and **Step title (AR)** (optional); **Description (EN)** and **Description (AR)**. Optionally set the fallback **Step title** and **Description** for other locales. Save.
+2. For each step: **Add entry** → set Product; optional **Step icon** (image); **Step title (EN)** and **Step title (AR)** (optional); **Description (EN)** and **Description (AR)**. Optionally set the fallback **Step title** and **Description** for other locales. Save.
 
 ### Step 3 — Add the product metafield
 
@@ -100,9 +101,9 @@ Only needed if you use **Product metaobject** (section or snippet).
 
 | What                | Where | Type / Notes |
 |---------------------|--------|--------------|
-| One step (metaobject) | Metaobject `how_to_use_step` | Fields: `product`; `step_title_en`, `step_title_ar` (optional `step_title`); `description_en`, `description_ar` (optional `description`) |
+| One step (metaobject) | Metaobject `how_to_use_step` | Fields: `product`; `step_icon` (optional image); `step_title_en`, `step_title_ar` (optional `step_title`); `description_en`, `description_ar` (optional `description`) |
 | Steps per product   | Product metafield | `custom.how_to_use_steps` = list of metaobject references |
-| Manual steps        | Section blocks   | Block type **Step**: product; step_title_en, step_title_ar (optional step_title); description_en, description_ar (optional description) |
+| Manual steps        | Section blocks   | Block type **Step**: step_icon (optional image); product; step_title_en, step_title_ar (optional step_title); description_en, description_ar (optional description) |
 | Section heading     | Section settings | heading_en, heading_ar (optional heading for other locales) |
 
 ---
@@ -123,7 +124,7 @@ Section Lab/How To Use/
 ## Requirements
 
 - **Section:** Product template. For metaobject mode, product metafield and metaobject setup above (with EN/AR fields). For manual mode, no metaobjects needed; use block fields for EN/AR.
-- **Snippet:** Product template; product metafield `custom.how_to_use_steps` and metaobject type `how_to_use_step` with `step_title_en`, `step_title_ar`, `description_en`, `description_ar` (and optional fallbacks).
+- **Snippet:** Product template; product metafield `custom.how_to_use_steps` and metaobject type `how_to_use_step` with optional `step_icon` (image), `step_title_en`, `step_title_ar`, `description_en`, `description_ar` (and optional fallbacks).
 
 ---
 
