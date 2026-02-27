@@ -30,10 +30,19 @@
 
 {% if has_videos %}
 <div id="sl-spv-block-{{ block_id }}" class="sl-spv-block-root">
-  <div class="sl-spv-inner">
-    <h2 class="sl-spv-heading">See It In Action</h2>
-    <div class="sl-spv-swiper swiper">
-      <div class="swiper-wrapper">
+  <details class="accordion group" open>
+    <summary>
+      <span class="accordion__toggle">
+        <span>See It In Action</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8" fill="none" class="icon icon-wd-arrow" aria-hidden="true">
+          <path d="M11 1L6 7L1 1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+    </summary>
+    <div class="accordion__content">
+      <div class="sl-spv-inner">
+        <div class="sl-spv-swiper swiper">
+          <div class="swiper-wrapper">
         {% for entry in ugc_videos %}
           {% assign video_file = entry.video %}
           {% if video_file != blank %}
@@ -91,21 +100,42 @@
             {% endif %}
           {% endif %}
         {% endfor %}
+          </div>
+          <div class="swiper-button-prev"></div>
+          <div class="swiper-button-next"></div>
+        </div>
       </div>
-      <div class="swiper-button-prev"></div>
-      <div class="swiper-button-next"></div>
     </div>
-  </div>
+  </details>
 </div>
 
 <style>
   #sl-spv-block-{{ block_id }}.sl-spv-block-root {
     width: 100%;
     margin: 16px 0;
+    border: none;
     --sl-spv-slide-width: 220px;
   }
-  #sl-spv-block-{{ block_id }} .sl-spv-inner { padding: 24px 0; }
-  #sl-spv-block-{{ block_id }} .sl-spv-heading { font-size: 24px; margin: 0 0 16px 0; }
+  #sl-spv-block-{{ block_id }} details.accordion { border: none; margin: 0; padding: 0; }
+  #sl-spv-block-{{ block_id }} details summary { list-style: none; margin: 0; padding: 0; border: none; border-top: none; }
+  #sl-spv-block-{{ block_id }} details summary::-webkit-details-marker { display: none; }
+  #sl-spv-block-{{ block_id }} details summary::before,
+  #sl-spv-block-{{ block_id }} details summary::after { display: none !important; }
+  #sl-spv-block-{{ block_id }} .accordion__toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: 400;
+    margin: 0;
+    padding: 0;
+    color: inherit;
+  }
+  #sl-spv-block-{{ block_id }} .accordion .icon { transition: transform 0.2s; }
+  #sl-spv-block-{{ block_id }} .accordion[open] .icon { transform: rotate(180deg); }
+  #sl-spv-block-{{ block_id }} .accordion__content { margin-top: 8px; padding: 0; }
+  #sl-spv-block-{{ block_id }} .sl-spv-inner { padding: 0; margin: 0; }
   #sl-spv-block-{{ block_id }} .sl-spv-swiper { overflow: hidden; position: relative; }
   #sl-spv-block-{{ block_id }} .swiper-slide { opacity: 1 !important; filter: none !important; }
   #sl-spv-block-{{ block_id }} .swiper-wrapper { display: flex; gap: 5px; }
