@@ -14,6 +14,7 @@ Product-specific volume / quantity-based offer display. Shows tiers (e.g. Buy 1,
 - **Offer types:** `none` (base price), `percent_off` (e.g. 20% off), `free_items` (Buy X Get Y Free)
 - **Labels** — optional badges per tier (e.g. "Most popular", "Best value") with configurable color
 - **Dual-image layout** for "Buy X Get Y Free" tiers (side-by-side images with + icon)
+- **Buy now** — each card has a button that scrolls to the product form (quantity + add to cart) and sets the tier quantity
 - **RTL** support (Arabic, Hebrew, Farsi, Urdu, Yiddish)
 - **English & Arabic** locale files included
 - Hidden on storefront when product has no volume offers; theme editor shows setup hint
@@ -82,6 +83,22 @@ Cards show **Offer details** (e.g. "Buy 2 Get 1 Free", "Buy 2 Get 20% off", "1 a
 
 ---
 
+## Render code (column snippet)
+
+Use this in a **Custom Liquid** block (e.g. in the product info column):
+
+```liquid
+{% render 'sl-volume-discount', product: product, block_id: block.id %}
+```
+
+- **`product`** — pass the product object (e.g. `product` on product template).
+- **`block_id`** — optional; use `block.id` when inside a section block so CSS/JS stay scoped. Omit or use a fixed string if not in a block.
+
+Optional debug in theme editor:  
+`{% render 'sl-volume-discount', product: product, block_id: block.id, debug: true %}`
+
+---
+
 ## Installation
 
 ### Option A — Section
@@ -94,20 +111,18 @@ Cards show **Offer details** (e.g. "Buy 2 Get 1 Free", "Buy 2 Get 20% off", "1 a
 
 The section only outputs content when the product has `custom.volume_offers` with at least one tier. Otherwise it is hidden on the storefront; in the theme editor you’ll see a dashed-border setup hint.
 
-### Option B — Snippet (Custom Liquid block)
+### Option B — Snippet (Custom Liquid block / column)
 
 1. Copy **snippets/sl-volume-discount.liquid** into your theme’s `snippets/` folder.
 2. Copy **locales/en.default.json** and **locales/ar.json** into your theme’s `locales/` (merge the `sections.sl_volume_discount` key into your existing locale files if you prefer).
-3. In the theme editor, on the product template add a **Custom Liquid** block where you want the volume discount (e.g. in product info).
-4. In the block paste:
+3. In the theme editor, on the product template add a **Custom Liquid** block where you want the volume discount (e.g. in the product info column).
+4. In the block paste the **render code** from [Render code (column snippet)](#render-code-column-snippet) above:
 
 ```liquid
 {% render 'sl-volume-discount', product: product, block_id: block.id %}
 ```
 
 5. Save.
-
-Optional: `{% render 'sl-volume-discount', product: product, block_id: block.id, debug: true %}` — in design mode shows a small debug panel (product id, offer count).
 
 ---
 
@@ -138,9 +153,11 @@ Translations live under `sections.sl_volume_discount` in the locale files. Keys:
 - `get_x_off` — "Get {{ x }} off {{ percent }}%"
 - `off_badge` — "-{{ percent }}%"
 - `buy_label` — "Buy {{ x }}"
+- `get_y_free` — "Get {{ y }} Free"
 - `buy_x_get_y_percent` — "Buy {{ x }} Get {{ percent }}% off"
 - `base_offer` — "1 at regular price"
 - `offer_details` — "Offer details" (heading in card info)
+- `buy_now` — Button that scrolls to quantity + add to cart and sets tier quantity
 - `no_offers` — Message when no offers (design mode / empty state)
 
 ---
