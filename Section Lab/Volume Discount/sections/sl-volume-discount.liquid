@@ -50,7 +50,7 @@
                 {% assign otype = tier.offer_type.value | default: tier.offer_type | default: 'none' | strip %}
                 {% assign oval = tier.offer_value.value | default: tier.offer_value | default: 0 %}
                 {% assign label_text = tier.label.value | default: tier.label | default: '' | strip %}
-                {% assign label_bg = tier.label_color.value | default: tier.label_color | default: '#E91E63' | strip %}
+                {% assign label_bg = tier.label_color.value | default: tier.label_color | default: '#eee' | strip %}
                 {% assign tier_description = tier.description.value | default: tier.description | default: '' | strip %}
 
                 {% assign total_cents = qty | times: price_cents %}
@@ -78,7 +78,7 @@
                             <div class="sl-vd-dual__side">
                               <span class="sl-vd-dual__title" style="background: {{ label_bg }};">{{ 'sections.sl_volume_discount.buy_label' | t: x: qty }}</span>
                               {% if feat_image != blank %}
-                                <img src="{{ feat_image | image_url: width: 320, height: 320 }}" alt="" width="160" height="160" loading="lazy">
+                                <img src="{{ feat_image | image_url: width: 520 }}" srcset="{{ feat_image | image_url: width: 220 }} 220w, {{ feat_image | image_url: width: 360 }} 360w, {{ feat_image | image_url: width: 520 }} 520w" sizes="220px" alt="" width="260" height="260" loading="lazy" decoding="async"{% if forloop.index0 > 1 %} fetchpriority="low"{% endif %}>
                               {% else %}
                                 <div class="sl-vd-placeholder"></div>
                               {% endif %}
@@ -87,7 +87,7 @@
                             <div class="sl-vd-dual__side">
                               <span class="sl-vd-dual__title" style="background: {{ label_bg }};">{{ 'sections.sl_volume_discount.get_y_free' | t: y: oval }}</span>
                               {% if feat_image != blank %}
-                                <img src="{{ feat_image | image_url: width: 320, height: 320 }}" alt="" width="160" height="160" loading="lazy">
+                                <img src="{{ feat_image | image_url: width: 520 }}" srcset="{{ feat_image | image_url: width: 220 }} 220w, {{ feat_image | image_url: width: 360 }} 360w, {{ feat_image | image_url: width: 520 }} 520w" sizes="220px" alt="" width="260" height="260" loading="lazy" decoding="async"{% if forloop.index0 > 1 %} fetchpriority="low"{% endif %}>
                               {% else %}
                                 <div class="sl-vd-placeholder"></div>
                               {% endif %}
@@ -99,7 +99,7 @@
                           <span class="sl-vd-label" style="background: {{ label_bg }};">{{ label_text }}</span>
                         {% endif %}
                         {% if feat_image != blank %}
-                          <img src="{{ feat_image | image_url: width: 320, height: 320 }}" alt="{{ prod_title | escape }}" width="160" height="160" loading="lazy" class="sl-vd-card__media">
+                          <img src="{{ feat_image | image_url: width: 520 }}" srcset="{{ feat_image | image_url: width: 220 }} 220w, {{ feat_image | image_url: width: 360 }} 360w, {{ feat_image | image_url: width: 520 }} 520w" sizes="220px" alt="{{ prod_title | escape }}" width="260" height="260" loading="lazy" decoding="async" class="sl-vd-card__media"{% if forloop.index0 > 1 %} fetchpriority="low"{% endif %}>
                         {% else %}
                           <div class="sl-vd-placeholder"></div>
                         {% endif %}
@@ -138,10 +138,10 @@
 </div>
 
 <style>
-  #sl-vd-section-{{ sid }}.sl-vd-section-root { width: 100%; --sl-vd-card-bg: #fff; --sl-vd-card-border: #e5e5e5; --sl-vd-card-radius: 12px; --sl-vd-slide-width: 160px; }
+  #sl-vd-section-{{ sid }}.sl-vd-section-root { width: 100%; --sl-vd-card-bg: #fff; --sl-vd-card-border: #e5e5e5; --sl-vd-card-radius: 12px; --sl-vd-slide-width: 220px; }
   #sl-vd-section-{{ sid }} details summary { list-style: none; }
   #sl-vd-section-{{ sid }} details summary::-webkit-details-marker { display: none; }
-  #sl-vd-section-{{ sid }} .accordion__toggle { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 18px; font-weight: 400; }
+  #sl-vd-section-{{ sid }} .accordion__toggle { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 24px; font-weight: 400; color: {{ section.settings.heading_color }}; }
   #sl-vd-section-{{ sid }} .accordion .icon { transition: transform 0.2s; }
   #sl-vd-section-{{ sid }} .accordion[open] .icon { transform: rotate(180deg); }
   #sl-vd-section-{{ sid }} .accordion__content { margin-top: 12px; }
@@ -165,13 +165,13 @@
   #sl-vd-section-{{ sid }} .sl-vd-tier-description { font-size: 12px; color: #666; line-height: 1.4; margin: 0; }
   #sl-vd-section-{{ sid }} .sl-vd-buy-now {
     display: block; width: 100%; margin-top: auto; padding: 8px 12px; font-size: 12px; font-weight: 600;
-    color: #fff; background: #333; border: none; border-radius: 6px; cursor: pointer; transition: opacity 0.2s; flex-shrink: 0;
+    color: #fff; background: #000; border: none; border-radius: 6px; cursor: pointer; transition: opacity 0.2s; flex-shrink: 0;
   }
   #sl-vd-section-{{ sid }} .sl-vd-buy-now:hover { opacity: 0.9; }
   #sl-vd-section-{{ sid }} .sl-vd-card__media { display: block; width: 100%; height: 100%; object-fit: cover; }
   #sl-vd-section-{{ sid }} .sl-vd-placeholder { width: 100%; height: 100%; background: #f0f0f0; }
   #sl-vd-section-{{ sid }} .sl-vd-label {
-    position: absolute; bottom: 3px; left: 3px; padding: 4px 8px; font-size: 11px; color: #fff; border-radius: 4px; z-index: 2;
+    position: absolute; bottom: 3px; left: 3px; padding: 4px 8px; font-size: 11px; font-weight: bold; color: #000; border-radius: 4px; z-index: 2;
   }
   #sl-vd-section-{{ sid }}.sl-vd-rtl .sl-vd-label { left: auto; right: 3px; }
   #sl-vd-section-{{ sid }} .sl-vd-off-badge {
@@ -193,7 +193,7 @@
     display: flex; align-items: center; justify-content: center; height: 100%; padding: 1px; box-sizing: border-box;
   }
   #sl-vd-section-{{ sid }} .sl-vd-dual__side { position: relative; flex: 1; display: flex; flex-direction: column; max-width: 54%; overflow: hidden; border-radius: 8px; }
-  #sl-vd-section-{{ sid }} .sl-vd-dual__title { display: block; text-align: center; padding: 4px 6px; font-size: 10px; font-weight: 600; color: #fff; border-radius: 4px 4px 0 0; line-height: 1.2; flex-shrink: 0; }
+  #sl-vd-section-{{ sid }} .sl-vd-dual__title { display: block; text-align: center; padding: 4px 6px; font-size: 10px; font-weight: bold; color: #000; border-radius: 4px 4px 0 0; line-height: 1.2; flex-shrink: 0; }
   #sl-vd-section-{{ sid }} .sl-vd-dual__side img,
   #sl-vd-section-{{ sid }} .sl-vd-dual__side .sl-vd-placeholder { flex: 1; min-height: 0; object-fit: cover; display: block; width: 100%; }
   #sl-vd-section-{{ sid }} .sl-vd-dual__side img { width: 100%; height: 100%; }
@@ -249,7 +249,6 @@
   function run() {
     var root = document.getElementById('sl-vd-section-' + sectionId);
     if (!root) return;
-    loadSwiper(initSwiper);
     root.addEventListener('click', function(e) {
       var btn = e.target.closest('.sl-vd-buy-now');
       if (!btn) return;
@@ -261,6 +260,15 @@
       if (input) { input.value = qty; input.dispatchEvent(new Event('change', { bubbles: true })); }
       form.scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
+    function onVisible() { loadSwiper(initSwiper); }
+    if (typeof IntersectionObserver !== 'undefined') {
+      var io = new IntersectionObserver(function(entries) {
+        if (entries[0].isIntersecting) { io.disconnect(); onVisible(); }
+      }, { rootMargin: '100px' });
+      io.observe(root);
+    } else {
+      onVisible();
+    }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
   else run();
@@ -285,6 +293,12 @@
       "label": "Heading",
       "default": "Purchase More & Save",
       "info": "Leave blank to use theme translation."
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "default": "#1c1c1c"
     },
     {
       "type": "checkbox",

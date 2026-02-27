@@ -29,19 +29,42 @@
   #sl-fbt-block-{{ block_id }}.sl-fbt-block-root {
     width: 100%;
     margin: 16px 0;
+    border: none;
     --sl-fbt-card-bg: #fff;
     --sl-fbt-card-border: #e5e5e5;
     --sl-fbt-card-padding: 16px;
     --sl-fbt-card-radius: 12px;
     --sl-fbt-slide-width: 220px;
   }
-  #sl-fbt-block-{{ block_id }} details summary { list-style: none; }
+  #sl-fbt-block-{{ block_id }} details.accordion {
+    border: none;
+    margin: 0;
+    padding: 0;
+  }
+  #sl-fbt-block-{{ block_id }} details summary {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border: none;
+    border-top: none;
+  }
   #sl-fbt-block-{{ block_id }} details summary::-webkit-details-marker { display: none; }
-  #sl-fbt-block-{{ block_id }} .accordion__toggle { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 18px; font-weight: 400; }
+  #sl-fbt-block-{{ block_id }} details summary::before,
+  #sl-fbt-block-{{ block_id }} details summary::after { display: none !important; }
+  #sl-fbt-block-{{ block_id }} .accordion__toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: 400;
+    margin: 0;
+    padding: 0;
+  }
   #sl-fbt-block-{{ block_id }} .accordion .icon { transition: transform 0.2s; }
   #sl-fbt-block-{{ block_id }} .accordion[open] .icon { transform: rotate(180deg); }
-  #sl-fbt-block-{{ block_id }} .accordion__content { margin-top: 12px; }
-  #sl-fbt-block-{{ block_id }} .sl-fbt-inner { padding: 0; }
+  #sl-fbt-block-{{ block_id }} .accordion__content { margin-top: 8px; padding: 0; }
+  #sl-fbt-block-{{ block_id }} .sl-fbt-inner { padding: 0; margin: 0; }
   #sl-fbt-block-{{ block_id }} .sl-fbt-swiper { overflow: hidden; position: relative; }
   #sl-fbt-block-{{ block_id }} .swiper-wrapper { display: flex; gap: 5px; }
   #sl-fbt-block-{{ block_id }} .swiper-slide {
@@ -100,10 +123,9 @@
   #sl-fbt-block-{{ block_id }} .sl-fbt-card__info {
     display: flex;
     flex-direction: column;
-    gap: 1px;
+    gap: 2px;
     flex: 1;
-    padding-left: 8px;
-    padding-right: 8px;
+    padding: 6px 8px 8px;
   }
   #sl-fbt-block-{{ block_id }} .sl-fbt-card__title {
     font-size: 14px;
@@ -382,7 +404,7 @@
       if (!products || products.length === 0) { ph.style.display = 'none'; return; }
       var svgArrow = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8" fill="none" class="icon icon-wd-arrow" aria-hidden="true"><path d="M11 1L6 7L1 1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
       var html = '<details class="accordion group" open>' +
-        '<summary><span class="accordion__toggle h6"><span>' + i18n.heading + '</span>' + svgArrow + '</span></summary>' +
+        '<summary><span class="accordion__toggle"><span>' + i18n.heading + '</span>' + svgArrow + '</span></summary>' +
         '<div class="accordion__content"><div class="sl-fbt-inner">' +
         '<div class="sl-fbt-swiper swiper"><div class="swiper-wrapper">';
       for (var i = 0; i < products.length; i++) {

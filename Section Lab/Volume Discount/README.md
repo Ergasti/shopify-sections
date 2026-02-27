@@ -37,7 +37,7 @@ Create one metaobject **definition** and then create **entries** (one per tier).
 | `offer_type`  | Single line text  | Yes      | One of: `none`, `percent_off`, `free_items` |
 | `offer_value` | Integer           | No       | For `percent_off`: discount % (e.g. 20). For `free_items`: number of free items (e.g. 1) |
 | `label`       | Single line text  | No       | Badge text, e.g. "Most popular", "Best value" |
-| `label_color` | Single line text  | No       | Badge background hex, e.g. `#E91E63`, `#2196F3`. Defaults to `#E91E63` |
+| `label_color` | Single line text  | No       | Badge background hex, e.g. `#eee`, `#2196F3`. Defaults to `#eee` (label text is black) |
 | `description` | Multi-line text   | No       | Tier description shown in the card info section below "Offer details" |
 
 4. **Storefront API access:** enable for the definition.
@@ -164,7 +164,13 @@ Translations live under `sections.sl_volume_discount` in the locale files. Keys:
 
 ## Design notes
 
-- Cards match FBT: 160px slide width, 12px radius, 1px border, first card 2px red border.
+- Cards match FBT: 220px slide width, 12px radius, 1px border, first card 2px red border.
 - Swiper: `slidesPerView: 'auto'`, `spaceBetween: 5`, `loop: false`, prev/next arrows, no pagination.
-- Swiper CSS/JS loaded from CDN (Swiper 11) when needed.
+- Swiper CSS/JS loaded from CDN (Swiper 11) when the section/block is near the viewport (IntersectionObserver, same approach as FBT).
 - RTL: applied automatically for ar, he, fa, ur, yi locales.
+
+## Performance & lazy loading
+
+- **Images:** `loading="lazy"`, `decoding="async"`, responsive `srcset` (220w, 360w, 520w) with `sizes="220px"`. Cards after the first two use `fetchpriority="low"` to deprioritize off-screen images.
+- **Swiper:** Loaded only when the Volume Discount section/block enters (or is within 100px of) the viewport, reducing initial page weight.
+- **Buy now:** Click handler is attached on DOMContentLoaded so it works before Swiper initializes.
