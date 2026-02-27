@@ -383,29 +383,37 @@
       <video id="sl-ugc-hp-full-video-{{ section.id }}" class="sl-ugc-hp-full-video" autoplay playsinline loop controls></video>
     </div>
     <div class="sl-ugc-hp-overlay-product">
-      <div class="sl-ugc-hp-overlay-product-row">
-        <a id="sl-ugc-hp-overlay-photo-link-{{ section.id }}" class="sl-ugc-hp-overlay-photo" href="#" aria-label="{{ 'sections.sl_ugc_hp.view_product' | t | default: 'View product' }}">
-          <img id="sl-ugc-hp-overlay-img-{{ section.id }}" src="" alt="" width="64" height="64" loading="lazy">
-        </a>
-        <div class="sl-ugc-hp-overlay-product-info">
-          <a id="sl-ugc-hp-overlay-name-{{ section.id }}" class="sl-ugc-hp-overlay-name" href="#"></a>
-          <div class="sl-ugc-hp-overlay-rating-row">
-            <svg xmlns="http://www.w3.org/2000/svg" width="72" height="13" viewBox="0 0 72 13" fill="none" class="sl-ugc-hp-overlay-stars" aria-hidden="true">
-              <path d="M6 0.5L7.34708 4.6459H11.7063L8.17963 7.2082L9.52671 11.3541L6 8.7918L2.47329 11.3541L3.82037 7.2082L0.293661 4.6459H4.65292L6 0.5Z" fill="#000"/>
-              <path d="M21 0.5L22.3471 4.6459H26.7063L23.1796 7.2082L24.5267 11.3541L21 8.7918L17.4733 11.3541L18.8204 7.2082L15.2937 4.6459H19.6529L21 0.5Z" fill="#000"/>
-              <path d="M36 0.5L37.3471 4.6459H41.7063L38.1796 7.2082L39.5267 11.3541L36 8.7918L32.4733 11.3541L33.8204 7.2082L30.2937 4.6459H34.6529L36 0.5Z" fill="#000"/>
-              <path d="M51 0.5L52.3471 4.6459H56.7063L53.1796 7.2082L54.5267 11.3541L51 8.7918L47.4733 11.3541L48.8204 7.2082L45.2937 4.6459H49.6529L51 0.5Z" fill="#000"/>
-              <path d="M66 0.5L67.3471 4.6459H71.7063L68.1796 7.2082L69.5267 11.3541L66 8.7918L62.4733 11.3541L63.8204 7.2082L60.2937 4.6459H64.6529L66 0.5Z" fill="#000"/>
-            </svg>
-            <span id="sl-ugc-hp-overlay-rating-{{ section.id }}" class="sl-ugc-hp-overlay-rating-text"></span>
+      <div class="sl-ugc-hp-product short">
+        <div class="sl-ugc-hp-product-photo">
+          <a id="sl-ugc-hp-overlay-photo-link-{{ section.id }}" href="#" aria-label="{{ 'sections.sl_ugc_hp.view_product' | t | default: 'View product' }}">
+            <img id="sl-ugc-hp-overlay-img-{{ section.id }}" src="" alt="" width="60" height="60" loading="lazy">
+          </a>
+        </div>
+        <div class="sl-ugc-hp-product-details">
+          <div class="sl-ugc-hp-name-rating-row">
+            <a id="sl-ugc-hp-overlay-name-{{ section.id }}" class="sl-ugc-hp-product-name" href="#"></a>
+            <div class="sl-ugc-hp-stars" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" width="72" height="13" viewBox="0 0 72 13" fill="none">
+                <path d="M6 0.5L7.34708 4.6459H11.7063L8.17963 7.2082L9.52671 11.3541L6 8.7918L2.47329 11.3541L3.82037 7.2082L0.293661 4.6459H4.65292L6 0.5Z" fill="{{ section.settings.star_color }}"/>
+                <path d="M21 0.5L22.3471 4.6459H26.7063L23.1796 7.2082L24.5267 11.3541L21 8.7918L17.4733 11.3541L18.8204 7.2082L15.2937 4.6459H19.6529L21 0.5Z" fill="{{ section.settings.star_color }}"/>
+                <path d="M36 0.5L37.3471 4.6459H41.7063L38.1796 7.2082L39.5267 11.3541L36 8.7918L32.4733 11.3541L33.8204 7.2082L30.2937 4.6459H34.6529L36 0.5Z" fill="{{ section.settings.star_color }}"/>
+                <path d="M51 0.5L52.3471 4.6459H56.7063L53.1796 7.2082L54.5267 11.3541L51 8.7918L47.4733 11.3541L48.8204 7.2082L45.2937 4.6459H49.6529L51 0.5Z" fill="{{ section.settings.star_color }}"/>
+                <path d="M66 0.5L67.3471 4.6459H71.7063L68.1796 7.2082L69.5267 11.3541L66 8.7918L62.4733 11.3541L63.8204 7.2082L60.2937 4.6459H64.6529L66 0.5Z" fill="{{ section.settings.star_color }}"/>
+              </svg>
+            </div>
+            <span id="sl-ugc-hp-overlay-rating-{{ section.id }}" class="sl-ugc-hp-overlay-rating-text" style="display: none;"></span>
           </div>
-          <div class="sl-ugc-hp-overlay-price-box">
-            <span id="sl-ugc-hp-overlay-price-{{ section.id }}" class="sl-ugc-hp-overlay-price"></span>
-            <span id="sl-ugc-hp-overlay-compare-{{ section.id }}" class="sl-ugc-hp-overlay-compare"></span>
+          <div class="sl-ugc-hp-price-btn-row">
+            <div class="sl-ugc-hp-price-block">
+              <span id="sl-ugc-hp-overlay-price-{{ section.id }}" class="sl-ugc-hp-product-price" style="color: {{ section.settings.price_color }};"></span>
+              <span id="sl-ugc-hp-overlay-compare-{{ section.id }}" class="sl-ugc-hp-product-compare" style="color: {{ section.settings.compare_color }};"></span>
+            </div>
+            <div class="sl-ugc-hp-add-form">
+              <button type="button" id="sl-ugc-hp-overlay-add-{{ section.id }}" class="sl-ugc-hp-add-btn" data-variant-id="" style="color: {{ section.settings.cta_color }}; background: {{ section.settings.cta_bg }};">{{ section.settings.cta_text | default: 'Add to cart' }}</button>
+            </div>
           </div>
         </div>
       </div>
-      <button type="button" id="sl-ugc-hp-overlay-add-{{ section.id }}" class="sl-ugc-hp-overlay-cta sl-ugc-hp-overlay-add-btn" data-variant-id="">{{ section.settings.cta_text | default: 'Add to cart' }}</button>
     </div>
     <div id="sl-ugc-hp-loading-{{ section.id }}" class="sl-ugc-hp-loading" hidden>{{ 'sections.sl_ugc_hp.loading' | t }}</div>
   </div>
@@ -458,8 +466,9 @@
     width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none;
   }
 
-  /* ===== PRODUCT STRIP (footer/caption below video) ===== */
-  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-product.short {
+  /* ===== PRODUCT STRIP (footer/caption below video) — shared with overlay ===== */
+  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-product.short,
+  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-product .sl-ugc-hp-product.short {
     position: relative;
     margin-top: -24px;
     margin-bottom: 0;
@@ -474,7 +483,8 @@
     text-align: center;
     flex-shrink: 0;
   }
-  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-product-photo {
+  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-product-photo,
+  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-product .sl-ugc-hp-product-photo {
     margin-top: -32px;
     text-align: center;
     margin-bottom: 6px;
@@ -485,21 +495,35 @@
     margin-left: auto;
     margin-right: auto;
   }
-  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-product-photo img {
+  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-product-photo img,
+  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-product .sl-ugc-hp-product-photo img {
     border-radius: 100px;
-    display: inline;
+    display: block;
     border: 2px solid #fff;
     width: 60px;
     height: 60px;
     object-fit: cover;
   }
-  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-product-placeholder {
+  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-product-photo a,
+  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-product .sl-ugc-hp-product-photo a {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 100px;
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+  }
+  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-product-placeholder,
+  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-product .sl-ugc-hp-product-placeholder {
     width: 60px; height: 60px; background: #eee; border-radius: 100px; display: inline-block; border: 2px solid #fff;
   }
-  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-product-details {
+  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-product-details,
+  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-product .sl-ugc-hp-product-details {
     width: 100%;
   }
-  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-name-rating-row {
+  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-name-rating-row,
+  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-product .sl-ugc-hp-name-rating-row {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -507,7 +531,8 @@
     flex-wrap: wrap;
     margin-bottom: 6px;
   }
-  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-product-name {
+  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-product-name,
+  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-product .sl-ugc-hp-product-name {
     margin: 0;
     color: {{ section.settings.text_color }};
     font-size: 13px;
@@ -516,31 +541,39 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    text-decoration: none;
   }
-  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-stars { display: flex; flex-shrink: 0; }
-  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-stars svg { width: 72px; height: 13px; }
-  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-price-btn-row {
+  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-product .sl-ugc-hp-product-name:hover { text-decoration: underline; }
+  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-stars,
+  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-product .sl-ugc-hp-stars { display: flex; flex-shrink: 0; }
+  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-stars svg,
+  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-product .sl-ugc-hp-stars svg { width: 72px; height: 13px; }
+  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-price-btn-row,
+  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-product .sl-ugc-hp-price-btn-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 8px;
     width: 100%;
   }
-  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-price-block {
+  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-price-block,
+  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-product .sl-ugc-hp-price-block {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: 0;
     flex-shrink: 0;
   }
-  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-product-price {
+  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-product-price,
+  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-product .sl-ugc-hp-product-price {
     font-size: 13px;
     font-weight: 600;
     color: {{ section.settings.price_color }};
     white-space: nowrap;
     line-height: 1.2;
   }
-  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-product-compare {
+  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-product-compare,
+  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-product .sl-ugc-hp-product-compare {
     display: block;
     font-size: 11px;
     font-weight: 400;
@@ -550,9 +583,11 @@
     margin-top: 1px;
   }
 
-  /* ===== ADD TO CART (FBT-style) ===== */
-  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-add-form { margin: 0; flex: 1; min-width: 0; }
-  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-add-btn {
+  /* ===== ADD TO CART (FBT-style) — shared with overlay ===== */
+  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-add-form,
+  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-product .sl-ugc-hp-add-form { margin: 0; flex: 1; min-width: 0; }
+  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-add-btn,
+  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-product .sl-ugc-hp-add-btn {
     display: flex;
     width: 100%;
     padding: 10px 16px;
@@ -568,10 +603,13 @@
     text-decoration: none;
     white-space: nowrap;
   }
-  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-add-btn:hover:not(:disabled) { opacity: 0.9; }
-  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-add-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-add-btn:hover:not(:disabled),
+  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-product .sl-ugc-hp-add-btn:hover:not(:disabled) { opacity: 0.9; }
+  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-add-btn:disabled,
+  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-product .sl-ugc-hp-add-btn:disabled { opacity: 0.5; cursor: not-allowed; }
   @keyframes sl-ugc-hp-pulse { 0%, 100% { opacity: 0.8; } 50% { opacity: 0.5; } }
-  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-add-btn.is-loading { animation: sl-ugc-hp-pulse 0.8s ease-in-out infinite; pointer-events: none; }
+  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-add-btn.is-loading,
+  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-product .sl-ugc-hp-add-btn.is-loading { animation: sl-ugc-hp-pulse 0.8s ease-in-out infinite; pointer-events: none; }
 
   #sl-ugc-hp-{{ section.id }} .swiper-button-prev, #sl-ugc-hp-{{ section.id }} .swiper-button-next,
   #sl-ugc-hp-{{ section.id }} .swiper-button-prev::after, #sl-ugc-hp-{{ section.id }} .swiper-button-next::after { color: {{ section.settings.arrow_color }} !important; }
@@ -625,80 +663,19 @@
     width: 100%; aspect-ratio: 9/16; border-radius: 30px; display: block;
   }
 
-  /* ===== OVERLAY PRODUCT STRIP ===== */
+  /* ===== OVERLAY PRODUCT STRIP (wrapper only; inner uses same .sl-ugc-hp-product as swiper) ===== */
   #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-product {
     position: relative;
-    margin-top: -160px;
-    background: #fff;
-    box-shadow: 0px -8px 32px 0px rgba(0,0,0,0.25);
-    padding: 10px;
-    border-radius: 16px 16px 24px 24px;
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-  }
-  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-product-row {
-    align-items: center;
-    display: grid;
-    grid-template-columns: 20% 80%;
-  }
-  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-photo {
+    background: transparent;
+    padding: 0;
     display: block;
-    text-decoration: none;
-    color: inherit;
+    bottom: 60px;
   }
-  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-photo:hover { opacity: 0.9; }
-  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-photo img {
-    width: 64px; height: 64px; object-fit: cover; border-radius: 100px;
-  }
-  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-name {
-    margin: 0 0 4px 0; font-size: 13px; font-weight: 500; color: #393938; line-height: 120%;
-    text-decoration: none;
-    display: inline-block;
-  }
-  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-name:hover { text-decoration: underline; color: #393938; }
-  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-rating-row {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex-wrap: wrap;
-    margin: 5px 0 2px 0;
-  }
-  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-rating-row .sl-ugc-hp-overlay-stars { flex-shrink: 0; }
-  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-rating-text {
+  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-product .sl-ugc-hp-overlay-rating-text {
     font-size: 12px;
     color: #545454;
     font-weight: 500;
   }
-  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-price-box { margin-top: 2px; }
-  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-price {
-    color: {{ section.settings.price_color }};
-    font-size: 13px; font-weight: 500;
-  }
-  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-compare { margin-left: 6px; text-decoration: line-through; font-size: 13px; color: #666; }
-  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-cta {
-    display: inline-flex;
-    width: auto;
-    height: 40px;
-    padding: 8px 18px;
-    justify-content: center;
-    align-items: center;
-    flex-shrink: 0;
-    border-radius: 8px;
-    border: none;
-    background: #000;
-    color: #fff;
-    margin-top: 10px;
-    margin-left: auto;
-    cursor: pointer;
-    transition: opacity 0.2s;
-    font-size: 13px;
-    font-weight: 600;
-    text-decoration: none;
-  }
-  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-cta:hover:not(:disabled) { opacity: 0.9; }
-  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-cta:disabled { opacity: 0.6; cursor: not-allowed; }
-  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-cta.is-loading { animation: sl-ugc-hp-pulse 0.8s ease-in-out infinite; pointer-events: none; }
   #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-loading {
     display: none;
     position: absolute; left: 50%; top: 40%; transform: translate(-50%,-50%);
