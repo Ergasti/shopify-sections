@@ -76,25 +76,24 @@
                         <div class="sl-vd-dual-wrap">
                           <div class="sl-vd-dual">
                             <div class="sl-vd-dual__side">
+                              <span class="sl-vd-dual__title" style="background: {{ label_bg }};">{{ 'sections.sl_volume_discount.buy_label' | t: x: qty }}</span>
                               {% if feat_image != blank %}
                                 <img src="{{ feat_image | image_url: width: 320, height: 320 }}" alt="" width="160" height="160" loading="lazy">
                               {% else %}
                                 <div class="sl-vd-placeholder"></div>
                               {% endif %}
-                              <span class="sl-vd-badge sl-vd-badge--dual" style="background: {{ label_bg }};">{{ 'sections.sl_volume_discount.buy_label' | t: x: qty }}</span>
                             </div>
                             <span class="sl-vd-plus" aria-hidden="true">+</span>
                             <div class="sl-vd-dual__side">
+                              <span class="sl-vd-dual__title" style="background: {{ label_bg }};">{{ 'sections.sl_volume_discount.get_y_free' | t: y: oval }}</span>
                               {% if feat_image != blank %}
                                 <img src="{{ feat_image | image_url: width: 320, height: 320 }}" alt="" width="160" height="160" loading="lazy">
                               {% else %}
                                 <div class="sl-vd-placeholder"></div>
                               {% endif %}
-                              <span class="sl-vd-badge sl-vd-badge--dual" style="background: {{ label_bg }};">{{ 'sections.sl_volume_discount.free' | t }}</span>
                             </div>
                           </div>
                         </div>
-                        <p class="sl-vd-dual-caption">{{ 'sections.sl_volume_discount.buy_x_get_y_free' | t: x: qty, y: oval }}</p>
                       {% else %}
                         {% if label_text != blank %}
                           <span class="sl-vd-label" style="background: {{ label_bg }};">{{ label_text }}</span>
@@ -166,9 +165,9 @@
   #sl-vd-section-{{ sid }} .sl-vd-card__media { display: block; width: 100%; height: 100%; object-fit: cover; }
   #sl-vd-section-{{ sid }} .sl-vd-placeholder { width: 100%; height: 100%; background: #f0f0f0; }
   #sl-vd-section-{{ sid }} .sl-vd-label {
-    position: absolute; top: 8px; right: 8px; padding: 4px 8px; font-size: 11px; color: #fff; border-radius: 4px; z-index: 2;
+    position: absolute; bottom: 3px; left: 3px; padding: 4px 8px; font-size: 11px; color: #fff; border-radius: 4px; z-index: 2;
   }
-  #sl-vd-section-{{ sid }}.sl-vd-rtl .sl-vd-label { right: auto; left: 8px; }
+  #sl-vd-section-{{ sid }}.sl-vd-rtl .sl-vd-label { left: auto; right: 3px; }
   #sl-vd-section-{{ sid }} .sl-vd-off-badge {
     position: absolute; right: 8px; bottom: 8px; padding: 4px 8px; font-size: 11px; font-weight: 600; color: #fff;
     background: #ff9800; border-radius: 4px; z-index: 2;
@@ -187,8 +186,11 @@
   #sl-vd-section-{{ sid }} .sl-vd-dual {
     display: flex; align-items: center; justify-content: center; height: 100%; padding: 1px; box-sizing: border-box;
   }
-  #sl-vd-section-{{ sid }} .sl-vd-dual__side { position: relative; flex: 1; aspect-ratio: 1; max-width: 54%; overflow: hidden; border-radius: 8px; }
-  #sl-vd-section-{{ sid }} .sl-vd-dual__side img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  #sl-vd-section-{{ sid }} .sl-vd-dual__side { position: relative; flex: 1; display: flex; flex-direction: column; max-width: 54%; overflow: hidden; border-radius: 8px; }
+  #sl-vd-section-{{ sid }} .sl-vd-dual__title { display: block; text-align: center; padding: 4px 6px; font-size: 10px; font-weight: 600; color: #fff; border-radius: 4px 4px 0 0; line-height: 1.2; flex-shrink: 0; }
+  #sl-vd-section-{{ sid }} .sl-vd-dual__side img,
+  #sl-vd-section-{{ sid }} .sl-vd-dual__side .sl-vd-placeholder { flex: 1; min-height: 0; object-fit: cover; display: block; width: 100%; }
+  #sl-vd-section-{{ sid }} .sl-vd-dual__side img { width: 100%; height: 100%; }
   #sl-vd-section-{{ sid }} .sl-vd-plus { width: 15px; height: 15px; border-radius: 50%; background: #333; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; flex-shrink: 0; }
   #sl-vd-section-{{ sid }} .sl-vd-badge {
     position: absolute; top: 4px; right: 4px; padding: 2px 6px; font-size: 10px; color: #fff; border-radius: 4px; z-index: 2;
