@@ -180,7 +180,6 @@
     .shipping-progress-bar__track-wrap {
       position: relative;
       width: 100%;
-      padding-top: 26px;
     }
 
     .shipping-progress-bar__track {
@@ -239,19 +238,20 @@
 
     .shipping-progress-bar__truck {
       position: absolute;
-      top: 0;
-      left: 0;
+      inset: 0;
       width: 100%;
-      height: 26px;
+      height: 100%;
       pointer-events: none;
       display: flex;
-      align-items: flex-end;
+      align-items: center;
       justify-content: flex-start;
+      z-index: 2;
     }
 
     .shipping-progress-bar__truck-inner {
       position: absolute;
       left: calc(var(--progress, 0%) - 14px);
+      top: 50%;
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -266,8 +266,8 @@
     }
 
     @keyframes sl-fspb-truck-bounce {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-3px); }
+      0%, 100% { transform: translateY(-50%); }
+      50% { transform: translateY(calc(-50% - 3px)); }
     }
 
     .shipping-progress-bar--locked .shipping-progress-bar__fill {
