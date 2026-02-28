@@ -19,6 +19,10 @@
       threshold_amount: section.settings.threshold_amount,
       success_message: section.settings.success_message,
       progress_message_template: section.settings.progress_message_template,
+      tier_message_almost: section.settings.tier_message_almost,
+      tier_message_close: section.settings.tier_message_close,
+      tier_message_mid: section.settings.tier_message_mid,
+      tier_message_far: section.settings.tier_message_far,
       hide_when_cart_empty: section.settings.hide_when_cart_empty
     %}
   </div>
@@ -77,9 +81,38 @@
     {
       "type": "text",
       "id": "progress_message_template",
-      "label": "Progress message",
+      "label": "Progress message (fallback)",
       "default": "Add %amount% more for free shipping",
-      "info": "Use %amount% as a placeholder for the remaining amount."
+      "info": "Use %amount% as placeholder. Overridden by tier messages below when set."
+    },
+    {
+      "type": "header",
+      "content": "Tiered messages (spend to get free shipping)"
+    },
+    {
+      "type": "text",
+      "id": "tier_message_almost",
+      "label": "Almost there (< $10 away)",
+      "default": "Almost there! Just %amount% away from free shipping!",
+      "info": "Shown when remaining is under $10. Use %amount%."
+    },
+    {
+      "type": "text",
+      "id": "tier_message_close",
+      "label": "Getting close (< $30 away)",
+      "default": "You're getting close! Add %amount% more for free shipping"
+    },
+    {
+      "type": "text",
+      "id": "tier_message_mid",
+      "label": "Mid range (< $50 away)",
+      "default": "Add %amount% more to get free shipping on your order"
+    },
+    {
+      "type": "text",
+      "id": "tier_message_far",
+      "label": "Far from threshold",
+      "default": "Free shipping when you spend %amount% more"
     },
     {
       "type": "checkbox",

@@ -170,7 +170,7 @@
     }
 
     .shipping-progress-bar__message--success {
-      color: var(--color-primary, #16a34a);
+      color: rgb(var(--color-button, var(--color-primary, 34, 197, 94)));
       font-weight: 600;
       animation: sl-fspb-success-pop 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
     }
@@ -207,10 +207,11 @@
       position: absolute;
       inset: 0;
       width: var(--progress, 0%);
-      background-image: linear-gradient(90deg, #38bdf8, #6366f1, #22c55e);
+      background-color: rgb(var(--color-button, var(--color-primary, 34, 197, 94)));
+      background-image: linear-gradient(90deg, rgb(var(--color-button, var(--color-primary, 34, 197, 94))), rgba(var(--color-button, var(--color-primary, 34, 197, 94)), 0.85));
       background-size: 200% 100%;
       border-radius: 999px;
-      box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.06), 0 8px 18px rgba(37, 99, 235, 0.45);
+      box-shadow: 0 0 0 1px rgba(var(--color-foreground, 15, 23, 42), 0.06), 0 4px 14px rgba(var(--color-button, var(--color-primary, 34, 197, 94)), 0.4);
       transition: width 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
       animation: sl-fspb-flow 1.4s ease-in-out infinite;
       transform-origin: left center;
@@ -264,12 +265,14 @@
     }
 
     .shipping-progress-bar--locked .shipping-progress-bar__fill {
-      background-image: linear-gradient(90deg, #e5e7eb, #cbd5f5);
-      box-shadow: 0 4px 10px rgba(148, 163, 184, 0.45);
+      background-color: rgb(var(--color-button, var(--color-primary, 34, 197, 94)));
+      background-image: linear-gradient(90deg, rgb(var(--color-button, var(--color-primary, 34, 197, 94))), rgba(var(--color-button, var(--color-primary, 34, 197, 94)), 0.75));
+      box-shadow: 0 4px 10px rgba(var(--color-foreground, 15, 23, 42), 0.12);
     }
 
     .shipping-progress-bar--unlocked .shipping-progress-bar__fill {
-      background-image: linear-gradient(90deg, #22c55e, #a3e635, #22c55e);
+      background-color: rgb(var(--color-button, var(--color-primary, 34, 197, 94)));
+      background-image: linear-gradient(90deg, rgb(var(--color-button, var(--color-primary, 34, 197, 94))), rgba(var(--color-button, var(--color-primary, 34, 197, 94)), 0.9), rgb(var(--color-button, var(--color-primary, 34, 197, 94))));
       animation: sl-fspb-pulse 1.2s ease-in-out infinite;
     }
 
@@ -506,14 +509,18 @@
         var tierClose = root.getAttribute('data-sl-fspb-tier-close');
         var tierMid = root.getAttribute('data-sl-fspb-tier-mid');
         var tierFar = root.getAttribute('data-sl-fspb-tier-far');
-        if (remaining < TIER_ALMOST_CENTS && tierAlmost) {
-          template = tierAlmost;
-        } else if (remaining < TIER_CLOSE_CENTS && tierClose) {
-          template = tierClose;
-        } else if (remaining < TIER_MID_CENTS && tierMid) {
-          template = tierMid;
-        } else if (tierFar) {
-          template = tierFar;
+        var defaultAlmost = 'Almost there! Just %amount% away from free shipping!';
+        var defaultClose = "You're getting close! Add %amount% more for free shipping";
+        var defaultMid = 'Add %amount% more to get free shipping on your order';
+        var defaultFar = 'Free shipping when you spend %amount% more';
+        if (remaining < TIER_ALMOST_CENTS) {
+          template = (tierAlmost != null && tierAlmost !== '') ? tierAlmost : defaultAlmost;
+        } else if (remaining < TIER_CLOSE_CENTS) {
+          template = (tierClose != null && tierClose !== '') ? tierClose : defaultClose;
+        } else if (remaining < TIER_MID_CENTS) {
+          template = (tierMid != null && tierMid !== '') ? tierMid : defaultMid;
+        } else {
+          template = (tierFar != null && tierFar !== '') ? tierFar : defaultFar;
         }
         var legacyToken = /\{\{\s*amount\s*\}\}/g;
         text = template.replace(/%amount%/g, formattedRemaining).replace(legacyToken, formattedRemaining);
@@ -547,23 +554,40 @@
       } catch (e) {}
     }
 
+    function onCartNeedsRefresh() {
+      setTimeout(fetchCartAndUpdate, 100);
+    }
+
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', fetchCartAndUpdate);
     } else {
       fetchCartAndUpdate();
     }
 
-    ['cart:change', 'cart:updated'].forEach(function(eventName) {
+    ['cart:refresh', 'cart:change', 'cart:updated', 'product:added'].forEach(function(eventName) {
       document.addEventListener(eventName, function(e) {
         var detail = e && e.detail ? e.detail : null;
         var cart = detail && (detail.cart || detail);
         if (cart) {
           updateAll(cart);
         } else {
-          fetchCartAndUpdate();
+          onCartNeedsRefresh();
         }
       });
     });
+
+    var _fetch = window.fetch;
+    if (typeof _fetch === 'function') {
+      window.fetch = function() {
+        var url = (arguments[0] && arguments[0].url) ? arguments[0].url : arguments[0];
+        return _fetch.apply(this, arguments).then(function(res) {
+          if (typeof url === 'string' && (url.indexOf('/cart/add') !== -1 || url.indexOf('/cart/change') !== -1 || url.indexOf('/cart/update') !== -1 || url.indexOf('/cart/clear') !== -1)) {
+            onCartNeedsRefresh();
+          }
+          return res;
+        });
+      };
+    }
   })();
   </script>
 {% elsif request.design_mode %}
