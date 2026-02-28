@@ -9,7 +9,7 @@ A comprehensive, categorized library of Shopify sections and snippets. Copy what
 ## Contents
 
 - [Quick reference (by category)](#quick-reference-by-category)
-- [Section Lab (all sections)](#section-lab-all-sections)
+- [All sections & snippets](#all-sections--snippets)
 - [Folder structure](#folder-structure-per-section)
 - [Categories overview](#categories-overview)
 - [Source repositories](#source-repositories-included-in-this-library)
@@ -57,7 +57,7 @@ A comprehensive, categorized library of Shopify sections and snippets. Copy what
 | | [Tooltips](Tooltips/README.md) | Sections.Design (this repo) | 2025-02-14 |
 | | [App Optimization](App%20Optimization/readme.md) | Sections.Design (this repo) | 2025-02-14 |
 | **Navigation & Content** | [SL – Story Navigation](Section%20Lab/Story%20Navigation/README.md) | Section Lab (paid) | 2025-02-14 |
-| | [SL – Scrolling Content](Section%20Lab/Scrolling%20Content/) | Section Lab (paid) | 2025-02-14 |
+| | [SL – Scrolling Content](Section%20Lab/Scrolling%20Content/README.md) | Section Lab (paid) | 2025-02-14 |
 | **Promotional** | [SL – Announcement Bar](Section%20Lab/Announcement%20Bar/README.md) | Section Lab (paid) | 2025-02-14 |
 | | [SL – Delivery Countdown](Section%20Lab/Delivery%20Countdown/README.md) | Section Lab (paid) | 2025-02-14 |
 | | [SL – Free Shipping Progress Bar](Section%20Lab/Free%20Shipping%20Progress%20Bar/README.md) | Section Lab (this repo) | 2025-02-24 |
@@ -67,31 +67,48 @@ A comprehensive, categorized library of Shopify sections and snippets. Copy what
 
 ---
 
-## Section Lab (all sections)
 
-Section Lab sections live under `Section Lab/`. Each has a `sections/` folder and often `snippets/` and/or `locales/`.
+## All sections & snippets
 
-| Section | Description |
-|---------|-------------|
-| [SL – Bundle](Section%20Lab/Bundle/README.md) | Bundle included products grid + product detail popups (Yves Rocher style). Metafield or blocks. |
-| [SL – How to Use](Section%20Lab/How%20To%20Use/README.md) | Product “how to use” steps from metaobject or manual blocks. |
-| [SL – Frequently Bought Together](Section%20Lab/Frequently%20Bought%20Together/README.md) | Product slider (recommendations or manual products). |
-| [SL – Price Bubble Widget](Section%20Lab/Price%20Bubble%20Widget/README.md) | Price bubble / badge. |
-| [SL – Icon List](Section%20Lab/Icon%20List/README.md) | Product bullets / icon list. |
-| [SL – Payment Icons](Section%20Lab/Payment%20Icons/README.md) | Payment method icons. |
-| [SL – Announcement Bar](Section%20Lab/Announcement%20Bar/README.md) | Top announcement bar. |
-| [SL – Delivery Countdown](Section%20Lab/Delivery%20Countdown/README.md) | Delivery countdown timer. |
-| [SL – Face Proof Bubble](Section%20Lab/Face%20Proof%20Bubble/README.md) | Social proof bubble. |
-| [SL – Sales Nudge Widget](Section%20Lab/Nudges%20Widget/README.md) | Sales nudge / urgency widget. |
-| [SL – Story Navigation](Section%20Lab/Story%20Navigation/README.md) | Story-style navigation. |
-| [SL – Scrolling Content](Section%20Lab/Scrolling%20Content/) | Horizontal scrolling content. |
-| [SL – Native Video Slider](Section%20Lab/Native%20Video%20Slider/README.md) | Native video slider. |
-| [SL – UGC Videos Homepage](Section%20Lab/UGC%20Videos%20Homepage/README.md) | UGC videos on homepage. |
-| [SL – Social Proof Video](Section%20Lab/Social%20Proof%20Video/README.md) | Social proof video section. |
-| [SL – Before And After](Section%20Lab/Before%20And%20After/README.md) | Before/after video or media. |
-| [SL – Real Results](Section%20Lab/Real%20Results/README.md) | Real results / testimonials. |
-| [SL – Volume Discount](Section%20Lab/Volume%20Discount/README.md) | Product volume/quantity discount tiers (metaobject); display-only Swiper cards. |
-| [SL – Free Shipping Progress Bar](Section%20Lab/Free%20Shipping%20Progress%20Bar/README.md) | Cart free-shipping threshold progress bar; cart page and minicart. |
+Every folder that contains `.liquid` section or snippet files. Sorted by last updated (oldest first, most recent at bottom). Each folder has a README with install steps and source.
+
+| Section / Snippet | Description | Updated |
+|------------------|-------------|---------|
+| [App Optimization](App%20Optimization/readme.md) | Optimize ScriptTag-loaded apps (block or load on interaction). | 2026-02-14 |
+| [Collection Page Swatches](Collection%20Page%20Swatches/README.md) | Color swatches on collection pages (snippet). | 2026-02-14 |
+| [Double Block Section](Double%20Block%20Section/README.md) | Two-block hero: 3/4 + 1/4 image layout. | 2026-02-14 |
+| [FAQ](FAQ/readme.md) | Accessible FAQ with SEO FAQ schema. | 2026-02-14 |
+| [IP Redirection](IP%20Redirection/README.md) | Redirect by IP / geo (snippet). | 2026-02-14 |
+| [Marquee Products](Marquee%20Products/README.md) | Horizontal scrolling product marquee. | 2026-02-14 |
+| [Media Slider Snap](Media%20Slider%20Snap/README.md) | Video/media slider with snap scroll. | 2026-02-14 |
+| [Pagination With Numbers](Pagination%20With%20Numbers/README.md) | Numbered pagination (snippet). | 2026-02-14 |
+| [Quiz](Quiz/README.md) | Product recommendation quiz section. | 2026-02-14 |
+| [Sectioned Contact Form](Sectioned%20Contact%20Form/README.md) | Drag-and-drop contact form builder. | 2026-02-14 |
+| [Tabbed Description](Tabbed%20Description/README.md) | Product description in tabs by H6 (snippet). | 2026-02-14 |
+| [Tooltips](Tooltips/README.md) | Product tooltips section. | 2026-02-14 |
+| [Video Slider](Video%20Slider/README.md) | Horizontal video slider (Swiper.js). | 2026-02-14 |
+| [Videos Slider](Videos%20Slider/README.md) | Mixed media carousel (images + videos). | 2026-02-14 |
+| [SL – Announcement Bar](Section%20Lab/Announcement%20Bar/README.md) | Top announcement bar. | 2026-02-16 |
+| [SL – Native Video Slider](Section%20Lab/Native%20Video%20Slider/README.md) | Native video slider. | 2026-02-16 |
+| [SL – Price Bubble Widget](Section%20Lab/Price%20Bubble%20Widget/README.md) | Price bubble / badge. | 2026-02-16 |
+| [SL – Story Navigation](Section%20Lab/Story%20Navigation/README.md) | Story-style navigation. | 2026-02-16 |
+| [SL – Delivery Countdown](Section%20Lab/Delivery%20Countdown/README.md) | Delivery countdown timer. | 2026-02-18 |
+| [SL – Face Proof Bubble](Section%20Lab/Face%20Proof%20Bubble/README.md) | Social proof bubble. | 2026-02-18 |
+| [SL – Icon List](Section%20Lab/Icon%20List/README.md) | Product bullets / icon list. | 2026-02-18 |
+| [SL – Payment Icons](Section%20Lab/Payment%20Icons/README.md) | Payment method icons. | 2026-02-18 |
+| [SL – Scrolling Content](Section%20Lab/Scrolling%20Content/README.md) | Horizontal scrolling marquee text. | 2026-02-24 |
+| [Product Card Label](Product%20Card%20Label/README.md) | On-card label from metafield (snippet). | 2026-02-25 |
+| [Scarcity Bar](Scarcity%20Bar/README.md) | "Only X left" urgency bar with progress. | 2026-02-25 |
+| [SL – Bundle](Section%20Lab/Bundle/README.md) | Bundle products grid + detail popups (Yves Rocher style). | 2026-02-25 |
+| [SL – Before And After](Section%20Lab/Before%20And%20After/README.md) | Before/after video or media. | 2026-02-26 |
+| [SL – Real Results](Section%20Lab/Real%20Results/README.md) | Real results / testimonials. | 2026-02-26 |
+| [SL – Frequently Bought Together](Section%20Lab/Frequently%20Bought%20Together/README.md) | Product slider (recommendations or manual). | 2026-02-27 |
+| [SL – How to Use](Section%20Lab/How%20To%20Use/README.md) | Product "how to use" steps (metaobject or blocks). | 2026-02-27 |
+| [SL – Social Proof Video](Section%20Lab/Social%20Proof%20Video/README.md) | Social proof video section. | 2026-02-27 |
+| [SL – UGC Videos Homepage](Section%20Lab/UGC%20Videos%20Homepage/README.md) | UGC videos on homepage. | 2026-02-27 |
+| [SL – Free Shipping Progress Bar](Section%20Lab/Free%20Shipping%20Progress%20Bar/README.md) | Cart free-shipping threshold progress bar. | 2026-02-28 |
+| [SL – Sales Nudge Widget](Section%20Lab/Nudges%20Widget/README.md) | Sales nudge / urgency widget. | 2026-02-28 |
+| [SL – Volume Discount](Section%20Lab/Volume%20Discount/README.md) | Volume/quantity discount tiers (metaobject). | 2026-02-28 |
 
 ---
 
