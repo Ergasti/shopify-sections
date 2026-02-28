@@ -74,6 +74,8 @@
     var sectionId = "{{ section.id }}";
     var previewMode = {{ section.settings.preview_mode_enable | json }};
     var headlineText = {{ section.settings.headline_text | strip_html | json }};
+    var toastDurationMs = previewMode ? -1 : ({{ section.settings.toast_duration_seconds | default: 5 }} * 1000);
+    var fadeOutSeconds = 5;
 
     function formatNudgeMessage(city, productTitle) {
       var msg = i18n.nudge_message || 'Someone from {{ city }} just bought {{ product }}';
@@ -106,10 +108,23 @@
       var pos = "{{ section.settings.position }}";
       if (isRtl && (pos === 'left' || pos === 'right')) pos = pos === 'left' ? 'right' : 'left';
 
+      var toastStyle = {
+        background: "{{ section.settings.background_color }}",
+        color: "{{ section.settings.text_color }}",
+        padding: "{{ section.settings.padding }}px",
+        maxWidth: "{{ section.settings.max_width }}px",
+        border: "{{ section.settings.border_width }}px solid {{ section.settings.border_color }}",
+        borderRadius: "{{ section.settings.border_radius }}px",
+        boxShadow: "0px 0px {{ section.settings.shadow_blur }}px 0px rgba(0, 0, 0, {{ section.settings.shadow_opacity }})"
+      };
+      if (toastDurationMs > 0 && toastDurationMs > fadeOutSeconds * 1000) {
+        var fadeDelay = (toastDurationMs / 1000 - fadeOutSeconds) + "s";
+        toastStyle.animation = "sl-nudge-fadeout " + fadeOutSeconds + "s ease-out " + fadeDelay + " forwards";
+      }
       Toastify({
         node: null,
         text: html,
-        duration: previewMode ? -1 : 10000,
+        duration: toastDurationMs,
         gravity: "{{ section.settings.gravity }}",
         position: pos,
         escapeMarkup: false,
@@ -117,15 +132,7 @@
         close: true,
         destination: rootPath.replace(/\/$/, '') + "/products/" + (product.handle || ""),
         className: "sl-toast sl-toast-{{ section.id }}",
-        style: {
-          background: "{{ section.settings.background_color }}",
-          color: "{{ section.settings.text_color }}",
-          padding: "{{ section.settings.padding }}px",
-          maxWidth: "{{ section.settings.max_width }}px",
-          border: "{{ section.settings.border_width }}px solid {{ section.settings.border_color }}",
-          borderRadius: "{{ section.settings.border_radius }}px",
-          boxShadow: "0px 0px {{ section.settings.shadow_blur }}px 0px rgba(0, 0, 0, {{ section.settings.shadow_opacity }})"
-        },
+        style: toastStyle,
         onClick: function() {
           if (product.handle) window.location.href = rootPath.replace(/\/$/, '') + "/products/" + product.handle;
         }
@@ -150,6 +157,10 @@
 </script>
 
 <style>
+  @keyframes sl-nudge-fadeout {
+    to { opacity: 0; }
+  }
+
   /* Container card styling to mimic Judge.me popup */
   .sl-toast-{{ section.id }}.toastify {
     padding: 0 !important;
@@ -285,6 +296,16 @@
       "id": "products",
       "label": "Products",
       "limit": 10
+    },
+    {
+      "type": "range",
+      "id": "toast_duration_seconds",
+      "label": "Show duration (seconds)",
+      "min": 3,
+      "max": 15,
+      "step": 1,
+      "default": 5,
+      "info": "Toast stays visible then fades out"
     },
     {
       "type": "header",
