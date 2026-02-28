@@ -2,18 +2,22 @@
   SL - Free Shipping Progress Bar (Snippet)
   Usage:
     {% render 'sl-free-shipping-progress-bar',
-      threshold_amount: 50,           # in store currency units (e.g. 50 = $50)
+      threshold_amount: 50,
       success_message: "You've unlocked free shipping!",
       progress_message_template: "Add %amount% more for free shipping",
-      hide_when_cart_empty: true
+      hide_when_cart_empty: true,
+      fill_color_start: "#4ade80",    # gradient start (lighter); defaults to green
+      fill_color_end: "#16a34a"      # gradient end (darker / primary); defaults to green
     %}
 
   Notes:
   - Uses the current cart total (`cart.total_price`) by default.
   - `threshold_amount` is required for the bar to appear.
-  - `progress_message_template` should include the token %amount%, which will be
-    replaced with the remaining amount needed for free shipping (formatted with `money`).
-  - For backward compatibility, templates that still use "{{ amount }}" will also work.
+  - Progress bar gradient runs from `fill_color_start` to `fill_color_end`. Omit both to use
+    default green (#4ade80 → #16a34a). Set `fill_color_start` only to gradient from your
+    color to the default primary green.
+  - `show_stripes` (default: true) — set to false to hide the diagonal stripes on the fill.
+  - `progress_message_template` uses %amount% as placeholder for the remaining amount.
 {% endcomment %}
 
 {% assign threshold_amount = threshold_amount | default: 0 | plus: 0 %}
@@ -57,8 +61,16 @@
   {% endif %}
 
   {% assign shop_currency = cart.currency | default: shop.currency | default: 'USD' %}
+  {% assign fill_color_start = fill_color_start | default: '#4ade80' | strip %}
+  {% assign fill_color_end = fill_color_end | default: '#16a34a' | strip %}
+  {% if show_stripes == false or show_stripes == 'false' %}
+    {% assign show_stripes = false %}
+  {% else %}
+    {% assign show_stripes = true %}
+  {% endif %}
   <div
-    class="shipping-progress-bar{% if threshold_reached %} shipping-progress-bar--unlocked{% else %} shipping-progress-bar--locked{% endif %}{% if should_hide %} hidden{% endif %}"
+    class="shipping-progress-bar{% if threshold_reached %} shipping-progress-bar--unlocked{% else %} shipping-progress-bar--locked{% endif %}{% unless show_stripes %} shipping-progress-bar--no-stripes{% endunless %}{% if should_hide %} hidden{% endif %}"
+    style="--sl-fspb-fill-start: {{ fill_color_start }}; --sl-fspb-fill-end: {{ fill_color_end }};"
     data-sl-fspb-threshold="{{ threshold_cents }}"
     {% if threshold_reached %}data-sl-fspb-unlocked-seen{% endif %}
     data-sl-fspb-hide-empty="{{ hide_when_cart_empty }}"
@@ -83,20 +95,23 @@
         </p>
       {% endif %}
 
-      <div class="shipping-progress-bar__track" style="--progress: {{ progress_percentage }}%">
-        <div
-          class="shipping-progress-bar__fill"
-          style="--progress: {{ progress_percentage }}%"
-          role="progressbar"
-          aria-valuenow="{{ progress_percentage }}"
-          aria-valuemin="0"
-          aria-valuemax="100"
-          aria-label="{{ success_message }}"
-        ></div>
+      <div class="shipping-progress-bar__track-wrap" style="--progress: {{ progress_percentage }}%">
         <div class="shipping-progress-bar__truck" aria-hidden="true">
           <span class="shipping-progress-bar__truck-inner shipping-progress-bar__truck-emoji">🚚</span>
         </div>
-        <div class="shipping-progress-bar__confetti{% if threshold_reached %} shipping-progress-bar__confetti--play{% endif %}" aria-hidden="true" data-sl-fspb-confetti>
+        <div class="shipping-progress-bar__track">
+          <div
+            class="shipping-progress-bar__fill"
+            style="--progress: {{ progress_percentage }}%"
+            role="progressbar"
+            aria-valuenow="{{ progress_percentage }}"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            aria-label="{{ success_message }}"
+          >
+            <div class="shipping-progress-bar__stripes"></div>
+          </div>
+          <div class="shipping-progress-bar__confetti{% if threshold_reached %} shipping-progress-bar__confetti--play{% endif %}" aria-hidden="true" data-sl-fspb-confetti>
           <span></span>
           <span></span>
           <span></span>
@@ -105,6 +120,7 @@
           <span></span>
           <span></span>
           <span></span>
+          </div>
         </div>
       </div>
     </div>
@@ -137,7 +153,7 @@
       font-size: var(--cart-font-size--sm, 0.95rem);
       text-align: center;
       margin: 0;
-      color: var(--color-foreground, #0f172a);
+      color: #374151;
       letter-spacing: 0.01em;
       display: inline-flex;
       align-items: center;
@@ -147,7 +163,7 @@
     }
 
     .shipping-progress-bar__message--success {
-      color: rgb(var(--color-button, var(--color-primary, 34, 197, 94)));
+      color: #15803d;
       font-weight: 600;
       animation: sl-fspb-success-pop 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
     }
@@ -161,38 +177,58 @@
       background: rgba(15, 23, 42, 0.04);
     }
 
+    .shipping-progress-bar__track-wrap {
+      position: relative;
+      width: 100%;
+      padding-top: 26px;
+    }
+
     .shipping-progress-bar__track {
       position: relative;
       width: 100%;
-      height: 14px;
-      background: linear-gradient(90deg, rgba(148, 163, 184, 0.4), rgba(148, 163, 184, 0.15));
-      border-radius: 999px;
+      height: 10px;
+      background: #eeeeee;
+      border-radius: 10px;
       overflow: hidden;
+    }
+
+    .shipping-progress-bar--no-stripes .shipping-progress-bar__stripes {
+      display: none;
     }
 
     .shipping-progress-bar__fill {
       position: absolute;
       inset: 0;
       width: var(--progress, 0%);
-      background: linear-gradient(90deg, rgba(var(--color-button, var(--color-primary, 34, 197, 94)), 0.6), rgb(var(--color-button, var(--color-primary, 34, 197, 94))), rgba(var(--color-button, var(--color-primary, 22, 163, 74)), 0.95));
-      background-color: rgb(var(--color-button, var(--color-primary, 34, 197, 94)));
-      border-radius: 999px;
-      box-shadow: 0 0 0 1px rgba(var(--color-foreground, 15, 23, 42), 0.06), 0 4px 14px rgba(var(--color-button, var(--color-primary, 34, 197, 94)), 0.35);
-      transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+      height: 100%;
+      background: linear-gradient(90deg, var(--sl-fspb-fill-start, #4ade80), var(--sl-fspb-fill-end, #16a34a));
+      border-radius: 10px;
+      transition: width 0.5s ease;
       transform-origin: left center;
       overflow: hidden;
     }
 
-    .shipping-progress-bar__fill::after {
-      content: "";
+    .shipping-progress-bar__stripes {
       position: absolute;
       inset: 0;
-      border-radius: 999px;
-      background: linear-gradient(105deg, transparent 0%, transparent 35%, rgba(255, 255, 255, 0.2) 45%, rgba(255, 255, 255, 0.35) 50%, rgba(255, 255, 255, 0.2) 55%, transparent 65%, transparent 100%);
-      background-size: 60% 100%;
-      background-repeat: no-repeat;
-      animation: sl-fspb-shimmer 2.2s ease-in-out infinite;
+      background-image: linear-gradient(
+        45deg,
+        rgba(255, 255, 255, 0.25) 25%,
+        transparent 25%,
+        transparent 50%,
+        rgba(255, 255, 255, 0.25) 50%,
+        rgba(255, 255, 255, 0.25) 75%,
+        transparent 75%,
+        transparent
+      );
+      background-size: 14px 14px;
+      animation: sl-fspb-stripes 1s linear infinite;
       pointer-events: none;
+    }
+
+    @keyframes sl-fspb-stripes {
+      from { background-position: 0 0; }
+      to { background-position: 14px 0; }
     }
 
     .shipping-progress-bar__icon-emoji {
@@ -203,16 +239,18 @@
 
     .shipping-progress-bar__truck {
       position: absolute;
-      inset-block: 0;
+      top: 0;
       left: 0;
       width: 100%;
+      height: 26px;
       pointer-events: none;
       display: flex;
-      align-items: center;
+      align-items: flex-end;
+      justify-content: flex-start;
     }
 
     .shipping-progress-bar__truck-inner {
-      position: relative;
+      position: absolute;
       left: calc(var(--progress, 0%) - 14px);
       display: inline-flex;
       align-items: center;
@@ -233,12 +271,11 @@
     }
 
     .shipping-progress-bar--locked .shipping-progress-bar__fill {
-      background: linear-gradient(90deg, rgba(var(--color-button, var(--color-primary, 34, 197, 94)), 0.55), rgb(var(--color-button, var(--color-primary, 34, 197, 94))), rgba(var(--color-button, var(--color-primary, 22, 163, 74)), 0.9));
-      box-shadow: 0 4px 10px rgba(var(--color-foreground, 15, 23, 42), 0.12);
+      background: linear-gradient(90deg, var(--sl-fspb-fill-start, #4ade80), var(--sl-fspb-fill-end, #16a34a));
     }
 
     .shipping-progress-bar--unlocked .shipping-progress-bar__fill {
-      background: linear-gradient(90deg, rgba(var(--color-button, var(--color-primary, 34, 197, 94)), 0.5), rgb(var(--color-button, var(--color-primary, 34, 197, 94))), rgba(var(--color-button, var(--color-primary, 22, 163, 74)), 0.95));
+      background: linear-gradient(90deg, var(--sl-fspb-fill-start, #4ade80), var(--sl-fspb-fill-end, #16a34a));
       animation: sl-fspb-pulse 1.2s ease-in-out infinite;
     }
 
@@ -332,21 +369,6 @@
       }
     }
 
-    @keyframes sl-fspb-shimmer {
-      0% {
-        transform: translateX(-100%);
-        opacity: 0.8;
-      }
-      50% {
-        transform: translateX(100%);
-        opacity: 1;
-      }
-      100% {
-        transform: translateX(-100%);
-        opacity: 0.8;
-      }
-    }
-
     @keyframes sl-fspb-pulse {
       0% {
         transform: scaleX(1);
@@ -397,7 +419,7 @@
     @media (prefers-reduced-motion: reduce) {
       .shipping-progress-bar,
       .shipping-progress-bar__fill,
-      .shipping-progress-bar__fill::after,
+      .shipping-progress-bar__stripes,
       .shipping-progress-bar__confetti span,
       .shipping-progress-bar__message--success,
       .shipping-progress-bar__truck-inner,
@@ -476,6 +498,8 @@
 
       fillEl.style.setProperty('--progress', progress + '%');
       fillEl.setAttribute('aria-valuenow', String(Math.round(progress)));
+      var trackWrap = trackEl && trackEl.parentElement;
+      if (trackWrap) trackWrap.style.setProperty('--progress', progress + '%');
       if (trackEl) trackEl.style.setProperty('--progress', progress + '%');
 
       var template = root.getAttribute('data-sl-fspb-template') || 'Add %amount% more for free shipping';

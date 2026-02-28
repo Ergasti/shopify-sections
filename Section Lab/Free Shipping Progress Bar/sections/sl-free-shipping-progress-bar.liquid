@@ -23,7 +23,10 @@
       tier_message_close: section.settings.tier_message_close,
       tier_message_mid: section.settings.tier_message_mid,
       tier_message_far: section.settings.tier_message_far,
-      hide_when_cart_empty: section.settings.hide_when_cart_empty
+      hide_when_cart_empty: section.settings.hide_when_cart_empty,
+      fill_color_start: section.settings.fill_color_start,
+      fill_color_end: section.settings.fill_color_end,
+      show_stripes: section.settings.show_stripes
     %}
   </div>
 </div>
@@ -118,6 +121,30 @@
       "type": "checkbox",
       "id": "hide_when_cart_empty",
       "label": "Hide when cart is empty",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Progress bar colors"
+    },
+    {
+      "type": "color",
+      "id": "fill_color_start",
+      "label": "Progress bar gradient start",
+      "default": "#4ade80",
+      "info": "Lighter end of the bar. Gradient runs to the end color (or theme primary green)."
+    },
+    {
+      "type": "color",
+      "id": "fill_color_end",
+      "label": "Progress bar gradient end",
+      "default": "#16a34a",
+      "info": "Darker / primary end. Defaults to green if not set; can match theme primary."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_stripes",
+      "label": "Show diagonal stripes on bar",
       "default": true
     },
     {
