@@ -2,7 +2,7 @@
 
 A comprehensive, categorized library of Shopify sections and snippets. Copy what you need into your theme.
 
-**Library last updated:** 2025-02-24
+**Library last updated:** 2025-02-28
 
 ---
 
@@ -37,6 +37,7 @@ A comprehensive, categorized library of Shopify sections and snippets. Copy what
 | | [SL – Icon List (Product Bullets)](Section%20Lab/Icon%20List/README.md) | Section Lab (paid) | 2025-02-14 |
 | | [SL – Payment Icons](Section%20Lab/Payment%20Icons/README.md) | Section Lab (paid) | 2025-02-14 |
 | | [SL – Frequently Bought Together](Section%20Lab/Frequently%20Bought%20Together/README.md) | Section Lab (paid) | 2025-02-14 |
+| | [SL – Volume Discount](Section%20Lab/Volume%20Discount/README.md) | Section Lab (this repo) | 2025-02-24 |
 | | [Scarcity Bar](Scarcity%20Bar/README.md) | Custom (this repo) | 2025-02-14 |
 | | [Collection Page Swatches](Collection%20Page%20Swatches/README.md) | patrickbolle/shopify-snippets | 2025-02-14 |
 | **Media & Gallery** | [Image Gallery (BoldizArt)](Image%20Gallery%20(BoldizArt)/README.md) | BoldizArt/Shopify-Image-Gallery | 2025-02-14 |
@@ -59,6 +60,7 @@ A comprehensive, categorized library of Shopify sections and snippets. Copy what
 | | [SL – Scrolling Content](Section%20Lab/Scrolling%20Content/) | Section Lab (paid) | 2025-02-14 |
 | **Promotional** | [SL – Announcement Bar](Section%20Lab/Announcement%20Bar/README.md) | Section Lab (paid) | 2025-02-14 |
 | | [SL – Delivery Countdown](Section%20Lab/Delivery%20Countdown/README.md) | Section Lab (paid) | 2025-02-14 |
+| | [SL – Free Shipping Progress Bar](Section%20Lab/Free%20Shipping%20Progress%20Bar/README.md) | Section Lab (this repo) | 2025-02-24 |
 | **Marketing & Social Proof** | [SL – Face Proof Bubble](Section%20Lab/Face%20Proof%20Bubble/README.md) | Section Lab (paid) | 2025-02-14 |
 | | [SL – Sales Nudge Widget](Section%20Lab/Nudges%20Widget/README.md) | Section Lab (paid) | 2025-02-14 |
 | **Maps & Local** | [Shop by State Map](Shop%20by%20State%20Map/README.md) | bhoomikakanwarchouhan2104-cpu/shop-by-state-Map-Feature- | 2025-02-14 |
@@ -88,6 +90,8 @@ Section Lab sections live under `Section Lab/`. Each has a `sections/` folder an
 | [SL – Social Proof Video](Section%20Lab/Social%20Proof%20Video/README.md) | Social proof video section. |
 | [SL – Before And After](Section%20Lab/Before%20And%20After/README.md) | Before/after video or media. |
 | [SL – Real Results](Section%20Lab/Real%20Results/README.md) | Real results / testimonials. |
+| [SL – Volume Discount](Section%20Lab/Volume%20Discount/README.md) | Product volume/quantity discount tiers (metaobject); display-only Swiper cards. |
+| [SL – Free Shipping Progress Bar](Section%20Lab/Free%20Shipping%20Progress%20Bar/README.md) | Cart free-shipping threshold progress bar; cart page and minicart. |
 
 ---
 
@@ -116,12 +120,12 @@ SectionName/                    # or Section Lab/SubSectionName/
 | **Content & Layout** | Double block, image/text, grids |
 | **Forms & Contact** | Contact form builders |
 | **Snippets & Utilities** | Tabbed description, pagination, IP redirect |
-| **Product & Collection** | Bundle, how to use, price bubble, icon list, payment icons, FBT, scarcity bar, swatches |
+| **Product & Collection** | Bundle, how to use, price bubble, icon list, payment icons, FBT, volume discount, scarcity bar, swatches |
 | **Media & Gallery** | Image galleries, grid banners |
 | **Video & Media** | Native video slider, UGC, social proof video, before/after, real results, media snap, video sliders, YouTube |
 | **Specialized** | Timeline, pricing table, FAQ, quiz, tooltips, app optimization |
 | **Navigation & Content** | Story navigation, scrolling content |
-| **Promotional** | Announcement bar, delivery countdown |
+| **Promotional** | Announcement bar, delivery countdown, free shipping progress bar |
 | **Marketing & Social Proof** | Face proof bubble, sales nudge |
 | **Maps & Local** | Shop by state/region |
 
@@ -145,7 +149,7 @@ SectionName/                    # or Section Lab/SubSectionName/
 | [iShopifyExpert/custom-slider](https://github.com/iShopifyExpert/custom-slider) | Custom / gallery slider (reference) |
 | [uxhacks/shopify-sections](https://github.com/uxhacks/shopify-sections) | Sections (reference) |
 | [jydykun/Shopify-Sections](https://github.com/jydykun/Shopify-Sections) | Skeleton theme (reference) |
-| **Section Lab** (this repo / paid bundle) | Bundle, How to Use, FBT, Price Bubble, Icon List, Payment Icons, Announcement Bar, Delivery Countdown, Face Proof Bubble, Nudges, Story Navigation, Scrolling Content, Native Video Slider, UGC Videos, Social Proof Video, Before And After, Real Results |
+| **Section Lab** (this repo / paid bundle) | Bundle, How to Use, FBT, Volume Discount, Free Shipping Progress Bar, Price Bubble, Icon List, Payment Icons, Announcement Bar, Delivery Countdown, Face Proof Bubble, Nudges, Story Navigation, Scrolling Content, Native Video Slider, UGC Videos, Social Proof Video, Before And After, Real Results |
 
 ---
 
