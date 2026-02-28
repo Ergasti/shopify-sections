@@ -60,6 +60,7 @@
   <div
     class="shipping-progress-bar{% if threshold_reached %} shipping-progress-bar--unlocked{% else %} shipping-progress-bar--locked{% endif %}{% if should_hide %} hidden{% endif %}"
     data-sl-fspb-threshold="{{ threshold_cents }}"
+    {% if threshold_reached %}data-sl-fspb-unlocked-seen{% endif %}
     data-sl-fspb-hide-empty="{{ hide_when_cart_empty }}"
     data-sl-fspb-success-msg="{{ success_message | escape }}"
     data-sl-fspb-template="{{ progress_message_template | escape }}"
@@ -72,24 +73,12 @@
     <div class="shipping-progress-bar__container">
       {% if threshold_reached %}
         <p class="shipping-progress-bar__message shipping-progress-bar__message--success" aria-live="polite">
-          <span class="shipping-progress-bar__icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" class="shipping-progress-bar__icon-svg" aria-hidden="true" focusable="false">
-              <path d="M5 17a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
-              <path d="M15 17a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
-              <path d="M5 17h-2v-4m-1 -8h11v12m-4 0h6m4 0h2v-6h-8m0 -5h5l3 5" />
-            </svg>
-          </span>
+          <span class="shipping-progress-bar__icon shipping-progress-bar__icon-emoji" aria-hidden="true">🚚</span>
           <span class="shipping-progress-bar__message-text">{{ success_message }}</span>
         </p>
       {% else %}
         <p class="shipping-progress-bar__message" aria-live="polite">
-          <span class="shipping-progress-bar__icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" class="shipping-progress-bar__icon-svg" aria-hidden="true" focusable="false">
-              <path d="M5 17a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
-              <path d="M15 17a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
-              <path d="M5 17h-2v-4m-1 -8h11v12m-4 0h6m4 0h2v-6h-8m0 -5h5l3 5" />
-            </svg>
-          </span>
+          <span class="shipping-progress-bar__icon shipping-progress-bar__icon-emoji" aria-hidden="true">🚚</span>
           <span class="shipping-progress-bar__message-text">{{ progress_message | strip }}</span>
         </p>
       {% endif %}
@@ -105,30 +94,18 @@
           aria-label="{{ success_message }}"
         ></div>
         <div class="shipping-progress-bar__truck" aria-hidden="true">
-          <span class="shipping-progress-bar__truck-inner">
-            <svg viewBox="0 0 24 24" class="shipping-progress-bar__truck-svg" aria-hidden="true" focusable="false">
-              <g class="shipping-progress-bar__truck-body">
-                <path d="M5 17h-2v-4m-1 -8h11v12m-4 0h6m4 0h2v-6h-8m0 -5h5l3 5" />
-              </g>
-              <g class="shipping-progress-bar__truck-wheels">
-                <path d="M5 17a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
-                <path d="M15 17a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
-              </g>
-            </svg>
-          </span>
+          <span class="shipping-progress-bar__truck-inner shipping-progress-bar__truck-emoji">🚚</span>
         </div>
-        {% if threshold_reached %}
-          <div class="shipping-progress-bar__confetti" aria-hidden="true">
-            <span></span>
-            <span></span>
-            <span></span>
-            <span></span>
-            <span></span>
-            <span></span>
-            <span></span>
-            <span></span>
-          </div>
-        {% endif %}
+        <div class="shipping-progress-bar__confetti{% if threshold_reached %} shipping-progress-bar__confetti--play{% endif %}" aria-hidden="true" data-sl-fspb-confetti>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
       </div>
     </div>
   </div>
@@ -184,16 +161,6 @@
       background: rgba(15, 23, 42, 0.04);
     }
 
-    .shipping-progress-bar__icon-svg {
-      width: 22px;
-      height: 22px;
-      stroke: currentColor;
-      fill: none;
-      stroke-width: 1.6;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-
     .shipping-progress-bar__track {
       position: relative;
       width: 100%;
@@ -207,14 +174,31 @@
       position: absolute;
       inset: 0;
       width: var(--progress, 0%);
+      background: linear-gradient(90deg, rgba(var(--color-button, var(--color-primary, 34, 197, 94)), 0.6), rgb(var(--color-button, var(--color-primary, 34, 197, 94))), rgba(var(--color-button, var(--color-primary, 22, 163, 74)), 0.95));
       background-color: rgb(var(--color-button, var(--color-primary, 34, 197, 94)));
-      background-image: linear-gradient(90deg, rgb(var(--color-button, var(--color-primary, 34, 197, 94))), rgba(var(--color-button, var(--color-primary, 34, 197, 94)), 0.85));
-      background-size: 200% 100%;
       border-radius: 999px;
-      box-shadow: 0 0 0 1px rgba(var(--color-foreground, 15, 23, 42), 0.06), 0 4px 14px rgba(var(--color-button, var(--color-primary, 34, 197, 94)), 0.4);
-      transition: width 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
-      animation: sl-fspb-flow 1.4s ease-in-out infinite;
+      box-shadow: 0 0 0 1px rgba(var(--color-foreground, 15, 23, 42), 0.06), 0 4px 14px rgba(var(--color-button, var(--color-primary, 34, 197, 94)), 0.35);
+      transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1);
       transform-origin: left center;
+      overflow: hidden;
+    }
+
+    .shipping-progress-bar__fill::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 999px;
+      background: linear-gradient(105deg, transparent 0%, transparent 35%, rgba(255, 255, 255, 0.2) 45%, rgba(255, 255, 255, 0.35) 50%, rgba(255, 255, 255, 0.2) 55%, transparent 65%, transparent 100%);
+      background-size: 60% 100%;
+      background-repeat: no-repeat;
+      animation: sl-fspb-shimmer 2.2s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    .shipping-progress-bar__icon-emoji {
+      font-size: 1.25rem;
+      line-height: 1;
+      filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15));
     }
 
     .shipping-progress-bar__truck {
@@ -229,7 +213,7 @@
 
     .shipping-progress-bar__truck-inner {
       position: relative;
-      left: calc(var(--progress, 0%) - 12px);
+      left: calc(var(--progress, 0%) - 14px);
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -237,20 +221,10 @@
       transition: left 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
     }
 
-    .shipping-progress-bar__truck-svg {
-      width: 26px;
-      height: 26px;
-      stroke: #0f172a;
-      fill: #ffffff;
-      stroke-width: 1.7;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-      filter: drop-shadow(0 1px 3px rgba(15, 23, 42, 0.45));
-    }
-
-    .shipping-progress-bar__truck-body {
-      animation: sl-fspb-truck-wiggle 0.6s ease-in-out infinite;
-      transform-origin: 14px 14px;
+    .shipping-progress-bar__truck-emoji {
+      font-size: 1.5rem;
+      line-height: 1;
+      filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.25));
     }
 
     @keyframes sl-fspb-truck-bounce {
@@ -258,21 +232,13 @@
       50% { transform: translateY(-3px); }
     }
 
-    @keyframes sl-fspb-truck-wiggle {
-      0%, 100% { transform: rotate(0deg); }
-      25% { transform: rotate(-0.6deg); }
-      75% { transform: rotate(0.6deg); }
-    }
-
     .shipping-progress-bar--locked .shipping-progress-bar__fill {
-      background-color: rgb(var(--color-button, var(--color-primary, 34, 197, 94)));
-      background-image: linear-gradient(90deg, rgb(var(--color-button, var(--color-primary, 34, 197, 94))), rgba(var(--color-button, var(--color-primary, 34, 197, 94)), 0.75));
+      background: linear-gradient(90deg, rgba(var(--color-button, var(--color-primary, 34, 197, 94)), 0.55), rgb(var(--color-button, var(--color-primary, 34, 197, 94))), rgba(var(--color-button, var(--color-primary, 22, 163, 74)), 0.9));
       box-shadow: 0 4px 10px rgba(var(--color-foreground, 15, 23, 42), 0.12);
     }
 
     .shipping-progress-bar--unlocked .shipping-progress-bar__fill {
-      background-color: rgb(var(--color-button, var(--color-primary, 34, 197, 94)));
-      background-image: linear-gradient(90deg, rgb(var(--color-button, var(--color-primary, 34, 197, 94))), rgba(var(--color-button, var(--color-primary, 34, 197, 94)), 0.9), rgb(var(--color-button, var(--color-primary, 34, 197, 94))));
+      background: linear-gradient(90deg, rgba(var(--color-button, var(--color-primary, 34, 197, 94)), 0.5), rgb(var(--color-button, var(--color-primary, 34, 197, 94))), rgba(var(--color-button, var(--color-primary, 22, 163, 74)), 0.95));
       animation: sl-fspb-pulse 1.2s ease-in-out infinite;
     }
 
@@ -300,6 +266,9 @@
       border-radius: 2px;
       opacity: 0;
       transform-origin: center;
+    }
+
+    .shipping-progress-bar__confetti--play span {
       animation: sl-fspb-confetti-fall 900ms ease-out forwards;
     }
 
@@ -363,6 +332,21 @@
       }
     }
 
+    @keyframes sl-fspb-shimmer {
+      0% {
+        transform: translateX(-100%);
+        opacity: 0.8;
+      }
+      50% {
+        transform: translateX(100%);
+        opacity: 1;
+      }
+      100% {
+        transform: translateX(-100%);
+        opacity: 0.8;
+      }
+    }
+
     @keyframes sl-fspb-pulse {
       0% {
         transform: scaleX(1);
@@ -413,10 +397,10 @@
     @media (prefers-reduced-motion: reduce) {
       .shipping-progress-bar,
       .shipping-progress-bar__fill,
+      .shipping-progress-bar__fill::after,
       .shipping-progress-bar__confetti span,
       .shipping-progress-bar__message--success,
       .shipping-progress-bar__truck-inner,
-      .shipping-progress-bar__truck-body,
       .shipping-progress-bar--unlocked {
         animation: none !important;
         transition: none !important;
@@ -532,30 +516,87 @@
       var textEl = msgTextEl || msgEl;
       if (textEl) textEl.textContent = text;
       fillEl.setAttribute('aria-label', text);
+
+      if (reached) {
+        root.setAttribute('data-sl-fspb-unlocked', '');
+        if (!root.hasAttribute('data-sl-fspb-unlocked-seen')) {
+          root.setAttribute('data-sl-fspb-unlocked-seen', '');
+          playConfetti(root);
+        }
+      } else {
+        root.removeAttribute('data-sl-fspb-unlocked');
+        root.removeAttribute('data-sl-fspb-unlocked-seen');
+      }
     }
 
-    function updateAll(cart) {
+    var CONFETTI_SCRIPT = 'https://cdn.jsdelivr.net/npm/@hiseb/confetti@2.1.0/dist/confetti.min.js';
+    var confettiLoaded = false;
+
+    function shootConfetti() {
+      if (typeof window.confetti !== 'function') return;
+      var positions = [
+        { x: window.innerWidth * 0.5, y: window.innerHeight * 0.5 },
+        { x: window.innerWidth * 0.25, y: window.innerHeight * 0.4 },
+        { x: window.innerWidth * 0.75, y: window.innerHeight * 0.35 }
+      ];
+      for (var i = 0; i < positions.length; i++) {
+        (function(pos, idx) {
+          setTimeout(function() {
+            window.confetti({
+              position: { x: pos.x, y: pos.y },
+              count: 80,
+              size: 1.2,
+              velocity: 220,
+              fade: true
+            });
+          }, idx * 250);
+        })(positions[i], i);
+      }
+    }
+
+    function playConfetti(root) {
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      function run() {
+        shootConfetti();
+        setTimeout(shootConfetti, 150);
+        setTimeout(shootConfetti, 300);
+      }
+      if (typeof window.confetti === 'function') {
+        run();
+        return;
+      }
+      if (confettiLoaded) return;
+      confettiLoaded = true;
+      var s = document.createElement('script');
+      s.src = CONFETTI_SCRIPT;
+      s.onload = run;
+      document.head.appendChild(s);
+    }
+
+    function updateAll(cart, opts) {
+      opts = opts || {};
       var total = cart && typeof cart.total_price === 'number' ? cart.total_price : 0;
       var currency = (cart && cart.currency) ? cart.currency : null;
       roots.forEach(function(root) {
         updateBar(root, total, currency);
+        if (opts.fromAdd) playConfetti(root);
       });
     }
 
-    function fetchCartAndUpdate() {
+    function fetchCartAndUpdate(fromAdd) {
       try {
         fetch('/cart.js', { credentials: 'same-origin' })
           .then(function(res) { return res.json(); })
           .then(function(cart) {
             if (!cart) return;
-            updateAll(cart);
+            updateAll(cart, { fromAdd: fromAdd === true });
           })
           .catch(function() {});
       } catch (e) {}
     }
 
-    function onCartNeedsRefresh() {
-      setTimeout(fetchCartAndUpdate, 100);
+    function onCartNeedsRefresh(fromAdd) {
+      setTimeout(function() { fetchCartAndUpdate(fromAdd); }, 100);
     }
 
     if (document.readyState === 'loading') {
@@ -568,10 +609,11 @@
       document.addEventListener(eventName, function(e) {
         var detail = e && e.detail ? e.detail : null;
         var cart = detail && (detail.cart || detail);
+        var fromAdd = (eventName === 'product:added');
         if (cart) {
-          updateAll(cart);
+          updateAll(cart, { fromAdd: fromAdd });
         } else {
-          onCartNeedsRefresh();
+          onCartNeedsRefresh(fromAdd);
         }
       });
     });
@@ -580,9 +622,10 @@
     if (typeof _fetch === 'function') {
       window.fetch = function() {
         var url = (arguments[0] && arguments[0].url) ? arguments[0].url : arguments[0];
+        var isAdd = typeof url === 'string' && url.indexOf('/cart/add') !== -1;
         return _fetch.apply(this, arguments).then(function(res) {
           if (typeof url === 'string' && (url.indexOf('/cart/add') !== -1 || url.indexOf('/cart/change') !== -1 || url.indexOf('/cart/update') !== -1 || url.indexOf('/cart/clear') !== -1)) {
-            onCartNeedsRefresh();
+            onCartNeedsRefresh(isAdd);
           }
           return res;
         });
