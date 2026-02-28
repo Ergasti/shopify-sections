@@ -87,6 +87,40 @@ Tier messages override the main progress message when the remaining amount falls
 
 ---
 
+## Adding the bar to the minicart (cart drawer)
+
+To show the free shipping progress bar inside your theme’s minicart (slide-out cart drawer):
+
+1. **Locate the cart drawer in your theme**  
+   Open the section that renders the minicart. It’s usually named something like:
+   - `sections/cart-drawer.liquid`
+   - `sections/main-cart-drawer.liquid`
+
+2. **Place the snippet inside the drawer**  
+   Add the snippet where you want the bar to appear (e.g. **above the cart items**, right after the drawer header or “Your cart” title):
+
+   ```liquid
+   {% comment %} Free shipping progress bar in minicart {% endcomment %}
+   {% render 'sl-free-shipping-progress-bar',
+     threshold_amount: 50,
+     success_message: "You've unlocked free shipping!",
+     progress_message_template: "Add %amount% more for free shipping",
+     hide_when_cart_empty: true,
+     fill_color_start: "#4ade80",
+     fill_color_end: "#16a34a",
+     show_stripes: true
+   %}
+   ```
+
+   Adjust `threshold_amount` (e.g. `50` for $50) and the messages/colors to match your store.
+
+3. **Ensure the cart drawer is re-rendered on cart updates**  
+   When customers add, change, or remove items, the theme usually re-renders the cart drawer via the Section Rendering API (e.g. `sections=cart-drawer,cart-icon-bubble`). Because the progress bar lives inside the cart drawer section and uses `cart.total_price`, it will show the correct total whenever the drawer is re-rendered. The snippet’s JavaScript also listens for cart events and fetches `/cart.js` after add/change/update/clear, so the bar updates in real time even when the drawer HTML is already on the page.
+
+No extra configuration is needed: once the snippet is inside the cart drawer section, the bar appears in the minicart and stays in sync with the cart.
+
+---
+
 ## Files
 
 - `sections/sl-free-shipping-progress-bar.liquid` — Section schema and render of the snippet

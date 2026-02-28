@@ -1,0 +1,426 @@
+{% comment %}
+  SL - Volume Discount (Improved Snippet)
+  UI/UX-enhanced version: offer framing, deal badge, savings display, best value tier, stronger CTAs.
+  Usage: {% render 'sl-volume-discount-improved', product: product, block_id: block.id %}
+  Same data as sl-volume-discount: product.metafields.custom.volume_offers.
+{% endcomment %}
+
+{% assign block_id = block_id | default: 'vd-improved' %}
+{% assign prod = product | default: nil %}
+{% assign show_debug = debug | default: false %}
+{% if request.design_mode %}{% assign show_debug = true %}{% endif %}
+
+{% assign locale_iso = request.locale.iso_code | default: 'en' %}
+{% assign is_rtl = false %}
+{% assign locale_start = locale_iso | slice: 0, 2 %}
+{% if locale_iso == 'ar' or locale_iso == 'he' or locale_iso == 'fa' or locale_iso == 'ur' or locale_iso == 'yi' %}
+  {% assign is_rtl = true %}
+{% elsif locale_start == 'ar' %}
+  {% assign is_rtl = true %}
+{% endif %}
+
+{% assign offers = prod.metafields.custom.volume_offers.value | default: prod.metafields.custom.volume_offers | default: nil %}
+{% assign has_offers = false %}
+{% if prod != blank and offers != blank and offers.size > 0 %}
+  {% assign has_offers = true %}
+{% endif %}
+
+{% comment %} Find best-value tier index (highest discount for badge) {% endcomment %}
+{% assign best_tier_index = -1 %}
+{% assign best_score = 0 %}
+{% if has_offers %}
+  {% for t in offers %}
+    {% assign otype_t = t.offer_type.value | default: t.offer_type | default: 'none' | strip %}
+    {% assign oval_t = t.offer_value.value | default: t.offer_value | default: 0 %}
+    {% if otype_t == 'percent_off' and oval_t > 0 %}
+      {% if oval_t > best_score %}
+        {% assign best_score = oval_t %}
+        {% assign best_tier_index = forloop.index0 %}
+      {% endif %}
+    {% elsif otype_t == 'free_items' and oval_t > 0 %}
+      {% assign score = 50 %}
+      {% if score > best_score %}
+        {% assign best_score = score %}
+        {% assign best_tier_index = forloop.index0 %}
+      {% endif %}
+    {% endif %}
+  {% endfor %}
+{% endif %}
+
+{% if has_offers %}
+{% assign vd_heading = 'sections.sl_volume_discount.heading' | t %}
+{% assign price_cents = prod.price | default: 0 %}
+{% assign prod_title = prod.title | default: '' %}
+{% assign feat_image = prod.featured_image %}
+<div id="sl-vd-block-{{ block_id }}" class="sl-vd-block-root sl-vd-improved{% if is_rtl %} sl-vd-rtl{% endif %}"{% if is_rtl %} dir="rtl"{% endif %}>
+  <div class="sl-vd-improved__wrap">
+    <details class="accordion group" open>
+      <summary>
+        <span class="accordion__toggle">
+          <span class="sl-vd-improved__heading-text">{{ vd_heading }}</span>
+          <span class="sl-vd-deal-badge" aria-hidden="true">{{ 'sections.sl_volume_discount.deal_badge' | t }}</span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8" fill="none" class="icon icon-wd-arrow" aria-hidden="true">
+            <path d="M11 1L6 7L1 1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+      </summary>
+      <div class="accordion__content">
+        <div class="sl-vd-inner">
+          <div class="sl-vd-swiper swiper">
+            <div class="swiper-wrapper">
+              {% for tier in offers %}
+                {% assign qty = tier.quantity.value | default: tier.quantity | default: 1 %}
+                {% assign otype = tier.offer_type.value | default: tier.offer_type | default: 'none' | strip %}
+                {% assign oval = tier.offer_value.value | default: tier.offer_value | default: 0 %}
+                {% assign label_text = tier.label.value | default: tier.label | default: '' | strip %}
+                {% assign label_bg = tier.label_color.value | default: tier.label_color | default: '#eee' | strip %}
+                {% assign tier_description = tier.description.value | default: tier.description | default: '' | strip %}
+
+                {% assign total_cents = qty | times: price_cents %}
+                {% assign display_cents = total_cents %}
+                {% assign original_cents = total_cents %}
+                {% assign save_cents = 0 %}
+                {% assign is_discounted = false %}
+                {% if otype == 'percent_off' and oval > 0 %}
+                  {% assign hundred_minus = 100 | minus: oval %}
+                  {% assign display_cents = total_cents | times: hundred_minus | divided_by: 100 %}
+                  {% assign original_cents = total_cents %}
+                  {% assign save_cents = total_cents | minus: display_cents %}
+                  {% assign is_discounted = true %}
+                {% elsif otype == 'free_items' and oval > 0 %}
+                  {% assign display_cents = total_cents %}
+                  {% assign free_value_cents = price_cents | times: oval %}
+                  {% assign save_cents = free_value_cents %}
+                  {% assign is_discounted = true %}
+                {% endif %}
+
+                {% assign per_item_cents = display_cents | divided_by: qty %}
+                {% assign is_best_value = false %}
+                {% if best_tier_index >= 0 and forloop.index0 == best_tier_index %}
+                  {% assign is_best_value = true %}
+                {% endif %}
+
+                <div class="swiper-slide">
+                  <div class="sl-vd-card{% if is_best_value %} sl-vd-card--best-value{% endif %}">
+                    {% if is_best_value %}
+                      <span class="sl-vd-best-value-badge">{{ 'sections.sl_volume_discount.best_value_badge' | t }}</span>
+                    {% endif %}
+                    <div class="sl-vd-card__figure">
+                      {% if otype == 'free_items' and oval > 0 %}
+                        <div class="sl-vd-dual-wrap">
+                          <div class="sl-vd-dual">
+                            <div class="sl-vd-dual__side">
+                              <span class="sl-vd-dual__title" style="background: {{ label_bg }};">{{ 'sections.sl_volume_discount.buy_label' | t: x: qty }}</span>
+                              {% if feat_image != blank %}
+                                <img src="{{ feat_image | image_url: width: 520 }}" srcset="{{ feat_image | image_url: width: 220 }} 220w, {{ feat_image | image_url: width: 360 }} 360w, {{ feat_image | image_url: width: 520 }} 520w" sizes="220px" alt="" width="260" height="260" loading="lazy" decoding="async"{% if forloop.index0 > 1 %} fetchpriority="low"{% endif %}>
+                              {% else %}
+                                <div class="sl-vd-placeholder"></div>
+                              {% endif %}
+                            </div>
+                            <span class="sl-vd-plus" aria-hidden="true">+</span>
+                            <div class="sl-vd-dual__side">
+                              <span class="sl-vd-dual__title" style="background: {{ label_bg }};">{{ 'sections.sl_volume_discount.get_y_free' | t: y: oval }}</span>
+                              {% if feat_image != blank %}
+                                <img src="{{ feat_image | image_url: width: 520 }}" srcset="{{ feat_image | image_url: width: 220 }} 220w, {{ feat_image | image_url: width: 360 }} 360w, {{ feat_image | image_url: width: 520 }} 520w" sizes="220px" alt="" width="260" height="260" loading="lazy" decoding="async"{% if forloop.index0 > 1 %} fetchpriority="low"{% endif %}>
+                              {% else %}
+                                <div class="sl-vd-placeholder"></div>
+                              {% endif %}
+                            </div>
+                          </div>
+                        </div>
+                      {% else %}
+                        {% if label_text != blank %}
+                          <span class="sl-vd-label" style="background: {{ label_bg }};">{{ label_text }}</span>
+                        {% endif %}
+                        {% if feat_image != blank %}
+                          <img src="{{ feat_image | image_url: width: 520 }}" srcset="{{ feat_image | image_url: width: 220 }} 220w, {{ feat_image | image_url: width: 360 }} 360w, {{ feat_image | image_url: width: 520 }} 520w" sizes="220px" alt="{{ prod_title | escape }}" width="260" height="260" loading="lazy" decoding="async" class="sl-vd-card__media"{% if forloop.index0 > 1 %} fetchpriority="low"{% endif %}>
+                        {% else %}
+                          <div class="sl-vd-placeholder"></div>
+                        {% endif %}
+                        {% if is_discounted and otype == 'percent_off' %}
+                          <span class="sl-vd-off-badge">{{ 'sections.sl_volume_discount.off_badge' | t: percent: oval }}</span>
+                        {% endif %}
+                      {% endif %}
+                    </div>
+                    <div class="sl-vd-card__info">
+                      <p class="sl-vd-offer-details-heading visually-hidden">{{ 'sections.sl_volume_discount.offer_details' | t }}</p>
+                      <p class="sl-vd-offer-details">
+                        {% if otype == 'free_items' and oval > 0 %}
+                          {{ 'sections.sl_volume_discount.buy_x_get_y_free' | t: x: qty, y: oval }}
+                        {% elsif otype == 'percent_off' and oval > 0 %}
+                          {{ 'sections.sl_volume_discount.buy_x_get_y_percent' | t: x: qty, percent: oval }}
+                        {% else %}
+                          {{ 'sections.sl_volume_discount.base_offer' | t }}
+                        {% endif %}
+                      </p>
+                      {% if save_cents > 0 %}
+                        {% capture saved_fmt %}{{ save_cents | money }}{% endcapture %}
+                        <p class="sl-vd-save-line">{{ 'sections.sl_volume_discount.save_amount' | t: amount: saved_fmt }}</p>
+                      {% endif %}
+                      {% if tier_description != blank %}
+                        <p class="sl-vd-tier-description">{{ tier_description }}</p>
+                      {% endif %}
+                      <button type="button" class="sl-vd-buy-now" data-qty="{{ qty }}" aria-label="{{ 'sections.sl_volume_discount.buy_now' | t }} ({{ 'sections.sl_volume_discount.buy_label' | t: x: qty }})">{{ 'sections.sl_volume_discount.buy_now' | t }}</button>
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+            <div class="swiper-button-prev"></div>
+            <div class="swiper-button-next"></div>
+          </div>
+        </div>
+      </div>
+    </details>
+  </div>
+</div>
+
+<style>
+  #sl-vd-block-{{ block_id }}.sl-vd-block-root.sl-vd-improved {
+    width: 100%;
+    margin: 16px 0;
+    --sl-vd-card-bg: #fff;
+    --sl-vd-card-border: #e0e0e0;
+    --sl-vd-card-radius: 12px;
+    --sl-vd-slide-width: 220px;
+    --sl-vd-improved-bg: #f0fdf4;
+    --sl-vd-improved-border: #bbf7d0;
+    --sl-vd-off-badge-bg: #dc2626;
+    --sl-vd-cta-bg: #16a34a;
+    --sl-vd-cta-hover: #15803d;
+  }
+  #sl-vd-block-{{ block_id }} .sl-vd-improved__wrap {
+    background: var(--sl-vd-improved-bg);
+    border: 1px solid var(--sl-vd-improved-border);
+    border-radius: 14px;
+    padding: 16px;
+  }
+  #sl-vd-block-{{ block_id }} details.accordion { border: none; margin: 0; padding: 0; }
+  #sl-vd-block-{{ block_id }} details summary { list-style: none; margin: 0; padding: 0; border: none; }
+  #sl-vd-block-{{ block_id }} details summary::-webkit-details-marker { display: none; }
+  #sl-vd-block-{{ block_id }} details summary::before,
+  #sl-vd-block-{{ block_id }} details summary::after { display: none !important; }
+  #sl-vd-block-{{ block_id }} .accordion__toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+    padding: 0;
+    color: #14532d;
+  }
+  #sl-vd-block-{{ block_id }} .sl-vd-deal-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #fff;
+    background: var(--sl-vd-cta-bg);
+    border-radius: 6px;
+  }
+  #sl-vd-block-{{ block_id }} .accordion .icon { transition: transform 0.2s; }
+  #sl-vd-block-{{ block_id }} .accordion[open] .icon { transform: rotate(180deg); }
+  #sl-vd-block-{{ block_id }} .accordion__content { margin-top: 12px; padding: 0; }
+  #sl-vd-block-{{ block_id }} .sl-vd-inner { padding: 0; margin: 0; }
+  #sl-vd-block-{{ block_id }} .sl-vd-swiper { overflow: hidden; position: relative; }
+  #sl-vd-block-{{ block_id }} .swiper-wrapper { display: flex; gap: 8px; }
+  #sl-vd-block-{{ block_id }} .swiper-slide { flex-shrink: 0; width: var(--sl-vd-slide-width) !important; height: auto; }
+  #sl-vd-block-{{ block_id }} .sl-vd-card {
+    position: relative;
+    padding: 0;
+    border-radius: var(--sl-vd-card-radius);
+    border: 1px solid var(--sl-vd-card-border);
+    background: var(--sl-vd-card-bg);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    height: 100%;
+    box-sizing: border-box;
+  }
+  #sl-vd-block-{{ block_id }} .sl-vd-card--best-value {
+    border-color: var(--sl-vd-cta-bg);
+    box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.25);
+  }
+  #sl-vd-block-{{ block_id }} .sl-vd-best-value-badge {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    right: 6px;
+    z-index: 3;
+    display: block;
+    text-align: center;
+    padding: 4px 8px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #fff;
+    background: var(--sl-vd-cta-bg);
+    border-radius: 6px;
+  }
+  #sl-vd-block-{{ block_id }}.sl-vd-rtl .sl-vd-best-value-badge { left: 6px; right: 6px; }
+  #sl-vd-block-{{ block_id }} .sl-vd-card__figure {
+    position: relative;
+    overflow: hidden;
+    border-radius: calc(var(--sl-vd-card-radius) - 2px);
+  }
+  #sl-vd-block-{{ block_id }} .sl-vd-card__figure:not(:has(.sl-vd-dual-wrap)) { aspect-ratio: 1; }
+  #sl-vd-block-{{ block_id }} .sl-vd-dual-wrap { aspect-ratio: 1; position: relative; border: 1px solid #e5e5e5; border-radius: var(--sl-vd-card-radius); overflow: hidden; }
+  #sl-vd-block-{{ block_id }} .sl-vd-offer-details-heading { display: none; }
+  #sl-vd-block-{{ block_id }} .sl-vd-card__media { display: block; width: 100%; height: 100%; object-fit: cover; }
+  #sl-vd-block-{{ block_id }} .sl-vd-placeholder { width: 100%; height: 100%; background: #f0f0f0; }
+  #sl-vd-block-{{ block_id }} .sl-vd-label {
+    position: absolute; bottom: 3px; left: 3px; padding: 1px 3px; font-size: 11px; font-weight: bold; color: #000; border-radius: 4px; z-index: 2;
+  }
+  #sl-vd-block-{{ block_id }}.sl-vd-rtl .sl-vd-label { left: auto; right: 3px; }
+  #sl-vd-block-{{ block_id }} .sl-vd-off-badge {
+    position: absolute;
+    right: 6px;
+    bottom: 6px;
+    padding: 4px 8px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    background: var(--sl-vd-off-badge-bg);
+    border-radius: 6px;
+    z-index: 2;
+  }
+  #sl-vd-block-{{ block_id }}.sl-vd-rtl .sl-vd-off-badge { right: auto; left: 6px; }
+  #sl-vd-block-{{ block_id }} .sl-vd-card__info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+    min-height: 0;
+    padding: 8px 10px 10px;
+  }
+  #sl-vd-block-{{ block_id }} .sl-vd-offer-details {
+    font-size: 14px;
+    font-weight: 700;
+    color: #14532d;
+    margin: 0 0 4px 0;
+    line-height: 1.3;
+  }
+  #sl-vd-block-{{ block_id }} .sl-vd-save-line {
+    font-size: 13px;
+    font-weight: 600;
+    color: #dc2626;
+    margin: 0;
+    line-height: 1.3;
+  }
+  #sl-vd-block-{{ block_id }} .sl-vd-tier-description { font-size: 12px; color: #666; line-height: 1.4; margin: 0; }
+  #sl-vd-block-{{ block_id }} .sl-vd-buy-now {
+    display: block;
+    width: 100%;
+    margin-top: auto;
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    background: var(--sl-vd-cta-bg);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    flex-shrink: 0;
+  }
+  #sl-vd-block-{{ block_id }} .sl-vd-buy-now:hover {
+    background: var(--sl-vd-cta-hover);
+  }
+  #sl-vd-block-{{ block_id }} .sl-vd-buy-now:active { transform: scale(0.98); }
+  #sl-vd-block-{{ block_id }} .sl-vd-dual {
+    display: flex; align-items: center; justify-content: center; height: 100%; padding: 1px; box-sizing: border-box;
+  }
+  #sl-vd-block-{{ block_id }} .sl-vd-dual__side { position: relative; flex: 1; display: flex; flex-direction: column; max-width: 54%; overflow: hidden; border-radius: 8px; }
+  #sl-vd-block-{{ block_id }} .sl-vd-dual__title { display: block; text-align: center; padding: 4px 6px; font-size: 10px; font-weight: bold; color: #000; border-radius: 4px 4px 0 0; line-height: 1.2; flex-shrink: 0; }
+  #sl-vd-block-{{ block_id }} .sl-vd-dual__side img,
+  #sl-vd-block-{{ block_id }} .sl-vd-dual__side .sl-vd-placeholder { flex: 1; min-height: 0; object-fit: cover; display: block; width: 100%; }
+  #sl-vd-block-{{ block_id }} .sl-vd-dual__side img { width: 100%; height: 100%; }
+  #sl-vd-block-{{ block_id }} .sl-vd-plus { width: 15px; height: 15px; border-radius: 50%; background: #333; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; flex-shrink: 0; }
+  #sl-vd-block-{{ block_id }} .swiper-button-prev, #sl-vd-block-{{ block_id }} .swiper-button-next,
+  #sl-vd-block-{{ block_id }} .swiper-button-prev::after, #sl-vd-block-{{ block_id }} .swiper-button-next::after,
+  #sl-vd-block-{{ block_id }} .swiper-button-prev svg, #sl-vd-block-{{ block_id }} .swiper-button-next svg { color: #16a34a !important; fill: #16a34a !important; stroke: #16a34a !important; }
+  #sl-vd-block-{{ block_id }}.sl-vd-rtl .sl-vd-inner { text-align: right; }
+  #sl-vd-block-{{ block_id }}.sl-vd-rtl .sl-vd-card { text-align: right; }
+  #sl-vd-block-{{ block_id }} .swiper-pagination { display: none !important; }
+</style>
+
+<script>
+(function() {
+  var blockId = '{{ block_id }}';
+  var isRtl = {{ is_rtl }};
+  var SWIPER_CSS = 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css';
+  var SWIPER_JS = 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js';
+  function loadSwiper(cb) {
+    if (typeof Swiper !== 'undefined') { cb(); return; }
+    var link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = SWIPER_CSS;
+    document.head.appendChild(link);
+    var s = document.createElement('script');
+    s.src = SWIPER_JS;
+    s.onload = cb;
+    document.head.appendChild(s);
+  }
+  function initSwiper() {
+    var root = document.getElementById('sl-vd-block-' + blockId);
+    if (!root) return;
+    var el = root.querySelector('.sl-vd-swiper');
+    if (!el || typeof Swiper === 'undefined') return;
+    if (el.swiper) return;
+    var nextEl = root.querySelector('.swiper-button-next');
+    var prevEl = root.querySelector('.swiper-button-prev');
+    new Swiper(el, {
+      slidesPerView: 'auto',
+      spaceBetween: 8,
+      loop: false,
+      rtl: isRtl,
+      navigation: (nextEl && prevEl) ? { nextEl: nextEl, prevEl: prevEl } : false,
+      pagination: false
+    });
+  }
+  function run() {
+    var root = document.getElementById('sl-vd-block-' + blockId);
+    if (!root) return;
+    root.addEventListener('click', function(e) {
+      var btn = e.target.closest('.sl-vd-buy-now');
+      if (!btn) return;
+      e.preventDefault();
+      var qty = parseInt(btn.getAttribute('data-qty'), 10) || 1;
+      var form = document.querySelector('form[action*="/cart/add"]') || document.querySelector('.product-form') || document.querySelector('form[action*="cart/add"]');
+      if (!form) return;
+      var input = form.querySelector('input[name="quantity"]') || form.querySelector('[name="quantity"]');
+      if (input) { input.value = qty; input.dispatchEvent(new Event('change', { bubbles: true })); }
+      form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+    function onVisible() { loadSwiper(initSwiper); }
+    if (typeof IntersectionObserver !== 'undefined') {
+      var io = new IntersectionObserver(function(entries) {
+        if (entries[0].isIntersecting) { io.disconnect(); onVisible(); }
+      }, { rootMargin: '100px' });
+      io.observe(root);
+    } else {
+      onVisible();
+    }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+{% elsif request.design_mode %}
+<div id="sl-vd-block-{{ block_id }}" class="sl-vd-block-root sl-vd-improved" style="padding: 12px; border: 1px dashed #ccc; border-radius: 8px; background: #f0fdf4;">
+  <p style="margin: 0 0 8px; font-size: 14px; color: #14532d;"><strong>{{ 'sections.sl_volume_discount.heading' | t }}</strong> — {{ 'sections.sl_volume_discount.no_offers' | t }}</p>
+  <p style="font-size: 12px; color: #666; margin: 0;">Add <strong>Volume Offer Tier</strong> metaobjects and assign them to this product via <code>custom.volume_offers</code>. See README.</p>
+  {% if show_debug %}
+  <div style="margin-top:10px;padding:10px;background:#f8f8f8;border:1px solid #ddd;border-radius:6px;font-size:11px;font-family:monospace;">
+    Product: {% if prod %}{{ prod.id }} — {{ prod.title }}{% else %}none{% endif %}<br>
+    volume_offers count: {{ offers.size | default: 0 }}
+  </div>
+  {% endif %}
+</div>
+{% endif %}

@@ -2,6 +2,9 @@
   "sections": {
     "sl_volume_discount": {
       "heading": "Purchase More & Save",
+      "deal_badge": "Deal",
+      "best_value_badge": "Best value",
+      "save_amount": "Save {{ amount }}",
       "free": "FREE",
       "per_item": "({{ price }} per item)",
       "buy_x_get_y_free": "Buy {{ x }} Get {{ y }} Free",

@@ -30,6 +30,14 @@
 {% assign prod_title = prod.title | default: '' %}
 {% assign feat_image = prod.featured_image %}
 {% assign sid = section.id %}
+
+{% if section.settings.use_improved_layout %}
+  <div id="sl-vd-section-{{ sid }}" class="sl-vd-section-root{% if is_rtl %} sl-vd-rtl{% endif %}"{% if is_rtl %} dir="rtl"{% endif %} style="background: {{ section.settings.background_color }}; padding: {{ section.settings.padding_top }}px 0 {{ section.settings.padding_bottom }}px 0;">
+    <div class="sl-vd-section-inner" style="{% unless section.settings.full_width %}max-width: {{ section.settings.content_width }}px; margin-left: auto; margin-right: auto;{% endunless %} padding: 0 16px;">
+      {% render 'sl-volume-discount-improved', product: prod, block_id: sid %}
+    </div>
+  </div>
+{% else %}
 <div id="sl-vd-section-{{ sid }}" class="sl-vd-section-root{% if is_rtl %} sl-vd-rtl{% endif %}"{% if is_rtl %} dir="rtl"{% endif %} style="background: {{ section.settings.background_color }}; padding: {{ section.settings.padding_top }}px 0 {{ section.settings.padding_bottom }}px 0;">
   <div class="sl-vd-section-inner" style="{% unless section.settings.full_width %}max-width: {{ section.settings.content_width }}px; margin-left: auto; margin-right: auto;{% endunless %} padding: 0 16px;">
     <details class="accordion group" {% if section.settings.accordion_open %}open{% endif %}>
@@ -136,6 +144,7 @@
     </details>
   </div>
 </div>
+{% endif %}
 
 <style>
   #sl-vd-section-{{ sid }}.sl-vd-section-root { width: 100%; border: none; --sl-vd-card-bg: #fff; --sl-vd-card-border: #e5e5e5; --sl-vd-card-radius: 12px; --sl-vd-slide-width: 220px; }
@@ -289,6 +298,13 @@
   "tag": "section",
   "class": "sl-volume-discount-section",
   "settings": [
+    {
+      "type": "checkbox",
+      "id": "use_improved_layout",
+      "label": "Use improved offer layout",
+      "default": false,
+      "info": "Shows Deal badge, savings amount, Best value tier, and stronger discount styling."
+    },
     {
       "type": "text",
       "id": "heading",

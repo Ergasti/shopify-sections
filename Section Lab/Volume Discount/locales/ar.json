@@ -2,6 +2,9 @@
   "sections": {
     "sl_volume_discount": {
       "heading": "اشتري أكثر ووفر أكثر",
+      "deal_badge": "عرض",
+      "best_value_badge": "أفضل قيمة",
+      "save_amount": "وفر {{ amount }}",
       "free": "مجاناً",
       "per_item": "({{ price }} للقطعة)",
       "buy_x_get_y_free": "اشتري {{ x }} واحصل على {{ y }} مجاناً",
