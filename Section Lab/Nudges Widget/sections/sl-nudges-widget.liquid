@@ -150,13 +150,22 @@
 </script>
 
 <style>
+  /* Container card styling to mimic Judge.me popup */
+  .sl-toast-{{ section.id }}.toastify {
+    padding: 0 !important;
+    border-radius: 8px !important;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    box-shadow: 0 10px 26px rgba(15, 23, 42, 0.12);
+    overflow: hidden;
+  }
+
   .sl-toast-{{ section.id }}.toastify .toast-close {
     color: {{ section.settings.close_color }};
     font-size: {{ section.settings.close_size }}px;
     opacity: 1;
     position: absolute;
-    top: 5px;
-    right: 5px;
+    top: 6px;
+    right: 6px;
     z-index: 2;
     cursor: pointer;
     background: none;
@@ -164,26 +173,64 @@
     padding: 4px;
   }
 
+  /* Global reset within the nudge to match Judge.me feel */
+  .sl-toast-{{ section.id }} * {
+    margin: 0;
+    line-height: 1.4;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Layout: image on the left, content on the right */
   .sl-toast-{{ section.id }} .sl-toast-body {
     display: flex;
-    gap: 15px;
-    align-items: center;
+    gap: 0;
+    align-items: stretch;
+    min-height: 147px;
   }
 
   .sl-toast-{{ section.id }} .sl-toast-image {
-    width: 67px;
-    height: 67px;
-    object-fit: contain;
-    border-radius: 6px;
+    width: 34%;
+    max-width: 120px;
+    height: auto;
+    object-fit: cover;
+    border-radius: 8px 0 0 8px;
     flex-shrink: 0;
   }
 
+  .sl-toast-{{ section.id }} .sl-toast-body > div {
+    width: 66%;
+    max-width: 238px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
   .sl-toast-{{ section.id }} .sl-toast-headline {
-    margin: 0 0 5px 0;
+    margin: 0 0 6px 0;
+    font-weight: 700;
+  }
+
+  /* Truncate main nudge text to 3 lines like Judge.me */
+  .sl-toast-{{ section.id }} .sl-toast-text {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+    white-space: normal;
+    line-height: 1.4;
+    font-size: {{ section.settings.size_text }}px;
   }
 
   .sl-toast-{{ section.id }} .sl-toast-verified {
-    margin-top: 4px;
+    margin-top: 6px;
+    font-size: {{ section.settings.size_highlight }}px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
   }
 
   .sl-toast-{{ section.id }} .sl-toast-body.sl-toast-rtl {
@@ -193,11 +240,11 @@
 
   @media screen and (max-width: 767px) {
     .sl-toast-{{ section.id }}.toastify {
-      width: 100% !important;
-      left: 0 !important;
-      right: 0 !important;
-      border-radius: 0 !important;
-      bottom: 0 !important;
+      width: calc(100% - 32px) !important;
+      left: 16px !important;
+      right: auto !important;
+      bottom: 24px !important;
+      border-radius: 8px !important;
     }
   }
 </style>

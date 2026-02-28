@@ -1,0 +1,142 @@
+{% comment %}
+  SL - Free Shipping Progress Bar (Section)
+  - Renders a free-shipping progress bar based on the current cart total.
+  - Uses the `sl-free-shipping-progress-bar` snippet for the UI and logic.
+  - Add this section to your cart template or any page where `cart` is available.
+{% endcomment %}
+
+{% assign sid = section.id %}
+
+<div id="sl-fspb-section-{{ sid }}" class="sl-fspb-section-root" style="background: {{ section.settings.background_color }}; padding: {{ section.settings.padding_top }}px 0 {{ section.settings.padding_bottom }}px 0;">
+  <div class="sl-fspb-section-inner" style="{% unless section.settings.full_width %}max-width: {{ section.settings.content_width }}px; margin-left: auto; margin-right: auto;{% endunless %} padding: 0 16px;">
+    {% if section.settings.heading != blank %}
+      <h2 class="sl-fspb-heading" style="margin: 0 0 8px; font-size: 20px; font-weight: 500; color: {{ section.settings.heading_color }};">
+        {{ section.settings.heading }}
+      </h2>
+    {% endif %}
+
+    {% render 'sl-free-shipping-progress-bar',
+      threshold_amount: section.settings.threshold_amount,
+      success_message: section.settings.success_message,
+      progress_message_template: section.settings.progress_message_template,
+      hide_when_cart_empty: section.settings.hide_when_cart_empty
+    %}
+  </div>
+</div>
+
+<style>
+  #sl-fspb-section-{{ sid }}.sl-fspb-section-root {
+    width: 100%;
+    border: none;
+  }
+
+  #sl-fspb-section-{{ sid }} .sl-fspb-section-inner {
+    box-sizing: border-box;
+  }
+
+  #sl-fspb-section-{{ sid }} .sl-fspb-heading {
+    text-align: left;
+  }
+</style>
+
+{% schema %}
+{
+  "name": "SL - Free Shipping Progress Bar",
+  "tag": "section",
+  "class": "sl-free-shipping-progress-bar-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Free shipping progress",
+      "info": "Optional heading shown above the bar."
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "default": "#1c1c1c"
+    },
+    {
+      "type": "range",
+      "id": "threshold_amount",
+      "label": "Free shipping threshold",
+      "min": 0,
+      "max": 500,
+      "step": 5,
+      "default": 50,
+      "unit": "$"
+    },
+    {
+      "type": "text",
+      "id": "success_message",
+      "label": "Success message",
+      "default": "You've unlocked free shipping!"
+    },
+    {
+      "type": "text",
+      "id": "progress_message_template",
+      "label": "Progress message",
+      "default": "Add %amount% more for free shipping",
+      "info": "Use %amount% as a placeholder for the remaining amount."
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_when_cart_empty",
+      "label": "Hide when cart is empty",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "checkbox",
+      "id": "full_width",
+      "label": "Full width",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "content_width",
+      "label": "Content width (when not full width)",
+      "min": 400,
+      "max": 1400,
+      "step": 20,
+      "default": 1000,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "default": 12,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "default": 12,
+      "unit": "px"
+    }
+  ],
+  "presets": [
+    {
+      "name": "SL - Free Shipping Progress Bar",
+      "category": "Cart"
+    }
+  ],
+  "templates": ["cart", "page", "product"]
+}
+{% endschema %}
+
