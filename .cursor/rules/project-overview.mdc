@@ -1,0 +1,35 @@
+---
+description: Project overview and conventions for the Shopify Sections Library repo
+alwaysApply: true
+---
+
+# Shopify Sections Library — Project Overview
+
+This repository is a **library of Shopify theme sections and snippets**, not a full theme. Sections are copy-pasted into merchants' themes.
+
+## Repo structure
+
+- **Root**: Each top-level folder is a **section or snippet group** (e.g. `FAQ/`, `Double Block Section/`, `Marquee Products/`).
+- **Section Lab**: All sections under `Section Lab/` share the "SL" naming and design system (e.g. `Section Lab/Volume Discount/`, `Section Lab/Nudges Widget/`).
+- **Per-section folder** (standard):
+  ```
+  SectionName/
+  ├── sections/          # .liquid section files (addable in theme editor)
+  ├── snippets/          # .liquid snippets (optional)
+  ├── assets/            # .js, .css (optional)
+  ├── locales/           # en.default.json, ar.json, etc. (optional)
+  └── README.md          # Install steps, features, source, last updated
+  ```
+
+## Conventions
+
+- **README.md**: Every section folder has a README with at least: description, category, source (repo or "this repo"), installation steps, and **last updated** date. Preserve source attribution and license notes.
+- **Naming**: Section Lab files use `sl-` prefix (e.g. `sl-volume-discount.liquid`, `sl-nudges-widget.liquid`). Other sections use kebab-case or source naming.
+- **Source attribution**: When adding or modifying sections from external repos, keep the source repo link and license in the section README and in the main README.md tables.
+- **Main README.md**: Contains categorized quick reference, full section list, folder structure doc, and PLAN.md reference. Keep tables and "Library last updated" in sync when adding sections.
+
+## What to do when editing
+
+- Adding a new section: create folder with `sections/`, optional `snippets/`, `assets/`, `locales/`, and README.md; update root README.md (quick reference + all sections + Section Lab table if applicable).
+- Modifying existing sections: preserve schema and backward compatibility where possible; update the section README "Last updated" and any changed behavior.
+- Do not assume a full Shopify theme layout (layout.liquid, config, etc.). Sections/snippets are self-contained and documented for copy-into-theme installation.

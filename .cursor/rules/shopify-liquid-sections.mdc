@@ -1,0 +1,32 @@
+---
+description: Conventions for Shopify Liquid sections and snippets in this library
+globs: "**/*.liquid"
+alwaysApply: false
+---
+
+# Shopify Liquid Sections & Snippets
+
+When editing `.liquid` files in this repo, follow these conventions.
+
+## Section files (`sections/*.liquid`)
+
+- **Schema**: Use `{% schema %}` with `name`, optional `tag`, `class`, `settings` (section-level), and `blocks` where needed. Preserve existing schema when making small changes.
+- **Section ID**: Use `#shopify-section-{{ section.id }}` (or `section.id`) for scoped CSS/JS to avoid clashes in merchants' themes.
+- **Inline CSS**: Prefer `{% style %}` or `<style>` scoped under the section ID. Avoid global class names that could conflict.
+- **Comments**: Optional header comment with source URL or "Get the latest version" link is fine (e.g. FAQ, Section Lab). Don't remove source attribution comments.
+
+## Snippets
+
+- **Render**: Use `{% render 'snippet-name', product: product, block_id: block.id %}`. Pass only needed variables; document required variables in the section README.
+- **Naming**: Match section naming (e.g. `sl-volume-discount.liquid` snippet for SL – Volume Discount section). Snippets used only by one section often live in that section’s `snippets/` folder.
+
+## Best practices
+
+- **Accessibility**: Use semantic HTML, `aria-expanded`, `aria-controls`, `role`, and keyboard support for accordions, tabs, and toggles. Maintain or add FAQ/structured data where relevant.
+- **Performance**: Use `loading="lazy"`, `decoding="async"`, and `srcset`/`sizes` for images. Prefer loading third-party JS (e.g. Swiper) when the section is near the viewport (IntersectionObserver) rather than in head.
+- **RTL**: For Section Lab and other localized sections, support RTL (e.g. `dir="rtl"` or locale-based) and document supported locales in README.
+- **No hardcoded secrets**: No API keys or store-specific URLs. Use theme/section settings or metafields for config.
+
+## Locales
+
+- **Structure**: Use `locales/en.default.json` (and e.g. `ar.json`) with namespaced keys (e.g. `sections.sl_volume_discount.heading`). Document locale keys in the section README under a "Localization" or "Translations" section.

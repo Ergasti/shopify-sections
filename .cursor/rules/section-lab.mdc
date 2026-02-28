@@ -1,0 +1,47 @@
+---
+description: Section Lab (SL) naming, metaobjects, locales, and design patterns
+globs: "Section Lab/**/*"
+alwaysApply: false
+---
+
+# Section Lab Conventions
+
+Sections under `Section Lab/` follow a shared design system and naming.
+
+## Naming
+
+- **Section files**: `sections/sl-<slug>.liquid` (e.g. `sl-volume-discount.liquid`, `sl-nudges-widget.liquid`).
+- **Snippets**: `snippets/sl-<slug>.liquid` or `sl-<feature>.liquid` (e.g. `sl-volume-discount.liquid`, `sl-free-shipping-progress-bar.liquid`).
+- **Locale namespace**: `sections.sl_<snake_slug>` (e.g. `sections.sl_volume_discount`, `sections.sl_nudges_widget`).
+
+## Metaobjects & metafields
+
+- Document metaobject **definitions** (name, field keys, types) and product/other metafields (namespace.key, type) in the section README.
+- Use `custom.*` for custom data (e.g. `custom.volume_offers`). Mention Storefront API access where required.
+- When adding new SL sections that use metaobjects, follow the same README structure: "Metaobject: …", "Product metafield: …", "Assigning …".
+
+## Locales
+
+- Provide at least `locales/en.default.json`; include `locales/ar.json` (and other RTL/locales) when the section is translated.
+- RTL: Support `ar`, `he`, `fa`, `ur`, `yi` where applicable; apply RTL via locale or `dir` so layout and icons flip correctly.
+
+## Design system (shared patterns)
+
+- **Swiper**: Use Swiper (e.g. v11 from CDN) for horizontal sliders; load only when section is near viewport (IntersectionObserver). Typical settings: `slidesPerView: 'auto'`, `spaceBetween`, `loop: false`, arrows, no pagination unless needed.
+- **Cards**: Consistent card styling (e.g. 220px slide width, 12px radius, 1px border; first card 2px red border for "selected" state) across FBT, Volume Discount, and similar sections.
+- **Images**: `loading="lazy"`, `decoding="async"`, responsive `srcset` with sensible `sizes`; use `fetchpriority="low"` for off-screen slides when appropriate.
+
+## README structure (Section Lab)
+
+Each Section Lab subsection README should include:
+
+- Title and short description; **Category** and **Source** (Section Lab this repo / paid).
+- **Features** (bullets).
+- **Metaobject / Metafield** docs if used (definition, fields, product metafield, assignment).
+- **Render code** (for snippet-only usage in Custom Liquid block) with required variables.
+- **Installation** (section and/or snippet path, theme editor steps).
+- **File structure** (folder tree).
+- **Localization** (locale keys and purpose).
+- **Design notes** and **Performance & lazy loading** where relevant.
+
+Keep README accurate when changing schema, locale keys, or file layout.
