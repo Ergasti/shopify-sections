@@ -81,11 +81,13 @@ Supported variables
       }
     {%- endif -%}
 
-    /* Theme edit: sticky gallery on desktop — gallery and thumbnails scroll with the page */
+    /* Theme edit: sticky gallery on desktop — gallery and thumbnails scroll with the page.
+       z-index so gallery stays above sticky add-to-cart bar; increase if your theme’s bar uses a higher value. */
     #shopify-section-{{ section.id }} .product-gallery {
       position: sticky;
       top: var(--header-height, 1.5rem);
       align-self: start;
+      z-index: 50;
     }
   }
 </style>
