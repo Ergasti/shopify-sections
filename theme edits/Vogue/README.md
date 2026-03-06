@@ -1,0 +1,18 @@
+# Vogue theme edits
+
+Theme-specific snippets and section overrides for the **Vogue** theme. Copy into your theme and replace the originals as needed.
+
+## Snippets
+
+### `snippets/product-gallery.liquid`
+
+**Edit:** On desktop (min-width: 1000px), the product gallery (main images + thumbnails) is **sticky**. When you scroll the product page, the gallery stays in view and scrolls with you.
+
+**Install:**
+
+1. In your Vogue theme, go to **Theme** → **Edit code**.
+2. Under **Snippets**, replace (or rename the original and add this file) `product-gallery.liquid` with the contents of `theme edits/Vogue/snippets/product-gallery.liquid`.
+3. Optional: if your theme uses a CSS variable for the header height, ensure `--header-height` is set (e.g. in your theme’s base CSS or layout). The sticky `top` value uses `var(--header-height, 1.5rem)` so it can align below the header.
+
+**Source:** Vogue theme (this repo: theme edit with sticky behavior).  
+**Last updated:** 2025-03-06
