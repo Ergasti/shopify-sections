@@ -6,7 +6,9 @@ Theme-specific snippets and section overrides for the **Vogue** theme. Copy into
 
 ### `snippets/product-gallery.liquid`
 
-**Edit:** On desktop (min-width: 1000px), the product gallery (main images + thumbnails) is **sticky**. When you scroll the product page, the gallery stays in view and scrolls with you.
+**Edits:**
+- **Sticky on desktop:** On desktop (min-width: 1000px), the product gallery (main images + thumbnails) stays in view and scrolls with you.
+- **Curved corners:** Gallery media and thumbnails use rounded corners (12px radius) to match the Section Lab Frequently Bought Together card style.
 
 **Install:**
 

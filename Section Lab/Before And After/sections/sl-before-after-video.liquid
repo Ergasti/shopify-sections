@@ -86,7 +86,7 @@
   #sl-ba-section-{{ section.id }} .sl-ba-swiper { overflow: hidden; position: relative; }
   #sl-ba-section-{{ section.id }} .swiper-slide { opacity: 1 !important; filter: none !important; flex-shrink: 0; width: var(--sl-ba-slide-width) !important; height: auto; }
   #sl-ba-section-{{ section.id }} .sl-ba-card {
-    position: relative; aspect-ratio: 1 / 1; overflow: hidden; background: #fff;
+    position: relative; aspect-ratio: 1 / 1; overflow: hidden; background: {{ section.settings.background_color }};
     border-radius: 16px; padding: 8px; cursor: pointer;
   }
   #sl-ba-section-{{ section.id }} .sl-ba-video-wrapper video,
