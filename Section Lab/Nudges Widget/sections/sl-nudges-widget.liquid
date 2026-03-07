@@ -108,14 +108,15 @@
       var pos = "{{ section.settings.position }}";
       if (isRtl && (pos === 'left' || pos === 'right')) pos = pos === 'left' ? 'right' : 'left';
 
+      /* Inline styles match SL Real Results (Results you'll see) card */
       var toastStyle = {
-        background: "{{ section.settings.background_color }}",
+        background: "#FFF",
         color: "{{ section.settings.text_color }}",
-        padding: "{{ section.settings.padding }}px",
+        padding: "0",
         maxWidth: "{{ section.settings.max_width }}px",
-        border: "{{ section.settings.border_width }}px solid {{ section.settings.border_color }}",
-        borderRadius: "{{ section.settings.border_radius }}px",
-        boxShadow: "0px 0px {{ section.settings.shadow_blur }}px 0px rgba(0, 0, 0, {{ section.settings.shadow_opacity }})"
+        border: "0.5px solid #EBEBEB",
+        borderRadius: "16px",
+        boxShadow: "0 4px 4px -1px rgba(0, 0, 0, 0.02)"
       };
       if (toastDurationMs > 0 && toastDurationMs > fadeOutSeconds * 1000) {
         var fadeDelay = (toastDurationMs / 1000 - fadeOutSeconds) + "s";
@@ -161,12 +162,13 @@
     to { opacity: 0; }
   }
 
-  /* Container card styling to mimic Judge.me popup */
+  /* Container card styling — matches SL Real Results (Results you'll see) */
   .sl-toast-{{ section.id }}.toastify {
     padding: 0 !important;
-    border-radius: 8px !important;
-    border: 1px solid rgba(15, 23, 42, 0.08);
-    box-shadow: 0 10px 26px rgba(15, 23, 42, 0.12);
+    border-radius: 16px !important;
+    border: 0.5px solid #EBEBEB !important;
+    background: #FFF !important;
+    box-shadow: 0 4px 4px -1px rgba(0, 0, 0, 0.02) !important;
     overflow: hidden;
   }
 
@@ -204,17 +206,17 @@
 
   .sl-toast-{{ section.id }} .sl-toast-image {
     width: 34%;
-    max-width: 120px;
+    max-width: 140px;
     height: auto;
     object-fit: cover;
-    border-radius: 8px 0 0 8px;
+    border-radius: 16px 0 0 16px;
     flex-shrink: 0;
   }
 
   .sl-toast-{{ section.id }} .sl-toast-body > div {
     width: 66%;
-    max-width: 238px;
-    padding: 10px 12px;
+    max-width: 280px;
+    padding: 20px !important;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -249,13 +251,17 @@
     text-align: right;
   }
 
+  .sl-toast-{{ section.id }} .sl-toast-body.sl-toast-rtl .sl-toast-image {
+    border-radius: 0 16px 16px 0;
+  }
+
   @media screen and (max-width: 767px) {
     .sl-toast-{{ section.id }}.toastify {
       width: calc(100% - 32px) !important;
       left: 16px !important;
       right: auto !important;
       bottom: 24px !important;
-      border-radius: 8px !important;
+      border-radius: 16px !important;
     }
   }
 </style>
@@ -404,7 +410,7 @@
       "min": 200,
       "max": 600,
       "step": 10,
-      "default": 350
+      "default": 480
     },
     {
       "type": "range",
