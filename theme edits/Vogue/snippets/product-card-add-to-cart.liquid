@@ -1,0 +1,304 @@
+{%- comment -%}
+----------------------------------------------------------------------------------------------------------------------
+PRODUCT CARD COMPONENT — Add to cart variant
+----------------------------------------------------------------------------------------------------------------------
+Same as the default product card, with:
+- Always-visible "Add to cart" button (text always shown, not icon-only on mobile).
+- Add-to-cart animation: button shows "Adding..." with transition while the item is being added.
+
+Use: {% render 'product-card-add-to-cart', product: product, ... %} (same variables as product-card).
+
+********************************************
+Supported variables (same as product-card)
+********************************************
+* product, stacked, reveal, position, show_badges, show_rating, show_vendor, show_quick_buy,
+  show_secondary_image, show_swatches, hide_product_information, quick_buy_context
+{%- endcomment -%}
+
+{%- liquid
+  if hide_product_information
+    assign show_badges = false
+    assign show_rating = false
+    assign show_vendor = false
+    assign show_title = false
+    assign show_prices = false
+    assign show_swatches = false
+    assign show_quick_buy = show_quick_buy | default: settings.show_quick_buy, allow_false: true
+    assign show_secondary_image = show_secondary_image | default: settings.show_secondary_image, allow_false: true
+  else
+    assign show_badges = show_badges | default: true, allow_false: true
+    assign show_rating = show_rating | default: settings.show_product_rating, allow_false: true
+    assign show_vendor = show_vendor | default: settings.show_vendor, allow_false: true
+    assign show_quick_buy = show_quick_buy | default: settings.show_quick_buy, allow_false: true
+    assign show_title = true
+    assign show_prices = true
+    assign show_secondary_image = show_secondary_image | default: settings.show_secondary_image, allow_false: true
+    assign show_swatches = show_swatches | default: true, allow_false: true
+  endif
+  assign adding_label = 'product.general.adding' | t
+  if adding_label == blank or adding_label == 'product.general.adding'
+    assign adding_label = 'Adding...'
+  endif
+-%}
+
+<product-card class="product-card product-card--add-to-cart-variant" {% if reveal %}reveal-on-scroll="true"{% endif %} handle="{{ product.handle | escape }}">
+  {%- comment -%} PRODUCT MEDIA {%- endcomment -%}
+
+  {%- if product.media.size > 0 -%}
+    <div class="product-card__figure">
+      {%- if show_badges -%}
+        {%- render 'product-badges', product: product, vertical: true, context: 'card' -%}
+      {%- endif -%}
+
+      <a href="{{ product.url }}" class="product-card__media" draggable="false" data-instant>
+        {%- capture sizes -%}
+          {%- if stacked -%}
+            (max-width: 699px) calc(100vw / {{ section.settings.products_per_row_mobile }}), (max-width: 999px) calc(100vw / {{ 3 | at_most: section.settings.products_per_row_desktop | default: 3 }} - 64px), calc((100vw - 96px) / {{ section.settings.products_per_row_desktop | default: 3 }} - (24px / {{ section.settings.products_per_row_desktop | default: 3 }} * {{ section.settings.products_per_row_desktop | default: 3 | minus: 1 }}))
+          {%- else -%}
+            (max-width: 699px) 74vw, (max-width: 999px) 38vw, calc((100vw - 96px) / {{ section.settings.products_per_row_desktop | default: 3 }} - (24px / {{ section.settings.products_per_row_desktop | default: 3 }} * {{ section.settings.products_per_row_desktop | default: 3 | minus: 1 }}))
+          {%- endif -%}
+        {%- endcapture -%}
+
+        {%- liquid
+          assign main_media_loading_strategy = nil
+          if section.index > 3 or position > 3
+            assign main_media_loading_strategy = 'lazy'
+          endif
+        -%}
+
+        {%- capture main_image_classes -%}product-card__image product-card__image--primary {% if settings.product_image_aspect_ratio contains 'crop' %}object-cover{% endif %} aspect-{{ settings.product_image_aspect_ratio | split: '_' | first }}{%- endcapture -%}
+        {{- product.featured_media | image_url: width: product.featured_media.width | image_tag: loading: main_media_loading_strategy, sizes: sizes, widths: '200,300,400,500,600,700,800,1000,1200,1400,1600,1800', draggable: 'false', class: main_image_classes -}}
+
+        {%- liquid
+          if show_secondary_image and product.media.size > 1
+            assign next_media = product.media[product.featured_media.position] | default: product.media[1]
+            if next_media != blank
+              echo next_media | image_url: width: next_media.width | image_tag: class: 'product-card__image product-card__image--secondary', loading: 'lazy', fetchpriority: 'low', sizes: sizes, widths: '200,300,400,500,600,700,800,1000,1200,1400,1600,1800', draggable: 'false', aria-hidden: 'true'
+            endif
+          endif
+        -%}
+      </a>
+
+      {%- if show_quick_buy and product.available -%}
+        {%- if product.variants.size == 1 and product.selling_plan_groups.size == 0 -%}
+          <product-form class="product-card__quick-add-form">
+            {%- form 'product', product, class: 'product-card__product-form', data-add-to-cart-form: '' -%}
+              <input type="hidden" name="on_success" value="force_open_drawer">
+              <input type="hidden" name="quantity" value="1">
+              <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+              <button type="submit" class="product-card__quick-add-button product-card__quick-add-button--text" data-add-to-cart-button aria-busy="false">
+                <span class="sr-only">{{ 'product.general.add_to_cart_button' | t }}</span>
+                <span class="product-card__quick-add-label" data-add-to-cart-label>{{ 'product.general.add_to_cart_button' | t }}</span>
+                <span class="product-card__quick-add-adding" data-add-to-cart-adding hidden>
+                  <span class="product-card__quick-add-spinner" aria-hidden="true"></span>
+                  {{ adding_label }}
+                </span>
+              </button>
+            {%- endform -%}
+          </product-form>
+        {%- else -%}
+          {%- capture quick_buy_id -%}product-quick-buy-{{ section.id }}-{{ block.id }}-{{ quick_buy_context }}-{{ product.id }}{%- endcapture -%}
+
+          <button type="button" aria-controls="{{ quick_buy_id }}" class="product-card__quick-add-button product-card__quick-add-button--text">
+            <span class="sr-only">{{ 'product.general.choose_options' | t }}</span>
+            <span class="product-card__quick-add-label">{{ 'product.general.add_to_cart_button' | t }}</span>
+          </button>
+
+          <quick-buy-modal handle="{{ product.handle }}?variant={{ product.selected_or_first_available_variant.id }}" class="quick-buy-modal modal" id="{{ quick_buy_id }}">
+          </quick-buy-modal>
+        {%- endif -%}
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+
+  {%- comment -%} PRODUCT INFO {%- endcomment -%}
+
+  <div class="product-card__info empty:hidden">
+    {%- assign text_class = '' -%}
+    {%- if settings.product_card_text_font == 'heading' -%}
+      {%- assign text_class = 'h6' -%}
+    {%- endif -%}
+
+    {%- if show_title or show_prices or show_vendor and product.vendor != blank -%}
+      <div class="v-stack justify-items-center gap-2">
+        {%- if show_vendor and product.vendor != blank -%}
+          {%- capture vendor_class -%}smallcaps {% if settings.product_card_text_font == 'heading' %}heading{% endif %}{% endcapture %}
+          {%- render 'vendor' with product.vendor, class: vendor_class -%}
+        {%- endif -%}
+
+        {%- if show_title or show_prices -%}
+          <div class="v-stack justify-items-center gap-1">
+            {%- if show_title -%}
+              <a href="{{ product.url }}" class="product-title {% if text_class != blank %}{{ text_class }}{% endif %} {% if settings.product_title_max_lines > 0 %}line-clamp{% endif %}" {% if settings.product_title_max_lines > 0 %}style="--line-clamp-count: {{ settings.product_title_max_lines }}"{% endif %} data-instant>
+                {{- product.title -}}
+              </a>
+            {%- endif -%}
+
+            {%- if show_prices -%}
+              {%- render 'price-list', product: product, context: 'card' -%}
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    {%- if show_swatches and settings.product_color_display != 'hide' -%}
+      {%- liquid
+        assign matched_product_option = nil
+        assign color_label_list = 'general.label.color' | t | replace: ', ', ',' | downcase | split: ','
+        for color_label in color_label_list
+          if product.options_by_name[color_label] != blank
+            assign matched_product_option = product.options_by_name[color_label]
+            break
+          endif
+        endfor
+        if matched_product_option == blank
+          for product_option in product.options_with_values
+            assign values_with_swatch = product_option.values | where: 'swatch'
+            if values_with_swatch.size > 0
+              assign matched_product_option = product_option
+              break
+            endif
+          endfor
+        endif
+      -%}
+
+      {%- if matched_product_option != blank -%}
+        {%- case settings.product_color_display -%}
+          {%- when 'count' -%}
+            <p class="smallcaps text-subdued">{{- 'product.general.available_colors_count' | t: count: matched_product_option.values.size -}}</p>
+          {%- when 'swatch' -%}
+            <fieldset class="h-stack wrap justify-center gap-1">
+              <legend class="sr-only">{{ matched_product_option.name }}</legend>
+              {%- capture param_name -%}swatch-{{ quick_buy_context }}-{{ section.id }}-{{ block.id }}-{{ product.id }}-{{ matched_product_option.position }}{%- endcapture -%}
+              {%- liquid
+                for option_value in matched_product_option.values
+                  render 'option-value', type: 'swatch', option_value: option_value, param_name: param_name, option_position: matched_product_option.position, output_variant_media: true, size: 'sm'
+                endfor
+              -%}
+            </fieldset>
+        {%- endcase -%}
+      {%- endif -%}
+    {%- endif -%}
+
+    {%- if show_rating -%}
+      {%- render 'product-rating', product: product, show_empty: settings.show_product_rating_if_empty, display_mode: settings.product_rating_mode -%}
+    {%- endif -%}
+  </div>
+</product-card>
+
+<script>
+  (function() {
+    function initAddToCartAnimation(scope) {
+      scope = scope || document;
+      var forms = scope.querySelectorAll('[data-add-to-cart-form]');
+      forms.forEach(function(form) {
+        var btn = form.querySelector('[data-add-to-cart-button]');
+        var label = form.querySelector('[data-add-to-cart-label]');
+        var adding = form.querySelector('[data-add-to-cart-adding]');
+        if (!btn || !label || !adding) return;
+
+        form.addEventListener('submit', function() {
+          btn.setAttribute('aria-busy', 'true');
+          btn.disabled = true;
+          label.hidden = true;
+          adding.hidden = false;
+        });
+
+        var reset = function() {
+          btn.setAttribute('aria-busy', 'false');
+          btn.disabled = false;
+          label.hidden = false;
+          adding.hidden = true;
+        };
+
+        form.addEventListener('product-form:success', reset);
+        form.addEventListener('product-form:error', reset);
+        document.addEventListener('cart:refresh', reset);
+        document.addEventListener('cart:updated', reset);
+        document.addEventListener('drawer:open', reset);
+
+        form.addEventListener('submit', function startResetWatch() {
+          var check = setInterval(function() {
+            var drawer = document.querySelector('[id*="drawer"], [id*="cart-drawer"], .drawer[open], [aria-label*="cart"][open], [data-cart-drawer][open]');
+            if (drawer && drawer.hasAttribute('open')) {
+              reset();
+              clearInterval(check);
+            }
+          }, 150);
+          setTimeout(function() { clearInterval(check); reset(); }, 4000);
+        });
+      });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function() { initAddToCartAnimation(); });
+    } else {
+      initAddToCartAnimation();
+    }
+    document.addEventListener('shopify:section:load', function(ev) { initAddToCartAnimation(ev.target); });
+  })();
+</script>
+
+<style>
+  .product-card--add-to-cart-variant .product-card__figure {
+    position: relative;
+  }
+  /* Always show the button (override theme hover-only quick-add) */
+  .product-card--add-to-cart-variant .product-card__quick-add-button--text,
+  .product-card--add-to-cart-variant .product-card__figure .product-card__quick-add-button--text {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
+  .product-card--add-to-cart-variant .product-card__quick-add-button--text {
+    position: absolute;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    min-height: 2.75rem;
+    padding: 0 1rem;
+    border: none;
+    border-radius: 2rem;
+    background: #fff;
+    color: #1a1a1a;
+    font-size: 0.875rem;
+    font-weight: 600;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+    white-space: nowrap;
+  }
+  .product-card--add-to-cart-variant .product-card__quick-add-button--text:hover:not(:disabled) {
+    transform: translateX(-50%) scale(1.02);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+  }
+  .product-card--add-to-cart-variant .product-card__quick-add-button--text:disabled {
+    cursor: wait;
+    opacity: 0.9;
+  }
+  .product-card--add-to-cart-variant .product-card__quick-add-label,
+  .product-card--add-to-cart-variant .product-card__quick-add-adding {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+  .product-card--add-to-cart-variant .product-card__quick-add-adding[hidden] {
+    display: none !important;
+  }
+  .product-card--add-to-cart-variant .product-card__quick-add-spinner {
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: product-card-spin 0.6s linear infinite;
+  }
+  @keyframes product-card-spin {
+    to { transform: rotate(360deg); }
+  }
+</style>

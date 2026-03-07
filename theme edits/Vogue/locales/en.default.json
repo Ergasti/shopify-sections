@@ -1,0 +1,9 @@
+{
+  "product": {
+    "general": {
+      "add_to_cart_button": "Add to cart",
+      "adding": "Adding...",
+      "choose_options": "Choose options"
+    }
+  }
+}
