@@ -32,7 +32,7 @@ A comprehensive, categorized library of Shopify sections and snippets. Copy what
 | | [YouTube Section](YouTube%20Section/README.md) | prowebcoder/shopify-sections-youtube | 2025-02-14 |
 | **Specialized** | [Timeline (rocklss)](Timeline%20(rocklss)/README.md) | rocklss/shopify_section | 2025-02-14 |
 | | [Pricing Table (rocklss)](Pricing%20Table%20(rocklss)/README.md) | rocklss/shopify_section | 2025-02-14 |
-| | [FAQ](FAQ/readme.md) | Sections.Design (this repo) | 2025-02-14 |
+| | [FAQ (section + snippet)](FAQ/readme.md) | Sections.Design (this repo) | 2025-02-24 |
 | | [Quiz](Quiz/README.md) | Sections.Design (this repo) | 2025-02-14 |
 | | [Tooltips](Tooltips/README.md) | Sections.Design (this repo) | 2025-02-14 |
 | | [App Optimization](App%20Optimization/readme.md) | Sections.Design (this repo) | 2025-02-14 |
@@ -102,7 +102,7 @@ SectionName/
 ## Original sections (this repo)
 
 - **App Optimization** — Optimize ScriptTag-loaded apps (block or load on interaction). [Demo](https://sections.design/blogs/shopify/app-optimization)
-- **FAQ** — Accessible FAQ with SEO FAQ schema. [Demo](https://sections.design/blogs/shopify/faq-rich-snippets-section#demo)
+- **FAQ** — Accessible FAQ with SEO FAQ schema. Includes a reusable `faq-item` snippet for embedding FAQ items in any section. [Demo](https://sections.design/blogs/shopify/faq-rich-snippets-section#demo)
 - **Tooltips** — Product tooltips. [Demo](https://sections.design/blogs/shopify/product-tooltips#shopify-section-tooltips)
 - **Quiz** — Product recommendation quiz (type, tags, vendor, price, options). [Demo](https://sections.design/blogs/shopify/quiz#shopify-section-Quiz)
 
