@@ -1,0 +1,56 @@
+{% comment %}
+  FAQ Item (Snippet)
+  Renders a single accessible FAQ accordion item with expand/collapse.
+  Use inside any section or template via Custom Liquid block.
+
+  Usage:
+    {% render 'faq-item', title: 'Question?', content: '<p>Answer.</p>', block_id: 'unique-id', expanded: false %}
+
+  Parameters:
+    title       {String}  — Required. The question text.
+    content     {String}  — Required. The answer HTML.
+    block_id    {String}  — Optional. Unique identifier for the item (default: auto-generated).
+    expanded    {Boolean} — Optional. Whether the item starts expanded (default: false).
+
+  Dependencies:
+    Copy assets/faq.js to your theme assets folder and load it once on the page:
+      <script src="{{ 'faq.js' | asset_url }}" defer></script>
+
+  After rendering all faq-item snippets, include a JSON config block for faq.js:
+    <script type="application/json" data-faq-config="my-faq">
+      { "sectionId": "my-faq", "blockIds": ["id-1", "id-2", "id-3"] }
+    </script>
+
+  See README.md for full install instructions.
+{% endcomment %}
+
+{%- liquid
+  assign faq_title = title | default: ''
+  assign faq_content = content | default: ''
+  assign faq_block_id = block_id | default: 'faq-item'
+  assign faq_expanded = expanded | default: false
+-%}
+
+{%- if faq_title != blank and faq_content != blank -%}
+  {%- if faq_expanded -%}
+    {%- assign aria_expanded = 'true' -%}
+    {%- assign hidden_attr = '' -%}
+  {%- else -%}
+    {%- assign aria_expanded = 'false' -%}
+    {%- assign hidden_attr = 'hidden' -%}
+  {%- endif -%}
+
+  <h2 class="faq-title m-0 p-0" data-faq-trigger="{{ faq_block_id }}">
+    <button class="faq-button flex items-center justify-between w-full text-left m-0 p-4 cursor-pointer" data-faq-button="{{ faq_block_id }}" aria-expanded="{{ aria_expanded }}">
+      <span>{{ faq_title }}</span>
+      <svg class="faq-icon" viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path class="faq-icon-minus" fill="currentColor" d="M8 0v14H6V0z"></path>
+        <path fill="currentColor" d="M0 6h14v2H0z"></path>
+      </svg>
+    </button>
+  </h2>
+
+  <div class="faq-panel rte overflow-hidden custom-bg" data-faq-panel="{{ faq_block_id }}" {{ hidden_attr }}>
+    <div class="faq-wrap p-4">{{ faq_content }}</div>
+  </div>
+{%- endif -%}
