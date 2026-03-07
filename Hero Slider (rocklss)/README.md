@@ -1,5 +1,8 @@
 # Hero Slider (rocklss)
 
+
+![Preview](preview.svg)
+
 Hero slider with image or video slides, title, subtitle, buttons, and nav. Supports autoplay, height settings, and font/color customization.
 
 **Category:** Carousels & Sliders  

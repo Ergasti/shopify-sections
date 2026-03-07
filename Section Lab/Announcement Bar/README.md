@@ -1,5 +1,8 @@
 # SL Announcement Bar (Section Lab)
 
+
+![Preview](preview.svg)
+
 Top-of-page announcement bar with optional **countdown timer**. Rich text message, optional link for the whole bar, and a message shown when the countdown ends. Timer can appear before or after the text.
 
 **Category:** Promotional / Navigation  

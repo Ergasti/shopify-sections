@@ -1,5 +1,8 @@
 # Image Gallery (BoldizArt)
 
+
+![Preview](preview.svg)
+
 Dynamic image gallery section. Configurable images per row on mobile, tablet, laptop, desktop; background and text color; container width.
 
 **Category:** Media & Gallery  

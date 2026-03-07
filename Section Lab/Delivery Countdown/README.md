@@ -1,5 +1,8 @@
 # SL Delivery Countdown (Section Lab)
 
+
+![Preview](preview.svg)
+
 Shows **estimated delivery** (day and date range) and a **countdown** to the order cutoff (e.g. "order before X H Y M"). Optional status dot with pulse. Can be placed on the product template or injected into product info via Custom Liquid.
 
 **Category:** Promotional / Product  

@@ -1,8 +1,15 @@
 # SL - How to Use
 
+<<<<<<< HEAD
 Product-level **“How to use it the right way”** steps, inspired by Yves Rocher. Each step shows a number, optional title, an optional **related product** (image + name, linked), and an expandable **description**. Available as a **section** (metaobject or manual steps) or a **snippet** (metaobject only, for Custom Liquid blocks).
 
 **Main idea:** Steps live in a **single, named “How to use” object**. Multiple products can reference the **same** object, so you define one routine (e.g. “Daily face cream routine”) and assign it to many products. The **product object** (the current product page) is what the section/snippet depends on; each step can optionally link to a **related product** (e.g. “use with Moisturizer X”) for the pill.
+=======
+
+![Preview](preview.svg)
+
+Product-level **“How to use it the right way”** steps, inspired by Yves Rocher. Each step shows a number, optional title, a **related product** (image + name, linked), and an expandable **description**. Available as a **section** (metaobject or manual steps) or a **snippet** (metaobject only, for Custom Liquid blocks).
+>>>>>>> edeefa4 (Add SVG preview images to all 37 section READMEs)
 
 **Category:** Product / Content  
 **Templates:** Product (section and snippet are used on product pages)

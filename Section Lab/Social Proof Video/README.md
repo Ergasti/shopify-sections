@@ -1,5 +1,8 @@
 # SL - Social Proof Video Slider
 
+
+![Preview](preview.svg)
+
 Product-specific UGC video slider for social proof. Uses **metaobjects** for per-product videos or **section blocks** for static videos. Add to product template.
 
 **Category:** Media / Social Proof  

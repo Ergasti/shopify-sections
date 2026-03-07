@@ -1,5 +1,8 @@
 # SL Sales Nudge Widget (Section Lab)
 
+
+![Preview](preview.svg)
+
 Toast-style **“social proof”** nudges: “Someone from [city] just bought [product]” with product image and “Verified Purchase · X min ago”. Uses **Toastify-js** from CDN. Shows up to 5 toasts (every 30s) or one persistent toast in preview mode. Clicking the toast goes to the product.
 
 **Category:** Marketing / Conversion  

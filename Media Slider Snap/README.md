@@ -1,5 +1,8 @@
 # Media Slider Snap
 
+
+![Preview](preview.svg)
+
 Scroll-snap media slider with **images and videos** in one carousel. Active slide is centered, scaled up, and full opacity; inactive slides are dimmed with optional white overlay. No external libraries—pure CSS scroll-snap + vanilla JS. Videos auto-play when in view and advance to next video on end; hover (desktop) switches active slide.
 
 **Category:** Video / Media  

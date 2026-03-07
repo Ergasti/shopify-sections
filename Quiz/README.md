@@ -1,5 +1,8 @@
 # Shopify Quiz Section
 
+
+![Preview](preview.svg)
+
 **Last updated in library:** 2025-02-14
 
 A Shopify product recommendation quiz section.

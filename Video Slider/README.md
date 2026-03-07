@@ -1,5 +1,8 @@
 # Video Slider Section
 
+
+![Preview](preview.svg)
+
 Horizontal video slider with Swiper.js: multiple MP4 videos per block, optional autoplay, prev/next buttons, and pagination dots. Section title, heading size/alignment, spacing, and padding/margin are configurable in the Theme Editor.
 
 **Category:** Video  

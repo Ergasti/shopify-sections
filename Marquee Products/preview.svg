@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 270" width="400" height="270">
+  <defs>
+    <style>text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }</style>
+  </defs>
+  <rect width="400" height="270" rx="12" fill="#fff" stroke="#e0e0e0" stroke-width="1"/>
+  <text x="200" y="30" text-anchor="middle" font-size="11" fill="#aaa" letter-spacing="1" text-transform="uppercase">Marquee Products</text>
+  <line x1="160" y1="38" x2="240" y2="38" stroke="#eee" stroke-width="1"/>
+  
+        <rect x="10" y="70" width="80" height="100" rx="6" fill="#f5f0eb" stroke="#ddd"/>
+        <rect x="20" y="80" width="60" height="50" rx="3" fill="#e8ddd0"/>
+        <rect x="20" y="138" width="50" height="6" rx="2" fill="#ddd"/>
+        <text x="20" y="157" font-size="10" fill="#999">$29</text>
+
+        <rect x="100" y="70" width="80" height="100" rx="6" fill="#ebf0f5" stroke="#ddd"/>
+        <rect x="110" y="80" width="60" height="50" rx="3" fill="#d0dde8"/>
+        <rect x="110" y="138" width="50" height="6" rx="2" fill="#ddd"/>
+        <text x="110" y="157" font-size="10" fill="#999">$49</text>
+
+        <rect x="190" y="70" width="80" height="100" rx="6" fill="#f0f5eb" stroke="#ddd"/>
+        <rect x="200" y="80" width="60" height="50" rx="3" fill="#dde8d0"/>
+        <rect x="200" y="138" width="50" height="6" rx="2" fill="#ddd"/>
+        <text x="200" y="157" font-size="10" fill="#999">$19</text>
+
+        <rect x="280" y="70" width="80" height="100" rx="6" fill="#f5ebf0" stroke="#ddd"/>
+        <rect x="290" y="80" width="60" height="50" rx="3" fill="#e8d0dd"/>
+        <rect x="290" y="138" width="50" height="6" rx="2" fill="#ddd"/>
+        <text x="290" y="157" font-size="10" fill="#999">$39</text>
+
+        <text x="15" y="200" font-size="11" fill="#aaa">◀ marquee scrolling ▶</text>
+        <text x="200" y="230" text-anchor="middle" font-size="10" fill="#bbb">pauses on hover</text>
+        
+</svg>

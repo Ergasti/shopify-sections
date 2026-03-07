@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 270" width="400" height="270">
+  <defs>
+    <style>text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }</style>
+  </defs>
+  <rect width="400" height="270" rx="12" fill="#fff" stroke="#e0e0e0" stroke-width="1"/>
+  <text x="200" y="30" text-anchor="middle" font-size="11" fill="#aaa" letter-spacing="1" text-transform="uppercase">FAQ</text>
+  <line x1="160" y1="38" x2="240" y2="38" stroke="#eee" stroke-width="1"/>
+  
+        <rect x="40" y="50" width="320" height="36" rx="4" fill="#f0f0f0" stroke="#ccc"/>
+        <text x="56" y="73" font-size="13" fill="#444">What is your return policy?</text>
+        <text x="340" y="73" font-size="16" fill="#999">+</text>
+
+        <rect x="40" y="94" width="320" height="36" rx="4" fill="#e8f4e8" stroke="#aad4aa"/>
+        <text x="56" y="117" font-size="13" fill="#444">Do you ship internationally?</text>
+        <text x="340" y="117" font-size="16" fill="#5a5">−</text>
+        <rect x="40" y="130" width="320" height="30" rx="4" fill="#f8fdf8" stroke="#cce8cc"/>
+        <text x="56" y="150" font-size="11" fill="#666">Yes — we ship to over 60 countries.</text>
+
+        <rect x="40" y="168" width="320" height="36" rx="4" fill="#f0f0f0" stroke="#ccc"/>
+        <text x="56" y="191" font-size="13" fill="#444">How long does delivery take?</text>
+        <text x="340" y="191" font-size="16" fill="#999">+</text>
+
+        <rect x="40" y="212" width="320" height="36" rx="4" fill="#f0f0f0" stroke="#ccc"/>
+        <text x="56" y="235" font-size="13" fill="#444">Can I cancel my order?</text>
+        <text x="340" y="235" font-size="16" fill="#999">+</text>
+        
+</svg>

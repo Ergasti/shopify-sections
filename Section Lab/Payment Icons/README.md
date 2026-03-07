@@ -1,5 +1,8 @@
 # SL Payment Icons (Section Lab)
 
+
+![Preview](preview.svg)
+
 Displays **payment method icons** (SVG) in a styled box. Uses the store’s enabled payment types by default, or a custom comma-separated list (e.g. visa, master, apple_pay). Optional heading. Can be placed anywhere or injected into product info via Custom Liquid.
 
 **Category:** Product / Trust  

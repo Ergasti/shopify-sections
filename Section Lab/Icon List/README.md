@@ -1,5 +1,8 @@
 # SL Icon List (Section Lab)
 
+
+![Preview](preview.svg)
+
 Vertical **icon + text** list (product bullets style). Each block has an optional icon image and rich text. Use as a standalone section or copy its content into the product info area via Custom Liquid.
 
 **Category:** Product / Content  

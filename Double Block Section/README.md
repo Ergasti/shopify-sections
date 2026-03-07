@@ -1,5 +1,8 @@
 # Double Block Section (Double Hero Slider)
 
+
+![Preview](preview.svg)
+
 Two-block layout: 3/4 width image (left) and 1/4 width image (right). Suited for hero or promotional layouts.
 
 **Category:** Content & Layout  

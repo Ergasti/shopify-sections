@@ -1,5 +1,8 @@
 # SL Price Bubble Widget (Section Lab)
 
+
+![Preview](preview.svg)
+
 Small “price bubble” widget (e.g. “Only 0.27€ per day”) with optional icon, tail (up/down/none), and full style control. Good for product pages or anywhere you want a compact price message.
 
 **Category:** Product / Conversion  

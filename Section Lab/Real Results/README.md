@@ -1,6 +1,13 @@
 # SL - Real Results (Results you'll see)
 
+<<<<<<< HEAD
 **Accordion** section with heading “RESULTS YOU'LL SEE” and one or more **“how it affects”** boxes. Each box has: video (or image), title, bubble tags (with checkmark), and description. Clicking the video area toggles play/pause.
+=======
+
+![Preview](preview.svg)
+
+Product highlights as a **card stack** (Swiper cards effect). Data comes from a product metafield. Each card shows an icon + title; cards with a description open a modal on click.
+>>>>>>> edeefa4 (Add SVG preview images to all 37 section READMEs)
 
 **Category:** Content  
 **Templates:** Product

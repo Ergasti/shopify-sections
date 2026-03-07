@@ -1,5 +1,8 @@
 # SL - UGC Videos Homepage
 
+
+![Preview](preview.svg)
+
 Home page section: a **Swiper** of UGC-style video cards, each with a **related product** strip below. Clicking a card opens a **full-screen overlay** with the video (autoplay, controls) and the same product CTA (“Get the product”).
 
 **Category:** Media  
