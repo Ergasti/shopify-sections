@@ -1,5 +1,8 @@
 # Fancy Slick Carousel Section
 
+
+![Preview](preview.svg)
+
 Slideshow/carousel section with text overlay, buttons, progress bar, overlay opacity, and multiple slide options. Uses **Slick** slider (jQuery plugin).
 
 **Category:** Carousels & Sliders  

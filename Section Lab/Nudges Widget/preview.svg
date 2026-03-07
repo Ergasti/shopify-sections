@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 270" width="400" height="270">
+  <defs>
+    <style>text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }</style>
+  </defs>
+  <rect width="400" height="270" rx="12" fill="#fff" stroke="#e0e0e0" stroke-width="1"/>
+  <text x="200" y="30" text-anchor="middle" font-size="11" fill="#aaa" letter-spacing="1" text-transform="uppercase">Sales Nudge Widget</text>
+  <line x1="160" y1="38" x2="240" y2="38" stroke="#eee" stroke-width="1"/>
+  
+        <rect x="20" y="50" width="360" height="180" rx="4" fill="#fafafa" stroke="#eee"/>
+        <text x="200" y="130" text-anchor="middle" font-size="14" fill="#ccc">Your Store Page</text>
+
+        <rect x="200" y="180" width="180" height="48" rx="8" fill="#333" stroke="#555"/>
+        <circle cx="220" cy="204" r="12" fill="#f39c12"/>
+        <text x="220" y="209" text-anchor="middle" font-size="12" fill="#fff">🔥</text>
+        <text x="248" y="199" font-size="10" fill="#fff" font-weight="600">Sarah just bought</text>
+        <text x="248" y="213" font-size="9" fill="#ccc">Vitamin C Serum — 2 min ago</text>
+        
+</svg>

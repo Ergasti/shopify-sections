@@ -1,5 +1,8 @@
 # SL - How to Use
 
+
+![Preview](preview.svg)
+
 Product-level **“How to use it the right way”** steps, inspired by Yves Rocher. Each step shows a number, optional title, a **related product** (image + name, linked), and an expandable **description**. Available as a **section** (metaobject or manual steps) or a **snippet** (metaobject only, for Custom Liquid blocks).
 
 **Category:** Product / Content  

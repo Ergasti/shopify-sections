@@ -1,5 +1,8 @@
 # Scarcity Bar
 
+
+![Preview](preview.svg)
+
 “Only **X** items left” urgency widget with an animated progress bar, optional pulsing dot, and EN/AR text. Quantity can be random (min–max) or, on product pages, use real product inventory.
 
 **Category:** Product / Marketing  

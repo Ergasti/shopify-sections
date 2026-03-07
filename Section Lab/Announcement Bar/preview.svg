@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 270" width="400" height="270">
+  <defs>
+    <style>text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }</style>
+  </defs>
+  <rect width="400" height="270" rx="12" fill="#fff" stroke="#e0e0e0" stroke-width="1"/>
+  <text x="200" y="30" text-anchor="middle" font-size="11" fill="#aaa" letter-spacing="1" text-transform="uppercase">Announcement Bar</text>
+  <line x1="160" y1="38" x2="240" y2="38" stroke="#eee" stroke-width="1"/>
+  
+        <rect x="0" y="70" width="400" height="50" fill="#1a1a2e"/>
+        <text x="200" y="100" text-anchor="middle" font-size="13" fill="#fff" font-weight="500">🎉  FREE SHIPPING on orders over $50  •  Ends in 02:15:30</text>
+
+        <rect x="0" y="130" width="400" height="130" fill="#f8f8f8" stroke="#eee"/>
+        <text x="200" y="200" text-anchor="middle" font-size="14" fill="#ccc">Rest of page…</text>
+        
+</svg>

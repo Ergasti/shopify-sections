@@ -1,5 +1,8 @@
 # SL - Native Video Slider (Section Lab)
 
+
+![Preview](preview.svg)
+
 Horizontal video slider using **Shopify native video** (upload in Theme Editor). No external URLs—each block uses the theme’s video picker. Scroll-snap, optional autoplay for the active slide, play/pause and mute per slide, optional arrows. Staggered effect and aspect ratio (16:9, 9:16, 1:1) configurable.
 
 **Category:** Video / Media  

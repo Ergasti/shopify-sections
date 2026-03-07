@@ -1,5 +1,8 @@
 # Timeline (rocklss)
 
+
+![Preview](preview.svg)
+
 Vertical timeline section with blocks (icon, title, description, date, link). Customizable colors, fonts, and background.
 
 **Category:** Specialized  

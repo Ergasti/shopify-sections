@@ -1,5 +1,8 @@
 # IP Redirection (Snippet)
 
+
+![Preview](preview.svg)
+
 Redirects visitors by continent (or region) using an IP geolocation API. Handy for regional stores or landing pages. Redirect is disabled when the theme customizer or preview bar is open.
 
 **Category:** Snippets & Utilities  

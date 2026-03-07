@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 270" width="400" height="270">
+  <defs>
+    <style>text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }</style>
+  </defs>
+  <rect width="400" height="270" rx="12" fill="#fff" stroke="#e0e0e0" stroke-width="1"/>
+  <text x="200" y="30" text-anchor="middle" font-size="11" fill="#aaa" letter-spacing="1" text-transform="uppercase">Image Gallery</text>
+  <line x1="160" y1="38" x2="240" y2="38" stroke="#eee" stroke-width="1"/>
+  
+        <rect x="30" y="60" width="95" height="75" rx="4" fill="#e8ddd0" stroke="#ccc"/>
+        <rect x="135" y="60" width="95" height="75" rx="4" fill="#d0dde8" stroke="#ccc"/>
+        <rect x="240" y="60" width="95" height="75" rx="4" fill="#dde8d0" stroke="#ccc"/>
+        <rect x="30" y="145" width="95" height="75" rx="4" fill="#e8d0dd" stroke="#ccc"/>
+        <rect x="135" y="145" width="95" height="75" rx="4" fill="#d0e8dd" stroke="#ccc"/>
+        <rect x="240" y="145" width="95" height="75" rx="4" fill="#ddd0e8" stroke="#ccc"/>
+
+        <text x="77" y="102" text-anchor="middle" font-size="20" fill="#bbb">🖼</text>
+        <text x="182" y="102" text-anchor="middle" font-size="20" fill="#bbb">🖼</text>
+        <text x="287" y="102" text-anchor="middle" font-size="20" fill="#bbb">🖼</text>
+        <text x="77" y="187" text-anchor="middle" font-size="20" fill="#bbb">🖼</text>
+        <text x="182" y="187" text-anchor="middle" font-size="20" fill="#bbb">🖼</text>
+        <text x="287" y="187" text-anchor="middle" font-size="20" fill="#bbb">🖼</text>
+        
+</svg>

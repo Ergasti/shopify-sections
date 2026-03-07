@@ -1,5 +1,8 @@
 # Pagination With Numbers (Snippet)
 
+
+![Preview](preview.svg)
+
 Pagination snippet with numbered pages and previous/next arrows.
 
 **Category:** Snippets & Utilities  

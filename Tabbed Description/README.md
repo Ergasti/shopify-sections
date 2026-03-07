@@ -1,5 +1,8 @@
 # Tabbed Description (Snippet)
 
+
+![Preview](preview.svg)
+
 Product description split into tabs, typically by H6 headings. Easy for merchants to manage.
 
 **Category:** Snippets & Utilities  

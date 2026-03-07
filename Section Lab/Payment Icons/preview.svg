@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 270" width="400" height="270">
+  <defs>
+    <style>text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }</style>
+  </defs>
+  <rect width="400" height="270" rx="12" fill="#fff" stroke="#e0e0e0" stroke-width="1"/>
+  <text x="200" y="30" text-anchor="middle" font-size="11" fill="#aaa" letter-spacing="1" text-transform="uppercase">Payment Icons</text>
+  <line x1="160" y1="38" x2="240" y2="38" stroke="#eee" stroke-width="1"/>
+  
+        <text x="200" y="100" text-anchor="middle" font-size="12" fill="#666">Accepted Payment Methods</text>
+        <rect x="52" y="115" width="50" height="30" rx="4" fill="#1a1f71"/>
+        <text x="77" y="135" text-anchor="middle" font-size="10" fill="#fff" font-weight="700">VISA</text>
+        <rect x="112" y="115" width="50" height="30" rx="4" fill="#eb001b"/>
+        <text x="137" y="135" text-anchor="middle" font-size="8" fill="#fff" font-weight="700">Master</text>
+        <rect x="172" y="115" width="50" height="30" rx="4" fill="#006fcf"/>
+        <text x="197" y="135" text-anchor="middle" font-size="7" fill="#fff" font-weight="700">AMEX</text>
+        <rect x="232" y="115" width="50" height="30" rx="4" fill="#003087"/>
+        <text x="257" y="135" text-anchor="middle" font-size="8" fill="#fff" font-weight="700">PayPal</text>
+        <rect x="292" y="115" width="50" height="30" rx="4" fill="#5a31f4"/>
+        <text x="317" y="135" text-anchor="middle" font-size="8" fill="#fff" font-weight="700">Shop</text>
+
+        <text x="200" y="175" text-anchor="middle" font-size="10" fill="#aaa">Configurable icon blocks</text>
+        
+</svg>

@@ -1,5 +1,8 @@
 # Videos Slider (Mixed Media Carousel)
 
+
+![Preview](preview.svg)
+
 Seamless **infinite** carousel of images and videos. Uses cloned first/last slides for smooth looping. No external libraries—vanilla JS + CSS. Supports auto-slide, arrows, visible slides (desktop/mobile), and media ratio (adapt / square / portrait).
 
 **Category:** Video / Media  

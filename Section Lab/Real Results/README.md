@@ -1,5 +1,8 @@
 # SL - Real Results
 
+
+![Preview](preview.svg)
+
 Product highlights as a **card stack** (Swiper cards effect). Data comes from a product metafield. Each card shows an icon + title; cards with a description open a modal on click.
 
 **Category:** Content  

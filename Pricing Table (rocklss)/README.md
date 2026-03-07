@@ -1,5 +1,8 @@
 # Pricing Table (rocklss)
 
+
+![Preview](preview.svg)
+
 Pricing table with multiple styles (1–4), featured plan, and blocks for title, price, duration, descriptions, and button.
 
 **Category:** Specialized  

@@ -1,5 +1,8 @@
 # YouTube Section
 
+
+![Preview](preview.svg)
+
 Embed YouTube videos in a section. Source: prowebcoder/shopify-sections-youtube.
 
 **Category:** Video  

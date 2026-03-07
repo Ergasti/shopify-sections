@@ -1,5 +1,8 @@
 # Shop by State Map
 
+
+![Preview](preview.svg)
+
 Interactive India map section. Each state highlights on selection and links to a collection. Configure State Map ID (SVG ID), tooltip label, and collection per state.
 
 **Category:** Maps & Local  

@@ -1,5 +1,8 @@
 # Collection Page Swatches (Snippet)
 
+
+![Preview](preview.svg)
+
 Shows color (or colour/couleur) option as clickable circles on collection pages. Each swatch links to the variant URL.
 
 **Category:** Product & Collection  

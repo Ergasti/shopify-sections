@@ -1,5 +1,8 @@
 # SL - Before And After Video
 
+
+![Preview](preview.svg)
+
 Product-specific before/after video slider. Uses **Swiper**, square aspect ratio, same play/mute strategy as Social Proof Video. Add to product template.
 
 **Category:** Media  

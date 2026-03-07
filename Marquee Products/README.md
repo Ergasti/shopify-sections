@@ -1,5 +1,8 @@
 # Marquee Products Section
 
+
+![Preview](preview.svg)
+
 Horizontal scrolling marquee that displays product cards. Supports optional dynamic prices via external API, image placeholder, and pause-on-hover.
 
 **Category:** Carousels & Sliders  

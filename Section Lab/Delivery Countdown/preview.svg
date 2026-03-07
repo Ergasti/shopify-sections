@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 270" width="400" height="270">
+  <defs>
+    <style>text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }</style>
+  </defs>
+  <rect width="400" height="270" rx="12" fill="#fff" stroke="#e0e0e0" stroke-width="1"/>
+  <text x="200" y="30" text-anchor="middle" font-size="11" fill="#aaa" letter-spacing="1" text-transform="uppercase">Delivery Countdown</text>
+  <line x1="160" y1="38" x2="240" y2="38" stroke="#eee" stroke-width="1"/>
+  
+        <rect x="50" y="80" width="300" height="100" rx="8" fill="#f8fdf8" stroke="#d4edda"/>
+        <text x="200" y="110" text-anchor="middle" font-size="12" fill="#155724" font-weight="600">🚚  Order within</text>
+        <text x="200" y="140" text-anchor="middle" font-size="28" fill="#155724" font-weight="700">2h 34m</text>
+        <text x="200" y="165" text-anchor="middle" font-size="12" fill="#155724">for delivery by <tspan font-weight="600">Tomorrow</tspan></text>
+        
+</svg>

@@ -1,5 +1,8 @@
 # SL - Frequently Bought Together
 
+
+![Preview](preview.svg)
+
 Product slider for “Frequently Bought Together” with card styling, auto-generated percentage badges, and add-to-cart. Designed to be modern, lightweight, and fast.
 
 **Category:** Products  

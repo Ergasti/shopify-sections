@@ -1,5 +1,8 @@
 # Shopify FAQ Rich Snippets Section
 
+
+![Preview](preview.svg)
+
 **Last updated in library:** 2025-02-24
 
 ## Demo

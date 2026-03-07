@@ -1,5 +1,8 @@
 # SL Story Navigation (Section Lab)
 
+
+![Preview](preview.svg)
+
 Horizontal “story” strip of circular (or rounded) icons with labels and links—similar to Instagram story rings. Optional badge per item from a collection metafield. Responsive with horizontal scroll on small screens.
 
 **Category:** Navigation / Content  

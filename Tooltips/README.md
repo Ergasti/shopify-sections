@@ -1,5 +1,8 @@
 # Shopify Tooltips Section
 
+
+![Preview](preview.svg)
+
 **Last updated in library:** 2025-02-14
 
 Simple, accesibile and performant. Provide additional explanatory content and showcase product features. 

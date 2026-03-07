@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 270" width="400" height="270">
+  <defs>
+    <style>text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }</style>
+  </defs>
+  <rect width="400" height="270" rx="12" fill="#fff" stroke="#e0e0e0" stroke-width="1"/>
+  <text x="200" y="30" text-anchor="middle" font-size="11" fill="#aaa" letter-spacing="1" text-transform="uppercase">Tabbed Description</text>
+  <line x1="160" y1="38" x2="240" y2="38" stroke="#eee" stroke-width="1"/>
+  
+        <rect x="50" y="70" width="80" height="30" rx="4" fill="#333"/>
+        <text x="90" y="90" text-anchor="middle" font-size="11" fill="#fff">Details</text>
+        <rect x="130" y="70" width="80" height="30" rx="4" fill="#eee" stroke="#ccc"/>
+        <text x="170" y="90" text-anchor="middle" font-size="11" fill="#666">Shipping</text>
+        <rect x="210" y="70" width="80" height="30" rx="4" fill="#eee" stroke="#ccc"/>
+        <text x="250" y="90" text-anchor="middle" font-size="11" fill="#666">Reviews</text>
+
+        <rect x="50" y="100" width="300" height="120" rx="4" fill="#fafafa" stroke="#ddd"/>
+        <rect x="66" y="118" width="200" height="8" rx="2" fill="#ddd"/>
+        <rect x="66" y="134" width="260" height="8" rx="2" fill="#ddd"/>
+        <rect x="66" y="150" width="180" height="8" rx="2" fill="#ddd"/>
+        <rect x="66" y="170" width="240" height="8" rx="2" fill="#eee"/>
+        <rect x="66" y="186" width="140" height="8" rx="2" fill="#eee"/>
+        
+</svg>

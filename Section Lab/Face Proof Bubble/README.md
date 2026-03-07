@@ -1,5 +1,8 @@
 # SL Face Proof Bubble (Section Lab)
 
+
+![Preview](preview.svg)
+
 Overlapping **circular images** (up to 3) with optional **verification badge** on the last image, plus **richtext**. Use as a standalone section or inject into product info via Custom Liquid.
 
 **Category:** Product / Marketing  

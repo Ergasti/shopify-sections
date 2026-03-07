@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 270" width="400" height="270">
+  <defs>
+    <style>text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }</style>
+  </defs>
+  <rect width="400" height="270" rx="12" fill="#fff" stroke="#e0e0e0" stroke-width="1"/>
+  <text x="200" y="30" text-anchor="middle" font-size="11" fill="#aaa" letter-spacing="1" text-transform="uppercase">Fancy Slick Carousel</text>
+  <line x1="160" y1="38" x2="240" y2="38" stroke="#eee" stroke-width="1"/>
+  
+        <rect x="20" y="50" width="360" height="170" rx="6" fill="#34495e"/>
+        <rect x="20" y="50" width="360" height="170" rx="6" fill="url(#slickGrad)" opacity="0.6"/>
+        <defs><linearGradient id="slickGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="transparent"/><stop offset="100%" stop-color="rgba(0,0,0,0.7)"/></linearGradient></defs>
+
+        <text x="200" y="120" text-anchor="middle" font-size="18" fill="#fff" font-weight="700">Summer Collection</text>
+        <text x="200" y="142" text-anchor="middle" font-size="11" fill="#ccc">Up to 50% off — limited time</text>
+        <rect x="155" y="155" width="90" height="26" rx="13" fill="#e74c3c"/>
+        <text x="200" y="173" text-anchor="middle" font-size="10" fill="#fff">Shop Now →</text>
+
+        <rect x="20" y="220" width="120" height="3" rx="1" fill="#eee"/>
+        <rect x="20" y="220" width="40" height="3" rx="1" fill="#e74c3c"/>
+        <text x="200" y="245" text-anchor="middle" font-size="10" fill="#bbb">Slick carousel with progress bar</text>
+        
+</svg>

@@ -1,5 +1,8 @@
 # Sectioned Contact Form
 
+
+![Preview](preview.svg)
+
 Drag-and-drop contact form builder. Add blocks for email, message, text, textarea, phone, name, headings, checkbox, radio, and select. Fully configurable from the Theme Editor.
 
 **Category:** Forms & Contact  

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 270" width="400" height="270">
+  <defs>
+    <style>text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }</style>
+  </defs>
+  <rect width="400" height="270" rx="12" fill="#fff" stroke="#e0e0e0" stroke-width="1"/>
+  <text x="200" y="30" text-anchor="middle" font-size="11" fill="#aaa" letter-spacing="1" text-transform="uppercase">Icon List</text>
+  <line x1="160" y1="38" x2="240" y2="38" stroke="#eee" stroke-width="1"/>
+  
+        <rect x="30" y="72" width="50" height="50" rx="25" fill="#f0f7ff"/>
+        <text x="55" y="103" text-anchor="middle" font-size="20">🚚</text>
+        <text x="55" y="140" text-anchor="middle" font-size="9" fill="#555">Free Ship</text>
+
+        <rect x="110" y="72" width="50" height="50" rx="25" fill="#fff0f0"/>
+        <text x="135" y="103" text-anchor="middle" font-size="20">🔒</text>
+        <text x="135" y="140" text-anchor="middle" font-size="9" fill="#555">Secure</text>
+
+        <rect x="190" y="72" width="50" height="50" rx="25" fill="#f0fff0"/>
+        <text x="215" y="103" text-anchor="middle" font-size="20">🌿</text>
+        <text x="215" y="140" text-anchor="middle" font-size="9" fill="#555">Natural</text>
+
+        <rect x="270" y="72" width="50" height="50" rx="25" fill="#fff8f0"/>
+        <text x="295" y="103" text-anchor="middle" font-size="20">⭐</text>
+        <text x="295" y="140" text-anchor="middle" font-size="9" fill="#555">Top Rated</text>
+
+        <rect x="350" y="72" width="50" height="50" rx="25" fill="#f8f0ff"/>
+        <text x="375" y="103" text-anchor="middle" font-size="20">🔄</text>
+        <text x="375" y="140" text-anchor="middle" font-size="9" fill="#555">Returns</text>
+        <text x="200" y="185" text-anchor="middle" font-size="10" fill="#aaa">Product trust icons strip</text>
+        
+</svg>
