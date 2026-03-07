@@ -1,0 +1,119 @@
+[
+  {
+    "type": "header",
+    "content": "Product card (add to cart style)"
+  },
+  {
+    "type": "range",
+    "id": "card_radius",
+    "min": 0,
+    "max": 32,
+    "step": 2,
+    "unit": "px",
+    "label": "Card corner radius",
+    "default": 12
+  },
+  {
+    "type": "range",
+    "id": "card_padding",
+    "min": 8,
+    "max": 32,
+    "step": 2,
+    "unit": "px",
+    "label": "Card padding",
+    "default": 16
+  },
+  {
+    "type": "checkbox",
+    "id": "card_border",
+    "label": "Card border",
+    "default": true
+  },
+  {
+    "type": "color",
+    "id": "card_bg",
+    "label": "Card background",
+    "default": "#ffffff"
+  },
+  {
+    "type": "color",
+    "id": "card_border_color",
+    "label": "Card border color",
+    "default": "#e5e5e5"
+  },
+  {
+    "type": "select",
+    "id": "card_shadow",
+    "label": "Card shadow",
+    "options": [
+      { "value": "none", "label": "None" },
+      { "value": "subtle", "label": "Subtle" },
+      { "value": "medium", "label": "Medium" },
+      { "value": "strong", "label": "Strong" }
+    ],
+    "default": "subtle"
+  },
+  {
+    "type": "range",
+    "id": "card_gap",
+    "min": 4,
+    "max": 24,
+    "step": 2,
+    "unit": "px",
+    "label": "Gap between card areas",
+    "default": 10
+  },
+  {
+    "type": "range",
+    "id": "card_info_gap",
+    "min": 2,
+    "max": 20,
+    "step": 2,
+    "unit": "px",
+    "label": "Gap inside info block",
+    "default": 8
+  },
+  {
+    "type": "header",
+    "content": "Add to cart button"
+  },
+  {
+    "type": "color",
+    "id": "product_card_button_bg",
+    "label": "Button background",
+    "info": "Leave blank to use theme button color"
+  },
+  {
+    "type": "color",
+    "id": "product_card_button_text_color",
+    "label": "Button text color",
+    "info": "Leave blank to use theme button text color"
+  },
+  {
+    "type": "range",
+    "id": "product_card_button_radius",
+    "min": 0,
+    "max": 24,
+    "step": 2,
+    "unit": "px",
+    "label": "Button corner radius",
+    "default": 8
+  },
+  {
+    "type": "select",
+    "id": "product_card_button_size",
+    "label": "Button size",
+    "options": [
+      { "value": "small", "label": "Small" },
+      { "value": "medium", "label": "Medium" },
+      { "value": "large", "label": "Large" }
+    ],
+    "default": "medium"
+  },
+  {
+    "type": "checkbox",
+    "id": "product_card_button_full_width",
+    "label": "Button full width",
+    "default": true
+  }
+]

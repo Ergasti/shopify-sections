@@ -3,7 +3,8 @@
     "general": {
       "add_to_cart_button": "Add to cart",
       "adding": "Adding...",
-      "choose_options": "Choose options"
+      "choose_options": "Choose options",
+      "sold_out": "Sold out"
     }
   }
 }

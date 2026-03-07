@@ -1,0 +1,312 @@
+{% comment %}
+  SL - Highlights (snippet)
+  Product-info style highlights: list of items with icon + label; optional popup per item.
+  Usage: {% render 'sl-highlights', highlights: list, section_id: 'highlights-1', heading: 'Highlights' %}
+  Or with section blocks: use_blocks: true, section: section
+  Each item: label (required), icon (optional: sparkle, leaf, recyclable, natural_origin, france), popup_title, popup_subtitle, popup_description, popup_image
+{% endcomment %}
+
+{% assign list = highlights | default: nil %}
+{% assign use_blocks = use_blocks | default: false %}
+{% assign hl_section = section | default: nil %}
+{% assign sid = section_id | default: block_id | default: 'sl-highlights' %}
+{% assign heading_text = heading | default: 'sections.sl_highlights.heading' | t | default: 'Highlights' %}
+{% assign close_label = 'sections.sl_highlights.close' | t | default: 'Close' %}
+{% assign locale_iso = request.locale.iso_code | default: 'en' %}
+{% assign is_rtl = false %}
+{% if locale_iso == 'ar' or locale_iso == 'he' or locale_iso == 'fa' or locale_iso == 'ur' or locale_iso == 'yi' %}{% assign is_rtl = true %}{% endif %}
+
+{% assign count = 0 %}
+{% if use_blocks and hl_section != blank %}
+  {% for block in hl_section.blocks %}
+    {% if block.type == 'highlight' and block.settings.label != blank %}
+      {% assign count = count | plus: 1 %}
+    {% endif %}
+  {% endfor %}
+{% elsif list != nil and list.size > 0 %}
+  {% assign count = list.size %}
+{% endif %}
+
+{% if count == 0 %}
+  {% if request.design_mode %}
+    <p class="sl-highlights-empty" style="padding:16px;color:#666;">{{ 'sections.sl_highlights.empty' | t | default: 'Add Highlight blocks or pass highlights array.' }}</p>
+  {% endif %}
+{% else %}
+
+<div id="sl-highlights-{{ sid }}" class="sl-highlights-root{% if is_rtl %} sl-highlights-rtl{% endif %}"{% if is_rtl %} dir="rtl"{% endif %}>
+  <details class="accordion group" open>
+    <summary>
+      <span class="accordion__toggle h6">
+        <span>{{ heading_text }}</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8" fill="none" class="icon icon-wd-arrow" aria-hidden="true"><path d="M11 1L6 7L1 1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+    </summary>
+    <div class="accordion__content prose">
+      <div class="sl-highlights-container">
+        {% if list != nil and list.size > 0 %}
+          {% for item in list %}
+            {% assign item_label = item.label | default: item.title | default: '' %}
+            {% if item_label != blank %}
+              {% assign item_icon = item.icon | default: 'sparkle' %}
+              {% assign has_popup = false %}
+              {% if item.popup_title != blank or item.popup_subtitle != blank or item.popup_description != blank %}
+                {% assign has_popup = true %}
+              {% endif %}
+              {% assign popup_title = item.popup_title | default: item_label %}
+              {% assign popup_subtitle = item.popup_subtitle | default: '' %}
+              {% assign popup_desc = item.popup_description | default: '' %}
+              {% assign popup_img = item.popup_image | default: item.image %}
+              {% if popup_img != blank %}
+                {% unless popup_img contains 'https://' or popup_img contains 'http://' %}
+                  {% assign popup_img = popup_img | image_url: width: 600 %}
+                {% endunless %}
+              {% endif %}
+              {% if has_popup %}
+                <button type="button" class="sl-highlights-item sl-highlights-item--clickable" data-popup-title="{{ popup_title | escape }}" data-popup-subtitle="{{ popup_subtitle | escape }}" data-popup-description="{{ popup_desc | escape }}" data-popup-image="{{ popup_img }}" aria-label="{{ item_label | escape }} — {{ 'sections.sl_highlights.view_details' | t | default: 'View details' }}">
+              {% else %}
+                <div class="sl-highlights-item">
+              {% endif %}
+                <span class="sl-highlights-item__icon" aria-hidden="true">
+                  {% render 'sl-highlights-icon', icon: item_icon, sid: sid, index: forloop.index %}
+                </span>
+                <h6>{{ item_label }}</h6>
+              {% if has_popup %}
+                </button>
+              {% else %}
+                </div>
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+        {% else %}
+          {% for block in hl_section.blocks %}
+            {% if block.type == 'highlight' %}
+              {% assign item_label = block.settings.label | default: '' %}
+              {% if item_label != blank %}
+                {% assign item_icon = block.settings.icon | default: 'sparkle' %}
+                {% assign has_popup = false %}
+                {% if block.settings.popup_title != blank or block.settings.popup_subtitle != blank or block.settings.popup_description != blank %}
+                  {% assign has_popup = true %}
+                {% endif %}
+                {% assign popup_title = block.settings.popup_title | default: item_label %}
+                {% assign popup_subtitle = block.settings.popup_subtitle | default: '' %}
+                {% assign popup_desc = block.settings.popup_description | default: '' %}
+                {% assign popup_img = block.settings.popup_image | default: nil %}
+                {% if popup_img != blank %}
+                  {% assign popup_img = popup_img | image_url: width: 600 %}
+                {% endif %}
+                {% if has_popup %}
+                  <button type="button" class="sl-highlights-item sl-highlights-item--clickable" data-popup-title="{{ popup_title | escape }}" data-popup-subtitle="{{ popup_subtitle | escape }}" data-popup-description="{{ popup_desc | escape }}" data-popup-image="{{ popup_img }}" aria-label="{{ item_label | escape }} — {{ 'sections.sl_highlights.view_details' | t | default: 'View details' }}" {{ block.shopify_attributes }}>
+                {% else %}
+                  <div class="sl-highlights-item" {{ block.shopify_attributes }}>
+                {% endif %}
+                  <span class="sl-highlights-item__icon" aria-hidden="true">
+                    {% render 'sl-highlights-icon', icon: item_icon, sid: sid, index: block.id %}
+                  </span>
+                  <h6>{{ item_label }}</h6>
+                {% if has_popup %}
+                  </button>
+                {% else %}
+                  </div>
+                {% endif %}
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+      </div>
+    </div>
+  </details>
+
+  <div id="sl-highlights-popup-{{ sid }}" class="sl-highlights-popup" aria-hidden="true" aria-modal="true" role="dialog">
+    <div class="sl-highlights-popup__backdrop">
+      <div class="sl-highlights-popup__box">
+        <div class="sl-highlights-popup__header">
+          <h2 class="sl-highlights-popup__title" id="sl-highlights-popup-title-{{ sid }}"></h2>
+          <button type="button" class="sl-highlights-popup__close" aria-label="{{ close_label | escape }}"></button>
+        </div>
+        <img class="sl-highlights-popup__image" id="sl-highlights-popup-image-{{ sid }}" alt="" style="display: none;">
+        <div class="sl-highlights-popup__body">
+          <h3 class="sl-highlights-popup__subtitle" id="sl-highlights-popup-subtitle-{{ sid }}"></h3>
+          <div class="sl-highlights-popup__description" id="sl-highlights-popup-description-{{ sid }}"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  #sl-highlights-{{ sid }}.sl-highlights-root {
+    width: 100%;
+    margin: 16px 0;
+  }
+  #sl-highlights-{{ sid }} details.accordion { border: none; margin: 0; padding: 0; }
+  #sl-highlights-{{ sid }} details summary { list-style: none; margin: 0; padding: 0; }
+  #sl-highlights-{{ sid }} details summary::-webkit-details-marker { display: none; }
+  #sl-highlights-{{ sid }} details summary::before,
+  #sl-highlights-{{ sid }} details summary::after { display: none !important; }
+  #sl-highlights-{{ sid }} .accordion__toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    padding-top: 24px;
+    padding-bottom: 16px;
+    margin: 0;
+    color: #272E0F;
+    font-family: Montserrat, sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: normal;
+    letter-spacing: 0.16px;
+  }
+  #sl-highlights-{{ sid }} .accordion .icon { transition: transform 0.2s; }
+  #sl-highlights-{{ sid }} .accordion[open] .icon { transform: rotate(180deg); }
+  #sl-highlights-{{ sid }} .accordion__content { margin-top: -0.25rem; padding-bottom: 1.25rem; padding-inline-end: 1.25rem; }
+  #sl-highlights-{{ sid }} .accordion__content.prose :first-child { margin-block-start: 0 !important; }
+  #sl-highlights-{{ sid }} .sl-highlights-container { display: flex; flex-direction: column; gap: 0; }
+  #sl-highlights-{{ sid }} .sl-highlights-item {
+    display: grid;
+    width: 100%;
+    padding: 4px 12px 4px 0;
+    align-items: center;
+    gap: 12px;
+    margin-block: 0;
+    grid-template-columns: 21px 1fr;
+    border: none;
+    background: none;
+    font: inherit;
+    text-align: left;
+    cursor: default;
+  }
+  #sl-highlights-{{ sid }} .sl-highlights-item--clickable { cursor: pointer; }
+  #sl-highlights-{{ sid }}.sl-highlights-rtl .sl-highlights-item { text-align: right; grid-template-columns: 1fr 21px; }
+  #sl-highlights-{{ sid }} .sl-highlights-item__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 21px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+  #sl-highlights-{{ sid }} .sl-highlights-item__icon svg { width: 100%; height: auto; max-width: 24px; max-height: 24px; }
+  #sl-highlights-{{ sid }} .sl-highlights-item h6 {
+    color: #272E0F;
+    font-family: Montserrat, sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 130%;
+    letter-spacing: 0.14px;
+    text-transform: capitalize;
+    margin: 0;
+  }
+  #sl-highlights-{{ sid }} .sl-highlights-popup {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(0,0,0,0.5);
+    overflow-y: auto;
+  }
+  #sl-highlights-{{ sid }} .sl-highlights-popup[aria-hidden="false"] { display: flex; }
+  #sl-highlights-{{ sid }} .sl-highlights-popup__backdrop { width: 100%; max-width: 500px; margin: auto; }
+  #sl-highlights-{{ sid }} .sl-highlights-popup__box {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+    overflow: hidden;
+  }
+  #sl-highlights-{{ sid }} .sl-highlights-popup__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 16px 12px;
+    border-bottom: 1px solid #E8EAE5;
+  }
+  #sl-highlights-{{ sid }} .sl-highlights-popup__title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #272E0F;
+  }
+  #sl-highlights-{{ sid }} .sl-highlights-popup__close {
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: none;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none'%3E%3Cpath d='M18 6L6 18' stroke='%23111111' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M6 6L18 18' stroke='%23111111' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat;
+    cursor: pointer;
+  }
+  #sl-highlights-{{ sid }} .sl-highlights-popup__image {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  #sl-highlights-{{ sid }} .sl-highlights-popup__body { padding: 16px; }
+  #sl-highlights-{{ sid }} .sl-highlights-popup__subtitle {
+    margin: 0 0 8px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #272E0F;
+  }
+  #sl-highlights-{{ sid }} .sl-highlights-popup__description {
+    font-size: 14px;
+    line-height: 1.5;
+    color: #272E0F;
+  }
+  #sl-highlights-{{ sid }} .sl-highlights-popup__description p { margin: 0 0 0.5em; }
+  #sl-highlights-{{ sid }} .sl-highlights-popup__description p:last-child { margin-bottom: 0; }
+</style>
+
+<script>
+(function() {
+  var sid = '{{ sid }}';
+  var root = document.getElementById('sl-highlights-' + sid);
+  var popup = document.getElementById('sl-highlights-popup-' + sid);
+  if (!root || !popup) return;
+  function openPop(title, subtitle, description, imageUrl) {
+    var titleEl = document.getElementById('sl-highlights-popup-title-' + sid);
+    var subtitleEl = document.getElementById('sl-highlights-popup-subtitle-' + sid);
+    var descEl = document.getElementById('sl-highlights-popup-description-' + sid);
+    var imgEl = document.getElementById('sl-highlights-popup-image-' + sid);
+    if (titleEl) titleEl.textContent = title || '';
+    if (subtitleEl) subtitleEl.textContent = subtitle || '';
+    if (descEl) {
+      var d = (description || '').trim();
+      descEl.innerHTML = d ? '<p>' + d.replace(/\n/g, '</p><p>') + '</p>' : '';
+    }
+    if (imgEl) {
+      imgEl.alt = title || '';
+      imgEl.src = imageUrl || '';
+      imgEl.style.display = (imageUrl && imageUrl.length) ? 'block' : 'none';
+    }
+    popup.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    var closeBtn = popup.querySelector('.sl-highlights-popup__close');
+    if (closeBtn) closeBtn.focus();
+    document.addEventListener('keydown', onEscape);
+  }
+  function closePop() {
+    popup.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    document.removeEventListener('keydown', onEscape);
+  }
+  function onEscape(e) { if (e.key === 'Escape') closePop(); }
+  root.querySelectorAll('.sl-highlights-item--clickable').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      openPop(
+        btn.getAttribute('data-popup-title') || '',
+        btn.getAttribute('data-popup-subtitle') || '',
+        btn.getAttribute('data-popup-description') || '',
+        btn.getAttribute('data-popup-image') || ''
+      );
+    });
+  });
+  var closeBtn = popup.querySelector('.sl-highlights-popup__close');
+  if (closeBtn) closeBtn.addEventListener('click', closePop);
+  var backdrop = popup.querySelector('.sl-highlights-popup__backdrop');
+  if (backdrop) backdrop.addEventListener('click', function(e) { if (e.target === this) closePop(); });
+})();
+</script>
+{% endif %}

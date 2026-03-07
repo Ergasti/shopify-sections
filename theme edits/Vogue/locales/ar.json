@@ -3,7 +3,8 @@
     "general": {
       "add_to_cart_button": "أضف إلى السلة",
       "adding": "جاري الإضافة...",
-      "choose_options": "اختر الخيارات"
+      "choose_options": "اختر الخيارات",
+      "sold_out": "نفذت الكمية"
     }
   }
 }

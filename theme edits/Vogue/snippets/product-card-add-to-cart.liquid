@@ -1,10 +1,10 @@
 {%- comment -%}
+PRODUCT CARD COMPONENT — Add to cart variant (FBT-style card layout)
 ----------------------------------------------------------------------------------------------------------------------
-PRODUCT CARD COMPONENT — Add to cart variant
-----------------------------------------------------------------------------------------------------------------------
-Same as the default product card, with:
-- Always-visible "Add to cart" button (text always shown, not icon-only on mobile).
-- Add-to-cart animation: button shows "Adding..." with transition while the item is being added.
+- Card layout like Section Lab Frequently Bought Together: bordered card, rounded corners, shadow, figure + info.
+- Always-visible "Add to cart" button in the info block (full width, FBT-style).
+- Add-to-cart animation: button shows "Adding..." with spinner while the item is being added.
+- All info kept: badges, media, vendor, title, price, swatches, rating, quick-add / quick-buy modal.
 
 Use: {% render 'product-card-add-to-cart', product: product, ... %} (same variables as product-card).
 
@@ -13,6 +13,7 @@ Supported variables (same as product-card)
 ********************************************
 * product, stacked, reveal, position, show_badges, show_rating, show_vendor, show_quick_buy,
   show_secondary_image, show_swatches, hide_product_information, quick_buy_context
+* first_card: pass forloop.first from the section to output CSS once per section (optional).
 {%- endcomment -%}
 
 {%- liquid
@@ -39,10 +40,45 @@ Supported variables (same as product-card)
   if adding_label == blank or adding_label == 'product.general.adding'
     assign adding_label = 'Adding...'
   endif
+  assign sold_out_label = 'product.general.sold_out' | t
+  if sold_out_label == blank or sold_out_label == 'product.general.sold_out'
+    assign sold_out_label = 'Sold out'
+  endif
+
+  assign card_radius = section.settings.card_radius | default: 12
+  assign card_padding = section.settings.card_padding | default: 16
+  assign card_border = section.settings.card_border
+  if card_border == nil
+    assign card_border = true
+  endif
+  assign card_bg = section.settings.card_bg | default: '#ffffff'
+  assign card_border_color = section.settings.card_border_color | default: '#e5e5e5'
+  assign card_shadow = section.settings.card_shadow | default: 'subtle'
+  assign card_gap = section.settings.card_gap | default: 10
+  assign info_gap = section.settings.card_info_gap | default: 8
+  assign button_bg_setting = section.settings.product_card_button_bg
+  assign button_text_setting = section.settings.product_card_button_text_color
+  if button_bg_setting != blank
+    assign button_bg = button_bg_setting
+  else
+    assign button_bg = '#000'
+  endif
+  if button_text_setting != blank
+    assign button_text_color = button_text_setting
+  else
+    assign button_text_color = '#fff'
+  endif
+  assign button_radius = section.settings.product_card_button_radius | default: 8
+  assign button_size = section.settings.product_card_button_size | default: 'medium'
+  assign button_full_width = section.settings.product_card_button_full_width
+  if button_full_width == nil
+    assign button_full_width = true
+  endif
 -%}
 
 <product-card class="product-card product-card--add-to-cart-variant" {% if reveal %}reveal-on-scroll="true"{% endif %} handle="{{ product.handle | escape }}">
-  {%- comment -%} PRODUCT MEDIA {%- endcomment -%}
+  <div class="product-card__card">
+  {%- comment -%} PRODUCT MEDIA (FBT-style figure) {%- endcomment -%}
 
   {%- if product.media.size > 0 -%}
     <div class="product-card__figure">
@@ -78,42 +114,12 @@ Supported variables (same as product-card)
           endif
         -%}
       </a>
-
-      {%- if show_quick_buy and product.available -%}
-        {%- if product.variants.size == 1 and product.selling_plan_groups.size == 0 -%}
-          <product-form class="product-card__quick-add-form">
-            {%- form 'product', product, class: 'product-card__product-form', data-add-to-cart-form: '' -%}
-              <input type="hidden" name="on_success" value="force_open_drawer">
-              <input type="hidden" name="quantity" value="1">
-              <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
-              <button type="submit" class="product-card__quick-add-button product-card__quick-add-button--text" data-add-to-cart-button aria-busy="false">
-                <span class="sr-only">{{ 'product.general.add_to_cart_button' | t }}</span>
-                <span class="product-card__quick-add-label" data-add-to-cart-label>{{ 'product.general.add_to_cart_button' | t }}</span>
-                <span class="product-card__quick-add-adding" data-add-to-cart-adding hidden>
-                  <span class="product-card__quick-add-spinner" aria-hidden="true"></span>
-                  {{ adding_label }}
-                </span>
-              </button>
-            {%- endform -%}
-          </product-form>
-        {%- else -%}
-          {%- capture quick_buy_id -%}product-quick-buy-{{ section.id }}-{{ block.id }}-{{ quick_buy_context }}-{{ product.id }}{%- endcapture -%}
-
-          <button type="button" aria-controls="{{ quick_buy_id }}" class="product-card__quick-add-button product-card__quick-add-button--text">
-            <span class="sr-only">{{ 'product.general.choose_options' | t }}</span>
-            <span class="product-card__quick-add-label">{{ 'product.general.add_to_cart_button' | t }}</span>
-          </button>
-
-          <quick-buy-modal handle="{{ product.handle }}?variant={{ product.selected_or_first_available_variant.id }}" class="quick-buy-modal modal" id="{{ quick_buy_id }}">
-          </quick-buy-modal>
-        {%- endif -%}
-      {%- endif -%}
     </div>
   {%- endif -%}
 
-  {%- comment -%} PRODUCT INFO {%- endcomment -%}
+  {%- comment -%} PRODUCT INFO (FBT-style card info + Add to cart) {%- endcomment -%}
 
-  <div class="product-card__info empty:hidden">
+  <div class="product-card__info">
     {%- assign text_class = '' -%}
     {%- if settings.product_card_text_font == 'heading' -%}
       {%- assign text_class = 'h6' -%}
@@ -184,11 +190,60 @@ Supported variables (same as product-card)
     {%- if show_rating -%}
       {%- render 'product-rating', product: product, show_empty: settings.show_product_rating_if_empty, display_mode: settings.product_rating_mode -%}
     {%- endif -%}
+
+    {%- if show_quick_buy -%}
+      {%- if product.available -%}
+        {%- if product.variants.size == 1 and product.selling_plan_groups.size == 0 -%}
+          <product-form class="product-card__quick-add-form">
+            {%- form 'product', product, class: 'product-card__product-form', data-add-to-cart-form: '' -%}
+              <input type="hidden" name="on_success" value="force_open_drawer">
+              <input type="hidden" name="quantity" value="1">
+              <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+              <button type="submit" class="product-card__quick-add-button product-card__quick-add-button--text" data-add-to-cart-button aria-busy="false">
+                <span class="sr-only">{{ 'product.general.add_to_cart_button' | t }}</span>
+                <span class="product-card__quick-add-label" data-add-to-cart-label>{{ 'product.general.add_to_cart_button' | t }}</span>
+                <span class="product-card__quick-add-adding" data-add-to-cart-adding hidden>
+                  <span class="product-card__quick-add-spinner" aria-hidden="true"></span>
+                  {{ adding_label }}
+                </span>
+              </button>
+            {%- endform -%}
+          </product-form>
+        {%- else -%}
+          {%- capture quick_buy_id -%}product-quick-buy-{{ section.id }}-{{ block.id }}-{{ quick_buy_context }}-{{ product.id }}{%- endcapture -%}
+
+          <button type="button" aria-controls="{{ quick_buy_id }}" class="product-card__quick-add-button product-card__quick-add-button--text">
+            <span class="sr-only">{{ 'product.general.choose_options' | t }}</span>
+            <span class="product-card__quick-add-label">{{ 'product.general.add_to_cart_button' | t }}</span>
+          </button>
+
+          <quick-buy-modal handle="{{ product.handle }}?variant={{ product.selected_or_first_available_variant.id }}" class="quick-buy-modal modal" id="{{ quick_buy_id }}">
+          </quick-buy-modal>
+        {%- endif -%}
+      {%- else -%}
+        <button type="button" class="product-card__quick-add-button product-card__quick-add-button--text product-card__quick-add-button--sold-out" disabled aria-disabled="true">
+          <span class="sr-only">{{ sold_out_label }}</span>
+          <span class="product-card__quick-add-label">{{ sold_out_label }}</span>
+        </button>
+      {%- endif -%}
+    {%- endif -%}
+  </div>
   </div>
 </product-card>
 
 <script>
   (function() {
+    function isCartDrawerOpen() {
+      var sel = '[id*="drawer"][open], [id*="cart-drawer"][open], [data-cart-drawer][open], details[open][id*="cart"], details[open][id*="drawer"], .drawer.is-open, .cart-drawer.is-open, [aria-label*="cart"][open], [role="dialog"][open]';
+      var el = document.querySelector(sel);
+      if (el) return true;
+      var details = document.querySelectorAll('details[id*="cart"], details[id*="drawer"], [data-cart-drawer]');
+      for (var i = 0; i < details.length; i++) {
+        if (details[i].hasAttribute('open') || details[i].classList.contains('is-open')) return true;
+      }
+      return false;
+    }
+
     function initAddToCartAnimation(scope) {
       scope = scope || document;
       var forms = scope.querySelectorAll('[data-add-to-cart-form]');
@@ -219,14 +274,19 @@ Supported variables (same as product-card)
         document.addEventListener('drawer:open', reset);
 
         form.addEventListener('submit', function startResetWatch() {
+          var done = false;
+          function doReset() {
+            if (done) return;
+            done = true;
+            reset();
+          }
           var check = setInterval(function() {
-            var drawer = document.querySelector('[id*="drawer"], [id*="cart-drawer"], .drawer[open], [aria-label*="cart"][open], [data-cart-drawer][open]');
-            if (drawer && drawer.hasAttribute('open')) {
-              reset();
+            if (isCartDrawerOpen()) {
               clearInterval(check);
+              doReset();
             }
-          }, 150);
-          setTimeout(function() { clearInterval(check); reset(); }, 4000);
+          }, 80);
+          setTimeout(function() { clearInterval(check); doReset(); }, 1200);
         });
       });
     }
@@ -240,57 +300,133 @@ Supported variables (same as product-card)
   })();
 </script>
 
+{%- comment -%} Output CSS once per section when section passes first_card: forloop.first; otherwise output every time (backward compatible). {%- endcomment -%}
+{%- if first_card != false -%}
 <style>
-  .product-card--add-to-cart-variant .product-card__figure {
-    position: relative;
+  /* Product card add-to-cart variant: uses section settings (scoped per section) */
+  #shopify-section-{{ section.id }} .product-card--add-to-cart-variant {
+    --product-card-bg: {{ card_bg }};
+    --product-card-border: {{ card_border_color }};
+    --product-card-radius: {{ card_radius }}px;
+    --product-card-padding: {{ card_padding }}px;
+    --product-card-gap: {{ card_gap }}px;
+    --product-card-info-gap: {{ info_gap }}px;
+    --product-card-button-bg: {{ button_bg }};
+    --product-card-button-color: {{ button_text_color }};
+    --product-card-button-radius: {{ button_radius }}px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
   }
-  /* Always show the button (override theme hover-only quick-add) */
-  .product-card--add-to-cart-variant .product-card__quick-add-button--text,
-  .product-card--add-to-cart-variant .product-card__figure .product-card__quick-add-button--text {
+  #shopify-section-{{ section.id }} .product-card--add-to-cart-variant .product-card__card {
+    padding: var(--product-card-padding);
+    border-radius: var(--product-card-radius);
+    {% if card_border %}border: 1px solid var(--product-card-border);{% else %}border: none;{% endif %}
+    background: var(--product-card-bg);
+    {% case card_shadow %}
+      {% when 'none' %}box-shadow: none;
+      {% when 'subtle' %}box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+      {% when 'medium' %}box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      {% when 'strong' %}box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+      {% else %}box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    {% endcase %}
+    display: flex;
+    flex-direction: column;
+    gap: var(--product-card-gap);
+    flex: 1;
+    min-height: 0;
+    box-sizing: border-box;
+  }
+  #shopify-section-{{ section.id }} .product-card--add-to-cart-variant .product-card__figure {
+    position: relative;
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: calc(var(--product-card-radius) - 2px);
+  }
+  #shopify-section-{{ section.id }} .product-card--add-to-cart-variant .product-card__media {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  #shopify-section-{{ section.id }} .product-card--add-to-cart-variant .product-card__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  #shopify-section-{{ section.id }} .product-card--add-to-cart-variant .product-card__info {
+    display: flex !important;
+    flex-direction: column;
+    gap: var(--product-card-info-gap);
+    flex: 1;
+    min-height: 0;
+    padding: 0;
+  }
+  #shopify-section-{{ section.id }} .product-card--add-to-cart-variant product-form.product-card__quick-add-form,
+  #shopify-section-{{ section.id }} .product-card--add-to-cart-variant .product-card__quick-add-form {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  #shopify-section-{{ section.id }} .product-card--add-to-cart-variant .product-card__quick-add-form {
+    margin-top: auto;
+    width: 100%;
+    padding-top: 4px;
+  }
+  #shopify-section-{{ section.id }} .product-card--add-to-cart-variant .product-card__product-form {
+    width: 100%;
+    display: block !important;
+  }
+  #shopify-section-{{ section.id }} .product-card--add-to-cart-variant [data-add-to-cart-button],
+  #shopify-section-{{ section.id }} .product-card--add-to-cart-variant .product-card__quick-add-button--text {
     opacity: 1 !important;
     visibility: visible !important;
     pointer-events: auto !important;
-  }
-  .product-card--add-to-cart-variant .product-card__quick-add-button--text {
-    position: absolute;
-    bottom: 1rem;
-    left: 50%;
-    transform: translateX(-50%);
     display: inline-flex !important;
+    position: relative;
+    z-index: 1;
     align-items: center;
     justify-content: center;
     gap: 0.375rem;
-    min-height: 2.75rem;
-    padding: 0 1rem;
+    width: {% if button_full_width %}100%{% else %}auto{% endif %};
+    min-height: {% if button_size == 'small' %}2.25rem{% elsif button_size == 'large' %}2.75rem{% else %}2.5rem{% endif %};
+    padding: {% if button_size == 'small' %}0.5rem 1rem{% elsif button_size == 'large' %}0.75rem 1.5rem{% else %}0.625rem 1.25rem{% endif %};
     border: none;
-    border-radius: 2rem;
-    background: #fff;
-    color: #1a1a1a;
-    font-size: 0.875rem;
+    border-radius: var(--product-card-button-radius);
+    background: var(--product-card-button-bg);
+    color: var(--product-card-button-color);
+    font-size: {% if button_size == 'small' %}0.8125rem{% elsif button_size == 'large' %}1rem{% else %}0.875rem{% endif %};
     font-weight: 600;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
     cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+    transition: opacity 0.2s ease;
     white-space: nowrap;
+    box-sizing: border-box;
   }
-  .product-card--add-to-cart-variant .product-card__quick-add-button--text:hover:not(:disabled) {
-    transform: translateX(-50%) scale(1.02);
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
-  }
-  .product-card--add-to-cart-variant .product-card__quick-add-button--text:disabled {
-    cursor: wait;
+  #shopify-section-{{ section.id }} .product-card--add-to-cart-variant .product-card__quick-add-button--text:hover:not(:disabled) {
     opacity: 0.9;
   }
-  .product-card--add-to-cart-variant .product-card__quick-add-label,
-  .product-card--add-to-cart-variant .product-card__quick-add-adding {
+  #shopify-section-{{ section.id }} .product-card--add-to-cart-variant .product-card__quick-add-button--text:disabled {
+    cursor: wait;
+    opacity: 0.7;
+  }
+  #shopify-section-{{ section.id }} .product-card--add-to-cart-variant .product-card__quick-add-button--sold-out {
+    cursor: not-allowed;
+    opacity: 0.6;
+    background: #9a9a9a;
+    color: #fff;
+  }
+  #shopify-section-{{ section.id }} .product-card--add-to-cart-variant .product-card__quick-add-button--sold-out:hover {
+    opacity: 0.6;
+  }
+  #shopify-section-{{ section.id }} .product-card--add-to-cart-variant .product-card__quick-add-label,
+  #shopify-section-{{ section.id }} .product-card--add-to-cart-variant .product-card__quick-add-adding {
     display: inline-flex;
     align-items: center;
     gap: 0.375rem;
   }
-  .product-card--add-to-cart-variant .product-card__quick-add-adding[hidden] {
+  #shopify-section-{{ section.id }} .product-card--add-to-cart-variant .product-card__quick-add-adding[hidden] {
     display: none !important;
   }
-  .product-card--add-to-cart-variant .product-card__quick-add-spinner {
+  #shopify-section-{{ section.id }} .product-card--add-to-cart-variant .product-card__quick-add-spinner {
     width: 1rem;
     height: 1rem;
     border: 2px solid currentColor;
@@ -302,3 +438,4 @@ Supported variables (same as product-card)
     to { transform: rotate(360deg); }
   }
 </style>
+{%- endif -%}

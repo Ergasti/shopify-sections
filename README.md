@@ -11,6 +11,7 @@ A comprehensive, categorized library of Shopify sections and snippets. Copy what
 - [Quick reference (by category)](#quick-reference-by-category)
 - [All sections & snippets](#all-sections--snippets)
 - [Section Lab (all sections)](#section-lab-all-sections)
+- [Theme edits (Vogue)](#theme-edits-vogue)
 - [Folder structure](#folder-structure-per-section)
 - [Categories overview](#categories-overview)
 - [Source repositories](#source-repositories-included-in-this-library)
@@ -45,6 +46,8 @@ Within each category, entries are sorted by **Updated** (oldest first, most rece
 | | [SL – Volume Discount](Section%20Lab/Volume%20Discount/README.md) | Section Lab (this repo) | 2026-02-28 |
 | | [SL – Active Ingredients](Section%20Lab/Active%20Ingredients/README.md) | Section Lab (this repo) | 2026-03-07 |
 | | [SL – Highlights](Section%20Lab/Highlights/README.md) | Section Lab (this repo) | 2026-03-07 |
+| | [Product Card Label](Product%20Card%20Label/README.md) | this repo | 2026-02-25 |
+| **Theme edits** | [Vogue theme edits](theme%20edits/Vogue/README.md) | this repo | 2026-03-07 |
 | **Media & Gallery** | [Image Gallery (BoldizArt)](Image%20Gallery%20(BoldizArt)/README.md) | BoldizArt/Shopify-Image-Gallery | 2025-02-14 |
 | **Video & Media** | [YouTube Section](YouTube%20Section/README.md) | prowebcoder/shopify-sections-youtube | 2025-02-14 |
 | | [Media Slider Snap](Media%20Slider%20Snap/README.md) | Custom (video-section2) | 2026-02-14 |
@@ -116,6 +119,13 @@ Every folder that contains `.liquid` section or snippet files. Sorted by last up
 | [SL – Volume Discount](Section%20Lab/Volume%20Discount/README.md) | Volume/quantity discount tiers (metaobject). | 2026-02-28 |
 | [SL – Active Ingredients](Section%20Lab/Active%20Ingredients/README.md) | Product active botanical ingredients accordion + popup (Yves Rocher style). | 2026-03-07 |
 | [SL – Highlights](Section%20Lab/Highlights/README.md) | Product highlights accordion: icon + label, optional popup. | 2026-03-07 |
+| [Theme edits (Vogue)](theme%20edits/Vogue/README.md) | Product card (Yves Rocher), product-card-add-to-cart (FBT-style, sold-out), collection-list, product-gallery, locales, schema settings. | 2026-03-07 |
+
+---
+
+## Theme edits (Vogue)
+
+Theme-specific overrides for the **Vogue** theme. See **[theme edits/Vogue/README.md](theme%20edits/Vogue/README.md)** for install steps and file list (product card, product-card-add-to-cart, collection-list section, product-gallery, locales, schema-settings). **Updated:** 2026-03-07.
 
 ---
 
@@ -174,7 +184,8 @@ SectionName/                    # or Section Lab/SubSectionName/
 | **Content & Layout** | Double block, image/text, grids |
 | **Forms & Contact** | Contact form builders |
 | **Snippets & Utilities** | Tabbed description, pagination, IP redirect |
-| **Product & Collection** | Bundle, how to use, price bubble, icon list, payment icons, FBT, volume discount, scarcity bar, swatches |
+| **Product & Collection** | Bundle, how to use, price bubble, icon list, payment icons, FBT, volume discount, scarcity bar, swatches, product card label |
+| **Theme edits** | Vogue: product card, add-to-cart card, collection list, product gallery, locales |
 | **Media & Gallery** | Image galleries, grid banners |
 | **Video & Media** | Native video slider, UGC, social proof video, before/after, real results, media snap, video sliders, YouTube |
 | **Specialized** | Timeline, pricing table, FAQ, quiz, tooltips, app optimization |

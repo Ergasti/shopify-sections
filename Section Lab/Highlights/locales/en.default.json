@@ -1,0 +1,10 @@
+{
+  "sections": {
+    "sl_highlights": {
+      "heading": "Highlights",
+      "close": "Close",
+      "view_details": "View details",
+      "empty": "Add Highlight blocks or pass highlights array."
+    }
+  }
+}
