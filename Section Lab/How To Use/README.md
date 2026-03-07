@@ -31,7 +31,7 @@ The section has two modes:
 2. **Manual steps (section blocks)**  
    You add **Step** blocks in the theme editor. Each block has: optional related product; step title and description in **English** and **Arabic** (optional fallback). Same steps for every product that uses this section.
 
-**Section settings:** Optional heading (EN/AR + fallback), alignment/size/color; step styling (background/text color, gap); **Steps layout** (Vertical = stacked column, Horizontal = row); **Steps per row** (horizontal only): choose 2–5 steps per row on desktop (mobile always 1 per row); **Section layout**: full width (screen width) by default, padding top/bottom and left/right, optional content max width when not full width.
+**Section settings:** Optional heading (EN/AR + fallback), alignment/size/color; step styling (background/text color, gap); **Steps layout**: **Vertical** = stacked cards; **Horizontal** = row of cards (wrap on small screens); **Swiper** = horizontal slider with one card per step (Swiper.js, arrows, lazy-loaded when in view). **Steps per row** (horizontal only): 2–5 on desktop. **Card width** (Swiper only): 220–380px per slide. **Section layout**: full width, padding, optional content max width.
 
 **Install section:** Copy `sections/sl-how-to-use.liquid` into your theme **sections** folder. In **Customize** → product template → **Add section** → **SL - How to Use**. Choose **Step source** (Product metaobject or Manual steps). If Manual steps, add **Step** blocks and set optional **Step icon** (image), product, title, and description for each.
 
@@ -67,14 +67,14 @@ Only needed if you use **Product metaobject** (section or snippet). The setup us
 
    | Field label      | Key             | Type              | Notes                                                                 |
    |------------------|-----------------|-------------------|-----------------------------------------------------------------------|
-   | Related product  | `product`       | Product reference | Optional. Product to show for this step (e.g. “use with Moisturizer”). |
+   | Related product  | `product`       | Product reference | Optional. **Use with** product for this step (e.g. “18+ Hydrating Shampoo”). Must be a **published** product in the same store so it resolves on the product page. |
    | Step icon        | `step_icon`     | File (image)      | Optional. Icon/image shown next to step number.                        |
    | Step title (EN)  | `step_title_en` | Single line text  | Optional, e.g. "Step 1"                                                |
    | Step title (AR)  | `step_title_ar` | Single line text  | Optional                                                              |
    | Step title       | `step_title`    | Single line text  | Optional fallback (other locales)                                     |
-   | Description (EN) | `description_en` | Multi-line text   | Step instructions in English                                         |
-   | Description (AR) | `description_ar` | Multi-line text   | Step instructions in Arabic                                           |
-   | Description      | `description`   | Multi-line text   | Optional fallback (other locales)                                     |
+   | Description (EN) | `description_en` | Rich text        | Step instructions in English (bold, links, lists, etc.).              |
+   | Description (AR) | `description_ar` | Rich text        | Step instructions in Arabic.                                          |
+   | Description      | `description`   | Rich text        | Optional fallback (other locales)                                     |
 
 5. Save.
 
@@ -132,11 +132,11 @@ You can create several “How to use (SL)” entries (e.g. one for face, one for
 
 | What | Where | Type / Notes |
 |------|--------|--------------|
-| One step (metaobject) | Metaobject `how_to_use_step` | Fields: `product` (optional related product); `step_icon` (optional image); `step_title_en`, `step_title_ar` (optional `step_title`); `description_en`, `description_ar` (optional `description`) |
+| One step (metaobject) | Metaobject `how_to_use_step` | Fields: `product` (optional **related product** — must be published so it resolves); `step_icon` (optional image); `step_title_en`, `step_title_ar` (optional `step_title`); `description_en`, `description_ar` (optional `description`) — use **Rich text**; the theme renders them with `metafield_tag` so the JSON is output as HTML. |
 | Named setup (reusable) | Metaobject `how_to_use` | **Name:** `name` (single line, for easy selection). **Steps:** `steps` = list of How to use step references. |
 | Product → one setup | Product metafield | `custom.how_to_use` = **one** metaobject reference to **How to use (SL)**. Metafield definition name: **How to use (SL)**. |
 | Legacy steps per product | Product metafield | `custom.how_to_use_steps` = list of How to use step references (fallback). |
-| Manual steps | Section blocks | Block type **Step**: step_icon (optional image); product; step_title_en, step_title_ar (optional step_title); description_en, description_ar (optional description) |
+| Manual steps | Section blocks | Block type **Step**: step_icon (optional image); product; step_title_en, step_title_ar (optional step_title); description_en, description_ar (optional description) — **richtext** for descriptions. |
 | Section heading | Section settings | heading_en, heading_ar (optional heading for other locales) |
 
 ---
@@ -168,7 +168,16 @@ Section Lab/How To Use/
 
 ---
 
+## Design: Swiper cards-stack
+
+- **Card structure:** Each step is a **full-width horizontal card** (`.sl-htu-card`): **figure on the left** (110px: step icon, related product image, or step number placeholder) and **info on the right** (title, related product pill, description). Border, 12px radius, elevated shadow for depth.
+- **Cards stack (Swiper `effect: 'cards'`):** Both **section** (Swiper layout) and **snippet** use Swiper's **cards effect** — slides are stacked on top of each other like a deck. Swipe or drag to reveal the next card. Each card takes the **full width** of the container. Pagination dots show progress below the stack.
+- **Section layouts:** **Vertical** = full-width cards in a column with gap; **Horizontal** = grid of cards (2–5 per row); **Swiper** = cards-stack effect (deck). Swiper loads lazily when section nears viewport; shared across sections if already loaded.
+- **Snippet:** Always uses Swiper cards-stack (full-width, deck-style).
+
+- **Loading:** Card images use `loading="lazy"` and `decoding="async"`. Swiper CSS is loaded with `media="print"` then switched to `all` on load. Swiper JS is loaded `async`. A shared `window.__slSwiperReady` promise prevents duplicate loading across sections/snippets.
+
 ## Styling
 
-- **Section:** CSS is scoped to `#sl-htu-section-{{ section.id }}`. Step colors and gap are in section settings (step background, step text color, gap between steps).
-- **Snippet:** CSS is scoped to `#sl-htu-block-{{ block_id }}`. Override with CSS variables: `--sl-htu-bg`, `--sl-htu-text`, `--sl-htu-radius`, `--sl-htu-step-gap`.
+- **Section:** CSS is scoped to `#sl-htu-section-{{ section.id }}`. Step colors and gap in settings. Card: `--sl-htu-card-bg`, `--sl-htu-card-border`, `--sl-htu-card-radius`.
+- **Snippet:** CSS is scoped to `#sl-htu-block-{{ block_id }}`. Override with CSS variables: `--sl-htu-bg`, `--sl-htu-text`, `--sl-htu-card-bg`, `--sl-htu-card-border`, `--sl-htu-card-radius`.

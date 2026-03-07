@@ -47,7 +47,7 @@
     </div>
   {% endif %}
 {% else %}
-<div id="sl-htu-section-{{ section.id }}" class="sl-htu-section-root sl-htu-layout-{{ layout }}" style="width: 100%; background: {{ section.settings.background_color }}; padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;">
+<div id="sl-htu-section-{{ section.id }}" class="sl-htu-section-root sl-htu-layout-{{ layout }}"{% if is_ar %} dir="rtl"{% endif %} style="width: 100%; background: {{ section.settings.background_color }}; padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;">
   <div class="sl-htu-section-inner" style="{% unless section.settings.full_width %}max-width: {{ section.settings.content_width }}px; margin-left: auto; margin-right: auto;{% endunless %} padding-left: {{ section.settings.padding_inline | default: 16 }}px; padding-right: {{ section.settings.padding_inline | default: 16 }}px;">
     <details class="accordion group" open>
       <summary style="text-align: {{ section.settings.heading_alignment }};"{% if is_ar %} dir="rtl"{% endif %}>
@@ -57,6 +57,100 @@
         </span>
       </summary>
       <div class="accordion__content">
+    {% if layout == 'swiper' %}
+    <div class="sl-htu-swiper swiper" data-htu-swiper>
+      <div class="swiper-wrapper">
+        {% if use_metaobject %}
+          {% for entry in steps_meta %}
+            {% assign step_product = entry.product.value | default: entry.product %}
+            {% assign step_num = forloop.index %}
+            {% if is_ar %}
+              {% assign step_title_text = entry.step_title_ar | default: entry.step_title_en | default: entry.step_title %}
+              {% assign step_desc_field = entry.description_ar | default: entry.description_en | default: entry.description %}
+            {% else %}
+              {% assign step_title_text = entry.step_title_en | default: entry.step_title_ar | default: entry.step_title %}
+              {% assign step_desc_field = entry.description_en | default: entry.description_ar | default: entry.description %}
+            {% endif %}
+            {% if step_title_text == blank %}{% capture step_title_text %}Step {{ step_num }}{% endcapture %}{% endif %}
+            {% assign step_icon = entry.step_icon.value | default: entry.step_icon %}
+            <div class="swiper-slide">
+              <div class="sl-htu-card">
+                <div class="sl-htu-card__figure">
+                  {% if step_icon != blank %}
+                    <img class="sl-htu-card__img sl-htu-card__img--icon" src="{{ step_icon | image_url: width: 240 }}" alt="" width="120" height="120" loading="lazy" decoding="async"{% if forloop.index0 > 1 %} fetchpriority="low"{% endif %}>
+                  {% elsif step_product != blank and step_product.featured_image != blank %}
+                    <img class="sl-htu-card__img" src="{{ step_product.featured_image | image_url: width: 400 }}" srcset="{{ step_product.featured_image | image_url: width: 260 }} 260w, {{ step_product.featured_image | image_url: width: 400 }} 400w" sizes="260px" alt="{{ step_product.title | escape }}" width="200" height="200" loading="lazy" decoding="async"{% if forloop.index0 > 1 %} fetchpriority="low"{% endif %}>
+                  {% else %}
+                    <div class="sl-htu-card__placeholder"><span class="sl-htu-step-no">{{ step_num }}</span></div>
+                  {% endif %}
+                  <span class="sl-htu-card__badge">{{ step_num }}</span>
+                </div>
+                <div class="sl-htu-card__info">
+                  <span class="sl-htu-step-title">{{ step_title_text }}</span>
+                  {% if step_product != blank %}
+                    <a href="{{ step_product.url }}" class="sl-htu-step-product-container" aria-label="{{ step_product.title | escape }}">
+                      <span class="sl-htu-step-product-image" style="background-image: url('{% if step_product.featured_image %}{{ step_product.featured_image | image_url: width: 80 }}{% endif %}');"></span>
+                      <span class="sl-htu-step-product-name">{{ step_product.title }}</span>
+                    </a>
+                  {% endif %}
+                  {% if step_desc_field != blank %}
+                    <div class="sl-htu-step-descriptions">
+                      <div class="sl-htu-step-descriptions-inner prose">{{ step_desc_field | metafield_tag }}</div>
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        {% else %}
+          {% for block in section.blocks %}
+            {% if block.type == 'step' %}
+              {% assign step_product = block.settings.product %}
+              {% assign step_num = forloop.index %}
+              {% if is_ar %}
+                {% assign step_title_text = block.settings.step_title_ar | default: block.settings.step_title_en | default: block.settings.step_title %}
+                {% assign step_description = block.settings.description_ar | default: block.settings.description_en | default: block.settings.description %}
+              {% else %}
+                {% assign step_title_text = block.settings.step_title_en | default: block.settings.step_title_ar | default: block.settings.step_title %}
+                {% assign step_description = block.settings.description_en | default: block.settings.description_ar | default: block.settings.description %}
+              {% endif %}
+              {% if step_title_text == blank %}{% capture step_title_text %}Step {{ step_num }}{% endcapture %}{% endif %}
+              {% assign step_icon = block.settings.step_icon %}
+              <div class="swiper-slide" {{ block.shopify_attributes }}>
+                <div class="sl-htu-card">
+                  <div class="sl-htu-card__figure">
+                    {% if step_icon != blank %}
+                      <img class="sl-htu-card__img sl-htu-card__img--icon" src="{{ step_icon | image_url: width: 240 }}" alt="" width="120" height="120" loading="lazy" decoding="async"{% if forloop.index0 > 1 %} fetchpriority="low"{% endif %}>
+                    {% elsif step_product != blank and step_product.featured_image != blank %}
+                      <img class="sl-htu-card__img" src="{{ step_product.featured_image | image_url: width: 400 }}" srcset="{{ step_product.featured_image | image_url: width: 260 }} 260w, {{ step_product.featured_image | image_url: width: 400 }} 400w" sizes="260px" alt="{{ step_product.title | escape }}" width="200" height="200" loading="lazy" decoding="async"{% if forloop.index0 > 1 %} fetchpriority="low"{% endif %}>
+                    {% else %}
+                      <div class="sl-htu-card__placeholder"><span class="sl-htu-step-no">{{ step_num }}</span></div>
+                    {% endif %}
+                    <span class="sl-htu-card__badge">{{ step_num }}</span>
+                  </div>
+                  <div class="sl-htu-card__info">
+                    <span class="sl-htu-step-title">{{ step_title_text }}</span>
+                    {% if step_product != blank %}
+                      <a href="{{ step_product.url }}" class="sl-htu-step-product-container" aria-label="{{ step_product.title | escape }}">
+                        <span class="sl-htu-step-product-image" style="background-image: url('{% if step_product.featured_image %}{{ step_product.featured_image | image_url: width: 80 }}{% endif %}');"></span>
+                        <span class="sl-htu-step-product-name">{{ step_product.title }}</span>
+                      </a>
+                    {% endif %}
+                    {% if step_description != blank %}
+                      <div class="sl-htu-step-descriptions">
+                        <div class="sl-htu-step-descriptions-inner prose">{{ step_description | replace: '<p', '<p class="sl-htu-step-p"' }}</div>
+                      </div>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+      </div>
+      <div class="sl-htu-pagination"></div>
+    </div>
+    {% else %}
     <div class="sl-htu-container sl-htu-container--{{ layout }}"{% if is_ar %} dir="rtl"{% endif %}>
       {% if use_metaobject %}
         {% for entry in steps_meta %}
@@ -64,36 +158,40 @@
           {% assign step_num = forloop.index %}
           {% if is_ar %}
             {% assign step_title_text = entry.step_title_ar | default: entry.step_title_en | default: entry.step_title %}
-            {% assign step_description = entry.description_ar | default: entry.description_en | default: entry.description %}
+            {% assign step_desc_field = entry.description_ar | default: entry.description_en | default: entry.description %}
           {% else %}
             {% assign step_title_text = entry.step_title_en | default: entry.step_title_ar | default: entry.step_title %}
-            {% assign step_description = entry.description_en | default: entry.description_ar | default: entry.description %}
+            {% assign step_desc_field = entry.description_en | default: entry.description_ar | default: entry.description %}
           {% endif %}
-          {% if step_title_text == blank %}
-            {% capture step_title_text %}Step {{ step_num }}{% endcapture %}
-          {% endif %}
+          {% if step_title_text == blank %}{% capture step_title_text %}Step {{ step_num }}{% endcapture %}{% endif %}
           {% assign step_icon = entry.step_icon.value | default: entry.step_icon %}
           <div class="sl-htu-step" data-step="{{ step_num }}">
-            <div class="sl-htu-step-title-container">
-              {% if step_icon != blank %}
-                <span class="sl-htu-step-icon-wrap">
-                  <img class="sl-htu-step-icon" src="{{ step_icon | image_url: width: 96 }}" alt="" width="48" height="48" loading="lazy">
-                </span>
-              {% endif %}
-              <span class="sl-htu-step-no">{{ step_num }}</span>
-              <span class="sl-htu-step-title">{{ step_title_text }}</span>
-            </div>
-            {% if step_product != blank %}
-              <a href="{{ step_product.url }}" class="sl-htu-step-product-container" aria-label="{{ step_product.title | escape }}">
-                <span class="sl-htu-step-product-image" style="background-image: url('{% if step_product.featured_image %}{{ step_product.featured_image | image_url: width: 80 }}{% endif %}');"></span>
-                <span class="sl-htu-step-product-name">{{ step_product.title }}</span>
-              </a>
-            {% endif %}
-            {% if step_description != blank %}
-              <div class="sl-htu-step-descriptions">
-                <div class="sl-htu-step-descriptions-inner prose">{{ step_description }}</div>
+            <div class="sl-htu-card">
+              <div class="sl-htu-card__figure">
+                {% if step_icon != blank %}
+                  <img class="sl-htu-card__img sl-htu-card__img--icon" src="{{ step_icon | image_url: width: 240 }}" alt="" width="120" height="120" loading="lazy" decoding="async">
+                {% elsif step_product != blank and step_product.featured_image != blank %}
+                  <img class="sl-htu-card__img" src="{{ step_product.featured_image | image_url: width: 400 }}" srcset="{{ step_product.featured_image | image_url: width: 260 }} 260w, {{ step_product.featured_image | image_url: width: 400 }} 400w" sizes="(max-width: 749px) 100vw, 260px" alt="{{ step_product.title | escape }}" width="200" height="200" loading="lazy" decoding="async">
+                {% else %}
+                  <div class="sl-htu-card__placeholder"><span class="sl-htu-step-no">{{ step_num }}</span></div>
+                {% endif %}
+                <span class="sl-htu-card__badge">{{ step_num }}</span>
               </div>
-            {% endif %}
+              <div class="sl-htu-card__info">
+                <span class="sl-htu-step-title">{{ step_title_text }}</span>
+                {% if step_product != blank %}
+                  <a href="{{ step_product.url }}" class="sl-htu-step-product-container" aria-label="{{ step_product.title | escape }}">
+                    <span class="sl-htu-step-product-image" style="background-image: url('{% if step_product.featured_image %}{{ step_product.featured_image | image_url: width: 80 }}{% endif %}');"></span>
+                    <span class="sl-htu-step-product-name">{{ step_product.title }}</span>
+                  </a>
+                {% endif %}
+                {% if step_desc_field != blank %}
+                  <div class="sl-htu-step-descriptions">
+                    <div class="sl-htu-step-descriptions-inner prose">{{ step_desc_field | metafield_tag }}</div>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
           </div>
         {% endfor %}
       {% else %}
@@ -108,36 +206,41 @@
               {% assign step_title_text = block.settings.step_title_en | default: block.settings.step_title_ar | default: block.settings.step_title %}
               {% assign step_description = block.settings.description_en | default: block.settings.description_ar | default: block.settings.description %}
             {% endif %}
-            {% if step_title_text == blank %}
-              {% capture step_title_text %}Step {{ step_num }}{% endcapture %}
-            {% endif %}
+            {% if step_title_text == blank %}{% capture step_title_text %}Step {{ step_num }}{% endcapture %}{% endif %}
             {% assign step_icon = block.settings.step_icon %}
             <div class="sl-htu-step" data-step="{{ step_num }}" {{ block.shopify_attributes }}>
-              <div class="sl-htu-step-title-container">
-                {% if step_icon != blank %}
-                  <span class="sl-htu-step-icon-wrap">
-                    <img class="sl-htu-step-icon" src="{{ step_icon | image_url: width: 96 }}" alt="" width="48" height="48" loading="lazy">
-                  </span>
-                {% endif %}
-                <span class="sl-htu-step-no">{{ step_num }}</span>
-                <span class="sl-htu-step-title">{{ step_title_text }}</span>
-              </div>
-              {% if step_product != blank %}
-                <a href="{{ step_product.url }}" class="sl-htu-step-product-container" aria-label="{{ step_product.title | escape }}">
-                  <span class="sl-htu-step-product-image" style="background-image: url('{% if step_product.featured_image %}{{ step_product.featured_image | image_url: width: 80 }}{% endif %}');"></span>
-                  <span class="sl-htu-step-product-name">{{ step_product.title }}</span>
-                </a>
-              {% endif %}
-              {% if step_description != blank %}
-                <div class="sl-htu-step-descriptions">
-                  <div class="sl-htu-step-descriptions-inner prose">{{ step_description }}</div>
+              <div class="sl-htu-card">
+                <div class="sl-htu-card__figure">
+                  {% if step_icon != blank %}
+                    <img class="sl-htu-card__img sl-htu-card__img--icon" src="{{ step_icon | image_url: width: 240 }}" alt="" width="120" height="120" loading="lazy" decoding="async">
+                  {% elsif step_product != blank and step_product.featured_image != blank %}
+                    <img class="sl-htu-card__img" src="{{ step_product.featured_image | image_url: width: 400 }}" srcset="{{ step_product.featured_image | image_url: width: 260 }} 260w, {{ step_product.featured_image | image_url: width: 400 }} 400w" sizes="(max-width: 749px) 100vw, 260px" alt="{{ step_product.title | escape }}" width="200" height="200" loading="lazy" decoding="async">
+                  {% else %}
+                    <div class="sl-htu-card__placeholder"><span class="sl-htu-step-no">{{ step_num }}</span></div>
+                  {% endif %}
+                  <span class="sl-htu-card__badge">{{ step_num }}</span>
                 </div>
-              {% endif %}
+                <div class="sl-htu-card__info">
+                  <span class="sl-htu-step-title">{{ step_title_text }}</span>
+                  {% if step_product != blank %}
+                    <a href="{{ step_product.url }}" class="sl-htu-step-product-container" aria-label="{{ step_product.title | escape }}">
+                      <span class="sl-htu-step-product-image" style="background-image: url('{% if step_product.featured_image %}{{ step_product.featured_image | image_url: width: 80 }}{% endif %}');"></span>
+                      <span class="sl-htu-step-product-name">{{ step_product.title }}</span>
+                    </a>
+                  {% endif %}
+                  {% if step_description != blank %}
+                    <div class="sl-htu-step-descriptions">
+                      <div class="sl-htu-step-descriptions-inner prose">{{ step_description | replace: '<p', '<p class="sl-htu-step-p"' }}</div>
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
             </div>
           {% endif %}
         {% endfor %}
       {% endif %}
     </div>
+    {% endif %}
       </div>
   </details>
   </div>
@@ -161,102 +264,285 @@
     --sl-htu-radius: 44px;
     --sl-htu-step-gap: {{ section.settings.step_gap }}px;
     --sl-htu-steps-per-row: {{ section.settings.horizontal_steps_per_row | default: 3 }};
+    --sl-htu-card-bg: #fff;
+    --sl-htu-card-border: #e5e5e5;
+    --sl-htu-card-radius: 12px;
+    --sl-htu-slide-width: {{ section.settings.swiper_slide_width | default: 280 }}px;
     box-sizing: border-box;
   }
   #sl-htu-section-{{ section.id }} .sl-htu-section-inner {
     width: 100%;
     box-sizing: border-box;
   }
-  /* Vertical layout: steps stack in a column */
-  #sl-htu-section-{{ section.id }} .sl-htu-container--vertical {
-    display: flex;
-    flex-direction: column;
-    padding-top: 0;
-    gap: 0;
-  }
-  #sl-htu-section-{{ section.id }} .sl-htu-container--vertical .sl-htu-step {
-    margin-top: 0;
-  }
-  #sl-htu-section-{{ section.id }} .sl-htu-container--vertical .sl-htu-step:first-child .sl-htu-step-title-container {
-    margin-top: 0;
-  }
-  #sl-htu-section-{{ section.id }} .sl-htu-container--vertical .sl-htu-step-title-container {
-    margin-top: var(--sl-htu-step-gap);
-    margin-block-start: var(--sl-htu-step-gap) !important;
-  }
-  #sl-htu-section-{{ section.id }} .sl-htu-container--vertical .sl-htu-step:first-child .sl-htu-step-title-container {
-    margin-top: 0;
-    margin-block-start: 0 !important;
-  }
-  /* Horizontal layout: steps in a row, wrap on narrow screens */
-  #sl-htu-section-{{ section.id }} .sl-htu-container--horizontal {
+  /* Card: horizontal (figure left, info right), full width */
+  #sl-htu-section-{{ section.id }} .sl-htu-card {
     display: flex;
     flex-direction: row;
-    flex-wrap: wrap;
-    align-items: flex-start;
-    gap: var(--sl-htu-step-gap);
-    padding-top: 0;
-  }
-  #sl-htu-section-{{ section.id }} .sl-htu-container--horizontal .sl-htu-step {
-    flex: 0 0 calc((100% - (var(--sl-htu-steps-per-row) - 1) * var(--sl-htu-step-gap)) / var(--sl-htu-steps-per-row));
-    max-width: calc((100% - (var(--sl-htu-steps-per-row) - 1) * var(--sl-htu-step-gap)) / var(--sl-htu-steps-per-row));
-    margin-top: 0;
+    align-items: stretch;
+    min-height: 130px;
+    width: 100%;
+    border-radius: var(--sl-htu-card-radius);
+    border: 1px solid var(--sl-htu-card-border);
+    background: var(--sl-htu-card-bg);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.08);
+    overflow: hidden;
     box-sizing: border-box;
+    position: relative;
   }
-  #sl-htu-section-{{ section.id }} .sl-htu-container--horizontal .sl-htu-step-title-container {
-    margin-top: 0;
-    margin-block-start: 0 !important;
-  }
-  #sl-htu-section-{{ section.id }} .sl-htu-step-title-container {
-    display: flex;
-    align-items: center;
-  }
-  #sl-htu-section-{{ section.id }} .sl-htu-step-icon-wrap {
+  #sl-htu-section-{{ section.id }} .sl-htu-card__figure {
+    position: relative;
+    width: 110px;
+    min-width: 110px;
     flex-shrink: 0;
-    margin-inline-end: 10px;
+    overflow: hidden;
+    background: #f5f5f5;
   }
-  #sl-htu-section-{{ section.id }} .sl-htu-step-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
+  #sl-htu-section-{{ section.id }} .sl-htu-card__img {
+    width: 100%;
+    height: 100%;
+    min-height: 130px;
     object-fit: cover;
     display: block;
   }
-  #sl-htu-section-{{ section.id }} .sl-htu-step-no {
-    display: flex; width: 32px; height: 32px; justify-content: center; align-items: center; flex-shrink: 0;
-    border-radius: var(--sl-htu-radius); background: var(--sl-htu-bg); color: var(--sl-htu-text);
-    font-size: 16px; font-weight: 700; line-height: 1; letter-spacing: 0.02em; text-transform: uppercase;
+  #sl-htu-section-{{ section.id }} .sl-htu-card__img--icon {
+    object-fit: contain;
+    padding: 14px;
+    min-height: 0;
   }
-  #sl-htu-section-{{ section.id }} .sl-htu-step-title {
-    color: var(--sl-htu-text); font-size: 16px; font-weight: 700; line-height: 1.2;
-    letter-spacing: 0.01em; text-transform: uppercase; padding-inline-start: 12px;
+  #sl-htu-section-{{ section.id }} .sl-htu-card__placeholder {
+    width: 100%;
+    height: 100%;
+    min-height: 130px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--sl-htu-bg);
+  }
+  #sl-htu-section-{{ section.id }} .sl-htu-card__placeholder .sl-htu-step-no {
+    width: 44px;
+    height: 44px;
+    font-size: 20px;
+  }
+  #sl-htu-section-{{ section.id }} .sl-htu-card__badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    display: flex;
+    width: 26px;
+    height: 26px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--sl-htu-bg);
+    color: var(--sl-htu-text);
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1;
+  }
+  #sl-htu-section-{{ section.id }}.sl-htu-section-root[dir="rtl"] .sl-htu-card__badge { left: auto; right: 8px; }
+  #sl-htu-section-{{ section.id }} .sl-htu-card__info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+    padding: 12px 14px 14px;
+    justify-content: center;
+  }
+  #sl-htu-section-{{ section.id }} .sl-htu-card__info .sl-htu-step-title {
+    color: var(--sl-htu-text);
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    margin: 0;
+    padding: 0;
   }
   #sl-htu-section-{{ section.id }} .sl-htu-step-product-container {
-    display: grid; align-items: center; grid-template-columns: auto 1fr; gap: 8px;
-    padding-block: 10px; padding-inline: 10px 20px; border-radius: 40px; max-width: fit-content; margin-top: 8px;
-    background: var(--sl-htu-bg); text-decoration: none; color: inherit; cursor: pointer; transition: opacity 0.2s;
+    display: grid;
+    align-items: center;
+    grid-template-columns: auto 1fr;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 24px;
+    max-width: fit-content;
+    background: var(--sl-htu-bg);
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    margin: 0;
   }
   #sl-htu-section-{{ section.id }} .sl-htu-step-product-container:hover { opacity: 0.85; }
   #sl-htu-section-{{ section.id }} .sl-htu-step-product-image {
-    width: 40px; height: 40px; display: block; border-radius: 23px; background-color: #e0e0e0;
-    background-size: cover; background-position: center; background-repeat: no-repeat;
+    width: 36px;
+    height: 36px;
+    display: block;
+    border-radius: 50%;
+    background-color: #e0e0e0;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
   }
   #sl-htu-section-{{ section.id }} .sl-htu-step-product-name {
-    color: var(--sl-htu-text); font-size: 13px; font-weight: 400; line-height: 1.3; letter-spacing: 0.01em;
+    color: var(--sl-htu-text);
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.3;
   }
-  #sl-htu-section-{{ section.id }} .sl-htu-step-descriptions { margin-top: 16px; }
+  #sl-htu-section-{{ section.id }} .sl-htu-step-descriptions { margin-top: 4px; }
   #sl-htu-section-{{ section.id }} .sl-htu-step-descriptions-inner {
-    margin-top: 12px; color: var(--sl-htu-text); font-size: 14px; font-weight: 400; line-height: 1.5; letter-spacing: 0.02em;
+    margin: 0;
+    color: var(--sl-htu-text);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.5;
+    letter-spacing: 0.02em;
   }
-  #sl-htu-section-{{ section.id }} .sl-htu-step-descriptions-inner p { margin: 0 0 0.5em 0; }
-  #sl-htu-section-{{ section.id }} .sl-htu-step-descriptions-inner p:last-child { margin-bottom: 0; }
+  #sl-htu-section-{{ section.id }} .sl-htu-step-descriptions-inner p,
+  #sl-htu-section-{{ section.id }} .sl-htu-step-descriptions-inner .metafield-rich_text_field p { margin: 0 0 0.5em 0; }
+  #sl-htu-section-{{ section.id }} .sl-htu-step-descriptions-inner p:last-child,
+  #sl-htu-section-{{ section.id }} .sl-htu-step-descriptions-inner .metafield-rich_text_field p:last-child { margin-bottom: 0; }
+  #sl-htu-section-{{ section.id }} .sl-htu-step-descriptions-inner .metafield-rich_text_field { color: inherit; font-size: inherit; line-height: inherit; }
+  #sl-htu-section-{{ section.id }} .sl-htu-step-descriptions-inner .metafield-rich_text_field ol,
+  #sl-htu-section-{{ section.id }} .sl-htu-step-descriptions-inner .metafield-rich_text_field ul { margin: 0.5em 0 0.5em 1.2em; padding: 0; }
+  /* Vertical layout: full-width cards stacked with gap */
+  #sl-htu-section-{{ section.id }} .sl-htu-container--vertical {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sl-htu-step-gap);
+    padding-bottom: 16px;
+  }
+  /* Horizontal layout: grid row of full-width cards */
+  #sl-htu-section-{{ section.id }} .sl-htu-container--horizontal {
+    display: grid;
+    grid-template-columns: repeat(var(--sl-htu-steps-per-row), 1fr);
+    gap: var(--sl-htu-step-gap);
+    padding-bottom: 16px;
+  }
   @media (max-width: 749px) {
-    #sl-htu-section-{{ section.id }} .sl-htu-container--horizontal .sl-htu-step {
-      flex: 1 1 100%;
-      min-width: 100%;
+    #sl-htu-section-{{ section.id }} .sl-htu-container--horizontal {
+      grid-template-columns: 1fr;
     }
   }
+  /* Swiper cards-stack layout */
+  #sl-htu-section-{{ section.id }} .sl-htu-swiper {
+    overflow: visible;
+    position: relative;
+    width: 100%;
+    padding-bottom: 40px;
+  }
+  #sl-htu-section-{{ section.id }} .sl-htu-swiper .swiper-slide {
+    width: 100% !important;
+    border-radius: var(--sl-htu-card-radius);
+    overflow: hidden;
+  }
+  #sl-htu-section-{{ section.id }} .sl-htu-swiper .sl-htu-card {
+    max-width: 100%;
+  }
+  #sl-htu-section-{{ section.id }} .swiper-button-prev,
+  #sl-htu-section-{{ section.id }} .swiper-button-next {
+    display: none;
+  }
+  #sl-htu-section-{{ section.id }} .sl-htu-pagination {
+    text-align: center;
+    margin-top: 14px;
+  }
+  #sl-htu-section-{{ section.id }} .sl-htu-pagination .swiper-pagination-bullet {
+    width: 8px; height: 8px; background: var(--sl-htu-text); opacity: 0.25;
+    margin: 0 3px; border-radius: 50%; display: inline-block; cursor: pointer;
+    transition: opacity 0.2s, transform 0.2s;
+  }
+  #sl-htu-section-{{ section.id }} .sl-htu-pagination .swiper-pagination-bullet-active {
+    opacity: 1; transform: scale(1.2);
+  }
 </style>
+{% if layout == 'swiper' %}
+<script>
+(function() {
+  var sectionId = '{{ section.id }}';
+  var root = document.getElementById('sl-htu-section-' + sectionId);
+  if (!root) return;
+  var swiperEl = root.querySelector('[data-htu-swiper]');
+  if (!swiperEl) return;
+  var isRtl = {{ is_ar | json }};
+  var SWIPER_CSS = 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css';
+  var SWIPER_JS = 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js';
+
+  function getSwiperReady() {
+    if (typeof Swiper !== 'undefined') return Promise.resolve();
+    if (window.__slSwiperReady) return window.__slSwiperReady;
+    var link = document.querySelector('link[href*="swiper"][href*="swiper-bundle"]');
+    if (!link) {
+      link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = SWIPER_CSS;
+      link.media = 'print';
+      link.onload = function() { link.media = 'all'; };
+      document.head.appendChild(link);
+    }
+    var script = document.querySelector('script[src*="swiper"][src*="swiper-bundle"]');
+    if (script) {
+      if (typeof Swiper !== 'undefined') return Promise.resolve();
+      window.__slSwiperReady = new Promise(function(resolve) {
+        function done() { resolve(); }
+        if (script.readyState === 'complete' || script.readyState === 'loaded') {
+          done();
+          return;
+        }
+        script.addEventListener('load', done);
+        script.addEventListener('error', done);
+      });
+      return window.__slSwiperReady;
+    }
+    window.__slSwiperReady = new Promise(function(resolve) {
+      var s = document.createElement('script');
+      s.src = SWIPER_JS;
+      s.async = true;
+      s.onload = function() { s.setAttribute('data-sl-loaded', '1'); resolve(); };
+      s.onerror = resolve;
+      document.head.appendChild(s);
+    });
+    return window.__slSwiperReady;
+  }
+
+  function initSwiper() {
+    if (!swiperEl || swiperEl.swiper) return;
+    if (typeof Swiper === 'undefined') return;
+    var paginationEl = root.querySelector('.sl-htu-pagination');
+    new Swiper(swiperEl, {
+      effect: 'cards',
+      cardsEffect: { slideShadows: false, perSlideRotate: 2, perSlideOffset: 8 },
+      grabCursor: true,
+      loop: false,
+      rtl: isRtl,
+      pagination: paginationEl ? { el: paginationEl, clickable: true } : false
+    });
+  }
+
+  function onVisible() {
+    getSwiperReady().then(initSwiper);
+  }
+
+  if (typeof IntersectionObserver !== 'undefined') {
+    var io = new IntersectionObserver(function(entries) {
+      if (!entries[0].isIntersecting) return;
+      io.disconnect();
+      onVisible();
+    }, { rootMargin: '120px', threshold: 0.01 });
+    io.observe(root);
+  } else {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', onVisible);
+    } else {
+      onVisible();
+    }
+  }
+})();
+</script>
+{% endif %}
 {% endunless %}
 
 {% schema %}
@@ -373,10 +659,11 @@
       "type": "select",
       "id": "layout",
       "label": "Steps layout",
-      "info": "Vertical = steps stack in a column. Horizontal = steps in a row (wrap on small screens).",
+      "info": "Vertical/Horizontal = card grid. Swiper = horizontal slider with card per step.",
       "options": [
-        { "value": "vertical", "label": "Vertical (stacked)" },
-        { "value": "horizontal", "label": "Horizontal (row)" }
+        { "value": "vertical", "label": "Vertical (stacked cards)" },
+        { "value": "horizontal", "label": "Horizontal (row of cards)" },
+        { "value": "swiper", "label": "Swiper (cards slider)" }
       ],
       "default": "vertical"
     },
@@ -389,6 +676,17 @@
       "max": 5,
       "step": 1,
       "default": 3
+    },
+    {
+      "type": "range",
+      "id": "swiper_slide_width",
+      "label": "Card width (Swiper layout)",
+      "info": "Width of each step card in the slider (desktop).",
+      "min": 220,
+      "max": 380,
+      "step": 20,
+      "default": 280,
+      "unit": "px"
     },
     {
       "type": "color",
@@ -486,18 +784,18 @@
           "content": "Description (English & Arabic)"
         },
         {
-          "type": "textarea",
+          "type": "richtext",
           "id": "description_en",
           "label": "Description (English)",
-          "info": "How to use instructions for this step."
+          "info": "How to use instructions for this step. Rich text supported."
         },
         {
-          "type": "textarea",
+          "type": "richtext",
           "id": "description_ar",
           "label": "Description (Arabic)"
         },
         {
-          "type": "textarea",
+          "type": "richtext",
           "id": "description",
           "label": "Description (fallback)",
           "info": "Used when locale is neither en nor ar."

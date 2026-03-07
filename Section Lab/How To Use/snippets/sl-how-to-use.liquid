@@ -1,10 +1,9 @@
 {% comment %}
   SL - How to Use (Snippet)
-  Use in product info via Custom Liquid block.
+  Swiper cards-stack: full-width horizontal cards, stacked on top of each other, swipe between them.
   Usage: {% render 'sl-how-to-use', product: product, block_id: block.id %}
-  Prefers product.metafields.custom.how_to_use (single "How to use" metaobject with .steps);
-  fallback: product.metafields.custom.how_to_use_steps (list of step metaobjects).
-  See README.md for metaobject and metafield setup.
+  Prefers product.metafields.custom.how_to_use → .steps;
+  fallback: product.metafields.custom.how_to_use_steps.
 {% endcomment %}
 
 {% assign block_id = block_id | default: 'htu' %}
@@ -28,9 +27,10 @@
   {% assign is_ar = true %}
 {% endif %}
 
+{% assign htu_heading = 'sections.sl_how_to_use.heading' | t | default: 'How to use it the right way' %}
 {% if request.design_mode and prod != blank and has_steps == false %}
   <div id="sl-htu-block-{{ block_id }}" class="sl-htu-block-root" style="padding: 12px; color: #666; border: 1px dashed #ccc;">
-    <p style="margin: 0;">How to Use — No steps. Assign a <strong>How to use (SL)</strong> entry to this product (<code>custom.how_to_use</code>), or use the legacy <strong>How to use steps</strong> metafield (<code>custom.how_to_use_steps</code>).</p>
+    <p style="margin: 0;">{{ htu_heading }} — No steps. Assign a <strong>How to use (SL)</strong> entry to this product (<code>custom.how_to_use</code>), or use the legacy <strong>How to use steps</strong> metafield (<code>custom.how_to_use_steps</code>).</p>
   </div>
 {% endif %}
 
@@ -38,56 +38,58 @@
 <div id="sl-htu-block-{{ block_id }}" class="sl-htu-block-root"{% if is_ar %} dir="rtl"{% endif %}>
   <details class="accordion group" open>
     <summary>
-      <span class="accordion__toggle">
-        <span>How to use it the right way</span>
+      <span class="accordion__toggle h6">
+        <span>{{ htu_heading }}</span>
         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8" fill="none" class="icon icon-wd-arrow" aria-hidden="true"><path d="M11 1L6 7L1 1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </span>
     </summary>
     <div class="accordion__content">
-  <div class="sl-htu-container"{% if is_ar %} dir="rtl"{% endif %}>
-  {% for entry in steps %}
-    {% assign step_product = entry.product.value | default: entry.product %}
-    {% assign step_num = forloop.index %}
-    {% if is_ar %}
-      {% assign step_title_text = entry.step_title_ar | default: entry.step_title_en | default: entry.step_title %}
-      {% assign step_description = entry.description_ar | default: entry.description_en | default: entry.description %}
-    {% else %}
-      {% assign step_title_text = entry.step_title_en | default: entry.step_title_ar | default: entry.step_title %}
-      {% assign step_description = entry.description_en | default: entry.description_ar | default: entry.description %}
-    {% endif %}
-    {% if step_title_text == blank %}
-      {% capture step_title_text %}Step {{ step_num }}{% endcapture %}
-    {% endif %}
-    {% assign step_icon = entry.step_icon.value | default: entry.step_icon %}
-
-    <div class="sl-htu-step" data-step="{{ step_num }}">
-      <div class="sl-htu-step-title-container">
-        {% if step_icon != blank %}
-          <span class="sl-htu-step-icon-wrap">
-            <img class="sl-htu-step-icon" src="{{ step_icon | image_url: width: 96 }}" alt="" width="48" height="48" loading="lazy">
-          </span>
+  <div class="sl-htu-swiper swiper" data-htu-swiper>
+    <div class="swiper-wrapper">
+      {% for entry in steps %}
+        {% assign step_product = entry.product.value | default: entry.product %}
+        {% assign step_num = forloop.index %}
+        {% if is_ar %}
+          {% assign step_title_text = entry.step_title_ar | default: entry.step_title_en | default: entry.step_title %}
+          {% assign step_desc_field = entry.description_ar | default: entry.description_en | default: entry.description %}
+        {% else %}
+          {% assign step_title_text = entry.step_title_en | default: entry.step_title_ar | default: entry.step_title %}
+          {% assign step_desc_field = entry.description_en | default: entry.description_ar | default: entry.description %}
         {% endif %}
-        <span class="sl-htu-step-no">{{ step_num }}</span>
-        <span class="sl-htu-step-title">{{ step_title_text }}</span>
-      </div>
+        {% if step_title_text == blank %}{% capture step_title_text %}Step {{ step_num }}{% endcapture %}{% endif %}
+        {% assign step_icon = entry.step_icon.value | default: entry.step_icon %}
 
-      {% if step_product != blank %}
-        <a href="{{ step_product.url }}" class="sl-htu-step-product-container" aria-label="{{ step_product.title | escape }}">
-          <span
-            class="sl-htu-step-product-image"
-            style="background-image: url('{% if step_product.featured_image %}{{ step_product.featured_image | image_url: width: 80 }}{% endif %}');"
-          ></span>
-          <span class="sl-htu-step-product-name">{{ step_product.title }}</span>
-        </a>
-      {% endif %}
-
-      {% if step_description != blank %}
-        <div class="sl-htu-step-descriptions">
-          <div class="sl-htu-step-descriptions-inner prose">{{ step_description }}</div>
+        <div class="swiper-slide">
+          <div class="sl-htu-card">
+            <div class="sl-htu-card__figure">
+              {% if step_icon != blank %}
+                <img class="sl-htu-card__img sl-htu-card__img--icon" src="{{ step_icon | image_url: width: 240 }}" alt="" width="120" height="120" loading="lazy" decoding="async">
+              {% elsif step_product != blank and step_product.featured_image != blank %}
+                <img class="sl-htu-card__img" src="{{ step_product.featured_image | image_url: width: 400 }}" srcset="{{ step_product.featured_image | image_url: width: 260 }} 260w, {{ step_product.featured_image | image_url: width: 400 }} 400w" sizes="120px" alt="{{ step_product.title | escape }}" width="200" height="200" loading="lazy" decoding="async">
+              {% else %}
+                <div class="sl-htu-card__placeholder"><span class="sl-htu-step-no">{{ step_num }}</span></div>
+              {% endif %}
+              <span class="sl-htu-card__badge">{{ step_num }}</span>
+            </div>
+            <div class="sl-htu-card__info">
+              <span class="sl-htu-step-title">{{ step_title_text }}</span>
+              {% if step_product != blank %}
+                <a href="{{ step_product.url }}" class="sl-htu-step-product-container" aria-label="{{ step_product.title | escape }}">
+                  <span class="sl-htu-step-product-image" style="background-image: url('{% if step_product.featured_image %}{{ step_product.featured_image | image_url: width: 80 }}{% endif %}');"></span>
+                  <span class="sl-htu-step-product-name">{{ step_product.title }}</span>
+                </a>
+              {% endif %}
+              {% if step_desc_field != blank %}
+                <div class="sl-htu-step-descriptions">
+                  <div class="sl-htu-step-descriptions-inner prose">{{ step_desc_field | metafield_tag }}</div>
+                </div>
+              {% endif %}
+            </div>
+          </div>
         </div>
-      {% endif %}
+      {% endfor %}
     </div>
-  {% endfor %}
+    <div class="sl-htu-pagination"></div>
   </div>
     </div>
   </details>
@@ -99,121 +101,186 @@
   #sl-htu-block-{{ block_id }} details summary::-webkit-details-marker { display: none; }
   #sl-htu-block-{{ block_id }} details summary::before,
   #sl-htu-block-{{ block_id }} details summary::after { display: none !important; }
-  #sl-htu-block-{{ block_id }} .accordion__toggle {
-    display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 18px; font-weight: 400; margin: 0; padding: 0; color: #1c1c1c;
-  }
+  #sl-htu-block-{{ block_id }} .accordion__toggle { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 18px; font-weight: 400; }
   #sl-htu-block-{{ block_id }} .accordion .icon { transition: transform 0.2s; }
   #sl-htu-block-{{ block_id }} .accordion[open] .icon { transform: rotate(180deg); }
-  #sl-htu-block-{{ block_id }} .accordion__content { margin-top: 8px; padding: 0; }
+  #sl-htu-block-{{ block_id }} .accordion__content { margin-top: 12px; padding: 0; }
   #sl-htu-block-{{ block_id }}.sl-htu-block-root {
     --sl-htu-bg: #EEEFE8;
     --sl-htu-text: #272E0F;
-    --sl-htu-radius: 44px;
-    --sl-htu-step-gap: 24px;
+    --sl-htu-card-bg: #fff;
+    --sl-htu-card-border: #e5e5e5;
+    --sl-htu-card-radius: 12px;
   }
-  #sl-htu-block-{{ block_id }} .sl-htu-container {
-    padding-top: 22px;
+  /* Swiper cards-stack container */
+  #sl-htu-block-{{ block_id }} .sl-htu-swiper {
+    overflow: visible;
+    position: relative;
+    width: 100%;
+    padding-bottom: 36px;
   }
-  #sl-htu-block-{{ block_id }} .sl-htu-step {
-    margin-top: 0;
+  #sl-htu-block-{{ block_id }} .sl-htu-swiper .swiper-slide {
+    width: 100% !important;
+    border-radius: var(--sl-htu-card-radius);
+    overflow: hidden;
   }
-  #sl-htu-block-{{ block_id }} .sl-htu-step:first-child .sl-htu-step-title-container {
-    margin-top: 0;
-  }
-  #sl-htu-block-{{ block_id }} .sl-htu-step-title-container {
+  /* Card: horizontal (figure left, info right), full width */
+  #sl-htu-block-{{ block_id }} .sl-htu-card {
     display: flex;
-    align-items: center;
-    margin-top: var(--sl-htu-step-gap);
-    margin-block-start: var(--sl-htu-step-gap) !important;
+    flex-direction: row;
+    align-items: stretch;
+    min-height: 130px;
+    width: 100%;
+    border-radius: var(--sl-htu-card-radius);
+    border: 1px solid var(--sl-htu-card-border);
+    background: var(--sl-htu-card-bg);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.08);
+    overflow: hidden;
+    box-sizing: border-box;
   }
-  #sl-htu-block-{{ block_id }} .sl-htu-step-icon-wrap {
+  #sl-htu-block-{{ block_id }} .sl-htu-card__figure {
+    position: relative;
+    width: 110px;
+    min-width: 110px;
     flex-shrink: 0;
-    margin-inline-end: 10px;
+    overflow: hidden;
+    background: #f5f5f5;
   }
-  #sl-htu-block-{{ block_id }} .sl-htu-step-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    object-fit: cover;
-    display: block;
+  #sl-htu-block-{{ block_id }} .sl-htu-card__img {
+    width: 100%; height: 100%; min-height: 130px; object-fit: cover; display: block;
   }
-  #sl-htu-block-{{ block_id }} .sl-htu-step-no {
-    display: flex;
-    width: 32px;
-    height: 32px;
-    justify-content: center;
-    align-items: center;
-    flex-shrink: 0;
-    border-radius: var(--sl-htu-radius);
-    background: var(--sl-htu-bg);
-    color: var(--sl-htu-text);
-    font-size: 16px;
-    font-weight: 700;
-    line-height: 1;
-    letter-spacing: 0.02em;
-    text-transform: uppercase;
+  #sl-htu-block-{{ block_id }} .sl-htu-card__img--icon {
+    object-fit: contain; padding: 14px; min-height: 0;
   }
-  #sl-htu-block-{{ block_id }} .sl-htu-step-title {
-    color: var(--sl-htu-text);
-    font-size: 16px;
-    font-weight: 700;
-    line-height: 1.2;
-    letter-spacing: 0.01em;
-    text-transform: uppercase;
-    padding-inline-start: 12px;
+  #sl-htu-block-{{ block_id }} .sl-htu-card__placeholder {
+    width: 100%; height: 100%; min-height: 130px;
+    display: flex; align-items: center; justify-content: center; background: var(--sl-htu-bg);
+  }
+  #sl-htu-block-{{ block_id }} .sl-htu-card__placeholder .sl-htu-step-no {
+    width: 44px; height: 44px; font-size: 20px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 50%; background: var(--sl-htu-bg); color: var(--sl-htu-text); font-weight: 700;
+  }
+  #sl-htu-block-{{ block_id }} .sl-htu-card__badge {
+    position: absolute; top: 8px; left: 8px;
+    display: flex; width: 28px; height: 28px;
+    align-items: center; justify-content: center;
+    border-radius: 50%; background: var(--sl-htu-bg); color: var(--sl-htu-text);
+    font-size: 13px; font-weight: 700; line-height: 1;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+  }
+  #sl-htu-block-{{ block_id }}[dir="rtl"] .sl-htu-card__badge { left: auto; right: 8px; }
+  #sl-htu-block-{{ block_id }} .sl-htu-card__info {
+    display: flex; flex-direction: column; gap: 6px;
+    flex: 1; min-width: 0; padding: 14px 16px; justify-content: center;
+  }
+  #sl-htu-block-{{ block_id }} .sl-htu-card__info .sl-htu-step-title {
+    color: var(--sl-htu-text); font-size: 14px; font-weight: 700;
+    line-height: 1.25; letter-spacing: 0.01em; text-transform: uppercase; margin: 0; padding: 0;
   }
   #sl-htu-block-{{ block_id }} .sl-htu-step-product-container {
-    display: grid;
-    align-items: center;
-    grid-template-columns: auto 1fr;
-    gap: 8px;
-    padding-block: 10px;
-    padding-inline: 10px 20px;
-    border-radius: 40px;
-    max-width: fit-content;
-    margin-top: 8px;
-    background: var(--sl-htu-bg);
-    text-decoration: none;
-    color: inherit;
-    cursor: pointer;
-    transition: opacity 0.2s;
+    display: grid; align-items: center; grid-template-columns: auto 1fr; gap: 8px;
+    padding: 6px 10px; border-radius: 24px; max-width: fit-content;
+    background: var(--sl-htu-bg); text-decoration: none; color: inherit;
+    cursor: pointer; transition: opacity 0.2s; margin: 0;
   }
-  #sl-htu-block-{{ block_id }} .sl-htu-step-product-container:hover {
-    opacity: 0.85;
-  }
+  #sl-htu-block-{{ block_id }} .sl-htu-step-product-container:hover { opacity: 0.85; }
   #sl-htu-block-{{ block_id }} .sl-htu-step-product-image {
-    width: 40px;
-    height: 40px;
-    display: block;
-    border-radius: 23px;
-    background-color: #e0e0e0;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
+    width: 32px; height: 32px; display: block; border-radius: 50%;
+    background-color: #e0e0e0; background-size: cover; background-position: center;
   }
   #sl-htu-block-{{ block_id }} .sl-htu-step-product-name {
-    color: var(--sl-htu-text);
-    font-size: 13px;
-    font-weight: 400;
-    line-height: 1.3;
-    letter-spacing: 0.01em;
+    color: var(--sl-htu-text); font-size: 12px; font-weight: 500; line-height: 1.3;
   }
-  #sl-htu-block-{{ block_id }} .sl-htu-step-descriptions {
-    margin-top: 16px;
-  }
+  #sl-htu-block-{{ block_id }} .sl-htu-step-descriptions { margin-top: 2px; }
   #sl-htu-block-{{ block_id }} .sl-htu-step-descriptions-inner {
-    margin-top: 12px;
-    color: var(--sl-htu-text);
-    font-size: 14px;
-    font-weight: 400;
-    line-height: 1.5;
-    letter-spacing: 0.02em;
+    margin: 0; color: var(--sl-htu-text); font-size: 13px; font-weight: 400; line-height: 1.5;
   }
-  #sl-htu-block-{{ block_id }} .sl-htu-step-descriptions-inner p {
-    margin: 0 0 0.5em 0;
+  #sl-htu-block-{{ block_id }} .sl-htu-step-descriptions-inner p,
+  #sl-htu-block-{{ block_id }} .sl-htu-step-descriptions-inner .metafield-rich_text_field p { margin: 0 0 0.4em 0; }
+  #sl-htu-block-{{ block_id }} .sl-htu-step-descriptions-inner p:last-child,
+  #sl-htu-block-{{ block_id }} .sl-htu-step-descriptions-inner .metafield-rich_text_field p:last-child { margin-bottom: 0; }
+  #sl-htu-block-{{ block_id }} .sl-htu-step-descriptions-inner .metafield-rich_text_field { color: inherit; font-size: inherit; line-height: inherit; }
+  #sl-htu-block-{{ block_id }} .sl-htu-step-descriptions-inner .metafield-rich_text_field ol,
+  #sl-htu-block-{{ block_id }} .sl-htu-step-descriptions-inner .metafield-rich_text_field ul { margin: 0.4em 0 0.4em 1.2em; padding: 0; }
+  /* Pagination dots */
+  #sl-htu-block-{{ block_id }} .sl-htu-pagination {
+    text-align: center; margin-top: 14px;
   }
-  #sl-htu-block-{{ block_id }} .sl-htu-step-descriptions-inner p:last-child {
-    margin-bottom: 0;
+  #sl-htu-block-{{ block_id }} .sl-htu-pagination .swiper-pagination-bullet {
+    width: 8px; height: 8px; background: var(--sl-htu-text); opacity: 0.25;
+    margin: 0 3px; border-radius: 50%; display: inline-block; cursor: pointer;
+    transition: opacity 0.2s, transform 0.2s;
+  }
+  #sl-htu-block-{{ block_id }} .sl-htu-pagination .swiper-pagination-bullet-active {
+    opacity: 1; transform: scale(1.2);
   }
 </style>
+
+<script>
+(function() {
+  var bid = {{ block_id | json }};
+  var root = document.getElementById('sl-htu-block-' + bid);
+  if (!root) return;
+  var swiperEl = root.querySelector('[data-htu-swiper]');
+  if (!swiperEl) return;
+  var isRtl = {{ is_ar | json }};
+  var SWIPER_CSS = 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css';
+  var SWIPER_JS = 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js';
+
+  function getSwiperReady() {
+    if (typeof Swiper !== 'undefined') return Promise.resolve();
+    if (window.__slSwiperReady) return window.__slSwiperReady;
+    if (!document.querySelector('link[href*="swiper-bundle"]')) {
+      var link = document.createElement('link');
+      link.rel = 'stylesheet'; link.href = SWIPER_CSS;
+      link.media = 'print'; link.onload = function() { link.media = 'all'; };
+      document.head.appendChild(link);
+    }
+    var script = document.querySelector('script[src*="swiper-bundle"]');
+    if (script) {
+      if (typeof Swiper !== 'undefined') return Promise.resolve();
+      window.__slSwiperReady = new Promise(function(resolve) {
+        if (script.readyState === 'complete' || script.readyState === 'loaded') { resolve(); return; }
+        script.addEventListener('load', resolve);
+        script.addEventListener('error', resolve);
+      });
+      return window.__slSwiperReady;
+    }
+    window.__slSwiperReady = new Promise(function(resolve) {
+      var s = document.createElement('script');
+      s.src = SWIPER_JS; s.async = true;
+      s.onload = function() { s.setAttribute('data-sl-loaded', '1'); resolve(); };
+      s.onerror = resolve;
+      document.head.appendChild(s);
+    });
+    return window.__slSwiperReady;
+  }
+
+  function initSwiper() {
+    if (!swiperEl || swiperEl.swiper || typeof Swiper === 'undefined') return;
+    var paginationEl = root.querySelector('.sl-htu-pagination');
+    new Swiper(swiperEl, {
+      effect: 'cards',
+      cardsEffect: { slideShadows: false, perSlideRotate: 2, perSlideOffset: 8 },
+      grabCursor: true,
+      loop: false,
+      rtl: isRtl,
+      pagination: paginationEl ? { el: paginationEl, clickable: true } : false
+    });
+  }
+
+  function onVisible() { getSwiperReady().then(initSwiper); }
+  if (typeof IntersectionObserver !== 'undefined') {
+    var io = new IntersectionObserver(function(entries) {
+      if (!entries[0].isIntersecting) return;
+      io.disconnect(); onVisible();
+    }, { rootMargin: '120px', threshold: 0.01 });
+    io.observe(root);
+  } else {
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', onVisible);
+    else onVisible();
+  }
+})();
+</script>
 {% endif %}
