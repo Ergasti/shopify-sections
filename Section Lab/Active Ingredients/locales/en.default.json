@@ -1,0 +1,10 @@
+{
+  "sections": {
+    "sl_active_ingredients": {
+      "heading": "Active botanical ingredients",
+      "close": "Close",
+      "view_details": "View details",
+      "empty": "Add Ingredient blocks or product metafield custom.active_ingredients."
+    }
+  }
+}

@@ -1,0 +1,189 @@
+{% comment %}
+  SL - Active Ingredients (Section)
+  Product page: accordion "Active botanical ingredients" with list of ingredients; each opens a popup.
+  Data: section blocks (Ingredient) or product metafield custom.active_ingredients (list of metaobject references).
+{% endcomment %}
+
+{% assign source = section.settings.source | default: 'blocks' %}
+{% assign prod = product | default: nil %}
+{% assign ingredients_list = nil %}
+{% if source == 'metafield' and prod != blank %}
+  {% assign meta_val = prod.metafields.custom.active_ingredients.value %}
+  {% if meta_val != blank and meta_val.size > 0 %}
+    {% assign ingredients_list = meta_val %}
+  {% endif %}
+{% endif %}
+
+{% assign use_blocks = false %}
+{% if source == 'blocks' %}
+  {% for block in section.blocks %}
+    {% if block.type == 'ingredient' and block.settings.title != blank %}
+      {% assign use_blocks = true %}
+      {% break %}
+    {% endif %}
+  {% endfor %}
+{% endif %}
+
+{% assign has_content = false %}
+{% if ingredients_list != nil and ingredients_list.size > 0 %}
+  {% assign has_content = true %}
+{% elsif use_blocks %}
+  {% assign has_content = true %}
+{% endif %}
+
+{% if has_content %}
+  <div id="sl-active-ingredients-section-{{ section.id }}" class="sl-active-ingredients-section" style="width:100%; background: {{ section.settings.background_color }}; padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;">
+    <div class="sl-active-ingredients-section__inner" style="{% unless section.settings.full_width %}max-width: {{ section.settings.content_width }}px; margin-left: auto; margin-right: auto;{% endunless %} padding-left: {{ section.settings.padding_inline }}px; padding-right: {{ section.settings.padding_inline }}px;">
+      {% render 'sl-active-ingredients',
+        ingredients: ingredients_list,
+        section: section,
+        use_blocks: use_blocks,
+        section_id: section.id,
+        heading: section.settings.heading
+      %}
+    </div>
+  </div>
+{% elsif request.design_mode %}
+  <div id="sl-active-ingredients-section-{{ section.id }}" class="sl-active-ingredients-section" style="padding: 24px; background: #f5f5f5; border: 2px dashed #ccc; text-align: center;">
+    <p style="margin: 0; color: #666;">Active Ingredients — Add <strong>Ingredient</strong> blocks below, or set <strong>Source</strong> to Product metafield and add <code>custom.active_ingredients</code> (list of Active Ingredient metaobjects) to the product.</p>
+  </div>
+{% endif %}
+
+{% schema %}
+{
+  "name": "SL - Active Ingredients",
+  "tag": "section",
+  "class": "sl-active-ingredients-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Source"
+    },
+    {
+      "type": "select",
+      "id": "source",
+      "label": "Data source",
+      "options": [
+        { "value": "blocks", "label": "Section blocks (add Ingredient blocks below)" },
+        { "value": "metafield", "label": "Product metafield (custom.active_ingredients)" }
+      ],
+      "default": "blocks"
+    },
+    {
+      "type": "header",
+      "content": "Heading"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Accordion heading",
+      "default": "Active botanical ingredients"
+    },
+    {
+      "type": "header",
+      "content": "Section layout"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "default": 0,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "default": 0,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_inline",
+      "label": "Padding left & right",
+      "min": 8,
+      "max": 80,
+      "step": 4,
+      "default": 16,
+      "unit": "px"
+    },
+    {
+      "type": "checkbox",
+      "id": "full_width",
+      "label": "Full width",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "content_width",
+      "label": "Content max width",
+      "min": 400,
+      "max": 1200,
+      "step": 20,
+      "default": 800,
+      "unit": "px"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "ingredient",
+      "name": "Ingredient",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Ingredient name"
+        },
+        {
+          "type": "text",
+          "id": "subtitle",
+          "label": "Subtitle (popup)",
+          "info": "Short line shown under the image in the popup"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Description (popup)",
+          "info": "Full description shown in the popup"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "SL - Active Ingredients",
+      "category": "Product",
+      "settings": { "heading": "Active botanical ingredients" },
+      "blocks": [
+        {
+          "type": "ingredient",
+          "settings": {
+            "title": "Example ingredient",
+            "subtitle": "Moisturizes and nourishes",
+            "description": "Add a short description for the popup."
+          }
+        }
+      ]
+    }
+  ],
+  "templates": ["product"]
+}
+{% endschema %}

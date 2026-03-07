@@ -1,0 +1,10 @@
+{
+  "sections": {
+    "sl_active_ingredients": {
+      "heading": "المكونات النباتية النشطة",
+      "close": "إغلاق",
+      "view_details": "عرض التفاصيل",
+      "empty": "أضف كتل المكونات أو حقل المنتج المخصص custom.active_ingredients."
+    }
+  }
+}

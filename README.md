@@ -43,6 +43,7 @@ Within each category, entries are sorted by **Updated** (oldest first, most rece
 | | [SL – How to Use](Section%20Lab/How%20To%20Use/README.md) | Section Lab (metaobjects) | 2026-02-27 |
 | | [SL – Frequently Bought Together](Section%20Lab/Frequently%20Bought%20Together/README.md) | Section Lab (paid) | 2026-02-27 |
 | | [SL – Volume Discount](Section%20Lab/Volume%20Discount/README.md) | Section Lab (this repo) | 2026-02-28 |
+| | [SL – Active Ingredients](Section%20Lab/Active%20Ingredients/README.md) | Section Lab (this repo) | 2026-03-07 |
 | **Media & Gallery** | [Image Gallery (BoldizArt)](Image%20Gallery%20(BoldizArt)/README.md) | BoldizArt/Shopify-Image-Gallery | 2025-02-14 |
 | **Video & Media** | [YouTube Section](YouTube%20Section/README.md) | prowebcoder/shopify-sections-youtube | 2025-02-14 |
 | | [Media Slider Snap](Media%20Slider%20Snap/README.md) | Custom (video-section2) | 2026-02-14 |
@@ -112,6 +113,7 @@ Every folder that contains `.liquid` section or snippet files. Sorted by last up
 | [SL – Free Shipping Progress Bar](Section%20Lab/Free%20Shipping%20Progress%20Bar/README.md) | Cart free-shipping threshold progress bar. | 2026-02-28 |
 | [SL – Sales Nudge Widget](Section%20Lab/Nudges%20Widget/README.md) | Sales nudge / urgency widget. | 2026-02-28 |
 | [SL – Volume Discount](Section%20Lab/Volume%20Discount/README.md) | Volume/quantity discount tiers (metaobject). | 2026-02-28 |
+| [SL – Active Ingredients](Section%20Lab/Active%20Ingredients/README.md) | Product active botanical ingredients accordion + popup (Yves Rocher style). | 2026-03-07 |
 
 ---
 
@@ -140,6 +142,7 @@ Section Lab sections live under `Section Lab/`. Each has a `sections/` folder an
 | [SL – Free Shipping Progress Bar](Section%20Lab/Free%20Shipping%20Progress%20Bar/README.md) | Cart free-shipping threshold progress bar. | 2026-02-28 |
 | [SL – Sales Nudge Widget](Section%20Lab/Nudges%20Widget/README.md) | Sales nudge / urgency widget. | 2026-02-28 |
 | [SL – Volume Discount](Section%20Lab/Volume%20Discount/README.md) | Volume/quantity discount tiers (metaobject). | 2026-02-28 |
+| [SL – Active Ingredients](Section%20Lab/Active%20Ingredients/README.md) | Product active botanical ingredients accordion + popup (Yves Rocher style). | 2026-03-07 |
 
 ---
 
@@ -197,7 +200,7 @@ SectionName/                    # or Section Lab/SubSectionName/
 | [iShopifyExpert/custom-slider](https://github.com/iShopifyExpert/custom-slider) | Custom / gallery slider (reference) |
 | [uxhacks/shopify-sections](https://github.com/uxhacks/shopify-sections) | Sections (reference) |
 | [jydykun/Shopify-Sections](https://github.com/jydykun/Shopify-Sections) | Skeleton theme (reference) |
-| **Section Lab** (this repo / paid bundle) | Bundle, How to Use, FBT, Volume Discount, Free Shipping Progress Bar, Price Bubble, Icon List, Payment Icons, Announcement Bar, Delivery Countdown, Face Proof Bubble, Nudges, Story Navigation, Scrolling Content, Native Video Slider, UGC Videos, Social Proof Video, Before And After, Real Results |
+| **Section Lab** (this repo / paid bundle) | Active Ingredients, Bundle, How to Use, FBT, Volume Discount, Free Shipping Progress Bar, Price Bubble, Icon List, Payment Icons, Announcement Bar, Delivery Countdown, Face Proof Bubble, Nudges, Story Navigation, Scrolling Content, Native Video Slider, UGC Videos, Social Proof Video, Before And After, Real Results |
 
 ---
 
