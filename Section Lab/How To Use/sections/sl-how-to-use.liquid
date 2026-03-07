@@ -1,11 +1,19 @@
 {% comment %}
   SL - How to Use (Section)
-  Steps from product metaobject (custom.how_to_use_steps) OR manual section blocks.
+  Steps from product metaobject: product → single "How to use" (custom.how_to_use) → steps;
+  fallback to legacy list custom.how_to_use_steps. Or manual section blocks.
   Add to product template. See README.md.
 {% endcomment %}
 
 {% assign step_source = section.settings.step_source | default: 'product_metaobject' %}
-{% assign steps_meta = product.metafields.custom.how_to_use_steps.value | default: nil %}
+{% assign how_to_use = product.metafields.custom.how_to_use.value | default: nil %}
+{% assign steps_meta = nil %}
+{% if how_to_use != blank and how_to_use.steps != blank %}
+  {% assign steps_meta = how_to_use.steps.value | default: how_to_use.steps %}
+{% endif %}
+{% if steps_meta == blank or steps_meta.size == 0 %}
+  {% assign steps_meta = product.metafields.custom.how_to_use_steps.value | default: nil %}
+{% endif %}
 {% assign use_metaobject = false %}
 {% if step_source == 'product_metaobject' and product != blank and steps_meta != blank and steps_meta.size > 0 %}
   {% assign use_metaobject = true %}
@@ -35,7 +43,7 @@
 {% unless has_steps %}
   {% if request.design_mode %}
     <div id="sl-htu-section-{{ section.id }}" class="sl-htu-section-root" style="padding: 24px; background: #f5f5f5; border: 2px dashed #ccc; text-align: center;">
-      <p style="margin: 0; color: #666;">How to Use — No steps. Choose <strong>Product metaobject</strong> and add steps to this product's metafield, or choose <strong>Manual steps</strong> and add Step blocks.</p>
+      <p style="margin: 0; color: #666;">How to Use — No steps. Choose <strong>Product metaobject</strong> and assign a <strong>How to use (SL)</strong> entry to this product (<code>custom.how_to_use</code>), or use the legacy <strong>How to use steps</strong> list (<code>custom.how_to_use_steps</code>), or choose <strong>Manual steps</strong> and add Step blocks.</p>
     </div>
   {% endif %}
 {% else %}

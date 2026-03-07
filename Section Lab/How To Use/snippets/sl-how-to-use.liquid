@@ -2,14 +2,21 @@
   SL - How to Use (Snippet)
   Use in product info via Custom Liquid block.
   Usage: {% render 'sl-how-to-use', product: product, block_id: block.id %}
-  Requires product.metafields.custom.how_to_use_steps (list of How to use step metaobjects).
-  Metaobject fields: product; step_icon (optional image); step_title_en, step_title_ar; description_en, description_ar.
+  Prefers product.metafields.custom.how_to_use (single "How to use" metaobject with .steps);
+  fallback: product.metafields.custom.how_to_use_steps (list of step metaobjects).
   See README.md for metaobject and metafield setup.
 {% endcomment %}
 
 {% assign block_id = block_id | default: 'htu' %}
 {% assign prod = product | default: nil %}
-{% assign steps = prod.metafields.custom.how_to_use_steps.value | default: nil %}
+{% assign how_to_use = prod.metafields.custom.how_to_use.value | default: nil %}
+{% assign steps = nil %}
+{% if how_to_use != blank and how_to_use.steps != blank %}
+  {% assign steps = how_to_use.steps.value | default: how_to_use.steps %}
+{% endif %}
+{% if steps == blank or steps.size == 0 %}
+  {% assign steps = prod.metafields.custom.how_to_use_steps.value | default: nil %}
+{% endif %}
 {% assign has_steps = false %}
 {% if prod != blank and steps != blank and steps.size > 0 %}
   {% assign has_steps = true %}
@@ -23,7 +30,7 @@
 
 {% if request.design_mode and prod != blank and has_steps == false %}
   <div id="sl-htu-block-{{ block_id }}" class="sl-htu-block-root" style="padding: 12px; color: #666; border: 1px dashed #ccc;">
-    <p style="margin: 0;">How to Use — No steps. Add entries to this product's <strong>How to use steps</strong> metafield (<code>custom.how_to_use_steps</code>).</p>
+    <p style="margin: 0;">How to Use — No steps. Assign a <strong>How to use (SL)</strong> entry to this product (<code>custom.how_to_use</code>), or use the legacy <strong>How to use steps</strong> metafield (<code>custom.how_to_use_steps</code>).</p>
   </div>
 {% endif %}
 
