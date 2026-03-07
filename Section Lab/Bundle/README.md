@@ -26,6 +26,74 @@ Data can also come from section blocks (Bundle item / Related bundle) instead of
 
 ---
 
+## Setup
+
+### Step 1 — Metafield definitions (for metafield-based bundles)
+
+Create two product metafields so the section can read bundle data:
+
+1. **Settings** → **Custom data** → **Products** → **Add definition**
+2. **First definition (products in this bundle):**
+   - **Name:** e.g. `Bundle products` (or “Included products”)
+   - **Namespace and key:** `custom.bundle_products`
+   - **Type:** **List of product references**
+   - **Storefront access:** ✓ Enabled (so the theme can read it)
+   - Save
+3. **Add definition** again for the second metafield:
+   - **Name:** e.g. `Part of bundles` (or “Related bundles”)
+   - **Namespace and key:** `custom.part_of_bundles`
+   - **Type:** **List of product references**
+   - **Storefront access:** ✓ Enabled
+   - Save
+
+### Step 2 — Assign metafields to products
+
+**To show “Included in this set” (product is a bundle):**
+
+1. **Products** → open the **bundle** product (the one that represents the set).
+2. In **Metafields**, find **Bundle products** (`custom.bundle_products`).
+3. Add the products that are **included in this bundle** (the items in the set). Order = order in the grid.
+4. Save the product.
+
+**To show “Bundle Up and Save!” (product is part of bundles):**
+
+1. **Products** → open the product that is **inside** a bundle (e.g. a single serum).
+2. In **Metafields**, find **Part of bundles** (`custom.part_of_bundles`).
+3. Add the **bundle product(s)** that contain this product (e.g. the “Skincare set” product).
+4. Save the product.
+
+**Optional:** On the **bundle** product you can also set `part_of_bundles` if that bundle is itself part of a larger bundle. The section will show included products first, then related bundles.
+
+### Step 3 — Add the section or snippet to your theme
+
+**Option A — Section (theme editor)**
+
+1. **Online Store** → **Themes** → **Customize**
+2. Open a **Product** template (or the one you use for bundle/individual products).
+3. **Add section** → **SL - Bundle**
+4. In section settings, choose **Bundle source:** “Product metafield” or “Manual (section blocks)”. If not on a product page, set **Bundle product** to the bundle you want to show.
+5. Adjust heading, colors, padding, and add **Bundle item** or **Related bundle** blocks if using manual mode.
+6. Save
+
+**Option B — Snippet only (Custom Liquid, no section)**
+
+1. **Customize** → Product template → **Add block** (e.g. in product info) → **Custom Liquid**
+2. Paste:
+
+```liquid
+{% render 'sl-bundle-combined',
+  product: product,
+  section_id: 'bundle-combined'
+%}
+```
+
+3. Optionally pass `subtitle`, `border_color`, `hover_text`, `related_title`, `related_subtitle`, `related_quick_add_label` (see Snippet-only usage below).
+4. Save
+
+The snippet reads `custom.bundle_products` and `custom.part_of_bundles` from the current product and shows included products and/or related bundles when data exists.
+
+---
+
 ## When the product is a bundle
 
 Shows “Included in this set” and the grid of items inside the bundle.
@@ -175,14 +243,16 @@ Locale namespace: **`sections.sl_bundle`**. Copy `locales/en.default.json` and `
 
 **RTL:** The section and snippets set `dir="rtl"` automatically for `ar`, `he`, `fa`, `ur`, `yi`. Add `.sl-bundle-rtl` / `.sl-bundle-section-rtl` / `.sl-bundle-related-rtl` overrides if you need to flip layout or icons.
 
-## Metafield definitions
+## Metafield definitions (reference)
 
-Create in **Settings → Custom data → Products** (or via your app):
+See **Setup (Step 1–2)** above for step-by-step creation and assignment. Summary:
 
-| Key                 | Type                     | Use case                    |
-|---------------------|--------------------------|-----------------------------|
-| `custom.bundle_products`  | List of product references | Products *in* this bundle  |
-| `custom.part_of_bundles` | List of product references | Bundle products that *contain* this product |
+| Namespace and key        | Type                     | Use case                                      |
+|--------------------------|--------------------------|-----------------------------------------------|
+| `custom.bundle_products` | List of product references | Products *in* this bundle (on the bundle product) |
+| `custom.part_of_bundles` | List of product references | Bundle product(s) that *contain* this product  |
+
+Create both under **Settings → Custom data → Products** with **Storefront access** enabled.
 
 ---
 

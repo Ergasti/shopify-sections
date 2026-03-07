@@ -11,6 +11,7 @@
 {% assign bundle_sec = bundle_section | default: nil %}
 {% assign sid = section_id | default: 'sl-bundle' %}
 {% assign sub = subtitle | default: nil %}
+{% assign heading_text = heading | default: 'sections.sl_bundle.included_heading' | t | default: 'Included in this set' %}
 {% assign border_clr = border_color | default: '#FE2C55' %}
 {% assign hover_label = hover_text | default: 'sections.sl_bundle.hover_label' | t | default: 'More Details' %}
 {% assign close_label = 'sections.sl_bundle.close' | t | default: 'Close' %}
@@ -46,50 +47,72 @@
   {% endif %}
 {% else %}
 
-<div id="sl-bundle-{{ sid }}" class="sl-bundle-root{% if is_rtl %} sl-bundle-rtl{% endif %}"{% if is_rtl %} dir="rtl"{% endif %} data-show-more="{{ show_more_text | escape }}" data-show-less="{{ show_less_text | escape }}">
-  {% if sub != blank %}
-    <p class="sl-bundle-subtitle">{{ sub | replace: 'X', product_count }}</p>
-  {% endif %}
-  <div class="sl-bundle-container">
-    <div class="sl-bundle-grid">
-      {% if products != nil and products.size > 0 %}
-        {% for prod in products %}
-          {% if prod != blank %}
-            <button type="button" class="sl-bundle-cube" data-popup-id="sl-bundle-popup-{{ sid }}-{{ prod.id }}" aria-label="{{ prod.title | escape }} — {{ hover_label | escape }}">
-              <span class="sl-bundle-pink-border">
-                {% if prod.featured_image %}
-                  <img src="{{ prod.featured_image | image_url: width: 400 }}" alt="{{ prod.featured_image.alt | default: prod.title | escape }}" width="200" height="200" loading="lazy">
-                {% else %}
-                  {{ 'product-1' | placeholder_svg_tag: 'sl-bundle-placeholder-img' }}
-                {% endif %}
-                <span class="sl-bundle-cube-hover">{{ hover_label }}</span>
-              </span>
-              <span class="sl-bundle-product-name">{{ prod.title }}</span>
-            </button>
-          {% endif %}
-        {% endfor %}
-      {% else %}
-        {% for block in bundle_sec.blocks %}
-          {% if block.type == 'product' %}
-            {% assign prod = block.settings.product %}
-            {% if prod != blank %}
-              <button type="button" class="sl-bundle-cube" data-popup-id="sl-bundle-popup-{{ sid }}-{{ prod.id }}" aria-label="{{ prod.title | escape }} — {{ hover_label | escape }}" {{ block.shopify_attributes }}>
-                <span class="sl-bundle-pink-border">
-                  {% if prod.featured_image %}
-                    <img src="{{ prod.featured_image | image_url: width: 400 }}" alt="{{ prod.featured_image.alt | default: prod.title | escape }}" width="200" height="200" loading="lazy">
-                  {% else %}
-                    {{ 'product-1' | placeholder_svg_tag: 'sl-bundle-placeholder-img' }}
-                  {% endif %}
-                  <span class="sl-bundle-cube-hover">{{ hover_label }}</span>
-                </span>
-                <span class="sl-bundle-product-name">{{ prod.title }}</span>
-              </button>
-            {% endif %}
-          {% endif %}
-        {% endfor %}
+<div id="sl-bundle-{{ sid }}" class="sl-bundle-root{% if is_rtl %} sl-bundle-rtl{% endif %}"{% if is_rtl %} dir="rtl"{% endif %} data-show-more="{{ show_more_text | escape }}" data-show-less="{{ show_less_text | escape }}" data-sl-bundle-included>
+  <details class="sl-bundle-accordion accordion group" open>
+    <summary>
+      <span class="accordion__toggle">
+        <span>{{ heading_text }}</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8" fill="none" class="icon icon-wd-arrow" aria-hidden="true"><path d="M11 1L6 7L1 1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+    </summary>
+    <div class="accordion__content">
+      {% if sub != blank %}
+        <p class="sl-bundle-subtitle">{{ sub | replace: 'X', product_count }}</p>
       {% endif %}
+      <div class="sl-bundle-inner">
+    <div class="sl-bundle-swiper swiper">
+      <div class="swiper-wrapper">
+        {% if products != nil and products.size > 0 %}
+          {% for prod in products %}
+            {% if prod != blank %}
+              <div class="swiper-slide">
+                <button type="button" class="sl-bundle-card sl-bundle-card--clickable" data-popup-id="sl-bundle-popup-{{ sid }}-{{ prod.id }}" aria-label="{{ prod.title | escape }} — {{ hover_label | escape }}">
+                  <span class="sl-bundle-card__figure">
+                    {% if prod.featured_image %}
+                      <img src="{{ prod.featured_image | image_url: width: 440 }}" alt="{{ prod.featured_image.alt | default: prod.title | escape }}" width="220" height="220" loading="lazy">
+                    {% else %}
+                      {{ 'product-1' | placeholder_svg_tag: 'sl-bundle-card__placeholder' }}
+                    {% endif %}
+                  </span>
+                  <span class="sl-bundle-card__info">
+                    <span class="sl-bundle-card__title">{{ prod.title }}</span>
+                    <span class="sl-bundle-card__cta">{{ hover_label }}</span>
+                  </span>
+                </button>
+              </div>
+            {% endif %}
+          {% endfor %}
+        {% else %}
+          {% for block in bundle_sec.blocks %}
+            {% if block.type == 'product' %}
+              {% assign prod = block.settings.product %}
+              {% if prod != blank %}
+                <div class="swiper-slide" {{ block.shopify_attributes }}>
+                  <button type="button" class="sl-bundle-card sl-bundle-card--clickable" data-popup-id="sl-bundle-popup-{{ sid }}-{{ prod.id }}" aria-label="{{ prod.title | escape }} — {{ hover_label | escape }}">
+                    <span class="sl-bundle-card__figure">
+                      {% if prod.featured_image %}
+                        <img src="{{ prod.featured_image | image_url: width: 440 }}" alt="{{ prod.featured_image.alt | default: prod.title | escape }}" width="220" height="220" loading="lazy">
+                      {% else %}
+                        {{ 'product-1' | placeholder_svg_tag: 'sl-bundle-card__placeholder' }}
+                      {% endif %}
+                    </span>
+                    <span class="sl-bundle-card__info">
+                      <span class="sl-bundle-card__title">{{ prod.title }}</span>
+                      <span class="sl-bundle-card__cta">{{ hover_label }}</span>
+                    </span>
+                  </button>
+                </div>
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+      </div>
+      <div class="swiper-button-prev" aria-label="Previous"></div>
+      <div class="swiper-button-next" aria-label="Next"></div>
     </div>
-  </div>
+      </div>
+    </div>
+  </details>
 
   {% comment %} Popups: one per product {% endcomment %}
   {% if products != nil and products.size > 0 %}
@@ -164,11 +187,41 @@
 
 <script>
   (function() {
-    var root = document.getElementById('sl-bundle-{{ sid }}');
+    var sid = '{{ sid }}';
+    var isRtl = {{ is_rtl }};
+    var root = document.getElementById('sl-bundle-' + sid);
     if (!root) return;
     var showMoreText = root.getAttribute('data-show-more') || 'Show more';
     var showLessText = root.getAttribute('data-show-less') || 'Show less';
     var focusBeforeOpen = null;
+    var SWIPER_CSS = 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css';
+    var SWIPER_JS = 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js';
+
+    function loadSwiper(cb) {
+      if (typeof Swiper !== 'undefined') { cb(); return; }
+      var link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = SWIPER_CSS;
+      document.head.appendChild(link);
+      var s = document.createElement('script');
+      s.src = SWIPER_JS;
+      s.onload = cb;
+      document.head.appendChild(s);
+    }
+    function initSwiper() {
+      var swiperEl = root.querySelector('.sl-bundle-swiper');
+      if (!swiperEl || typeof Swiper === 'undefined' || swiperEl.swiper) return;
+      var nextEl = root.querySelector('.swiper-button-next');
+      var prevEl = root.querySelector('.swiper-button-prev');
+      new Swiper(swiperEl, {
+        slidesPerView: 'auto',
+        spaceBetween: 5,
+        loop: false,
+        rtl: isRtl,
+        navigation: (nextEl && prevEl) ? { nextEl: nextEl, prevEl: prevEl } : false,
+        pagination: false
+      });
+    }
     function openPopup(id) {
       var el = document.getElementById(id);
       if (!el) return;
@@ -216,9 +269,9 @@
         btn.setAttribute('data-expanded', 'false');
       }
     };
-    root.querySelectorAll('.sl-bundle-cube').forEach(function(cube) {
-      cube.addEventListener('click', function() {
-        var id = cube.getAttribute('data-popup-id');
+    root.querySelectorAll('.sl-bundle-card--clickable, [data-popup-id]').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var id = btn.getAttribute('data-popup-id');
         if (id) openPopup(id);
       });
     });
@@ -234,85 +287,145 @@
     root.querySelectorAll('.sl-bundle-overlay').forEach(function(overlay) {
       overlay.addEventListener('click', function(e) { if (e.target === overlay) closePopup(overlay.id); });
     });
+
+    if (root.hasAttribute('data-sl-bundle-included')) {
+      var swiperLoaded = false;
+      function doSwiper() {
+        if (swiperLoaded) return;
+        swiperLoaded = true;
+        loadSwiper(function() { initSwiper(); });
+      }
+      if ('IntersectionObserver' in window) {
+        var io = new IntersectionObserver(function(entries) {
+          entries.forEach(function(e) { if (e.isIntersecting) { doSwiper(); io.disconnect(); } });
+        }, { rootMargin: '100px', threshold: 0 });
+        io.observe(root);
+      } else doSwiper();
+    }
   })();
 </script>
 
 <style>
   #sl-bundle-{{ sid }}.sl-bundle-root {
-    --sl-bundle-border: {{ border_clr }};
+    width: 100%;
+    margin: 16px 0;
     box-sizing: border-box;
+    --sl-bundle-card-bg: #fff;
+    --sl-bundle-card-border: #e5e5e5;
+    --sl-bundle-card-radius: 12px;
+    --sl-bundle-slide-width: 220px;
   }
+  #sl-bundle-{{ sid }} details.sl-bundle-accordion,
+  #sl-bundle-{{ sid }} details.accordion {
+    border: none;
+    margin: 0;
+    padding: 0;
+  }
+  #sl-bundle-{{ sid }} details summary {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border: none;
+  }
+  #sl-bundle-{{ sid }} details summary::-webkit-details-marker { display: none; }
+  #sl-bundle-{{ sid }} details summary::before,
+  #sl-bundle-{{ sid }} details summary::after { display: none !important; }
+  #sl-bundle-{{ sid }} .accordion__toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: 400;
+    margin: 0;
+    padding: 0;
+    color: inherit;
+  }
+  #sl-bundle-{{ sid }} .accordion .icon { transition: transform 0.2s; }
+  #sl-bundle-{{ sid }} .accordion[open] .icon { transform: rotate(180deg); }
+  #sl-bundle-{{ sid }} .accordion__content { margin-top: 8px; padding: 0; }
   #sl-bundle-{{ sid }} .sl-bundle-subtitle {
-    color: #272E0F;
-    font-family: Montserrat, sans-serif;
     font-size: 14px;
     font-weight: 400;
-    line-height: 150%;
-    letter-spacing: 0.28px;
+    line-height: 1.5;
     margin: 0 0 16px 0;
+    color: inherit;
   }
-  #sl-bundle-{{ sid }} .sl-bundle-container { width: 100%; }
-  #sl-bundle-{{ sid }} .sl-bundle-grid {
-    width: 100%;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 5%;
-    padding-bottom: 15px;
+  #sl-bundle-{{ sid }} .sl-bundle-inner { padding: 0; }
+  #sl-bundle-{{ sid }} .sl-bundle-swiper { overflow: hidden; position: relative; }
+  #sl-bundle-{{ sid }} .swiper-wrapper { display: flex; gap: 0; }
+  #sl-bundle-{{ sid }} .swiper-slide {
+    flex-shrink: 0;
+    width: var(--sl-bundle-slide-width) !important;
+    height: auto;
   }
-  #sl-bundle-{{ sid }} .sl-bundle-cube {
-    position: relative;
-    cursor: pointer;
-    margin-block-start: 0;
-    text-align: center;
-    border: none;
-    background: none;
+  #sl-bundle-{{ sid }} .sl-bundle-card {
     padding: 0;
-    font: inherit;
+    border-radius: var(--sl-bundle-card-radius);
+    border: 1px solid var(--sl-bundle-card-border);
+    background: var(--sl-bundle-card-bg);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
     width: 100%;
+    box-sizing: border-box;
+    text-align: left;
+    cursor: pointer;
+    font: inherit;
+    margin: 0;
+  }
+  #sl-bundle-{{ sid }} .sl-bundle-rtl .sl-bundle-card { text-align: right; }
+  #sl-bundle-{{ sid }} .sl-bundle-card__figure {
+    position: relative;
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: calc(var(--sl-bundle-card-radius) - 2px) calc(var(--sl-bundle-card-radius) - 2px) 0 0;
     display: block;
   }
-  #sl-bundle-{{ sid }} .sl-bundle-pink-border {
-    border: 1px solid var(--sl-bundle-border);
-    border-radius: 100px;
-    position: relative;
-    margin: 0 auto;
-    overflow: hidden;
-    aspect-ratio: 1;
-    max-width: 200px;
-  }
-  #sl-bundle-{{ sid }} .sl-bundle-pink-border img,
-  #sl-bundle-{{ sid }} .sl-bundle-placeholder-img {
-    border: 2px solid white;
-    border-radius: 100px;
+  #sl-bundle-{{ sid }} .sl-bundle-card__figure img,
+  #sl-bundle-{{ sid }} .sl-bundle-card__placeholder {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
+    object-position: center;
     display: block;
   }
-  #sl-bundle-{{ sid }} .sl-bundle-cube-hover {
-    position: absolute;
-    top: 0; right: 0; left: 0; bottom: 0;
-    border-radius: 104px;
-    background: rgba(255, 255, 255, 0.8);
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    font-family: Montserrat, sans-serif;
+  #sl-bundle-{{ sid }} .sl-bundle-card__figure {
+    background: #f8f8f8;
+  }
+  #sl-bundle-{{ sid }} .sl-bundle-card__info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+    padding: 8px 10px 10px;
+  }
+  #sl-bundle-{{ sid }} .sl-bundle-card__title {
+    font-size: 14px;
     font-weight: 500;
-    display: none;
-    margin-block-start: 0;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    color: inherit;
   }
-  #sl-bundle-{{ sid }} .sl-bundle-pink-border:hover .sl-bundle-cube-hover { display: flex; }
-  #sl-bundle-{{ sid }} .sl-bundle-product-name {
-    color: #272E0F;
-    text-align: center;
-    font-family: Montserrat, sans-serif;
+  #sl-bundle-{{ sid }} .sl-bundle-card__cta {
     font-size: 12px;
-    font-weight: 400;
-    line-height: normal;
-    display: block;
-    margin-top: 20px;
+    font-weight: 600;
+    color: inherit;
+    opacity: 0.8;
+  }
+  #sl-bundle-{{ sid }} .sl-bundle-card:hover { border-color: {{ border_clr }}; }
+  #sl-bundle-{{ sid }} .swiper-button-prev,
+  #sl-bundle-{{ sid }} .swiper-button-next,
+  #sl-bundle-{{ sid }} .swiper-button-prev::after,
+  #sl-bundle-{{ sid }} .swiper-button-next::after { color: #000 !important; }
+  #sl-bundle-{{ sid }} .swiper-pagination { display: none !important; }
+  @media (max-width: 768px) {
+    #sl-bundle-{{ sid }} .swiper-button-prev,
+    #sl-bundle-{{ sid }} .swiper-button-next { display: none !important; }
   }
 
   /* Popup */
@@ -450,11 +563,6 @@
   #sl-bundle-{{ sid }} .sl-bundle-popup-link:hover { color: #fff; opacity: 0.9; }
 
   @media (max-width: 600px) {
-    #sl-bundle-{{ sid }} .sl-bundle-grid {
-      grid-template-columns: 1fr;
-      gap: 24px;
-      padding-left: 0;
-    }
     #sl-bundle-{{ sid }} .sl-bundle-overlay-background { max-width: 100%; }
   }
 </style>

@@ -77,30 +77,33 @@
   {% endif %}
 
   {% if has_included or has_related %}
-    {% if has_included %}
-      <div class="sl-bundle-combined-block sl-bundle-combined-included">
-        {% render 'sl-bundle',
-          bundle_products: included_list,
-          section_id: sid_included,
-          subtitle: subtitle | default: 'This set includes X products',
-          border_color: border_color | default: '#FE2C55',
-          hover_text: hover_text | default: 'More Details'
-        %}
-      </div>
-    {% endif %}
+    <div class="sl-bundle-combined-sections">
+      {% if has_included %}
+        <section class="sl-bundle-combined-block sl-bundle-combined-included">
+          {% render 'sl-bundle',
+            bundle_products: included_list,
+            section_id: sid_included,
+            heading: included_heading | default: nil,
+            subtitle: subtitle | default: 'This set includes X products',
+            border_color: border_color | default: '#FE2C55',
+            hover_text: hover_text | default: 'More Details'
+          %}
+        </section>
+      {% endif %}
 
-    {% if has_related %}
-      <div class="sl-bundle-combined-block sl-bundle-combined-related">
-        {% render 'sl-bundle-related',
-          related_bundles: related_list,
-          current_product_title: current_title,
-          section_id: sid_related,
-          title: related_title | default: 'Bundle Up and Save!',
-          subtitle: related_subtitle | default: 'Bundle [product] to complete the routine.',
-          quick_add_label: related_quick_add_label | default: 'View'
-        %}
-      </div>
-    {% endif %}
+      {% if has_related %}
+        <section class="sl-bundle-combined-block sl-bundle-combined-related">
+          {% render 'sl-bundle-related',
+            related_bundles: related_list,
+            current_product_title: current_title,
+            section_id: sid_related,
+            title: related_title | default: 'Bundle Up and Save!',
+            subtitle: related_subtitle | default: 'Bundle [product] to complete the routine.',
+            quick_add_label: related_quick_add_label | default: 'View'
+          %}
+        </section>
+      {% endif %}
+    </div>
   {% else %}
     <div class="sl-bundle-combined-empty" style="padding: 16px; color: #666; font-size: 14px; text-align: center;">
       <p style="margin: 0;">{{ 'sections.sl_bundle.empty_combined' | t | default: 'No bundle data for this product. Add custom.bundle_products (products in this bundle) and/or custom.part_of_bundles (bundles that contain this product), or pass bundle_products / related_bundles into the snippet.' }}</p>
@@ -112,14 +115,28 @@
   #sl-bundle-combined-{{ sid }}.sl-bundle-combined-root {
     display: block;
     width: 100%;
+    margin: 16px 0;
+  }
+  #sl-bundle-combined-{{ sid }} .sl-bundle-combined-sections {
+    display: block;
+    width: 100%;
   }
   #sl-bundle-combined-{{ sid }} .sl-bundle-combined-block {
     width: 100%;
   }
-  #sl-bundle-combined-{{ sid }} .sl-bundle-combined-related {
-    margin-top: 48px;
+  #sl-bundle-combined-{{ sid }} .sl-bundle-combined-included {
+    margin-bottom: 0;
+    padding-bottom: 0;
   }
-  #sl-bundle-combined-{{ sid }} .sl-bundle-combined-included + .sl-bundle-combined-related {
-    margin-top: 48px;
+  #sl-bundle-combined-{{ sid }} .sl-bundle-combined-related {
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+  }
+  #sl-bundle-combined-{{ sid }} .sl-bundle-combined-included:only-child,
+  #sl-bundle-combined-{{ sid }} .sl-bundle-combined-related:only-child {
+    border-top: none;
+    padding-top: 0;
+    margin-top: 0;
   }
 </style>

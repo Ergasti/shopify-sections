@@ -1,6 +1,6 @@
 {% comment %}
   SL - Bundle Related (snippet)
-  "Bundle Up and Save!" — horizontal carousel of bundles that contain the current product.
+  "Bundle Up and Save!" — Swiper carousel of bundles (FBT-style cards). Lazy-loads Swiper when in viewport.
   related_bundles: array of product objects. OR use_related_blocks + related_section to use blocks.
 {% endcomment %}
 
@@ -34,259 +34,299 @@
   {% endif %}
 {% else %}
 
-<div id="sl-bundle-related-{{ sid }}" class="related-bundles-container sl-bundle-related-root{% if is_rtl %} sl-bundle-related-rtl{% endif %}"{% if is_rtl %} dir="rtl"{% endif %}>
-  <p class="bundle-title sl-bundle-related-title">{{ title_text }}</p>
-  <p class="bundle-subtitle sl-bundle-related-subtitle">{{ subtitle_text }}</p>
-
-  <div class="bundle-cards-container sl-bundle-related-carousel" data-sl-bundle-related-id="{{ sid }}">
-    <button type="button" class="bundle-carousel-prev-button sl-bundle-related-prev" aria-label="Previous">
-      <svg xmlns="http://www.w3.org/2000/svg" width="7" height="10" viewBox="0 0 10 15" fill="none"><path d="M8.13171 1.84937L1.27731 7.56137L8.13171 13.2734" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-    </button>
-    <button type="button" class="bundle-carousel-next-button sl-bundle-related-next" aria-label="Next">
-      <svg xmlns="http://www.w3.org/2000/svg" width="7" height="10" viewBox="0 0 10 15" fill="none"><path d="M1.27734 13.2734L8.13174 7.56144L1.27734 1.84944" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-    </button>
-
-    <div id="bundle-cards-container-overflow-{{ sid }}" class="bundle-cards-container-overflow sl-bundle-related-track">
-      {% if bundles != nil and bundles.size > 0 %}
-        {% for bundle_product in bundles %}
-          {% if bundle_product != blank %}
-            <div class="sl-bundle-related-card product-card yr-product-card">
-              <div class="product-card__figure">
-                <a href="{{ bundle_product.url }}" class="product-card__media">
-                  {% if bundle_product.featured_image %}
-                    <img src="{{ bundle_product.featured_image | image_url: width: 400 }}" alt="{{ bundle_product.featured_image.alt | default: bundle_product.title | escape }}" width="200" height="200" loading="lazy" class="product-card__image">
-                  {% else %}
-                    {{ 'product-1' | placeholder_svg_tag: 'sl-bundle-related-placeholder' }}
-                  {% endif %}
-                </a>
-              </div>
-              <div class="product-card__info wd-product-card-main-info">
-                <div class="wd-product-card-title-price">
-                  <a href="{{ bundle_product.url }}" class="product-title h6">{{ bundle_product.title }}</a>
-                  <div class="price-list">
-                    {% if bundle_product.compare_at_price > bundle_product.price %}
-                      <span class="sale-price">{{ bundle_product.price | money }}</span>
-                      <span class="compare-at-price">{{ bundle_product.compare_at_price | money }}</span>
-                    {% else %}
-                      <span class="sale-price">{{ bundle_product.price | money }}</span>
-                    {% endif %}
-                  </div>
-                </div>
-                <a href="{{ bundle_product.url }}" class="product-card__quick-add-button">{{ quick_label }}</a>
-              </div>
-            </div>
-          {% endif %}
-        {% endfor %}
-      {% else %}
-        {% for block in related_sec.blocks %}
-          {% if block.type == 'related_bundle' %}
-            {% assign bundle_product = block.settings.product %}
+<div id="sl-bundle-related-{{ sid }}" class="sl-bundle-related-root{% if is_rtl %} sl-bundle-related-rtl{% endif %}"{% if is_rtl %} dir="rtl"{% endif %} data-sl-bundle-related data-slide-width="220">
+  <details class="sl-bundle-accordion accordion group" open>
+    <summary>
+      <span class="accordion__toggle">
+        <span>{{ title_text }}</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8" fill="none" class="icon icon-wd-arrow" aria-hidden="true"><path d="M11 1L6 7L1 1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+    </summary>
+    <div class="accordion__content">
+      {% if subtitle_text != blank %}
+        <p class="sl-bundle-related-subtitle">{{ subtitle_text }}</p>
+      {% endif %}
+      <div class="sl-bundle-related-inner">
+    <div class="sl-bundle-swiper swiper">
+      <div class="swiper-wrapper">
+        {% if bundles != nil and bundles.size > 0 %}
+          {% for bundle_product in bundles %}
             {% if bundle_product != blank %}
-              <div class="sl-bundle-related-card product-card yr-product-card" {{ block.shopify_attributes }}>
-                <div class="product-card__figure">
-                  <a href="{{ bundle_product.url }}" class="product-card__media">
-                    {% if bundle_product.featured_image %}
-                      <img src="{{ bundle_product.featured_image | image_url: width: 400 }}" alt="{{ bundle_product.featured_image.alt | default: bundle_product.title | escape }}" width="200" height="200" loading="lazy" class="product-card__image">
-                    {% else %}
-                      {{ 'product-1' | placeholder_svg_tag: 'sl-bundle-related-placeholder' }}
-                    {% endif %}
-                  </a>
-                </div>
-                <div class="product-card__info wd-product-card-main-info">
-                  <div class="wd-product-card-title-price">
-                    <a href="{{ bundle_product.url }}" class="product-title h6">{{ bundle_product.title }}</a>
-                    <div class="price-list">
-                      {% if bundle_product.compare_at_price > bundle_product.price %}
-                        <span class="sale-price">{{ bundle_product.price | money }}</span>
-                        <span class="compare-at-price">{{ bundle_product.compare_at_price | money }}</span>
+              <div class="swiper-slide">
+                <div class="sl-bundle-card" data-product-id="{{ bundle_product.id }}">
+                  <div class="sl-bundle-card__figure">
+                    <a href="{{ bundle_product.url }}" class="sl-bundle-card__media">
+                      {% if bundle_product.featured_image %}
+                        <img src="{{ bundle_product.featured_image | image_url: width: 440 }}" alt="{{ bundle_product.featured_image.alt | default: bundle_product.title | escape }}" width="220" height="220" loading="lazy">
                       {% else %}
-                        <span class="sale-price">{{ bundle_product.price | money }}</span>
+                        {{ 'product-1' | placeholder_svg_tag: 'sl-bundle-card__placeholder' }}
+                      {% endif %}
+                    </a>
+                  </div>
+                  <div class="sl-bundle-card__info">
+                    <a href="{{ bundle_product.url }}" class="sl-bundle-card__title">{{ bundle_product.title }}</a>
+                    <div class="sl-bundle-card__price">
+                      {% if bundle_product.compare_at_price > bundle_product.price %}
+                        <span class="sl-bundle-card__price--sale">{{ bundle_product.price | money }}</span>
+                        <span class="sl-bundle-card__price--compare">{{ bundle_product.compare_at_price | money }}</span>
+                      {% else %}
+                        <span class="sl-bundle-card__price--sale">{{ bundle_product.price | money }}</span>
                       {% endif %}
                     </div>
+                    <a href="{{ bundle_product.url }}" class="sl-bundle-card__cta">{{ quick_label }}</a>
                   </div>
-                  <a href="{{ bundle_product.url }}" class="product-card__quick-add-button">{{ quick_label }}</a>
                 </div>
               </div>
             {% endif %}
-          {% endif %}
-        {% endfor %}
-      {% endif %}
+          {% endfor %}
+        {% else %}
+          {% for block in related_sec.blocks %}
+            {% if block.type == 'related_bundle' %}
+              {% assign bundle_product = block.settings.product %}
+              {% if bundle_product != blank %}
+                <div class="swiper-slide" {{ block.shopify_attributes }}>
+                  <div class="sl-bundle-card" data-product-id="{{ bundle_product.id }}">
+                    <div class="sl-bundle-card__figure">
+                      <a href="{{ bundle_product.url }}" class="sl-bundle-card__media">
+                        {% if bundle_product.featured_image %}
+                          <img src="{{ bundle_product.featured_image | image_url: width: 440 }}" alt="{{ bundle_product.featured_image.alt | default: bundle_product.title | escape }}" width="220" height="220" loading="lazy">
+                        {% else %}
+                          {{ 'product-1' | placeholder_svg_tag: 'sl-bundle-card__placeholder' }}
+                        {% endif %}
+                      </a>
+                    </div>
+                    <div class="sl-bundle-card__info">
+                      <a href="{{ bundle_product.url }}" class="sl-bundle-card__title">{{ bundle_product.title }}</a>
+                      <div class="sl-bundle-card__price">
+                        {% if bundle_product.compare_at_price > bundle_product.price %}
+                          <span class="sl-bundle-card__price--sale">{{ bundle_product.price | money }}</span>
+                          <span class="sl-bundle-card__price--compare">{{ bundle_product.compare_at_price | money }}</span>
+                        {% else %}
+                          <span class="sl-bundle-card__price--sale">{{ bundle_product.price | money }}</span>
+                        {% endif %}
+                      </div>
+                      <a href="{{ bundle_product.url }}" class="sl-bundle-card__cta">{{ quick_label }}</a>
+                    </div>
+                  </div>
+                </div>
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+      </div>
+      <div class="swiper-button-prev" aria-label="Previous"></div>
+      <div class="swiper-button-next" aria-label="Next"></div>
     </div>
-  </div>
+      </div>
+    </div>
+  </details>
 </div>
-
-<script>
-  (function() {
-    var sid = '{{ sid }}';
-    var track = document.getElementById('bundle-cards-container-overflow-' + sid);
-    var carousel = track && track.closest('.sl-bundle-related-carousel');
-    if (!track || !carousel) return;
-    var prev = carousel.querySelector('.sl-bundle-related-prev');
-    var next = carousel.querySelector('.sl-bundle-related-next');
-    var cards = track.querySelectorAll('.sl-bundle-related-card');
-    var cardCount = cards.length;
-    var cardWidth = 260;
-    var gap = 10;
-    var scrollAmount = (cardWidth + gap) * 2;
-    function updateButtons() {
-      var maxScroll = track.scrollWidth - track.clientWidth;
-      if (prev) { prev.classList.toggle('swiper-button-disabled', track.scrollLeft <= 0); prev.style.display = (track.scrollLeft <= 0 ? 'none' : 'grid'); }
-      if (next) { next.classList.toggle('swiper-button-disabled', maxScroll <= 1); next.style.display = (maxScroll <= 1 ? 'none' : 'grid'); }
-    }
-    if (prev) prev.addEventListener('click', function() { track.scrollLeft -= scrollAmount; updateButtons(); });
-    if (next) next.addEventListener('click', function() { track.scrollLeft += scrollAmount; updateButtons(); });
-    track.addEventListener('scroll', updateButtons);
-    if (cardCount === 1) track.style.width = '100%';
-    else track.style.width = (cardCount * cardWidth + (cardCount - 1) * gap) + 'px';
-    track.style.gridTemplateColumns = 'repeat(' + cardCount + ', ' + cardWidth + 'px)';
-    updateButtons();
-  })();
-</script>
 
 <style>
   #sl-bundle-related-{{ sid }}.sl-bundle-related-root {
-    margin-top: 65px;
-  }
-  #sl-bundle-related-{{ sid }} .sl-bundle-related-title {
-    color: #272E0F;
-    font-family: Montserrat, sans-serif;
-    font-size: 16px;
-    font-weight: 700;
-    line-height: normal;
-    letter-spacing: 0.16px;
-    text-transform: uppercase;
-    margin: 0 0 10px 0;
-  }
-  #sl-bundle-related-{{ sid }} .sl-bundle-related-subtitle {
-    color: #272E0F;
-    font-family: Montserrat, sans-serif;
-    font-size: 14px;
-    font-weight: 400;
-    line-height: 150%;
-    letter-spacing: 0.28px;
-    margin: 0 0 10px 0;
-  }
-  #sl-bundle-related-{{ sid }} .sl-bundle-related-carousel {
     width: 100%;
-    overflow: auto;
-    position: relative;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+    margin: 16px 0;
+    --sl-bundle-card-bg: #fff;
+    --sl-bundle-card-border: #e5e5e5;
+    --sl-bundle-card-radius: 12px;
+    --sl-bundle-slide-width: 220px;
   }
-  #sl-bundle-related-{{ sid }} .sl-bundle-related-carousel::-webkit-scrollbar { display: none; }
-  #sl-bundle-related-{{ sid }} .sl-bundle-related-track {
-    display: grid;
-    gap: 10px;
-    overflow-x: auto;
-    scroll-behavior: smooth;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    padding: 4px 0;
+  #sl-bundle-related-{{ sid }} details.sl-bundle-accordion,
+  #sl-bundle-related-{{ sid }} details.accordion {
+    border: none;
+    margin: 0;
+    padding: 0;
   }
-  #sl-bundle-related-{{ sid }} .sl-bundle-related-track::-webkit-scrollbar { display: none; }
-  #sl-bundle-related-{{ sid }} .sl-bundle-related-card {
-    padding: 13px;
-    border-radius: 16px;
-    border: 0.5px solid #EBEBEB;
-    background: rgba(255, 255, 255, 0.90);
-    box-shadow: 0 1px 1px rgba(0,0,0,0.02), 0 4px 4px -1px rgba(0,0,0,0.02);
-    display: grid;
-    grid-template-columns: 30% 67%;
+  #sl-bundle-related-{{ sid }} details summary {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border: none;
+  }
+  #sl-bundle-related-{{ sid }} details summary::-webkit-details-marker { display: none; }
+  #sl-bundle-related-{{ sid }} details summary::before,
+  #sl-bundle-related-{{ sid }} details summary::after { display: none !important; }
+  #sl-bundle-related-{{ sid }} .accordion__toggle {
+    display: inline-flex;
     align-items: center;
-    gap: 10px;
-    flex-shrink: 0;
-    min-width: 0;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: 400;
+    margin: 0;
+    padding: 0;
+    color: inherit;
   }
-  #sl-bundle-related-{{ sid }} .sl-bundle-related-card .product-card__figure { margin: 0; }
-  #sl-bundle-related-{{ sid }} .sl-bundle-related-card .product-card__media { display: block; }
-  #sl-bundle-related-{{ sid }} .sl-bundle-related-card .product-card__image {
-    width: 100%;
-    height: auto;
-    border-radius: 10px;
-    aspect-ratio: 1;
-    object-fit: cover;
-  }
-  #sl-bundle-related-{{ sid }} .sl-bundle-related-card .product-card__info {
-    display: block;
-    text-align: left;
-  }
-  #sl-bundle-related-{{ sid }} .sl-bundle-related-card .wd-product-card-title-price {
-    display: block;
-    width: 100%;
-  }
-  #sl-bundle-related-{{ sid }} .sl-bundle-related-card .product-title {
-    color: #272E0F;
-    font-family: Montserrat, sans-serif;
+  #sl-bundle-related-{{ sid }} .accordion .icon { transition: transform 0.2s; }
+  #sl-bundle-related-{{ sid }} .accordion[open] .icon { transform: rotate(180deg); }
+  #sl-bundle-related-{{ sid }} .accordion__content { margin-top: 8px; padding: 0; }
+  #sl-bundle-related-{{ sid }} .sl-bundle-related-subtitle {
     font-size: 14px;
     font-weight: 400;
-    line-height: normal;
-    text-decoration: none;
-    display: block;
-    margin-bottom: 6px;
-    width: 80%;
-    min-height: 38px;
+    line-height: 1.5;
+    margin: 0 0 16px 0;
+    color: inherit;
+    opacity: 0.9;
   }
-  #sl-bundle-related-{{ sid }} .sl-bundle-related-card .product-title:hover { text-decoration: underline; }
-  #sl-bundle-related-{{ sid }} .sl-bundle-related-card .price-list {
-    display: block;
-    margin-bottom: 10px;
+  #sl-bundle-related-{{ sid }} .sl-bundle-related-inner { padding: 0; }
+  #sl-bundle-related-{{ sid }} .sl-bundle-swiper { overflow: hidden; position: relative; }
+  #sl-bundle-related-{{ sid }} .swiper-wrapper { display: flex; gap: 0; }
+  #sl-bundle-related-{{ sid }} .swiper-slide {
+    flex-shrink: 0;
+    width: var(--sl-bundle-slide-width) !important;
+    height: auto;
   }
-  #sl-bundle-related-{{ sid }} .sl-bundle-related-card .sale-price {
-    color: #272E0F;
-    font-family: Montserrat, sans-serif;
+  #sl-bundle-related-{{ sid }} .sl-bundle-card {
+    padding: 0;
+    border-radius: var(--sl-bundle-card-radius);
+    border: 1px solid var(--sl-bundle-card-border);
+    background: var(--sl-bundle-card-bg);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    height: 100%;
+    box-sizing: border-box;
+  }
+  #sl-bundle-related-{{ sid }} .sl-bundle-card__figure {
+    position: relative;
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: calc(var(--sl-bundle-card-radius) - 2px) calc(var(--sl-bundle-card-radius) - 2px) 0 0;
+  }
+  #sl-bundle-related-{{ sid }} .sl-bundle-card__media {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  #sl-bundle-related-{{ sid }} .sl-bundle-card__figure {
+    background: #f8f8f8;
+  }
+  #sl-bundle-related-{{ sid }} .sl-bundle-card__media img,
+  #sl-bundle-related-{{ sid }} .sl-bundle-card__placeholder {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+  }
+  #sl-bundle-related-{{ sid }} .sl-bundle-card__info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+    padding: 8px 10px 10px;
+  }
+  #sl-bundle-related-{{ sid }} .sl-bundle-card__title {
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 500;
+    color: inherit;
+    text-decoration: none;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
-  #sl-bundle-related-{{ sid }} .sl-bundle-related-card .compare-at-price {
-    color: #545454;
-    font-size: 13px;
+  #sl-bundle-related-{{ sid }} .sl-bundle-card__title:hover { text-decoration: underline; }
+  #sl-bundle-related-{{ sid }} .sl-bundle-card__price { font-size: 14px; font-weight: 600; }
+  #sl-bundle-related-{{ sid }} .sl-bundle-card__price--compare {
+    font-size: 12px;
+    font-weight: 400;
+    opacity: 0.7;
     text-decoration: line-through;
     margin-left: 6px;
   }
-  #sl-bundle-related-{{ sid }} .sl-bundle-related-card .product-card__quick-add-button {
+  #sl-bundle-related-{{ sid }} .sl-bundle-card__cta {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 8px 16px;
-    border-radius: 8px;
-    border: 1px solid rgba(255,255,255,0.12);
-    background: #fff;
-    box-shadow: 0 1px 1px rgba(255,255,255,0.02) inset, 0 4px 8px 3px rgba(0,0,0,0.15);
-    color: #545454;
-    font-family: Montserrat, sans-serif;
-    font-size: 13px;
-    font-weight: 500;
-    text-transform: uppercase;
-    text-decoration: none;
-    max-width: 80px;
-  }
-  #sl-bundle-related-{{ sid }} .sl-bundle-related-prev,
-  #sl-bundle-related-{{ sid }} .sl-bundle-related-next {
-    background: #272E0F;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    background: #000;
     color: #fff;
-    width: 30px;
-    height: 30px;
-    border-radius: 32px;
-    display: grid;
-    align-items: center;
-    justify-content: center;
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 10;
-    border: none;
-    cursor: pointer;
-    padding: 0;
+    border-radius: 6px;
+    text-decoration: none;
+    margin-top: 2px;
+    transition: opacity 0.2s;
   }
-  #sl-bundle-related-{{ sid }} .sl-bundle-related-prev { left: 7px; }
-  #sl-bundle-related-{{ sid }} .sl-bundle-related-next { right: 7px; }
-  #sl-bundle-related-{{ sid }} .sl-bundle-related-prev.swiper-button-disabled,
-  #sl-bundle-related-{{ sid }} .sl-bundle-related-next.swiper-button-disabled { display: none !important; }
-  #sl-bundle-related-{{ sid }} .sl-bundle-related-prev svg,
-  #sl-bundle-related-{{ sid }} .sl-bundle-related-next svg { margin: 0 auto; }
-  @media (max-width: 800px) {
-    #sl-bundle-related-{{ sid }} .sl-bundle-related-prev,
-    #sl-bundle-related-{{ sid }} .sl-bundle-related-next { display: none !important; }
+  #sl-bundle-related-{{ sid }} .sl-bundle-card__cta:hover { opacity: 0.9; color: #fff; }
+  #sl-bundle-related-{{ sid }} .swiper-button-prev,
+  #sl-bundle-related-{{ sid }} .swiper-button-next,
+  #sl-bundle-related-{{ sid }} .swiper-button-prev::after,
+  #sl-bundle-related-{{ sid }} .swiper-button-next::after { color: #000 !important; }
+  #sl-bundle-related-{{ sid }} .swiper-pagination { display: none !important; }
+  #sl-bundle-related-{{ sid }}.sl-bundle-related-rtl .sl-bundle-related-inner,
+  #sl-bundle-related-{{ sid }}.sl-bundle-related-rtl .sl-bundle-related-title { text-align: right; }
+  #sl-bundle-related-{{ sid }}.sl-bundle-related-rtl .sl-bundle-card { text-align: right; }
+  @media (max-width: 768px) {
+    #sl-bundle-related-{{ sid }} .swiper-button-prev,
+    #sl-bundle-related-{{ sid }} .swiper-button-next { display: none !important; }
   }
 </style>
+
+<script>
+(function() {
+  var sid = '{{ sid }}';
+  var isRtl = {{ is_rtl }};
+  var SWIPER_CSS = 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css';
+  var SWIPER_JS = 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js';
+
+  function loadSwiper(cb) {
+    if (typeof Swiper !== 'undefined') { cb(); return; }
+    var link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = SWIPER_CSS;
+    document.head.appendChild(link);
+    var s = document.createElement('script');
+    s.src = SWIPER_JS;
+    s.onload = cb;
+    document.head.appendChild(s);
+  }
+
+  function initSwiper(root) {
+    var swiperEl = root.querySelector('.sl-bundle-swiper');
+    if (!swiperEl || typeof Swiper === 'undefined') return;
+    if (swiperEl.swiper) return;
+    var nextEl = root.querySelector('.swiper-button-next');
+    var prevEl = root.querySelector('.swiper-button-prev');
+    new Swiper(swiperEl, {
+      slidesPerView: 'auto',
+      spaceBetween: 5,
+      loop: false,
+      rtl: isRtl,
+      navigation: (nextEl && prevEl) ? { nextEl: nextEl, prevEl: prevEl } : false,
+      pagination: false
+    });
+  }
+
+  function run() {
+    var root = document.getElementById('sl-bundle-related-' + sid);
+    if (!root || !root.hasAttribute('data-sl-bundle-related')) return;
+    var swiperEl = root.querySelector('.sl-bundle-swiper');
+    if (!swiperEl || swiperEl.querySelectorAll('.swiper-slide').length === 0) return;
+
+    var loaded = false;
+    function doInit() {
+      if (loaded) return;
+      loaded = true;
+      loadSwiper(function() { initSwiper(root); });
+    }
+
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function(entries) {
+        entries.forEach(function(e) {
+          if (e.isIntersecting) { doInit(); io.disconnect(); }
+        });
+      }, { rootMargin: '100px', threshold: 0 });
+      io.observe(root);
+    } else {
+      doInit();
+    }
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
 {% endif %}
