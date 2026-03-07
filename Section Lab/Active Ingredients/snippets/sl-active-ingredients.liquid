@@ -10,7 +10,13 @@
 {% assign use_blocks = use_blocks | default: false %}
 {% assign ing_section = section | default: nil %}
 {% assign sid = section_id | default: block_id | default: 'sl-active-ingredients' %}
-{% assign heading_text = heading | default: 'sections.sl_active_ingredients.heading' | t | default: 'Active botanical ingredients' %}
+{% assign heading_text = heading | default: '' %}
+{% if heading_text == blank or heading_text == 'Active botanical ingredients' %}
+  {% assign heading_text = 'sections.sl_active_ingredients.heading' | t %}
+{% endif %}
+{% if heading_text == blank %}
+  {% assign heading_text = 'Active botanical ingredients' %}
+{% endif %}
 {% assign close_label = 'sections.sl_active_ingredients.close' | t | default: 'Close' %}
 {% assign locale_iso = request.locale.iso_code | default: 'en' %}
 {% assign is_rtl = false %}
@@ -53,44 +59,51 @@
               {% assign ing_img_small = '' %}
               {% assign ing_img_large = '' %}
               {% if ing_img != blank %}
-                {% if ing_img contains 'cdn.shopify.com' or ing_img contains 'http' %}
-                  {% assign ing_img_small = ing_img %}
-                  {% assign ing_img_large = ing_img %}
-                {% else %}
-                  {% assign ing_img_small = ing_img | image_url: width: 128 %}
-                  {% assign ing_img_large = ing_img | image_url: width: 600 %}
-                {% endif %}
+                {% assign ing_img_small = ing_img | image_url: width: 128 %}
+                {% assign ing_img_large = ing_img | image_url: width: 600 %}
               {% endif %}
-              <button type="button" class="sl-active-ingredients-item" data-title="{{ ing_title | escape }}" data-subtitle="{{ ing_subtitle | escape }}" data-description="{{ ing_desc | escape }}" data-image="{{ ing_img_large }}" aria-label="{{ ing_title | escape }} — {{ 'sections.sl_active_ingredients.view_details' | t | default: 'View details' }}">
-                {% if ing_img_small != blank %}
-                  <img src="{{ ing_img_small }}" alt="{{ ing_title | escape }}" width="64" height="64" loading="lazy">
-                {% else %}
-                  <span class="sl-active-ingredients-item__placeholder" aria-hidden="true"></span>
-                {% endif %}
-                <h6>{{ ing_title }}
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><g clip-path="url(#clip0_ing_{{ sid }}_{{ forloop.index }})"><path d="M7.9987 14.6668C11.6806 14.6668 14.6654 11.6821 14.6654 8.00016C14.6654 4.31826 11.6806 1.3335 7.9987 1.3335C4.3168 1.3335 1.33203 4.31826 1.33203 8.00016C1.33203 11.6821 4.3168 14.6668 7.9987 14.6668Z" stroke="#878787" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.05859 5.99989C6.21533 5.55434 6.5247 5.17863 6.9319 4.93931C7.3391 4.7 7.81786 4.61252 8.28338 4.69237C8.7489 4.77222 9.17114 5.01424 9.47531 5.37558C9.77949 5.73691 9.94596 6.19424 9.94526 6.66656C9.94526 7.99989 7.94526 8.66656 7.94526 8.66656" stroke="#878787" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 11.3335H8.00667" stroke="#878787" stroke-linecap="round" stroke-linejoin="round"/></g><defs><clipPath id="clip0_ing_{{ sid }}_{{ forloop.index }}"><rect width="16" height="16" fill="white"/></clipPath></defs></svg>
-                </h6>
-              </button>
+              {% assign ing_coll = ing.collection.value | default: ing.collection %}
+              {% assign ing_btn_url = ing_coll.url | default: ing.button_url | default: '' %}
+              {% assign ing_btn_label = ing.button_label | default: 'sections.sl_active_ingredients.products_with_ingredient' | t | default: 'Products with this ingredient' %}
+              <div class="sl-active-ingredients-card">
+                <button type="button" class="sl-active-ingredients-item" data-title="{{ ing_title | escape }}" data-subtitle="{{ ing_subtitle | escape }}" data-image="{{ ing_img_large }}" data-button-url="{{ ing_btn_url }}" data-button-label="{{ ing_btn_label | escape }}" aria-label="{{ ing_title | escape }} — {{ 'sections.sl_active_ingredients.view_details' | t | default: 'View details' }}">
+                  {% if ing_img_small != blank %}
+                    <img src="{{ ing_img_small }}" alt="{{ ing_title | escape }}" width="64" height="64" loading="lazy">
+                  {% else %}
+                    <span class="sl-active-ingredients-item__placeholder" aria-hidden="true"></span>
+                  {% endif %}
+                  <h6>{{ ing_title }}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><g clip-path="url(#clip0_ing_{{ sid }}_{{ forloop.index }})"><path d="M7.9987 14.6668C11.6806 14.6668 14.6654 11.6821 14.6654 8.00016C14.6654 4.31826 11.6806 1.3335 7.9987 1.3335C4.3168 1.3335 1.33203 4.31826 1.33203 8.00016C1.33203 11.6821 4.3168 14.6668 7.9987 14.6668Z" stroke="#878787" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.05859 5.99989C6.21533 5.55434 6.5247 5.17863 6.9319 4.93931C7.3391 4.7 7.81786 4.61252 8.28338 4.69237C8.7489 4.77222 9.17114 5.01424 9.47531 5.37558C9.77949 5.73691 9.94596 6.19424 9.94526 6.66656C9.94526 7.99989 7.94526 8.66656 7.94526 8.66656" stroke="#878787" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 11.3335H8.00667" stroke="#878787" stroke-linecap="round" stroke-linejoin="round"/></g><defs><clipPath id="clip0_ing_{{ sid }}_{{ forloop.index }}"><rect width="16" height="16" fill="white"/></clipPath></defs></svg>
+                  </h6>
+                </button>
+                <div class="sl-active-ingredients-item-desc" hidden>{% if ing_desc != blank %}{{ ing_desc }}{% endif %}</div>
+              </div>
             {% endif %}
           {% endfor %}
         {% else %}
+          {% assign default_btn_label = 'sections.sl_active_ingredients.products_with_ingredient' | t | default: 'Products with this ingredient' %}
           {% for block in ing_section.blocks %}
             {% if block.type == 'ingredient' %}
               {% assign ing_title = block.settings.title | default: '' %}
               {% if ing_title != blank %}
                 {% assign ing_subtitle = block.settings.subtitle | default: '' %}
-                {% assign ing_desc = block.settings.description | default: '' %}
                 {% assign ing_img = block.settings.image %}
-                <button type="button" class="sl-active-ingredients-item" data-title="{{ ing_title | escape }}" data-subtitle="{{ ing_subtitle | escape }}" data-description="{{ ing_desc | escape }}" data-image="{% if ing_img != blank %}{{ ing_img | image_url: width: 600 }}{% endif %}" aria-label="{{ ing_title | escape }} — {{ 'sections.sl_active_ingredients.view_details' | t | default: 'View details' }}" {{ block.shopify_attributes }}>
-                  {% if ing_img != blank %}
-                    <img src="{{ ing_img | image_url: width: 128 }}" alt="{{ ing_title | escape }}" width="64" height="64" loading="lazy">
-                  {% else %}
-                    <span class="sl-active-ingredients-item__placeholder" aria-hidden="true"></span>
-                  {% endif %}
-                  <h6>{{ ing_title }}
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><g clip-path="url(#clip0_ing_{{ sid }}_{{ block.id }})"><path d="M7.9987 14.6668C11.6806 14.6668 14.6654 11.6821 14.6654 8.00016C14.6654 4.31826 11.6806 1.3335 7.9987 1.3335C4.3168 1.3335 1.33203 4.31826 1.33203 8.00016C1.33203 11.6821 4.3168 14.6668 7.9987 14.6668Z" stroke="#878787" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.05859 5.99989C6.21533 5.55434 6.5247 5.17863 6.9319 4.93931C7.3391 4.7 7.81786 4.61252 8.28338 4.69237C8.7489 4.77222 9.17114 5.01424 9.47531 5.37558C9.77949 5.73691 9.94596 6.19424 9.94526 6.66656C9.94526 7.99989 7.94526 8.66656 7.94526 8.66656" stroke="#878787" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 11.3335H8.00667" stroke="#878787" stroke-linecap="round" stroke-linejoin="round"/></g><defs><clipPath id="clip0_ing_{{ sid }}_{{ block.id }}"><rect width="16" height="16" fill="white"/></clipPath></defs></svg>
-                  </h6>
-                </button>
+                {% assign ing_coll = block.settings.collection %}
+                {% assign ing_btn_url = ing_coll.url | default: '' %}
+                {% assign ing_btn_label = block.settings.button_label | default: default_btn_label %}
+                <div class="sl-active-ingredients-card sl-active-ingredients-item-wrap">
+                  <button type="button" class="sl-active-ingredients-item" data-title="{{ ing_title | escape }}" data-subtitle="{{ ing_subtitle | escape }}" data-image="{% if ing_img != blank %}{{ ing_img | image_url: width: 600 }}{% endif %}" data-button-url="{{ ing_btn_url }}" data-button-label="{{ ing_btn_label | escape }}" aria-label="{{ ing_title | escape }} — {{ 'sections.sl_active_ingredients.view_details' | t | default: 'View details' }}" {{ block.shopify_attributes }}>
+                    {% if ing_img != blank %}
+                      <img src="{{ ing_img | image_url: width: 128 }}" alt="{{ ing_title | escape }}" width="64" height="64" loading="lazy">
+                    {% else %}
+                      <span class="sl-active-ingredients-item__placeholder" aria-hidden="true"></span>
+                    {% endif %}
+                    <h6>{{ ing_title }}
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><g clip-path="url(#clip0_ing_{{ sid }}_{{ block.id }})"><path d="M7.9987 14.6668C11.6806 14.6668 14.6654 11.6821 14.6654 8.00016C14.6654 4.31826 11.6806 1.3335 7.9987 1.3335C4.3168 1.3335 1.33203 4.31826 1.33203 8.00016C1.33203 11.6821 4.3168 14.6668 7.9987 14.6668Z" stroke="#878787" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.05859 5.99989C6.21533 5.55434 6.5247 5.17863 6.9319 4.93931C7.3391 4.7 7.81786 4.61252 8.28338 4.69237C8.7489 4.77222 9.17114 5.01424 9.47531 5.37558C9.77949 5.73691 9.94596 6.19424 9.94526 6.66656C9.94526 7.99989 7.94526 8.66656 7.94526 8.66656" stroke="#878787" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 11.3335H8.00667" stroke="#878787" stroke-linecap="round" stroke-linejoin="round"/></g><defs><clipPath id="clip0_ing_{{ sid }}_{{ block.id }}"><rect width="16" height="16" fill="white"/></clipPath></defs></svg>
+                    </h6>
+                  </button>
+                  <div class="sl-active-ingredients-item-desc" hidden>{{ block.settings.description }}</div>
+                </div>
               {% endif %}
             {% endif %}
           {% endfor %}
@@ -106,10 +119,13 @@
           <h2 class="sl-active-ingredients-popup__title" id="sl-active-ingredients-popup-title-{{ sid }}"></h2>
           <button type="button" class="sl-active-ingredients-popup__close" aria-label="{{ close_label | escape }}"></button>
         </div>
-        <img class="sl-active-ingredients-popup__image" id="sl-active-ingredients-popup-image-{{ sid }}" alt="" style="display: none;">
+        <img class="sl-active-ingredients-popup__image" id="sl-active-ingredients-popup-image-{{ sid }}" alt="" width="600" height="600" style="display: none;">
         <div class="sl-active-ingredients-popup__body">
           <h3 class="sl-active-ingredients-popup__subtitle" id="sl-active-ingredients-popup-subtitle-{{ sid }}"></h3>
-          <div class="sl-active-ingredients-popup__description" id="sl-active-ingredients-popup-description-{{ sid }}"></div>
+          <div class="sl-active-ingredients-popup__description rte" id="sl-active-ingredients-popup-description-{{ sid }}"></div>
+          <div class="sl-active-ingredients-popup__cta-wrap" id="sl-active-ingredients-popup-cta-{{ sid }}" style="display: none;">
+            <a href="#" class="sl-active-ingredients-popup__cta" id="sl-active-ingredients-popup-cta-link-{{ sid }}"></a>
+          </div>
         </div>
       </div>
     </div>
@@ -145,14 +161,29 @@
   #sl-active-ingredients-{{ sid }} .accordion[open] .icon { transform: rotate(180deg); }
   #sl-active-ingredients-{{ sid }} .accordion__content { margin-top: -0.25rem; padding-bottom: 1.25rem; padding-inline-end: 1.25rem; }
   #sl-active-ingredients-{{ sid }} .accordion__content.prose :first-child { margin-block-start: 0 !important; }
-  #sl-active-ingredients-{{ sid }} .sl-active-ingredients-container { display: flex; flex-direction: column; gap: 0; }
+  #sl-active-ingredients-{{ sid }} .sl-active-ingredients-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    --sl-active-ingredients-card-bg: #fff;
+    --sl-active-ingredients-card-border: 1px solid #E8EAE5;
+    --sl-active-ingredients-card-radius: 12px;
+  }
+  #sl-active-ingredients-{{ sid }} .sl-active-ingredients-card {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    background: var(--sl-active-ingredients-card-bg);
+    border: var(--sl-active-ingredients-card-border);
+    border-radius: var(--sl-active-ingredients-card-radius);
+    overflow: hidden;
+  }
   #sl-active-ingredients-{{ sid }} .sl-active-ingredients-item {
     display: flex;
     width: 100%;
-    max-width: 342px;
-    padding: 4px 12px 4px 0;
+    padding: 12px 16px;
     align-items: center;
-    gap: 12px;
+    gap: 16px;
     justify-content: start;
     cursor: pointer;
     border: none;
@@ -190,7 +221,7 @@
     display: none;
     position: fixed;
     inset: 0;
-    z-index: 99999;
+    z-index: 100001;
     align-items: center;
     justify-content: center;
     padding: 16px;
@@ -243,8 +274,34 @@
     line-height: 1.5;
     color: #272E0F;
   }
+  #sl-active-ingredients-{{ sid }} .sl-active-ingredients-popup__description.rte p,
   #sl-active-ingredients-{{ sid }} .sl-active-ingredients-popup__description p { margin: 0 0 0.5em; }
+  #sl-active-ingredients-{{ sid }} .sl-active-ingredients-popup__description.rte p:last-child,
   #sl-active-ingredients-{{ sid }} .sl-active-ingredients-popup__description p:last-child { margin-bottom: 0; }
+  #sl-active-ingredients-{{ sid }} .sl-active-ingredients-popup__description.rte ul,
+  #sl-active-ingredients-{{ sid }} .sl-active-ingredients-popup__description.rte ol { margin: 0.5em 0 1em 1.25em; padding: 0; }
+  #sl-active-ingredients-{{ sid }} .sl-active-ingredients-popup__description.rte a { color: #272E0F; text-decoration: underline; }
+  #sl-active-ingredients-{{ sid }} .sl-active-ingredients-popup__description.rte strong { font-weight: 700; }
+  #sl-active-ingredients-{{ sid }} .sl-active-ingredients-popup__cta-wrap {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #E8EAE5;
+  }
+  #sl-active-ingredients-{{ sid }} .sl-active-ingredients-popup__cta {
+    display: inline-block;
+    padding: 10px 20px;
+    color: #fff;
+    background: #000;
+    border-radius: 28px;
+    font-family: Montserrat, sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    text-align: center;
+    text-decoration: none;
+    transition: opacity 0.2s;
+  }
+  #sl-active-ingredients-{{ sid }} .sl-active-ingredients-popup__cta:hover { color: #fff; opacity: 0.9; }
+  #sl-active-ingredients-{{ sid }} .sl-active-ingredients-item-wrap { display: block; width: 100%; max-width: 100%; }
 </style>
 
 <script>
@@ -256,21 +313,36 @@
   var closeLabel = {{ close_label | json }};
   var defaultImageUrl = 'https://cdn.shopify.com/s/files/1/0533/2089/files/placeholder-images-image_large.png';
 
-  function openPop(title, subtitle, description, imageUrl) {
+  function openPop(title, subtitle, description, imageUrl, buttonUrl, buttonLabel) {
     var titleEl = document.getElementById('sl-active-ingredients-popup-title-' + sid);
     var subtitleEl = document.getElementById('sl-active-ingredients-popup-subtitle-' + sid);
     var descEl = document.getElementById('sl-active-ingredients-popup-description-' + sid);
     var imgEl = document.getElementById('sl-active-ingredients-popup-image-' + sid);
+    var ctaWrap = document.getElementById('sl-active-ingredients-popup-cta-' + sid);
+    var ctaLink = document.getElementById('sl-active-ingredients-popup-cta-link-' + sid);
     if (titleEl) titleEl.textContent = title || '';
     if (subtitleEl) subtitleEl.textContent = subtitle || '';
     if (descEl) {
       var d = (description || '').trim();
-      descEl.innerHTML = d ? '<p>' + d.replace(/\n/g, '</p><p>') + '</p>' : '';
+      if (d && d.indexOf('<') !== -1) {
+        descEl.innerHTML = d;
+      } else {
+        descEl.innerHTML = d ? '<p>' + d.replace(/\n/g, '</p><p>') + '</p>' : '';
+      }
     }
     if (imgEl) {
       imgEl.alt = title || '';
       imgEl.src = imageUrl || defaultImageUrl;
       imgEl.style.display = (imageUrl && imageUrl.length) ? 'block' : 'none';
+    }
+    if (ctaWrap && ctaLink) {
+      if (buttonUrl && buttonUrl.length) {
+        ctaLink.href = buttonUrl;
+        ctaLink.textContent = buttonLabel || 'Products with this ingredient';
+        ctaWrap.style.display = 'block';
+      } else {
+        ctaWrap.style.display = 'none';
+      }
     }
     popup.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
@@ -291,9 +363,13 @@
     btn.addEventListener('click', function() {
       var title = btn.getAttribute('data-title') || '';
       var subtitle = btn.getAttribute('data-subtitle') || '';
-      var description = btn.getAttribute('data-description') || '';
       var image = btn.getAttribute('data-image') || '';
-      openPop(title, subtitle, description, image);
+      var buttonUrl = btn.getAttribute('data-button-url') || '';
+      var buttonLabel = btn.getAttribute('data-button-label') || '';
+      var card = btn.closest('.sl-active-ingredients-card');
+      var descEl = card ? card.querySelector('.sl-active-ingredients-item-desc') : null;
+      var description = (descEl && descEl.innerHTML) ? descEl.innerHTML.trim() : '';
+      openPop(title, subtitle, description, image, buttonUrl, buttonLabel);
     });
   });
 

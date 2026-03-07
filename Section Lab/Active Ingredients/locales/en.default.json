@@ -4,6 +4,7 @@
       "heading": "Active botanical ingredients",
       "close": "Close",
       "view_details": "View details",
+      "products_with_ingredient": "Products with this ingredient",
       "empty": "Add Ingredient blocks or product metafield custom.active_ingredients."
     }
   }

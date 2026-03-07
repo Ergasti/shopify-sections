@@ -10,7 +10,7 @@ Product-page section for **active botanical ingredients** (Yves Rocher–style):
 ## Features
 
 - Accordion with configurable heading (e.g. “Active botanical ingredients”) and arrow icon
-- List of ingredients: circular image (64px), title, info icon
+- List of ingredients as **horizontal cards** (same background, border, and radius as other Section Lab cards): circular image (64px), title, info icon
 - Click an ingredient to open a modal: image, subtitle, full description
 - Close popup via X button, overlay click, or Escape; focus management for accessibility
 - Data from **section blocks** or **product metafield** (list of metaobject references)
@@ -25,7 +25,7 @@ Product-page section for **active botanical ingredients** (Yves Rocher–style):
 1. **Online Store** → **Themes** → **Customize** → open a **Product** template.
 2. **Add section** → **SL - Active Ingredients**.
 3. In section settings, set **Data source** to “Section blocks”.
-4. Add **Ingredient** blocks: set **Image**, **Title**, **Subtitle** (popup), **Description** (popup).
+4. Add **Ingredient** blocks: set **Image**, **Title**, **Subtitle** (popup), **Description** (popup, rich text), and optionally **Products with this ingredient** (collection) and **Button label**.
 5. Save.
 
 ### Option B — Product metafield (metaobject)
@@ -37,8 +37,9 @@ Product-page section for **active botanical ingredients** (Yves Rocher–style):
 3. **Fields:**
    - `title` — Single line text (required)
    - `subtitle` — Single line text (optional, for popup)
-   - `description` — Multi-line text (optional, for popup)
+   - `description` — Multi-line or rich text (optional, for popup)
    - `image` — File (optional, image)
+   - `collection` — **Collection reference** (optional); select the related collection for “Products with this ingredient” in the popup
 4. Save.
 
 **Step 2 — Product metafield**
@@ -53,7 +54,7 @@ Product-page section for **active botanical ingredients** (Yves Rocher–style):
 **Step 3 — Assign to products**
 
 1. **Products** → open a product → **Metafields** → **Active ingredients**.
-2. Add entries (or create new Active Ingredient metaobjects) with title, optional subtitle, description, image.
+2. Add entries (or create new Active Ingredient metaobjects) with title, optional subtitle, description (rich text if your metaobject supports it), image, and optionally **collection** (the related collection for the “Products with this ingredient” button).
 3. Save.
 
 **Step 4 — Add section**
@@ -109,6 +110,15 @@ Metaobject entries should have: `title`, optional `subtitle`, `description`, `im
 | `close`       | Popup close button (aria-label)   |
 | `view_details` | Item button aria-label         |
 | `empty`       | Design-mode message when no data  |
+| `products_with_ingredient` | Default label for “Products with this ingredient” button |
+
+---
+
+## Popup
+
+- The popup uses **z-index: 100001** so it appears above typical theme headers/menus.
+- **Description** is rich text (section blocks) or plain text (metafield); line breaks are converted to paragraphs when plain.
+- If you set a **Collection** on an ingredient block, the popup shows a **“Products with this ingredient”** button linking to that collection.
 
 ---
 
@@ -118,7 +128,7 @@ Metaobject entries should have: `title`, optional `subtitle`, `description`, `im
 |----------------------------|------------------------------|-----------------------------|
 | `custom.active_ingredients` | List of metaobject references | Active Ingredient entries   |
 
-Metaobject **Active Ingredient** fields: `title`, `subtitle`, `description`, `image` (file).
+Metaobject **Active Ingredient** fields: `title`, `subtitle`, `description`, `image` (file), `collection` (collection reference, optional — for “Products with this ingredient” button).
 
 ---
 

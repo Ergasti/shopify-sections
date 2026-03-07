@@ -77,7 +77,7 @@
       "type": "text",
       "id": "heading",
       "label": "Accordion heading",
-      "default": "Active botanical ingredients"
+      "default": ""
     },
     {
       "type": "header",
@@ -159,10 +159,23 @@
           "info": "Short line shown under the image in the popup"
         },
         {
-          "type": "textarea",
+          "type": "richtext",
           "id": "description",
           "label": "Description (popup)",
-          "info": "Full description shown in the popup"
+          "info": "Rich text description shown in the popup"
+        },
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Products with this ingredient",
+          "info": "Collection page to link to (e.g. products filtered by this ingredient)"
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button label",
+          "info": "Shown in popup when a collection is set",
+          "default": "Products with this ingredient"
         }
       ]
     }
@@ -171,14 +184,14 @@
     {
       "name": "SL - Active Ingredients",
       "category": "Product",
-      "settings": { "heading": "Active botanical ingredients" },
+      "settings": { "heading": "" },
       "blocks": [
         {
           "type": "ingredient",
           "settings": {
             "title": "Example ingredient",
             "subtitle": "Moisturizes and nourishes",
-            "description": "Add a short description for the popup."
+            "button_label": "Products with this ingredient"
           }
         }
       ]
