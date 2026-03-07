@@ -9,8 +9,13 @@
 {% assign related_sec = related_section | default: nil %}
 {% assign current_title = current_product_title | default: product.title | default: '' %}
 {% assign sid = section_id | default: 'sl-bundle-related' %}
-{% assign title_text = title | default: 'Bundle Up and Save!' %}
-{% assign subtitle_text = subtitle | default: 'Bundle [product] to complete the routine.' | replace: '[product]', current_title %}
+{% assign title_text = title | default: 'sections.sl_bundle.related_heading' | t | default: 'Bundle Up and Save!' %}
+{% assign subtitle_text = subtitle | default: 'sections.sl_bundle.related_subtitle' | t | default: 'Bundle [product] to complete the routine.' | replace: '[product]', current_title %}
+{% assign quick_label = quick_add_label | default: 'sections.sl_bundle.related_button' | t | default: 'View' %}
+{% assign empty_related_msg = 'sections.sl_bundle.empty_related' | t | default: 'Related bundles — Add products via custom.part_of_bundles or Related bundle blocks.' %}
+{% assign locale_iso = request.locale.iso_code | default: 'en' %}
+{% assign is_rtl = false %}
+{% if locale_iso == 'ar' or locale_iso == 'he' or locale_iso == 'fa' or locale_iso == 'ur' or locale_iso == 'yi' %}{% assign is_rtl = true %}{% endif %}
 
 {% assign bundle_count = 0 %}
 {% if use_related_blocks and related_sec != blank %}
@@ -25,11 +30,11 @@
 
 {% if bundle_count == 0 %}
   {% if request.design_mode %}
-    <p class="sl-bundle-related-empty" style="padding:16px;color:#666;">Related bundles — Add products via <code>custom.part_of_bundles</code> or Related bundle blocks.</p>
+    <p class="sl-bundle-related-empty" style="padding:16px;color:#666;">{{ empty_related_msg }}</p>
   {% endif %}
 {% else %}
 
-<div id="sl-bundle-related-{{ sid }}" class="related-bundles-container sl-bundle-related-root">
+<div id="sl-bundle-related-{{ sid }}" class="related-bundles-container sl-bundle-related-root{% if is_rtl %} sl-bundle-related-rtl{% endif %}"{% if is_rtl %} dir="rtl"{% endif %}>
   <p class="bundle-title sl-bundle-related-title">{{ title_text }}</p>
   <p class="bundle-subtitle sl-bundle-related-subtitle">{{ subtitle_text }}</p>
 
@@ -67,7 +72,7 @@
                     {% endif %}
                   </div>
                 </div>
-                <a href="{{ bundle_product.url }}" class="product-card__quick-add-button">{{ quick_add_label | default: 'View' }}</a>
+                <a href="{{ bundle_product.url }}" class="product-card__quick-add-button">{{ quick_label }}</a>
               </div>
             </div>
           {% endif %}
@@ -99,7 +104,7 @@
                       {% endif %}
                     </div>
                   </div>
-                  <a href="{{ bundle_product.url }}" class="product-card__quick-add-button">{{ quick_add_label | default: 'View' }}</a>
+                  <a href="{{ bundle_product.url }}" class="product-card__quick-add-button">{{ quick_label }}</a>
                 </div>
               </div>
             {% endif %}

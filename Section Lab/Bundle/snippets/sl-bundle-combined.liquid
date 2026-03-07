@@ -103,7 +103,7 @@
     {% endif %}
   {% else %}
     <div class="sl-bundle-combined-empty" style="padding: 16px; color: #666; font-size: 14px; text-align: center;">
-      <p style="margin: 0;">No bundle data for this product. Add <code>custom.bundle_products</code> (products in this bundle) and/or <code>custom.part_of_bundles</code> (bundles that contain this product), or pass <code>bundle_products</code> / <code>related_bundles</code> into the snippet.</p>
+      <p style="margin: 0;">{{ 'sections.sl_bundle.empty_combined' | t | default: 'No bundle data for this product. Add custom.bundle_products (products in this bundle) and/or custom.part_of_bundles (bundles that contain this product), or pass bundle_products / related_bundles into the snippet.' }}</p>
     </div>
   {% endif %}
 </div>

@@ -12,7 +12,16 @@
 {% assign sid = section_id | default: 'sl-bundle' %}
 {% assign sub = subtitle | default: nil %}
 {% assign border_clr = border_color | default: '#FE2C55' %}
-{% assign hover_label = hover_text | default: 'More Details' %}
+{% assign hover_label = hover_text | default: 'sections.sl_bundle.hover_label' | t | default: 'More Details' %}
+{% assign close_label = 'sections.sl_bundle.close' | t | default: 'Close' %}
+{% assign about_heading = 'sections.sl_bundle.about_product' | t | default: 'About the product' %}
+{% assign show_more_text = 'sections.sl_bundle.show_more' | t | default: 'Show more' %}
+{% assign show_less_text = 'sections.sl_bundle.show_less' | t | default: 'Show less' %}
+{% assign view_product_text = 'sections.sl_bundle.view_product' | t | default: 'View product' %}
+{% assign empty_included_msg = 'sections.sl_bundle.empty_included' | t | default: 'Bundle — Add products via section blocks or product metafield custom.bundle_products.' %}
+{% assign locale_iso = request.locale.iso_code | default: 'en' %}
+{% assign is_rtl = false %}
+{% if locale_iso == 'ar' or locale_iso == 'he' or locale_iso == 'fa' or locale_iso == 'ur' or locale_iso == 'yi' %}{% assign is_rtl = true %}{% endif %}
 
 {% assign product_count = 0 %}
 {% if use_block_products and bundle_sec != blank and bundle_sec.blocks.size > 0 %}
@@ -33,11 +42,11 @@
 
 {% if show_bundle == false %}
   {% if request.design_mode %}
-    <p class="sl-bundle-empty" style="padding:16px;color:#666;">Bundle — Add products via section blocks or product metafield <code>custom.bundle_products</code>.</p>
+    <p class="sl-bundle-empty" style="padding:16px;color:#666;">{{ empty_included_msg }}</p>
   {% endif %}
 {% else %}
 
-<div id="sl-bundle-{{ sid }}" class="sl-bundle-root">
+<div id="sl-bundle-{{ sid }}" class="sl-bundle-root{% if is_rtl %} sl-bundle-rtl{% endif %}"{% if is_rtl %} dir="rtl"{% endif %} data-show-more="{{ show_more_text | escape }}" data-show-less="{{ show_less_text | escape }}">
   {% if sub != blank %}
     <p class="sl-bundle-subtitle">{{ sub | replace: 'X', product_count }}</p>
   {% endif %}
@@ -46,17 +55,17 @@
       {% if products != nil and products.size > 0 %}
         {% for prod in products %}
           {% if prod != blank %}
-            <div class="sl-bundle-cube" onclick="slBundleOpenPopup('sl-bundle-popup-{{ sid }}-{{ prod.id }}')" role="button" tabindex="0" data-popup-id="sl-bundle-popup-{{ sid }}-{{ prod.id }}">
-              <div class="sl-bundle-pink-border">
+            <button type="button" class="sl-bundle-cube" data-popup-id="sl-bundle-popup-{{ sid }}-{{ prod.id }}" aria-label="{{ prod.title | escape }} — {{ hover_label | escape }}">
+              <span class="sl-bundle-pink-border">
                 {% if prod.featured_image %}
                   <img src="{{ prod.featured_image | image_url: width: 400 }}" alt="{{ prod.featured_image.alt | default: prod.title | escape }}" width="200" height="200" loading="lazy">
                 {% else %}
                   {{ 'product-1' | placeholder_svg_tag: 'sl-bundle-placeholder-img' }}
                 {% endif %}
-                <div class="sl-bundle-cube-hover">{{ hover_label }}</div>
-              </div>
+                <span class="sl-bundle-cube-hover">{{ hover_label }}</span>
+              </span>
               <span class="sl-bundle-product-name">{{ prod.title }}</span>
-            </div>
+            </button>
           {% endif %}
         {% endfor %}
       {% else %}
@@ -64,17 +73,17 @@
           {% if block.type == 'product' %}
             {% assign prod = block.settings.product %}
             {% if prod != blank %}
-              <div class="sl-bundle-cube" onclick="slBundleOpenPopup('sl-bundle-popup-{{ sid }}-{{ prod.id }}')" role="button" tabindex="0" data-popup-id="sl-bundle-popup-{{ sid }}-{{ prod.id }}" {{ block.shopify_attributes }}>
-                <div class="sl-bundle-pink-border">
+              <button type="button" class="sl-bundle-cube" data-popup-id="sl-bundle-popup-{{ sid }}-{{ prod.id }}" aria-label="{{ prod.title | escape }} — {{ hover_label | escape }}" {{ block.shopify_attributes }}>
+                <span class="sl-bundle-pink-border">
                   {% if prod.featured_image %}
                     <img src="{{ prod.featured_image | image_url: width: 400 }}" alt="{{ prod.featured_image.alt | default: prod.title | escape }}" width="200" height="200" loading="lazy">
                   {% else %}
                     {{ 'product-1' | placeholder_svg_tag: 'sl-bundle-placeholder-img' }}
                   {% endif %}
-                  <div class="sl-bundle-cube-hover">{{ hover_label }}</div>
-                </div>
+                  <span class="sl-bundle-cube-hover">{{ hover_label }}</span>
+                </span>
                 <span class="sl-bundle-product-name">{{ prod.title }}</span>
-              </div>
+              </button>
             {% endif %}
           {% endif %}
         {% endfor %}
@@ -86,10 +95,10 @@
   {% if products != nil and products.size > 0 %}
     {% for prod in products %}
       {% if prod != blank %}
-        <div id="sl-bundle-popup-{{ sid }}-{{ prod.id }}" class="sl-bundle-overlay" aria-hidden="true">
+        <div id="sl-bundle-popup-{{ sid }}-{{ prod.id }}" class="sl-bundle-overlay" aria-hidden="true" aria-modal="true" role="dialog">
           <div class="sl-bundle-overlay-background">
             <div class="sl-bundle-close-row">
-              <span class="sl-bundle-x" onclick="slBundleClosePopup('sl-bundle-popup-{{ sid }}-{{ prod.id }}')" role="button" tabindex="0" aria-label="Close"></span>
+              <button type="button" class="sl-bundle-x sl-bundle-close-btn" data-popup-id="sl-bundle-popup-{{ sid }}-{{ prod.id }}" aria-label="{{ close_label | escape }}"></button>
             </div>
             <div class="sl-bundle-popup-scroll">
               {% if prod.featured_image %}
@@ -98,18 +107,18 @@
               <h4 class="sl-bundle-popup-title">{{ prod.title }}</h4>
               {% if prod.description != blank %}
                 <div class="sl-bundle-popup-divider"></div>
-                <h5 class="sl-bundle-popup-heading">About the product</h5>
+                <h5 class="sl-bundle-popup-heading">{{ about_heading }}</h5>
                 <div class="sl-bundle-popup-description sl-bundle-popup-desc-short">
                   <div class="sl-bundle-desc-inner">{{ prod.description | strip_html | truncate: 200 }}</div>
-                  <span class="sl-bundle-more-details" onclick="slBundleShowMore(this)">Show more</span>
+                  <button type="button" class="sl-bundle-more-details" data-expanded="false">{{ show_more_text }}</button>
                 </div>
                 <div class="sl-bundle-popup-description sl-bundle-popup-description-full" style="display:none;">
                   <div class="sl-bundle-desc-inner">{{ prod.description }}</div>
-                  <span class="sl-bundle-more-details" onclick="slBundleShowMore(this)">Show less</span>
+                  <button type="button" class="sl-bundle-more-details" data-expanded="true">{{ show_less_text }}</button>
                 </div>
               {% endif %}
               <div class="sl-bundle-popup-divider"></div>
-              <a class="sl-bundle-popup-link" href="{{ prod.url }}">View product</a>
+              <a class="sl-bundle-popup-link" href="{{ prod.url }}">{{ view_product_text }}</a>
             </div>
           </div>
         </div>
@@ -120,10 +129,10 @@
       {% if block.type == 'product' %}
         {% assign prod = block.settings.product %}
         {% if prod != blank %}
-          <div id="sl-bundle-popup-{{ sid }}-{{ prod.id }}" class="sl-bundle-overlay" aria-hidden="true">
+          <div id="sl-bundle-popup-{{ sid }}-{{ prod.id }}" class="sl-bundle-overlay" aria-hidden="true" aria-modal="true" role="dialog">
             <div class="sl-bundle-overlay-background">
               <div class="sl-bundle-close-row">
-                <span class="sl-bundle-x" onclick="slBundleClosePopup('sl-bundle-popup-{{ sid }}-{{ prod.id }}')" role="button" tabindex="0" aria-label="Close"></span>
+                <button type="button" class="sl-bundle-x sl-bundle-close-btn" data-popup-id="sl-bundle-popup-{{ sid }}-{{ prod.id }}" aria-label="{{ close_label | escape }}"></button>
               </div>
               <div class="sl-bundle-popup-scroll">
                 {% if prod.featured_image %}
@@ -132,18 +141,18 @@
                 <h4 class="sl-bundle-popup-title">{{ prod.title }}</h4>
                 {% if prod.description != blank %}
                   <div class="sl-bundle-popup-divider"></div>
-                  <h5 class="sl-bundle-popup-heading">About the product</h5>
+                  <h5 class="sl-bundle-popup-heading">{{ about_heading }}</h5>
                   <div class="sl-bundle-popup-description sl-bundle-popup-desc-short">
                     <div class="sl-bundle-desc-inner">{{ prod.description | strip_html | truncate: 200 }}</div>
-                    <span class="sl-bundle-more-details" onclick="slBundleShowMore(this)">Show more</span>
+                    <button type="button" class="sl-bundle-more-details" data-expanded="false">{{ show_more_text }}</button>
                   </div>
                   <div class="sl-bundle-popup-description sl-bundle-popup-description-full" style="display:none;">
                     <div class="sl-bundle-desc-inner">{{ prod.description }}</div>
-                    <span class="sl-bundle-more-details" onclick="slBundleShowMore(this)">Show less</span>
+                    <button type="button" class="sl-bundle-more-details" data-expanded="true">{{ show_less_text }}</button>
                   </div>
                 {% endif %}
                 <div class="sl-bundle-popup-divider"></div>
-                <a class="sl-bundle-popup-link" href="{{ prod.url }}">View product</a>
+                <a class="sl-bundle-popup-link" href="{{ prod.url }}">{{ view_product_text }}</a>
               </div>
             </div>
           </div>
@@ -157,13 +166,35 @@
   (function() {
     var root = document.getElementById('sl-bundle-{{ sid }}');
     if (!root) return;
+    var showMoreText = root.getAttribute('data-show-more') || 'Show more';
+    var showLessText = root.getAttribute('data-show-less') || 'Show less';
+    var focusBeforeOpen = null;
     function openPopup(id) {
       var el = document.getElementById(id);
-      if (el) { el.style.display = 'block'; el.setAttribute('aria-hidden', 'false'); document.body.style.overflow = 'hidden'; }
+      if (!el) return;
+      focusBeforeOpen = document.activeElement;
+      el.style.display = 'flex';
+      el.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+      var closeBtn = el.querySelector('.sl-bundle-close-btn');
+      if (closeBtn) closeBtn.focus();
+      document.addEventListener('keydown', escapeHandler);
     }
     function closePopup(id) {
       var el = document.getElementById(id);
-      if (el) { el.style.display = 'none'; el.setAttribute('aria-hidden', 'true'); document.body.style.overflow = ''; }
+      if (el) {
+        el.style.display = 'none';
+        el.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+        document.removeEventListener('keydown', escapeHandler);
+        if (focusBeforeOpen && typeof focusBeforeOpen.focus === 'function') focusBeforeOpen.focus();
+      }
+    }
+    function escapeHandler(e) {
+      if (e.key === 'Escape') {
+        var openOverlay = root.querySelector('.sl-bundle-overlay[aria-hidden="false"]');
+        if (openOverlay) closePopup(openOverlay.id);
+      }
     }
     window.slBundleOpenPopup = function(id) { openPopup(id); };
     window.slBundleClosePopup = function(id) { closePopup(id); };
@@ -172,18 +203,33 @@
       if (!scroll) return;
       var short = scroll.querySelector('.sl-bundle-popup-desc-short');
       var full = scroll.querySelector('.sl-bundle-popup-description-full');
-      if (btn.textContent.trim().toLowerCase().indexOf('more') !== -1) {
+      var expanded = btn.getAttribute('data-expanded') === 'true';
+      if (!expanded) {
         if (short) short.style.display = 'none';
         if (full) full.style.display = 'block';
-        btn.textContent = 'Show less';
+        btn.textContent = showLessText;
+        btn.setAttribute('data-expanded', 'true');
       } else {
         if (short) short.style.display = 'block';
         if (full) full.style.display = 'none';
-        btn.textContent = 'Show more';
+        btn.textContent = showMoreText;
+        btn.setAttribute('data-expanded', 'false');
       }
     };
     root.querySelectorAll('.sl-bundle-cube').forEach(function(cube) {
-      cube.addEventListener('keydown', function(e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); var id = cube.getAttribute('data-popup-id'); if (id) openPopup(id); } });
+      cube.addEventListener('click', function() {
+        var id = cube.getAttribute('data-popup-id');
+        if (id) openPopup(id);
+      });
+    });
+    root.querySelectorAll('.sl-bundle-close-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var id = btn.getAttribute('data-popup-id');
+        if (id) closePopup(id);
+      });
+    });
+    root.querySelectorAll('.sl-bundle-more-details').forEach(function(btn) {
+      btn.addEventListener('click', function() { window.slBundleShowMore(btn); });
     });
     root.querySelectorAll('.sl-bundle-overlay').forEach(function(overlay) {
       overlay.addEventListener('click', function(e) { if (e.target === overlay) closePopup(overlay.id); });
@@ -219,6 +265,12 @@
     cursor: pointer;
     margin-block-start: 0;
     text-align: center;
+    border: none;
+    background: none;
+    padding: 0;
+    font: inherit;
+    width: 100%;
+    display: block;
   }
   #sl-bundle-{{ sid }} .sl-bundle-pink-border {
     border: 1px solid var(--sl-bundle-border);
@@ -295,7 +347,8 @@
     height: 56px;
     margin: 0 10px;
   }
-  #sl-bundle-{{ sid }} .sl-bundle-x {
+  #sl-bundle-{{ sid }} .sl-bundle-x,
+  #sl-bundle-{{ sid }} .sl-bundle-close-btn {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none'%3E%3Cpath d='M18 6L6 18' stroke='%23111111' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M6 6L18 18' stroke='%23111111' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
     width: 24px;
     height: 24px;
@@ -306,7 +359,12 @@
     top: 16px;
     cursor: pointer;
     background-repeat: no-repeat;
+    border: none;
+    padding: 0;
+    background-color: transparent;
+    font: inherit;
   }
+  #sl-bundle-{{ sid }} .sl-bundle-rtl .sl-bundle-close-btn { right: auto; left: 0; }
   #sl-bundle-{{ sid }} .sl-bundle-popup-scroll {
     max-height: 620px;
     overflow-y: auto;
@@ -365,7 +423,11 @@
     color: #878787;
     text-transform: capitalize;
     cursor: pointer;
+    border: none;
+    padding: 0;
+    text-align: left;
   }
+  #sl-bundle-{{ sid }} .sl-bundle-rtl .sl-bundle-more-details { text-align: right; }
   #sl-bundle-{{ sid }} .sl-bundle-popup-desc-short {
     height: 85px;
     overflow: hidden;

@@ -1,0 +1,20 @@
+{
+  "sections": {
+    "sl_bundle": {
+      "close": "إغلاق",
+      "hover_label": "المزيد من التفاصيل",
+      "about_product": "عن المنتج",
+      "show_more": "عرض المزيد",
+      "show_less": "عرض أقل",
+      "view_product": "عرض المنتج",
+      "included_heading": "المشمول في هذه المجموعة",
+      "subtitle": "تتضمن هذه المجموعة X منتجات",
+      "empty_included": "مجموعة — أضف منتجات عبر كتل القسم أو حقل المنتج المخصص custom.bundle_products.",
+      "related_heading": "وفّر مع المجموعة!",
+      "related_subtitle": "اجمع [product] لإكمال الروتين.",
+      "related_button": "عرض",
+      "empty_related": "مجموعات ذات صلة — أضف منتجات عبر custom.part_of_bundles أو كتل مجموعة ذات صلة.",
+      "empty_combined": "لا توجد بيانات مجموعة لهذا المنتج. أضف custom.bundle_products و/أو custom.part_of_bundles، أو مرّر bundle_products / related_bundles إلى المقتطف."
+    }
+  }
+}

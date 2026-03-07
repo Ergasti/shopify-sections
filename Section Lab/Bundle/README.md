@@ -6,12 +6,23 @@ Section and snippets for bundle UIs on the product page. **Behavior is condition
 2. **Product is part of one or more bundles** → “Bundle Up and Save!”: horizontal carousel of related bundle products.
 3. **Neither** → Section renders nothing (or a design-mode hint).
 
+## Relating products to bundles
+
+**Yes — the section can relate one product to another where one acts as a bundle composed of other products:**
+
+- **Product as bundle**: One product (the “bundle”) is composed of other products. Set `custom.bundle_products` on the bundle product to a list of the included products. On that product’s page you see “Included in this set” and the grid of items.
+- **Product as part of bundles**: Any product can be related to bundle products that contain it. Set `custom.part_of_bundles` on that product to a list of the bundle product(s). On its page you see “Bundle Up and Save!” and the carousel of those bundles.
+- A product can be **both**: e.g. a bundle that itself is included in a larger bundle. Use both metafields; the section shows included products first, then related bundles.
+
+Data can also come from section blocks (Bundle item / Related bundle) instead of metafields.
+
 ## Files
 
 - **sections/sl-bundle.liquid** — Section for theme editor. Add to product template (or any page with **Bundle product** set).
 - **snippets/sl-bundle.liquid** — Included products grid + popups (used when product is a bundle).
 - **snippets/sl-bundle-related.liquid** — Related bundles carousel (used when product is part of a bundle).
 - **snippets/sl-bundle-combined.liquid** — Single snippet that shows both blocks when data exists (included products + related bundles). **No section required** — use it on its own (e.g. Custom Liquid block on product page).
+- **locales/en.default.json**, **locales/ar.json** — Translation keys under `sections.sl_bundle` (see Localization below).
 
 ---
 
@@ -42,7 +53,7 @@ Shows “Included in this set” and the grid of items inside the bundle.
 ### Popup
 
 - Each cube opens a modal: image, title, description (Show more/less), “View product” link.  
-- Close with X or overlay click; body scroll locked while open.
+- Close with X button, overlay click, or **Escape**. Focus moves into the popup when opened and returns to the trigger when closed.
 
 ---
 
@@ -141,6 +152,28 @@ To see why nothing shows, add `debug: true` or open the theme editor (debug appe
 ```
 
 ---
+
+## Localization
+
+Locale namespace: **`sections.sl_bundle`**. Copy `locales/en.default.json` and `locales/ar.json` into your theme and translate as needed.
+
+| Key | Purpose |
+|-----|--------|
+| `close` | Popup close button (aria-label) |
+| `hover_label` | Cube hover text (e.g. “More Details”) |
+| `about_product` | Popup “About the product” heading |
+| `show_more` / `show_less` | Description expand/collapse |
+| `view_product` | Link text in popup |
+| `included_heading` | “Included in this set” (section heading default) |
+| `subtitle` | “This set includes X products” (X = count) |
+| `empty_included` | Design-mode message when no bundle products |
+| `related_heading` | “Bundle Up and Save!” |
+| `related_subtitle` | “Bundle [product] to complete the routine.” |
+| `related_button` | Card button (e.g. “View”) |
+| `empty_related` | Design-mode message when no related bundles |
+| `empty_combined` | Message when snippet has no bundle data |
+
+**RTL:** The section and snippets set `dir="rtl"` automatically for `ar`, `he`, `fa`, `ur`, `yi`. Add `.sl-bundle-rtl` / `.sl-bundle-section-rtl` / `.sl-bundle-related-rtl` overrides if you need to flip layout or icons.
 
 ## Metafield definitions
 

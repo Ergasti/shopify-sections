@@ -57,11 +57,14 @@
   {% endfor %}
 {% endif %}
 
-{% assign subtitle_template = section.settings.subtitle | default: 'This set includes X products' %}
+{% assign subtitle_template = section.settings.subtitle | default: 'sections.sl_bundle.subtitle' | t | default: 'This set includes X products' %}
+{% assign ba_locale = request.locale.iso_code | default: 'en' %}
+{% assign ba_rtl = false %}
+{% if ba_locale == 'ar' or ba_locale == 'he' or ba_locale == 'fa' or ba_locale == 'ur' or ba_locale == 'yi' %}{% assign ba_rtl = true %}{% endif %}
 
 {% if is_bundle %}
   {% comment %} Mode 1: Product IS a bundle — show included products {% endcomment %}
-  <div id="sl-bundle-section-{{ section.id }}" class="sl-bundle-section-root" style="width: 100%; background: {{ section.settings.background_color }}; padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;">
+  <div id="sl-bundle-section-{{ section.id }}" class="sl-bundle-section-root{% if ba_rtl %} sl-bundle-section-rtl{% endif %}"{% if ba_rtl %} dir="rtl"{% endif %} style="width: 100%; background: {{ section.settings.background_color }}; padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;">
     <div class="sl-bundle-section-inner" style="{% unless section.settings.full_width %}max-width: {{ section.settings.content_width }}px; margin-left: auto; margin-right: auto;{% endunless %} padding-left: {{ section.settings.padding_inline }}px; padding-right: {{ section.settings.padding_inline }}px;">
       {% if section.settings.heading != blank %}
         <h2 class="sl-bundle-section-heading" style="text-align: {{ section.settings.heading_alignment }}; font-size: {{ section.settings.heading_size }}px; color: {{ section.settings.heading_color }}; margin: 0 0 10px 0;">{{ section.settings.heading }}</h2>
@@ -82,7 +85,7 @@
   </div>
 {% elsif related_bundles != nil and related_bundles.size > 0 %}
   {% comment %} Mode 2: Product is PART OF bundle(s) — show related bundles carousel {% endcomment %}
-  <div id="sl-bundle-section-{{ section.id }}" class="sl-bundle-section-root" style="width: 100%; background: {{ section.settings.background_color }}; padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;">
+  <div id="sl-bundle-section-{{ section.id }}" class="sl-bundle-section-root{% if ba_rtl %} sl-bundle-section-rtl{% endif %}"{% if ba_rtl %} dir="rtl"{% endif %} style="width: 100%; background: {{ section.settings.background_color }}; padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;">
     <div class="sl-bundle-section-inner" style="{% unless section.settings.full_width %}max-width: {{ section.settings.content_width }}px; margin-left: auto; margin-right: auto;{% endunless %} padding-left: {{ section.settings.padding_inline }}px; padding-right: {{ section.settings.padding_inline }}px;">
       {% render 'sl-bundle-related',
         related_bundles: related_bundles,
@@ -96,7 +99,7 @@
   </div>
 {% elsif related_from_blocks %}
   {% comment %} Mode 2 (blocks): related bundles from section blocks {% endcomment %}
-  <div id="sl-bundle-section-{{ section.id }}" class="sl-bundle-section-root" style="width: 100%; background: {{ section.settings.background_color }}; padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;">
+  <div id="sl-bundle-section-{{ section.id }}" class="sl-bundle-section-root{% if ba_rtl %} sl-bundle-section-rtl{% endif %}"{% if ba_rtl %} dir="rtl"{% endif %} style="width: 100%; background: {{ section.settings.background_color }}; padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;">
     <div class="sl-bundle-section-inner" style="{% unless section.settings.full_width %}max-width: {{ section.settings.content_width }}px; margin-left: auto; margin-right: auto;{% endunless %} padding-left: {{ section.settings.padding_inline }}px; padding-right: {{ section.settings.padding_inline }}px;">
       {% render 'sl-bundle-related',
         related_bundles: nil,
@@ -112,7 +115,7 @@
   </div>
 {% else %}
   {% if request.design_mode %}
-    <div id="sl-bundle-section-{{ section.id }}" class="sl-bundle-section-root" style="padding: 24px; background: #f5f5f5; border: 2px dashed #ccc; text-align: center;">
+    <div id="sl-bundle-section-{{ section.id }}" class="sl-bundle-section-root{% if ba_rtl %} sl-bundle-section-rtl{% endif %}"{% if ba_rtl %} dir="rtl"{% endif %} style="padding: 24px; background: #f5f5f5; border: 2px dashed #ccc; text-align: center;">
       <p style="margin: 0; color: #666;">Bundle — This product is not a bundle and has no related bundles. Add <code>custom.bundle_products</code> (bundle), or <code>custom.part_of_bundles</code> / Related bundle blocks (part of bundle).</p>
     </div>
   {% endif %}

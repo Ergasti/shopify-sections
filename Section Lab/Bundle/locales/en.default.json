@@ -1,0 +1,20 @@
+{
+  "sections": {
+    "sl_bundle": {
+      "close": "Close",
+      "hover_label": "More Details",
+      "about_product": "About the product",
+      "show_more": "Show more",
+      "show_less": "Show less",
+      "view_product": "View product",
+      "included_heading": "Included in this set",
+      "subtitle": "This set includes X products",
+      "empty_included": "Bundle — Add products via section blocks or product metafield custom.bundle_products.",
+      "related_heading": "Bundle Up and Save!",
+      "related_subtitle": "Bundle [product] to complete the routine.",
+      "related_button": "View",
+      "empty_related": "Related bundles — Add products via custom.part_of_bundles or Related bundle blocks.",
+      "empty_combined": "No bundle data for this product. Add custom.bundle_products (products in this bundle) and/or custom.part_of_bundles (bundles that contain this product), or pass bundle_products / related_bundles into the snippet."
+    }
+  }
+}
