@@ -382,6 +382,7 @@
     overflow: hidden;
     border-radius: calc(var(--sl-bundle-card-radius) - 2px) calc(var(--sl-bundle-card-radius) - 2px) 0 0;
     display: block;
+    background: #f8f8f8;
   }
   #sl-bundle-{{ sid }} .sl-bundle-card__figure img,
   #sl-bundle-{{ sid }} .sl-bundle-card__placeholder {
@@ -390,9 +391,7 @@
     object-fit: contain;
     object-position: center;
     display: block;
-  }
-  #sl-bundle-{{ sid }} .sl-bundle-card__figure {
-    background: #f8f8f8;
+    border-radius: inherit;
   }
   #sl-bundle-{{ sid }} .sl-bundle-card__info {
     display: flex;
