@@ -10,7 +10,11 @@
 {% assign use_blocks = use_blocks | default: false %}
 {% assign hl_section = section | default: nil %}
 {% assign sid = section_id | default: block_id | default: 'sl-highlights' %}
-{% assign heading_text = heading | default: 'sections.sl_highlights.heading' | t | default: 'Highlights' %}
+{% if heading != blank %}
+  {% assign heading_text = heading %}
+{% else %}
+  {% assign heading_text = 'sections.sl_highlights.heading' | t | default: 'Highlights' %}
+{% endif %}
 {% assign close_label = 'sections.sl_highlights.close' | t | default: 'Close' %}
 {% assign locale_iso = request.locale.iso_code | default: 'en' %}
 {% assign is_rtl = false %}
