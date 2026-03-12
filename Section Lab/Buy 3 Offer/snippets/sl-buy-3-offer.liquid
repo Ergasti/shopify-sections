@@ -21,7 +21,18 @@
 {% endcomment %}
 
 {% assign sid = section_id | default: id | default: block_id | default: 'sl-buy3-offer' %}
-{% assign target_product = product | default: nil %}
+
+{% assign qualifying_collection_handle = collection_handle | default: '' %}
+{% if qualifying_collection_handle == blank and collection != blank %}
+  {% assign qualifying_collection_handle = collection.handle | default: '' %}
+{% endif %}
+{% assign qualifying_collection_title = collection_title | default: '' %}
+{% if qualifying_collection_title == blank and collection != blank %}
+  {% assign qualifying_collection_title = collection.title | default: '' %}
+{% endif %}
+{% if qualifying_collection_title == blank %}
+  {% assign qualifying_collection_title = qualifying_collection_handle %}
+{% endif %}
 
 {% assign offer_qty = offer_qty | default: 3 | plus: 0 %}
 {% if offer_qty <= 0 %}{% assign offer_qty = 3 %}{% endif %}
@@ -43,11 +54,11 @@
 {% assign is_rtl = false %}
 {% if locale_iso == 'ar' or locale_iso == 'he' or locale_iso == 'fa' or locale_iso == 'ur' or locale_iso == 'yi' %}{% assign is_rtl = true %}{% endif %}
 
-{% if target_product == blank %}
+{% if qualifying_collection_handle == blank %}
   {% if request.design_mode %}
     <div style="padding: 16px; border: 1px dashed #ccc; border-radius: 8px; background: #fafafa;">
       <strong>SL - Buy 3 Offer (Snippet)</strong><br>
-      {{ 'sections.sl_buy3_offer.missing_product' | t | default: 'Pass a product when rendering this snippet.' }}
+      {{ 'sections.sl_buy3_offer.missing_collection' | t | default: 'Pass a collection_handle when rendering this snippet.' }}
     </div>
   {% endif %}
 {% else %}
@@ -56,7 +67,7 @@
     class="sl-buy3-offer{% if is_rtl %} sl-buy3-offer--rtl{% endif %}{% unless show_stripes %} sl-buy3-offer--no-stripes{% endunless %}"
     style="--sl-buy3-fill-start: {{ fill_color_start }}; --sl-buy3-fill-end: {{ fill_color_end }};"
     data-sl-buy3-offer
-    data-sl-buy3-product-id="{{ target_product.id }}"
+    data-sl-buy3-collection-handle="{{ qualifying_collection_handle }}"
     data-sl-buy3-offer-qty="{{ offer_qty }}"
     data-sl-buy3-offer-price="{{ offer_price_cents }}"
     data-sl-buy3-regular-total="{{ regular_total_cents }}"
@@ -72,23 +83,23 @@
           <span class="sl-buy3-offer__badge-dot" aria-hidden="true"></span>
           {{ 'sections.sl_buy3_offer.urgency' | t | default: 'Limited-time deal' }}
         </span>
-        <span class="sl-buy3-offer__product">{{ target_product.title }}</span>
+        <span class="sl-buy3-offer__product">{{ qualifying_collection_title }}</span>
       </p>
 
       <div class="sl-buy3-offer__deal-row">
         <h3 class="sl-buy3-offer__title">
           {{ 'sections.sl_buy3_offer.title' | t | default: 'Buy 3 for' }}
-          <span class="sl-buy3-offer__price" data-sl-buy3-offer-price-text>{{ offer_price_cents | money }}</span>
+          <span class="sl-buy3-offer__price" data-sl-buy3-offer-price-text>{{ offer_price_cents | money_without_trailing_zeros }}</span>
         </h3>
 
         <div class="sl-buy3-offer__deal-meta">
           <span class="sl-buy3-offer__save">
             {{ 'sections.sl_buy3_offer.save' | t | default: 'Save' }}
-            <span data-sl-buy3-save-value>{{ savings_cents | money }}</span>
+            <span data-sl-buy3-save-value>{{ savings_cents | money_without_trailing_zeros }}</span>
           </span>
           <span class="sl-buy3-offer__instead">
             {{ 'sections.sl_buy3_offer.instead_of' | t | default: 'Instead of' }}
-            <span class="sl-buy3-offer__was" data-sl-buy3-regular-total-text>{{ regular_total_cents | money }}</span>
+            <span class="sl-buy3-offer__was" data-sl-buy3-regular-total-text>{{ regular_total_cents | money_without_trailing_zeros }}</span>
           </span>
         </div>
       </div>
@@ -191,6 +202,8 @@
       display: inline-flex;
       align-items: baseline;
       gap: 8px;
+      text-align: start;
+      flex: 1 1 auto;
     }
     #sl-buy3-offer-{{ sid }} .sl-buy3-offer__price { color: #15803d; font-weight: 800; white-space: nowrap; }
     #sl-buy3-offer-{{ sid }} .sl-buy3-offer__deal-row {
@@ -199,6 +212,7 @@
       justify-content: space-between;
       gap: 12px;
       flex-wrap: wrap;
+      text-align: start;
     }
     #sl-buy3-offer-{{ sid }} .sl-buy3-offer__deal-meta {
       display: inline-flex;
@@ -208,6 +222,7 @@
       justify-content: flex-end;
       color: #374151;
       font-size: 0.92rem;
+      flex: 0 0 auto;
     }
     #sl-buy3-offer-{{ sid }} .sl-buy3-offer__was { text-decoration: line-through; opacity: 0.85; white-space: nowrap; }
     #sl-buy3-offer-{{ sid }} .sl-buy3-offer__save {
@@ -310,34 +325,69 @@
       try {
         if (window.Shopify && typeof window.Shopify.formatMoney === 'function') {
           var fmt = window.money_format || window.Shopify.money_format || '${{amount}}';
-          return window.Shopify.formatMoney(cents, fmt);
+          var fmtNoDecimals = fmt
+            .replace('amount_with_comma_separator', 'amount_no_decimals_with_comma_separator')
+            .replace('amount_with_period_and_space_separator', 'amount_no_decimals_with_period_and_space_separator')
+            .replace('amount_with_space_separator', 'amount_no_decimals_with_space_separator')
+            .replace('amount_with_apostrophe_separator', 'amount_no_decimals_with_apostrophe_separator')
+            .replace('amount', 'amount_no_decimals');
+          return window.Shopify.formatMoney(cents, fmtNoDecimals);
         }
       } catch (e) {}
       try {
-        return new Intl.NumberFormat(undefined, { style: 'currency', currency: currency, minimumFractionDigits: 2 }).format(cents / 100);
+        return new Intl.NumberFormat(undefined, { style: 'currency', currency: currency, minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(cents / 100);
       } catch (e2) {}
-      return (cents / 100).toFixed(2);
+      return String(Math.round(cents / 100));
     }
 
-    function getQtyForProduct(cart, productId) {
+    var collectionCache = window.__slBuy3CollectionCache = window.__slBuy3CollectionCache || {};
+
+    function fetchCollectionProductIds(handle) {
+      if (!handle) return Promise.resolve({});
+      if (collectionCache[handle] && collectionCache[handle].promise) return collectionCache[handle].promise;
+
+      var ids = {};
+      var page = 1;
+      var maxPages = 10;
+
+      function loadNext() {
+        var url = '/collections/' + encodeURIComponent(handle) + '/products.json?limit=250&page=' + page;
+        return fetch(url, { credentials: 'same-origin' })
+          .then(function(r) { return r.json(); })
+          .then(function(data) {
+            var products = data && data.products ? data.products : [];
+            for (var i = 0; i < products.length; i++) {
+              if (products[i] && products[i].id) ids[String(products[i].id)] = true;
+            }
+            if (!products.length || page >= maxPages) return ids;
+            page += 1;
+            return loadNext();
+          });
+      }
+
+      collectionCache[handle] = collectionCache[handle] || {};
+      collectionCache[handle].promise = loadNext().catch(function() { return ids; });
+      return collectionCache[handle].promise;
+    }
+
+    function getQtyForCollection(cart, productIdsMap) {
       if (!cart || !cart.items || !cart.items.length) return 0;
       var sum = 0;
       for (var i = 0; i < cart.items.length; i++) {
         var it = cart.items[i];
-        if (String(it.product_id) === String(productId)) sum += (it.quantity || 0);
+        if (productIdsMap && productIdsMap[String(it.product_id)] === true) sum += (it.quantity || 0);
       }
       return sum;
     }
 
-    function updateUI(cart) {
-      var productId = root.getAttribute('data-sl-buy3-product-id');
+    function updateUI(cart, productIdsMap) {
       var offerQty = parseInt(root.getAttribute('data-sl-buy3-offer-qty') || '3', 10) || 3;
       var offerPrice = parseInt(root.getAttribute('data-sl-buy3-offer-price') || '0', 10) || 0;
       var regularTotal = parseInt(root.getAttribute('data-sl-buy3-regular-total') || '0', 10) || 0;
       var savings = parseInt(root.getAttribute('data-sl-buy3-savings') || '0', 10) || 0;
       var currency = root.getAttribute('data-sl-buy3-currency') || (cart && cart.currency) || 'EGP';
 
-      var qty = getQtyForProduct(cart, productId);
+      var qty = getQtyForCollection(cart, productIdsMap);
       var remaining = Math.max(0, offerQty - qty);
       var progress = Math.min(100, (qty / offerQty) * 100);
 
@@ -370,12 +420,14 @@
     }
 
     function refresh() {
-      try {
-        fetch('/cart.js', { credentials: 'same-origin' })
-          .then(function(r) { return r.json(); })
-          .then(function(cart) { updateUI(cart); })
-          .catch(function() {});
-      } catch (e) {}
+      var handle = root.getAttribute('data-sl-buy3-collection-handle');
+      fetchCollectionProductIds(handle)
+        .then(function(idsMap) {
+          return fetch('/cart.js', { credentials: 'same-origin' })
+            .then(function(r) { return r.json(); })
+            .then(function(cart) { updateUI(cart, idsMap); });
+        })
+        .catch(function() {});
     }
 
     refresh();
@@ -384,8 +436,9 @@
       document.addEventListener(eventName, function(e) {
         var detail = e && e.detail ? e.detail : null;
         var cart = detail && (detail.cart || detail);
-        if (cart) updateUI(cart);
-        else setTimeout(refresh, 120);
+        if (!cart) { setTimeout(refresh, 120); return; }
+        var handle = root.getAttribute('data-sl-buy3-collection-handle');
+        fetchCollectionProductIds(handle).then(function(idsMap) { updateUI(cart, idsMap); }).catch(function() { updateUI(cart, {}); });
       });
     });
 

@@ -9,7 +9,8 @@
       "loading": "Checking your cart…",
       "add_more": "Add %count% more to unlock the offer and save %save%.",
       "unlocked": "Offer unlocked! You got the deal.",
-      "missing_product": "Add this section to a product page, or choose a product in settings."
+      "missing_product": "Add this section to a product page, or choose a product in settings.",
+      "missing_collection": "Choose a collection in the section settings."
     }
   }
 }
