@@ -2,6 +2,7 @@
   "sections": {
     "sl_buy3_offer": {
       "badge": "Offer",
+      "urgency": "Limited-time deal",
       "title": "Buy 3 for",
       "instead_of": "Instead of",
       "save": "Save",

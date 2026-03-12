@@ -68,23 +68,30 @@
   >
     <div class="sl-buy3-offer__inner">
       <p class="sl-buy3-offer__kicker">
-        <span class="sl-buy3-offer__badge">{{ 'sections.sl_buy3_offer.badge' | t | default: 'Offer' }}</span>
+        <span class="sl-buy3-offer__badge">
+          <span class="sl-buy3-offer__badge-dot" aria-hidden="true"></span>
+          {{ 'sections.sl_buy3_offer.urgency' | t | default: 'Limited-time deal' }}
+        </span>
         <span class="sl-buy3-offer__product">{{ target_product.title }}</span>
       </p>
 
-      <h3 class="sl-buy3-offer__title">
-        {{ 'sections.sl_buy3_offer.title' | t | default: 'Buy 3 for' }}
-        <span class="sl-buy3-offer__price" data-sl-buy3-offer-price-text>{{ offer_price_cents | money }}</span>
-      </h3>
+      <div class="sl-buy3-offer__deal-row">
+        <h3 class="sl-buy3-offer__title">
+          {{ 'sections.sl_buy3_offer.title' | t | default: 'Buy 3 for' }}
+          <span class="sl-buy3-offer__price" data-sl-buy3-offer-price-text>{{ offer_price_cents | money }}</span>
+        </h3>
 
-      <p class="sl-buy3-offer__subtitle">
-        {{ 'sections.sl_buy3_offer.instead_of' | t | default: 'Instead of' }}
-        <span class="sl-buy3-offer__was" data-sl-buy3-regular-total-text>{{ regular_total_cents | money }}</span>
-        <span class="sl-buy3-offer__save">
-          {{ 'sections.sl_buy3_offer.save' | t | default: 'Save' }}
-          <span data-sl-buy3-save-value>{{ savings_cents | money }}</span>
-        </span>
-      </p>
+        <div class="sl-buy3-offer__deal-meta">
+          <span class="sl-buy3-offer__save">
+            {{ 'sections.sl_buy3_offer.save' | t | default: 'Save' }}
+            <span data-sl-buy3-save-value>{{ savings_cents | money }}</span>
+          </span>
+          <span class="sl-buy3-offer__instead">
+            {{ 'sections.sl_buy3_offer.instead_of' | t | default: 'Instead of' }}
+            <span class="sl-buy3-offer__was" data-sl-buy3-regular-total-text>{{ regular_total_cents | money }}</span>
+          </span>
+        </div>
+      </div>
 
       <div class="sl-buy3-offer__message" aria-live="polite">
         <span class="sl-buy3-offer__icon" aria-hidden="true">🛍️</span>
@@ -111,9 +118,18 @@
       padding: 16px 20px;
       background: #ffffff;
       border-radius: 12px;
-      border: 1px solid rgba(15, 23, 42, 0.08);
-      box-shadow: 0 10px 26px rgba(15, 23, 42, 0.12);
+      border: 1px solid rgba(15, 23, 42, 0.1);
+      box-shadow: 0 14px 34px rgba(15, 23, 42, 0.16);
       overflow: hidden;
+      position: relative;
+    }
+    #sl-buy3-offer-{{ sid }}.sl-buy3-offer::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(800px 220px at 20% -20%, rgba(34, 197, 94, 0.18), transparent 60%),
+                  radial-gradient(700px 240px at 120% 0%, rgba(59, 130, 246, 0.14), transparent 55%);
     }
     #sl-buy3-offer-{{ sid }} .sl-buy3-offer__inner { display: grid; gap: 10px; }
     #sl-buy3-offer-{{ sid }} .sl-buy3-offer__kicker {
@@ -126,46 +142,85 @@
       font-size: 0.92rem;
       letter-spacing: 0.01em;
       font-weight: 500;
+      position: relative;
     }
     #sl-buy3-offer-{{ sid }} .sl-buy3-offer__badge {
       display: inline-flex;
+      align-items: center;
+      gap: 8px;
       padding: 4px 10px;
       border-radius: 999px;
-      background: rgba(15, 23, 42, 0.04);
-      color: #111827;
-      font-weight: 600;
-      font-size: 0.8rem;
+      background: rgba(15, 23, 42, 0.06);
+      color: #0f172a;
+      font-weight: 800;
+      font-size: 0.78rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      border: 1px solid rgba(15, 23, 42, 0.12);
+      box-shadow: 0 10px 22px rgba(15, 23, 42, 0.12);
+      position: relative;
+      isolation: isolate;
+      animation: sl-buy3-pulse 1.4s ease-in-out infinite;
+    }
+    #sl-buy3-offer-{{ sid }} .sl-buy3-offer__badge::after {
+      content: "";
+      position: absolute;
+      inset: -6px;
+      border-radius: 999px;
+      border: 2px solid rgba(34, 197, 94, 0.35);
+      opacity: 0;
+      transform: scale(0.92);
+      animation: sl-buy3-ring 1.4s ease-out infinite;
+      z-index: -1;
+    }
+    #sl-buy3-offer-{{ sid }} .sl-buy3-offer__badge-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #22c55e;
+      box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.18);
     }
     #sl-buy3-offer-{{ sid }} .sl-buy3-offer__product { font-weight: 600; color: #111827; }
     #sl-buy3-offer-{{ sid }} .sl-buy3-offer__title {
       margin: 0;
-      font-size: 1.15rem;
+      font-size: 1.12rem;
       line-height: 1.25;
       color: #111827;
       letter-spacing: 0.01em;
-      font-weight: 750;
+      font-weight: 900;
+      display: inline-flex;
+      align-items: baseline;
+      gap: 8px;
     }
     #sl-buy3-offer-{{ sid }} .sl-buy3-offer__price { color: #15803d; font-weight: 800; white-space: nowrap; }
-    #sl-buy3-offer-{{ sid }} .sl-buy3-offer__subtitle {
-      margin: 0;
-      color: #374151;
-      font-size: 0.95rem;
+    #sl-buy3-offer-{{ sid }} .sl-buy3-offer__deal-row {
       display: flex;
       align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
       flex-wrap: wrap;
-      gap: 8px;
+    }
+    #sl-buy3-offer-{{ sid }} .sl-buy3-offer__deal-meta {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      color: #374151;
+      font-size: 0.92rem;
     }
     #sl-buy3-offer-{{ sid }} .sl-buy3-offer__was { text-decoration: line-through; opacity: 0.85; white-space: nowrap; }
     #sl-buy3-offer-{{ sid }} .sl-buy3-offer__save {
-      margin-inline-start: auto;
       color: #0f172a;
-      font-weight: 650;
-      background: rgba(34, 197, 94, 0.12);
-      border: 1px solid rgba(34, 197, 94, 0.18);
+      font-weight: 850;
+      background: rgba(34, 197, 94, 0.14);
+      border: 1px solid rgba(34, 197, 94, 0.22);
       padding: 3px 10px;
       border-radius: 999px;
       white-space: nowrap;
+      box-shadow: 0 10px 22px rgba(34, 197, 94, 0.18);
     }
+    #sl-buy3-offer-{{ sid }} .sl-buy3-offer__instead { white-space: nowrap; opacity: 0.9; }
     #sl-buy3-offer-{{ sid }} .sl-buy3-offer__message {
       margin: 6px 0 0;
       display: inline-flex;
@@ -218,11 +273,29 @@
     }
     #sl-buy3-offer-{{ sid }}.sl-buy3-offer--no-stripes .sl-buy3-offer__stripes { display: none; }
     @keyframes sl-buy3-stripes { from { background-position: 0 0; } to { background-position: 14px 0; } }
-    #sl-buy3-offer-{{ sid }}.sl-buy3-offer--rtl .sl-buy3-offer__subtitle { flex-direction: row-reverse; }
-    #sl-buy3-offer-{{ sid }}.sl-buy3-offer--rtl .sl-buy3-offer__save { margin-inline-start: 0; margin-inline-end: auto; }
+    @keyframes sl-buy3-pulse {
+      0%, 100% { transform: translateZ(0) scale(1); }
+      50% { transform: translateZ(0) scale(1.03); }
+    }
+    @keyframes sl-buy3-ring {
+      0% { opacity: 0.0; transform: scale(0.92); }
+      30% { opacity: 0.55; }
+      100% { opacity: 0; transform: scale(1.12); }
+    }
+    #sl-buy3-offer-{{ sid }}.sl-buy3-offer--rtl .sl-buy3-offer__deal-row { flex-direction: row-reverse; }
+    #sl-buy3-offer-{{ sid }}.sl-buy3-offer--rtl .sl-buy3-offer__deal-meta { justify-content: flex-start; }
+    @media screen and (max-width: 749px) {
+      #sl-buy3-offer-{{ sid }} .sl-buy3-offer__deal-row { justify-content: flex-start; }
+      #sl-buy3-offer-{{ sid }} .sl-buy3-offer__deal-meta { width: 100%; justify-content: flex-start; }
+    }
     @media (prefers-reduced-motion: reduce) {
       #sl-buy3-offer-{{ sid }} .sl-buy3-offer__fill,
-      #sl-buy3-offer-{{ sid }} .sl-buy3-offer__stripes { animation: none !important; transition: none !important; }
+      #sl-buy3-offer-{{ sid }} .sl-buy3-offer__stripes,
+      #sl-buy3-offer-{{ sid }} .sl-buy3-offer__badge,
+      #sl-buy3-offer-{{ sid }} .sl-buy3-offer__badge::after {
+        animation: none !important;
+        transition: none !important;
+      }
     }
   </style>
 

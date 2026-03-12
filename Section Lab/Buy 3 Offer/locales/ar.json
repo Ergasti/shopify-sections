@@ -2,6 +2,7 @@
   "sections": {
     "sl_buy3_offer": {
       "badge": "عرض",
+      "urgency": "عرض لفترة محدودة",
       "title": "اشتري 3 بـ",
       "instead_of": "بدل",
       "save": "وفّر",
