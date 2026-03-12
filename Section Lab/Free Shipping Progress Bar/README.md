@@ -55,6 +55,25 @@ The bar appears when the cart has items (unless you turn off “Hide when cart i
 
 Use the snippet when you need the bar inside another section or a custom layout.
 
+Example — Arabic (Egyptian), threshold 650:
+
+```liquid
+{% render 'sl-free-shipping-progress-bar',
+  threshold_amount: 650,
+  success_message: "وصلكم الشحن المجاني!",
+  progress_message_template: "ضيفوا %amount% زيادة عشان الشحن المجاني",
+  hide_when_cart_empty: true,
+  fill_color_start: "#4ade80",
+  fill_color_end: "#16a34a",
+  show_stripes: true,
+  tier_message_almost: "قربتم! باقي %amount% والشحن المجاني وصلكم",
+  tier_message_close: "قربتم! ضيفوا %amount% زيادة عشان الشحن المجاني",
+  tier_message_mid: "ضيفوا %amount% زيادة عشان توصلكم الشحن المجاني",
+  tier_message_far: "الشحن مجاني لما تضيفوا %amount% زيادة"
+%}
+```
+
+English Example:
 ```liquid
 {% render 'sl-free-shipping-progress-bar',
   threshold_amount: 50,
