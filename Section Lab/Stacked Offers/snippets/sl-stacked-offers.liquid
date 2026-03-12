@@ -206,14 +206,29 @@
       z-index: 2;
       padding: 3px 10px;
       border-radius: 999px;
-      background: rgba(15,23,42,.06);
-      border: 1px solid rgba(15,23,42,.12);
-      color: #0f172a;
+      background: rgba(15,23,42,.80);
+      border: 1px solid rgba(15,23,42,.90);
+      color: #fefce8;
       font-size: .72rem;
       font-weight: 700;
       letter-spacing: .06em;
       text-transform: uppercase;
       white-space: nowrap;
+      box-shadow: 0 10px 22px rgba(15,23,42,.50);
+      animation: sl-so-pulse 1.4s ease-in-out infinite;
+      position: absolute;
+      isolation: isolate;
+    }
+    #sl-stacked-offers-{{ sid }}.sl-stacked-offers--urgency .sl-stacked-offers__badge::after {
+      content: "";
+      position: absolute;
+      inset: -6px;
+      border-radius: 999px;
+      border: 2px solid rgba(248,113,113,0.85);
+      opacity: 0;
+      transform: scale(.92);
+      animation: sl-so-ring 1.4s ease-out infinite;
+      z-index: -1;
     }
     #sl-stacked-offers-{{ sid }} .sl-stacked-offers__dot {
       width: 7px; height: 7px;
@@ -375,6 +390,15 @@
       animation: sl-so-stripes .8s linear infinite;
     }
     @keyframes sl-so-stripes { from { background-position: 0 0; } to { background-position: 12px 0; } }
+    @keyframes sl-so-pulse {
+      0%,100% { transform: scale(1); box-shadow: 0 10px 22px rgba(15,23,42,.45); }
+      50%     { transform: scale(1.03); box-shadow: 0 14px 30px rgba(15,23,42,.65); }
+    }
+    @keyframes sl-so-ring {
+      0%   { opacity: 0;   transform: scale(.92); }
+      30%  { opacity: .55; transform: scale(1.02); }
+      100% { opacity: 0;   transform: scale(1.10); }
+    }
     /* ── Earned state (inside bundle row) ────────────────── */
     #sl-stacked-offers-{{ sid }} .sl-stacked-offers__earned {
       display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
