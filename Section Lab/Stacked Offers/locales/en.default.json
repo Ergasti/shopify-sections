@@ -1,0 +1,19 @@
+{
+  "sections": {
+    "sl_stacked_offers": {
+      "urgency": "Stack & save",
+      "bundle_title": "Buy 3 for",
+      "instead_of": "Instead of",
+      "save": "Save",
+      "loading": "Checking your cart…",
+      "bundle_none": "Add %count% more to unlock your first deal and save %save%.",
+      "bundle_next": "Add %count% more to unlock the next deal and save %save%.",
+      "bundle_earned": "Unlocked %deals% deal(s). Add %count% more to unlock another.",
+      "total_saved": "Total saved: %amount%",
+      "ship_next": "Add %amount% more to get free delivery.",
+      "ship_earned": "Free delivery unlocked!",
+      "missing_collection": "Choose a qualifying collection in settings."
+    }
+  }
+}
+

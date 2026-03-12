@@ -1,0 +1,19 @@
+{
+  "sections": {
+    "sl_stacked_offers": {
+      "urgency": "زوّد ووفّر",
+      "bundle_title": "اشتري 3 بـ",
+      "instead_of": "بدل",
+      "save": "وفّر",
+      "loading": "بنراجع السلة…",
+      "bundle_none": "زوّد %count% كمان عشان تفعل أول عرض وتوفّر %save%.",
+      "bundle_next": "زوّد %count% كمان عشان تفعل العرض الجاي وتوفّر %save%.",
+      "bundle_earned": "اتفعل %deals% عرض. زوّد %count% كمان عشان تفعل عرض كمان.",
+      "total_saved": "إجمالي التوفير: %amount%",
+      "ship_next": "زوّد %amount% كمان عشان التوصيل يبقى مجاني.",
+      "ship_earned": "التوصيل المجاني اتفعل!",
+      "missing_collection": "اختار كولكشن من إعدادات السكشن."
+    }
+  }
+}
+

@@ -1,0 +1,420 @@
+{% comment %}
+  SL - Stacked Offers (Snippet)
+  Use when you need BOTH:
+   - Repeating bundle deal by collection quantity (e.g. 3 for 299; 6 = 2 deals)
+   - Free delivery threshold (cart total, e.g. 650)
+
+  Render:
+  {% render 'sl-stacked-offers',
+    collection_handle: collection.handle,
+    collection_title: collection.title,
+    offer_qty: 3,
+    offer_price: 299,
+    regular_total: 750,
+    free_shipping_threshold_amount: 650,
+    fill_color_start: '#4ade80',
+    fill_color_end: '#16a34a',
+    section_id: section.id
+  %}
+{% endcomment %}
+
+{% assign sid = section_id | default: id | default: block_id | default: 'sl-stacked-offers' %}
+
+{% assign handle = collection_handle | default: '' %}
+{% assign title = collection_title | default: handle %}
+
+{% assign offer_qty = offer_qty | default: 3 | plus: 0 %}
+{% if offer_qty <= 0 %}{% assign offer_qty = 3 %}{% endif %}
+
+{% assign offer_price_cents = offer_price | default: 299 | plus: 0 | times: 100 %}
+{% assign regular_total_cents = regular_total | default: 750 | plus: 0 | times: 100 %}
+{% assign savings_cents = regular_total_cents | minus: offer_price_cents %}
+{% if savings_cents < 0 %}{% assign savings_cents = 0 %}{% endif %}
+
+{% assign free_shipping_threshold_cents = free_shipping_threshold_amount | default: 650 | plus: 0 | times: 100 %}
+
+{% assign fill_color_start = fill_color_start | default: '#4ade80' | strip %}
+{% assign fill_color_end = fill_color_end | default: '#16a34a' | strip %}
+
+{% assign locale_iso = request.locale.iso_code | default: 'en' %}
+{% assign is_rtl = false %}
+{% if locale_iso == 'ar' or locale_iso == 'he' or locale_iso == 'fa' or locale_iso == 'ur' or locale_iso == 'yi' %}{% assign is_rtl = true %}{% endif %}
+
+{% if handle == blank %}
+  {% if request.design_mode %}
+    <div style="padding: 16px; border: 1px dashed #ccc; border-radius: 8px; background: #fafafa;">
+      <strong>SL - Stacked Offers (Snippet)</strong><br>
+      {{ 'sections.sl_stacked_offers.missing_collection' | t | default: 'Pass collection_handle when rendering this snippet.' }}
+    </div>
+  {% endif %}
+{% else %}
+  <div
+    id="sl-stacked-offers-{{ sid }}"
+    class="sl-stacked-offers{% if is_rtl %} sl-stacked-offers--rtl{% endif %}"
+    style="--sl-so-fill-start: {{ fill_color_start }}; --sl-so-fill-end: {{ fill_color_end }};"
+    data-sl-stacked-offers
+    data-sl-so-collection-handle="{{ handle }}"
+    data-sl-so-offer-qty="{{ offer_qty }}"
+    data-sl-so-offer-price="{{ offer_price_cents }}"
+    data-sl-so-regular-total="{{ regular_total_cents }}"
+    data-sl-so-savings="{{ savings_cents }}"
+    data-sl-so-free-ship-threshold="{{ free_shipping_threshold_cents }}"
+    data-sl-so-currency="{{ cart.currency | default: shop.currency | default: 'EGP' }}"
+    data-sl-so-msg-bundle-next="{{ 'sections.sl_stacked_offers.bundle_next' | t | default: 'Add %count% more to unlock the next deal and save %save%.' | escape }}"
+    data-sl-so-msg-bundle-earned="{{ 'sections.sl_stacked_offers.bundle_earned' | t | default: 'Unlocked %deals% deal(s). Add %count% more to unlock another.' | escape }}"
+    data-sl-so-msg-bundle-none="{{ 'sections.sl_stacked_offers.bundle_none' | t | default: 'Add %count% more to unlock your first deal and save %save%.' | escape }}"
+    data-sl-so-total_saved="{{ 'sections.sl_stacked_offers.total_saved' | t | default: 'Total saved: %amount%' | escape }}"
+    data-sl-so-msg-ship-next="{{ 'sections.sl_stacked_offers.ship_next' | t | default: 'Add %amount% more to get free delivery.' | escape }}"
+    data-sl-so-msg-ship-earned="{{ 'sections.sl_stacked_offers.ship_earned' | t | default: 'Free delivery unlocked!' | escape }}"
+    {% if is_rtl %}dir="rtl"{% endif %}
+  >
+    <div class="sl-stacked-offers__inner">
+      <div class="sl-stacked-offers__top">
+        <span class="sl-stacked-offers__badge">
+          <span class="sl-stacked-offers__dot" aria-hidden="true"></span>
+          {{ 'sections.sl_stacked_offers.urgency' | t | default: 'Stack & save' }}
+        </span>
+        <span class="sl-stacked-offers__label">{{ title }}</span>
+      </div>
+
+      <div class="sl-stacked-offers__row">
+        <div class="sl-stacked-offers__deal">
+          <div class="sl-stacked-offers__deal-title">
+            {{ 'sections.sl_stacked_offers.bundle_title' | t | default: 'Buy 3 for' }}
+            <span class="sl-stacked-offers__deal-price" data-sl-so-offer-price-text>{{ offer_price_cents | money_without_trailing_zeros }}</span>
+          </div>
+          <div class="sl-stacked-offers__deal-meta">
+            <span class="sl-stacked-offers__save">
+              {{ 'sections.sl_stacked_offers.save' | t | default: 'Save' }}
+              <span data-sl-so-save-value>{{ savings_cents | money_without_trailing_zeros }}</span>
+            </span>
+            <span class="sl-stacked-offers__instead">
+              {{ 'sections.sl_stacked_offers.instead_of' | t | default: 'Instead of' }}
+              <span class="sl-stacked-offers__was" data-sl-so-regular-total-text>{{ regular_total_cents | money_without_trailing_zeros }}</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sl-stacked-offers__progress">
+        <div class="sl-stacked-offers__line">
+          <span class="sl-stacked-offers__icon" aria-hidden="true">🧴</span>
+          <span class="sl-stacked-offers__text" data-sl-so-bundle-msg>{{ 'sections.sl_stacked_offers.loading' | t | default: 'Checking your cart…' }}</span>
+        </div>
+        <div class="sl-stacked-offers__earned" data-sl-so-earned hidden>
+          <div class="sl-stacked-offers__earned-bars" data-sl-so-earned-bars aria-hidden="true"></div>
+          <div class="sl-stacked-offers__earned-total" data-sl-so-earned-total></div>
+        </div>
+        <div class="sl-stacked-offers__track" aria-hidden="true">
+          <div class="sl-stacked-offers__fill" data-sl-so-bundle-fill style="--progress:0%"><span class="sl-stacked-offers__stripes"></span></div>
+        </div>
+      </div>
+
+      <div class="sl-stacked-offers__progress">
+        <div class="sl-stacked-offers__line">
+          <span class="sl-stacked-offers__icon" aria-hidden="true">🚚</span>
+          <span class="sl-stacked-offers__text" data-sl-so-ship-msg>{{ 'sections.sl_stacked_offers.loading' | t | default: 'Checking your cart…' }}</span>
+        </div>
+        <div class="sl-stacked-offers__track" aria-hidden="true">
+          <div class="sl-stacked-offers__fill" data-sl-so-ship-fill style="--progress:0%"><span class="sl-stacked-offers__stripes"></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    #sl-stacked-offers-{{ sid }}.sl-stacked-offers{
+      width:100%;
+      max-width: 560px;
+      margin: 16px auto;
+      padding: 16px 18px;
+      background:#fff;
+      border-radius:14px;
+      border:1px solid rgba(15,23,42,.10);
+      box-shadow:0 14px 34px rgba(15,23,42,.16);
+      overflow:hidden;
+      position:relative;
+    }
+    #sl-stacked-offers-{{ sid }}.sl-stacked-offers::before{
+      content:"";
+      position:absolute;inset:0;pointer-events:none;
+      background: radial-gradient(800px 220px at 20% -20%, rgba(34, 197, 94, 0.18), transparent 60%),
+                  radial-gradient(700px 240px at 120% 0%, rgba(59, 130, 246, 0.14), transparent 55%);
+    }
+    #sl-stacked-offers-{{ sid }} .sl-stacked-offers__inner{display:grid;gap:10px;position:relative}
+    #sl-stacked-offers-{{ sid }} .sl-stacked-offers__top{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    #sl-stacked-offers-{{ sid }} .sl-stacked-offers__badge{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:4px 10px;border-radius:999px;
+      background:rgba(15,23,42,.06);
+      border:1px solid rgba(15,23,42,.12);
+      color:#0f172a;font-weight:900;font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;
+      box-shadow:0 10px 22px rgba(15,23,42,.12);
+      animation: sl-so-pulse 1.4s ease-in-out infinite;
+      position:relative;isolation:isolate;
+    }
+    #sl-stacked-offers-{{ sid }} .sl-stacked-offers__badge::after{
+      content:"";position:absolute;inset:-6px;border-radius:999px;
+      border:2px solid rgba(34,197,94,.35);
+      opacity:0;transform:scale(.92);
+      animation: sl-so-ring 1.4s ease-out infinite;
+      z-index:-1;
+    }
+    #sl-stacked-offers-{{ sid }} .sl-stacked-offers__dot{width:8px;height:8px;border-radius:999px;background:#22c55e;box-shadow:0 0 0 4px rgba(34,197,94,.18)}
+    #sl-stacked-offers-{{ sid }} .sl-stacked-offers__label{font-weight:650;color:#111827;font-size:.92rem}
+
+    #sl-stacked-offers-{{ sid }} .sl-stacked-offers__deal{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    #sl-stacked-offers-{{ sid }} .sl-stacked-offers__deal-title{font-size:1.12rem;font-weight:950;color:#111827;letter-spacing:.01em;display:inline-flex;gap:8px;align-items:baseline;text-align:start;flex:1 1 auto}
+    #sl-stacked-offers-{{ sid }} .sl-stacked-offers__deal-price{color:#15803d;font-weight:950;white-space:nowrap}
+    #sl-stacked-offers-{{ sid }} .sl-stacked-offers__deal-meta{display:inline-flex;align-items:baseline;gap:10px;flex-wrap:wrap;justify-content:flex-end;color:#374151;font-size:.92rem;flex:0 0 auto}
+    #sl-stacked-offers-{{ sid }} .sl-stacked-offers__save{color:#0f172a;font-weight:900;background:rgba(34,197,94,.14);border:1px solid rgba(34,197,94,.22);padding:3px 10px;border-radius:999px;white-space:nowrap;box-shadow:0 10px 22px rgba(34,197,94,.18)}
+    #sl-stacked-offers-{{ sid }} .sl-stacked-offers__instead{white-space:nowrap;opacity:.9}
+    #sl-stacked-offers-{{ sid }} .sl-stacked-offers__was{text-decoration:line-through;opacity:.85}
+
+    #sl-stacked-offers-{{ sid }} .sl-stacked-offers__progress{display:grid;gap:8px}
+    #sl-stacked-offers-{{ sid }} .sl-stacked-offers__earned{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+      color:#0f172a;
+      font-size:0.86rem;
+      font-weight:750;
+      margin-top:-2px;
+    }
+    #sl-stacked-offers-{{ sid }} .sl-stacked-offers__earned-bars{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+    #sl-stacked-offers-{{ sid }} .sl-stacked-offers__earned-bar{
+      width:34px;
+      height:6px;
+      border-radius:999px;
+      background:linear-gradient(90deg,var(--sl-so-fill-start,#4ade80),var(--sl-so-fill-end,#16a34a));
+      box-shadow:0 6px 14px rgba(34,197,94,.18);
+      opacity:0.95;
+    }
+    #sl-stacked-offers-{{ sid }} .sl-stacked-offers__earned-more{
+      padding:2px 8px;
+      border-radius:999px;
+      border:1px solid rgba(15,23,42,.12);
+      background:rgba(15,23,42,.06);
+      font-weight:850;
+    }
+    #sl-stacked-offers-{{ sid }} .sl-stacked-offers__earned-total{
+      background:rgba(34,197,94,.12);
+      border:1px solid rgba(34,197,94,.20);
+      padding:3px 10px;
+      border-radius:999px;
+      white-space:nowrap;
+    }
+    #sl-stacked-offers-{{ sid }} .sl-stacked-offers__line{display:flex;gap:10px;align-items:center;justify-content:center;text-align:center;color:#374151;font-size:.92rem;font-weight:600}
+    #sl-stacked-offers-{{ sid }} .sl-stacked-offers__icon{font-size:1.1rem;line-height:1}
+    #sl-stacked-offers-{{ sid }} .sl-stacked-offers__track{position:relative;width:100%;height:10px;background:#eee;border-radius:10px;overflow:hidden}
+    #sl-stacked-offers-{{ sid }} .sl-stacked-offers__fill{position:absolute;inset:0;width:var(--progress,0%);height:100%;background:linear-gradient(90deg,var(--sl-so-fill-start,#4ade80),var(--sl-so-fill-end,#16a34a));border-radius:10px;transition:width .45s cubic-bezier(.2,.8,.2,1);overflow:hidden}
+    #sl-stacked-offers-{{ sid }} .sl-stacked-offers__stripes{
+      position:absolute;inset:0;
+      background-image:linear-gradient(45deg,rgba(255,255,255,.25) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.25) 50%,rgba(255,255,255,.25) 75%,transparent 75%,transparent);
+      background-size:14px 14px;animation: sl-so-stripes 1s linear infinite;pointer-events:none;
+    }
+
+    #sl-stacked-offers-{{ sid }}.sl-stacked-offers--rtl .sl-stacked-offers__deal{flex-direction:row-reverse}
+    #sl-stacked-offers-{{ sid }}.sl-stacked-offers--rtl .sl-stacked-offers__deal-meta{justify-content:flex-start}
+
+    @keyframes sl-so-stripes{from{background-position:0 0}to{background-position:14px 0}}
+    @keyframes sl-so-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.03)}}
+    @keyframes sl-so-ring{0%{opacity:0;transform:scale(.92)}30%{opacity:.55}100%{opacity:0;transform:scale(1.12)}}
+    @media (prefers-reduced-motion: reduce){
+      #sl-stacked-offers-{{ sid }} .sl-stacked-offers__fill,
+      #sl-stacked-offers-{{ sid }} .sl-stacked-offers__stripes,
+      #sl-stacked-offers-{{ sid }} .sl-stacked-offers__badge,
+      #sl-stacked-offers-{{ sid }} .sl-stacked-offers__badge::after{animation:none !important;transition:none !important}
+    }
+    @media screen and (max-width:749px){
+      #sl-stacked-offers-{{ sid }} .sl-stacked-offers__deal{justify-content:flex-start}
+      #sl-stacked-offers-{{ sid }} .sl-stacked-offers__deal-meta{width:100%;justify-content:flex-start}
+    }
+  </style>
+
+  <script>
+  (function() {
+    var root = document.getElementById('sl-stacked-offers-{{ sid }}');
+    if (!root) return;
+
+    var cache = window.__slStackedOffersCollectionCache = window.__slStackedOffersCollectionCache || {};
+
+    function formatMoneyNoDecimals(cents, currency) {
+      cents = Math.max(0, cents || 0);
+      currency = (currency || '').toUpperCase() || 'EGP';
+      try {
+        if (window.Shopify && typeof window.Shopify.formatMoney === 'function') {
+          var fmt = window.money_format || window.Shopify.money_format || '${{amount}}';
+          var fmtNoDecimals = fmt
+            .replace('amount_with_comma_separator', 'amount_no_decimals_with_comma_separator')
+            .replace('amount_with_period_and_space_separator', 'amount_no_decimals_with_period_and_space_separator')
+            .replace('amount_with_space_separator', 'amount_no_decimals_with_space_separator')
+            .replace('amount_with_apostrophe_separator', 'amount_no_decimals_with_apostrophe_separator')
+            .replace('amount', 'amount_no_decimals');
+          return window.Shopify.formatMoney(cents, fmtNoDecimals);
+        }
+      } catch (e) {}
+      try {
+        return new Intl.NumberFormat(undefined, { style: 'currency', currency: currency, minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(cents / 100);
+      } catch (e2) {}
+      return String(Math.round(cents / 100));
+    }
+
+    function fetchCollectionIds(handle) {
+      if (!handle) return Promise.resolve({});
+      if (cache[handle] && cache[handle].promise) return cache[handle].promise;
+
+      var ids = {};
+      var page = 1;
+      var maxPages = 10;
+
+      function loadNext() {
+        var url = '/collections/' + encodeURIComponent(handle) + '/products.json?limit=250&page=' + page;
+        return fetch(url, { credentials: 'same-origin' })
+          .then(function(r) { return r.json(); })
+          .then(function(data) {
+            var products = data && data.products ? data.products : [];
+            for (var i = 0; i < products.length; i++) {
+              if (products[i] && products[i].id) ids[String(products[i].id)] = true;
+            }
+            if (!products.length || page >= maxPages) return ids;
+            page += 1;
+            return loadNext();
+          });
+      }
+
+      cache[handle] = cache[handle] || {};
+      cache[handle].promise = loadNext().catch(function() { return ids; });
+      return cache[handle].promise;
+    }
+
+    function fetchCart() {
+      return fetch('/cart.js', { credentials: 'same-origin' }).then(function(r) { return r.json(); });
+    }
+
+    function qtyForIds(cart, idsMap) {
+      if (!cart || !cart.items || !cart.items.length) return 0;
+      var sum = 0;
+      for (var i = 0; i < cart.items.length; i++) {
+        var it = cart.items[i];
+        if (idsMap && idsMap[String(it.product_id)] === true) sum += (it.quantity || 0);
+      }
+      return sum;
+    }
+
+    function setProgress(el, pct) {
+      if (!el) return;
+      el.style.setProperty('--progress', pct + '%');
+      el.style.width = pct + '%';
+    }
+
+    function update(cart, idsMap) {
+      var offerQty = parseInt(root.getAttribute('data-sl-so-offer-qty') || '3', 10) || 3;
+      var savings = parseInt(root.getAttribute('data-sl-so-savings') || '0', 10) || 0;
+      var shipThreshold = parseInt(root.getAttribute('data-sl-so-free-ship-threshold') || '0', 10) || 0;
+      var currency = root.getAttribute('data-sl-so-currency') || (cart && cart.currency) || 'EGP';
+
+      var qty = qtyForIds(cart, idsMap);
+      var deals = offerQty > 0 ? Math.floor(qty / offerQty) : 0;
+      var remainder = offerQty > 0 ? (qty % offerQty) : 0;
+      var nextCount = remainder === 0 ? offerQty : (offerQty - remainder);
+      var bundlePct = offerQty > 0 ? Math.min(100, (remainder / offerQty) * 100) : 0;
+
+      var bundleMsgEl = root.querySelector('[data-sl-so-bundle-msg]');
+      var bundleFill = root.querySelector('[data-sl-so-bundle-fill]');
+      if (bundleMsgEl) {
+        var tplNone = root.getAttribute('data-sl-so-msg-bundle-none') || '';
+        var tplEarned = root.getAttribute('data-sl-so-msg-bundle-earned') || '';
+        var msg;
+        if (deals <= 0) {
+          msg = tplNone.replace(/%count%/g, String(nextCount)).replace(/%save%/g, formatMoneyNoDecimals(savings, currency));
+        } else {
+          msg = tplEarned
+            .replace(/%deals%/g, String(deals))
+            .replace(/%count%/g, String(nextCount))
+            .replace(/%save%/g, formatMoneyNoDecimals(savings, currency));
+        }
+        bundleMsgEl.textContent = msg;
+      }
+      setProgress(bundleFill, bundlePct);
+
+      var earnedWrap = root.querySelector('[data-sl-so-earned]');
+      var earnedBars = root.querySelector('[data-sl-so-earned-bars]');
+      var earnedTotal = root.querySelector('[data-sl-so-earned-total]');
+      if (earnedWrap && earnedBars && earnedTotal) {
+        if (deals > 0) {
+          earnedWrap.hidden = false;
+          var maxBars = 5;
+          var barsToShow = Math.min(maxBars, deals);
+          var extra = deals - barsToShow;
+          var html = '';
+          for (var b = 0; b < barsToShow; b++) html += '<span class=\"sl-stacked-offers__earned-bar\"></span>';
+          if (extra > 0) html += '<span class=\"sl-stacked-offers__earned-more\">+' + extra + '</span>';
+          earnedBars.innerHTML = html;
+
+          var totalSavedCents = deals * savings;
+          var tplTotal = root.getAttribute('data-sl-so-total_saved') || 'Total saved: %amount%';
+          earnedTotal.textContent = tplTotal.replace(/%amount%/g, formatMoneyNoDecimals(totalSavedCents, currency));
+        } else {
+          earnedWrap.hidden = true;
+          earnedBars.innerHTML = '';
+          earnedTotal.textContent = '';
+        }
+      }
+
+      var total = cart && typeof cart.total_price === 'number' ? cart.total_price : 0;
+      var remainingShip = Math.max(0, shipThreshold - total);
+      var shipPct = shipThreshold > 0 ? Math.min(100, (total / shipThreshold) * 100) : 0;
+      var shipMsgEl = root.querySelector('[data-sl-so-ship-msg]');
+      var shipFill = root.querySelector('[data-sl-so-ship-fill]');
+      if (shipMsgEl) {
+        if (remainingShip <= 0) {
+          shipMsgEl.textContent = root.getAttribute('data-sl-so-msg-ship-earned') || '';
+        } else {
+          var tplShip = root.getAttribute('data-sl-so-msg-ship-next') || '';
+          shipMsgEl.textContent = tplShip.replace(/%amount%/g, formatMoneyNoDecimals(remainingShip, currency));
+        }
+      }
+      setProgress(shipFill, shipPct);
+    }
+
+    function refresh() {
+      var handle = root.getAttribute('data-sl-so-collection-handle');
+      return fetchCollectionIds(handle)
+        .then(function(idsMap) { return fetchCart().then(function(cart) { update(cart, idsMap); }); })
+        .catch(function() {});
+    }
+
+    refresh();
+    ['cart:refresh','cart:change','cart:updated','product:added'].forEach(function(name){
+      document.addEventListener(name, function(e){
+        var detail = e && e.detail ? e.detail : null;
+        var cart = detail && (detail.cart || detail);
+        if (!cart) { setTimeout(refresh, 120); return; }
+        var handle = root.getAttribute('data-sl-so-collection-handle');
+        fetchCollectionIds(handle).then(function(idsMap){ update(cart, idsMap); }).catch(function(){ update(cart, {}); });
+      });
+    });
+
+    var _fetch = window.fetch;
+    if (typeof _fetch === 'function') {
+      window.fetch = function() {
+        var url = (arguments[0] && arguments[0].url) ? arguments[0].url : arguments[0];
+        var watches = typeof url === 'string' && (
+          url.indexOf('/cart/add') !== -1 ||
+          url.indexOf('/cart/change') !== -1 ||
+          url.indexOf('/cart/update') !== -1 ||
+          url.indexOf('/cart/clear') !== -1
+        );
+        return _fetch.apply(this, arguments).then(function(res) {
+          if (watches) setTimeout(refresh, 150);
+          return res;
+        });
+      };
+    }
+  })();
+  </script>
+{% endif %}
+

@@ -2,7 +2,22 @@
 
 A comprehensive, categorized library of Shopify sections and snippets. Copy what you need into your theme.
 
-**Library last updated:** 2025-02-14
+**Library last updated:** 2026-03-12
+
+---
+
+## Contents
+
+- [Quick reference (by category)](#quick-reference-by-category)
+- [All sections & snippets](#all-sections--snippets)
+- [Section Lab (all sections)](#section-lab-all-sections)
+- [Theme edits (Vogue)](#theme-edits-vogue)
+- [Folder structure](#folder-structure-per-section)
+- [Categories overview](#categories-overview)
+- [Source repositories](#source-repositories-included-in-this-library)
+- [Original sections (this repo)](#original-sections-this-repo)
+- [Plan and progress](#plan-and-progress)
+- [Authors & license](#authors--license)
 
 ---
 
@@ -13,17 +28,27 @@ A comprehensive, categorized library of Shopify sections and snippets. Copy what
 | **Carousels & Sliders** | [Marquee Products](Marquee%20Products/README.md) | bstroshek/marquee-section | 2025-02-14 |
 | | [Fancy Slick Carousel](Fancy%20Slick%20Carousel/README.md) | patrickbolle/shopify-snippets | 2025-02-14 |
 | | [Hero Slider (rocklss)](Hero%20Slider%20(rocklss)/README.md) | rocklss/shopify_section | 2025-02-14 |
-| **Content & Layout** | [Double Block Section](Double%20Block%20Section/README.md) | patrickbolle/shopify-snippets | 2025-02-14 |
-| **Forms & Contact** | [Sectioned Contact Form](Sectioned%20Contact%20Form/README.md) | patrickbolle/shopify-snippets | 2025-02-14 |
-| **Snippets & Utilities** | [Tabbed Description](Tabbed%20Description/README.md) | patrickbolle/shopify-snippets | 2025-02-14 |
-| | [Pagination With Numbers](Pagination%20With%20Numbers/README.md) | patrickbolle/shopify-snippets | 2025-02-14 |
-| | [IP Redirection](IP%20Redirection/README.md) | patrickbolle/shopify-snippets | 2025-02-14 |
-| **Product & Collection** | [SL Price Bubble Widget](Section%20Lab/Price%20Bubble%20Widget/README.md) | Section Lab (paid) | 2025-02-14 |
-| | [SL Icon List (Product Bullets)](Section%20Lab/Icon%20List/README.md) | Section Lab (paid) | 2025-02-14 |
-| | [SL Payment Icons](Section%20Lab/Payment%20Icons/README.md) | Section Lab (paid) | 2025-02-14 |
-| | [SL How to Use (section + snippet)](Section%20Lab/How%20To%20Use/README.md) | Section Lab (metaobjects) | 2025-02-24 |
-| | [Scarcity Bar](Scarcity%20Bar/README.md) | Custom (this repo) | 2025-02-14 |
-| | [Collection Page Swatches](Collection%20Page%20Swatches/README.md) | patrickbolle/shopify-snippets | 2025-02-14 |
+| | [Marquee Products](Marquee%20Products/README.md) | bstroshek/marquee-section | 2026-02-14 |
+| **Content & Layout** | [Double Block Section](Double%20Block%20Section/README.md) | patrickbolle/shopify-snippets | 2026-02-14 |
+| **Forms & Contact** | [Sectioned Contact Form](Sectioned%20Contact%20Form/README.md) | patrickbolle/shopify-snippets | 2026-02-14 |
+| **Snippets & Utilities** | [IP Redirection](IP%20Redirection/README.md) | patrickbolle/shopify-snippets | 2026-02-14 |
+| | [Pagination With Numbers](Pagination%20With%20Numbers/README.md) | patrickbolle/shopify-snippets | 2026-02-14 |
+| | [Tabbed Description](Tabbed%20Description/README.md) | patrickbolle/shopify-snippets | 2026-02-14 |
+| **Product & Collection** | [Collection Page Swatches](Collection%20Page%20Swatches/README.md) | patrickbolle/shopify-snippets | 2026-02-14 |
+| | [SL – Price Bubble Widget](Section%20Lab/Price%20Bubble%20Widget/README.md) | Section Lab (paid) | 2026-02-16 |
+| | [SL – Icon List (Product Bullets)](Section%20Lab/Icon%20List/README.md) | Section Lab (paid) | 2026-02-18 |
+| | [SL – Payment Icons](Section%20Lab/Payment%20Icons/README.md) | Section Lab (paid) | 2026-02-18 |
+| | [SL – Bundle](Section%20Lab/Bundle/README.md) | Section Lab (this repo) | 2026-02-25 |
+| | [Scarcity Bar](Scarcity%20Bar/README.md) | Custom (this repo) | 2026-02-25 |
+| | [SL – How to Use](Section%20Lab/How%20To%20Use/README.md) | Section Lab (metaobjects) | 2026-02-27 |
+| | [SL – Frequently Bought Together](Section%20Lab/Frequently%20Bought%20Together/README.md) | Section Lab (paid) | 2026-02-27 |
+| | [SL – Volume Discount](Section%20Lab/Volume%20Discount/README.md) | Section Lab (this repo) | 2026-02-28 |
+| | [SL – Active Ingredients](Section%20Lab/Active%20Ingredients/README.md) | Section Lab (this repo) | 2026-03-07 |
+| | [SL – Highlights](Section%20Lab/Highlights/README.md) | Section Lab (this repo) | 2026-03-07 |
+| | [SL – Buy 3 Offer](Section%20Lab/Buy%203%20Offer/README.md) | Section Lab (this repo) | 2026-03-12 |
+| | [SL – Stacked Offers](Section%20Lab/Stacked%20Offers/README.md) | Section Lab (this repo) | 2026-03-12 |
+| | [Product Card Label](Product%20Card%20Label/README.md) | this repo | 2026-02-25 |
+| **Theme edits** | [Vogue theme edits](theme%20edits/Vogue/README.md) | this repo | 2026-03-07 |
 | **Media & Gallery** | [Image Gallery (BoldizArt)](Image%20Gallery%20(BoldizArt)/README.md) | BoldizArt/Shopify-Image-Gallery | 2025-02-14 |
 | **Video / Media** | [SL - Native Video Slider](Section%20Lab/Native%20Video%20Slider/README.md) | Section Lab (paid) | 2025-02-14 |
 | | [Media Slider Snap](Media%20Slider%20Snap/README.md) | Custom (video-section2) | 2025-02-14 |
@@ -45,6 +70,90 @@ A comprehensive, categorized library of Shopify sections and snippets. Copy what
 
 ---
 
+## All sections & snippets
+
+Every folder that contains `.liquid` section or snippet files. Sorted by last updated (oldest first, most recent at bottom). Each folder has a README with install steps and source.
+
+| Section / Snippet | Description | Updated |
+|------------------|-------------|---------|
+| [App Optimization](App%20Optimization/readme.md) | Optimize ScriptTag-loaded apps (block or load on interaction). | 2026-02-14 |
+| [Collection Page Swatches](Collection%20Page%20Swatches/README.md) | Color swatches on collection pages (snippet). | 2026-02-14 |
+| [Double Block Section](Double%20Block%20Section/README.md) | Two-block hero: 3/4 + 1/4 image layout. | 2026-02-14 |
+| [FAQ](FAQ/readme.md) | Accessible FAQ with SEO FAQ schema. | 2026-02-14 |
+| [IP Redirection](IP%20Redirection/README.md) | Redirect by IP / geo (snippet). | 2026-02-14 |
+| [Marquee Products](Marquee%20Products/README.md) | Horizontal scrolling product marquee. | 2026-02-14 |
+| [Media Slider Snap](Media%20Slider%20Snap/README.md) | Video/media slider with snap scroll. | 2026-02-14 |
+| [Pagination With Numbers](Pagination%20With%20Numbers/README.md) | Numbered pagination (snippet). | 2026-02-14 |
+| [Quiz](Quiz/README.md) | Product recommendation quiz section. | 2026-02-14 |
+| [Sectioned Contact Form](Sectioned%20Contact%20Form/README.md) | Drag-and-drop contact form builder. | 2026-02-14 |
+| [Tabbed Description](Tabbed%20Description/README.md) | Product description in tabs by H6 (snippet). | 2026-02-14 |
+| [Tooltips](Tooltips/README.md) | Product tooltips section. | 2026-02-14 |
+| [Video Slider](Video%20Slider/README.md) | Horizontal video slider (Swiper.js). | 2026-02-14 |
+| [Videos Slider](Videos%20Slider/README.md) | Mixed media carousel (images + videos). | 2026-02-14 |
+| [SL – Announcement Bar](Section%20Lab/Announcement%20Bar/README.md) | Top announcement bar. | 2026-02-16 |
+| [SL – Native Video Slider](Section%20Lab/Native%20Video%20Slider/README.md) | Native video slider. | 2026-02-16 |
+| [SL – Price Bubble Widget](Section%20Lab/Price%20Bubble%20Widget/README.md) | Price bubble / badge. | 2026-02-16 |
+| [SL – Story Navigation](Section%20Lab/Story%20Navigation/README.md) | Story-style navigation. | 2026-02-16 |
+| [SL – Delivery Countdown](Section%20Lab/Delivery%20Countdown/README.md) | Delivery countdown timer. | 2026-02-18 |
+| [SL – Face Proof Bubble](Section%20Lab/Face%20Proof%20Bubble/README.md) | Social proof bubble. | 2026-02-18 |
+| [SL – Icon List](Section%20Lab/Icon%20List/README.md) | Product bullets / icon list. | 2026-02-18 |
+| [SL – Payment Icons](Section%20Lab/Payment%20Icons/README.md) | Payment method icons. | 2026-02-18 |
+| [SL – Scrolling Content](Section%20Lab/Scrolling%20Content/README.md) | Horizontal scrolling marquee text. | 2026-02-24 |
+| [Product Card Label](Product%20Card%20Label/README.md) | On-card label from metafield (snippet). | 2026-02-25 |
+| [Scarcity Bar](Scarcity%20Bar/README.md) | "Only X left" urgency bar with progress. | 2026-02-25 |
+| [SL – Bundle](Section%20Lab/Bundle/README.md) | Bundle products grid + detail popups (Yves Rocher style). | 2026-02-25 |
+| [SL – Before And After](Section%20Lab/Before%20And%20After/README.md) | Before/after video or media. | 2026-02-26 |
+| [SL – Real Results](Section%20Lab/Real%20Results/README.md) | Real results / testimonials. | 2026-02-26 |
+| [SL – Frequently Bought Together](Section%20Lab/Frequently%20Bought%20Together/README.md) | Product slider (recommendations or manual). | 2026-02-27 |
+| [SL – How to Use](Section%20Lab/How%20To%20Use/README.md) | Product "how to use" steps (metaobject or blocks). | 2026-02-27 |
+| [SL – Social Proof Video](Section%20Lab/Social%20Proof%20Video/README.md) | Social proof video section. | 2026-02-27 |
+| [SL – UGC Videos Homepage](Section%20Lab/UGC%20Videos%20Homepage/README.md) | UGC videos on homepage. | 2026-02-27 |
+| [SL – Free Shipping Progress Bar](Section%20Lab/Free%20Shipping%20Progress%20Bar/README.md) | Cart free-shipping threshold progress bar. | 2026-02-28 |
+| [SL – Sales Nudge Widget](Section%20Lab/Nudges%20Widget/README.md) | Sales nudge / urgency widget. | 2026-02-28 |
+| [SL – Volume Discount](Section%20Lab/Volume%20Discount/README.md) | Volume/quantity discount tiers (metaobject). | 2026-02-28 |
+| [SL – Active Ingredients](Section%20Lab/Active%20Ingredients/README.md) | Product active botanical ingredients accordion + popup (Yves Rocher style). | 2026-03-07 |
+| [SL – Highlights](Section%20Lab/Highlights/README.md) | Product highlights accordion: icon + label, optional popup. | 2026-03-07 |
+| [SL – Buy 3 Offer](Section%20Lab/Buy%203%20Offer/README.md) | Product/cart offer card: tracks qualifying collection quantity, shows “add X more” + savings. | 2026-03-12 |
+| [SL – Stacked Offers](Section%20Lab/Stacked%20Offers/README.md) | Combined promo card: repeating bundle deals + free delivery threshold. | 2026-03-12 |
+| [Theme edits (Vogue)](theme%20edits/Vogue/README.md) | Product card (Yves Rocher), product-card-add-to-cart (FBT-style, sold-out), collection-list, product-gallery, locales, schema settings. | 2026-03-07 |
+
+---
+
+## Theme edits (Vogue)
+
+Theme-specific overrides for the **Vogue** theme. See **[theme edits/Vogue/README.md](theme%20edits/Vogue/README.md)** for install steps and file list (product card, product-card-add-to-cart, collection-list section, product-gallery, locales, schema-settings). **Updated:** 2026-03-07.
+
+---
+
+## Section Lab (all sections)
+
+Section Lab sections live under `Section Lab/`. Each has a `sections/` folder and often `snippets/` and/or `locales/`. Sorted by last updated (oldest first, most recent at bottom).
+
+| Section | Description | Updated |
+|---------|-------------|---------|
+| [SL – Announcement Bar](Section%20Lab/Announcement%20Bar/README.md) | Top announcement bar. | 2026-02-16 |
+| [SL – Native Video Slider](Section%20Lab/Native%20Video%20Slider/README.md) | Native video slider. | 2026-02-16 |
+| [SL – Price Bubble Widget](Section%20Lab/Price%20Bubble%20Widget/README.md) | Price bubble / badge. | 2026-02-16 |
+| [SL – Story Navigation](Section%20Lab/Story%20Navigation/README.md) | Story-style navigation. | 2026-02-16 |
+| [SL – Delivery Countdown](Section%20Lab/Delivery%20Countdown/README.md) | Delivery countdown timer. | 2026-02-18 |
+| [SL – Face Proof Bubble](Section%20Lab/Face%20Proof%20Bubble/README.md) | Social proof bubble. | 2026-02-18 |
+| [SL – Icon List](Section%20Lab/Icon%20List/README.md) | Product bullets / icon list. | 2026-02-18 |
+| [SL – Payment Icons](Section%20Lab/Payment%20Icons/README.md) | Payment method icons. | 2026-02-18 |
+| [SL – Scrolling Content](Section%20Lab/Scrolling%20Content/README.md) | Horizontal scrolling marquee text. | 2026-02-24 |
+| [SL – Bundle](Section%20Lab/Bundle/README.md) | Bundle products grid + detail popups (Yves Rocher style). | 2026-02-25 |
+| [SL – Before And After](Section%20Lab/Before%20And%20After/README.md) | Before/after video or media. | 2026-02-26 |
+| [SL – Real Results](Section%20Lab/Real%20Results/README.md) | Real results / testimonials. | 2026-02-26 |
+| [SL – Frequently Bought Together](Section%20Lab/Frequently%20Bought%20Together/README.md) | Product slider (recommendations or manual). | 2026-02-27 |
+| [SL – How to Use](Section%20Lab/How%20To%20Use/README.md) | Product "how to use" steps (metaobject or blocks). | 2026-02-27 |
+| [SL – Social Proof Video](Section%20Lab/Social%20Proof%20Video/README.md) | Social proof video section. | 2026-02-27 |
+| [SL – UGC Videos Homepage](Section%20Lab/UGC%20Videos%20Homepage/README.md) | UGC videos on homepage. | 2026-02-27 |
+| [SL – Free Shipping Progress Bar](Section%20Lab/Free%20Shipping%20Progress%20Bar/README.md) | Cart free-shipping threshold progress bar. | 2026-02-28 |
+| [SL – Sales Nudge Widget](Section%20Lab/Nudges%20Widget/README.md) | Sales nudge / urgency widget. | 2026-02-28 |
+| [SL – Volume Discount](Section%20Lab/Volume%20Discount/README.md) | Volume/quantity discount tiers (metaobject). | 2026-02-28 |
+| [SL – Active Ingredients](Section%20Lab/Active%20Ingredients/README.md) | Product active botanical ingredients accordion + popup (Yves Rocher style). | 2026-03-07 |
+| [SL – Highlights](Section%20Lab/Highlights/README.md) | Product highlights accordion: icon + label list, optional popup per item. | 2026-03-07 |
+| [SL – Buy 3 Offer](Section%20Lab/Buy%203%20Offer/README.md) | Product/cart offer card: qualifying collection quantity tracker with savings + progress. | 2026-03-12 |
+| [SL – Stacked Offers](Section%20Lab/Stacked%20Offers/README.md) | Stacked incentives: repeating bundle deals + free delivery threshold in one card. | 2026-03-12 |
 ## Folder structure (per section)
 
 Each section or snippet group lives in its own folder:
@@ -95,7 +204,7 @@ SectionName/
 | [iShopifyExpert/custom-slider](https://github.com/iShopifyExpert/custom-slider) | Custom / gallery slider (reference) |
 | [uxhacks/shopify-sections](https://github.com/uxhacks/shopify-sections) | Sections (reference) |
 | [jydykun/Shopify-Sections](https://github.com/jydykun/Shopify-Sections) | Skeleton theme (reference) |
-| **Section Lab** (paid bundle) | Price Bubble, Story Navigation, Native Video Slider, Announcement Bar, Sales Nudge, Icon List, Delivery Countdown, Face Proof Bubble, Payment Icons; internal use only |
+| **Section Lab** (this repo / paid bundle) | Active Ingredients, Bundle, How to Use, FBT, Volume Discount, Free Shipping Progress Bar, Buy 3 Offer, Stacked Offers, Price Bubble, Icon List, Payment Icons, Announcement Bar, Delivery Countdown, Face Proof Bubble, Nudges, Story Navigation, Scrolling Content, Native Video Slider, UGC Videos, Social Proof Video, Before And After, Real Results |
 
 ---
 
