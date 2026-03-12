@@ -40,6 +40,7 @@ One compact promo card that shows **two stacked incentives** at the same time:
 {% render 'sl-stacked-offers',
   collection_handle: collection.handle,
   collection_title: collection.title,
+  show_total_saved: true,
   offer_qty: 3,
   offer_price: 299,
   regular_total: 750,
@@ -52,6 +53,7 @@ One compact promo card that shows **two stacked incentives** at the same time:
 
 - `collection_handle` (required)
 - `collection_title` (recommended)
+- `show_total_saved` (default: true) — show/hide the “Total saved” row.
 - `offer_qty` (default: 3)
 - `offer_price` (default: 299)
 - `regular_total` (default: 750)

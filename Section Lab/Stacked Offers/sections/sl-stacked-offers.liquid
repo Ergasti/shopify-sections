@@ -69,270 +69,384 @@
     data-sl-so-timer-label="{{ 'sections.sl_stacked_offers.timer_label' | t | default: 'Ends in' | escape }}"
     {% if is_rtl %}dir="rtl"{% endif %}
   >
+    {{- '' -}}
+    {%- comment -%}Corner chips — urgency mode only, absolutely positioned{%- endcomment -%}
+    <span class="sl-stacked-offers__badge" aria-hidden="true">
+      <span class="sl-stacked-offers__dot"></span>
+      {{ 'sections.sl_stacked_offers.urgency' | t | default: 'Stack & save' }}
+    </span>
+    <span class="sl-stacked-offers__timer" data-sl-so-timer hidden>
+      <span data-sl-so-timer-label>{{ 'sections.sl_stacked_offers.timer_label' | t | default: 'Ends in' }}</span>
+      <span class="sl-stacked-offers__timer-value" data-sl-so-timer-value>--:--:--</span>
+    </span>
+
     <div class="sl-stacked-offers__inner">
-      <div class="sl-stacked-offers__top sl-stacked-offers__hero-row">
-        <span class="sl-stacked-offers__badge">
-          <span class="sl-stacked-offers__dot" aria-hidden="true"></span>
-          {{ 'sections.sl_stacked_offers.urgency' | t | default: 'Stack & save' }}
-        </span>
-        <span class="sl-stacked-offers__label">{{ qualifying_collection.title }}</span>
-        <span class="sl-stacked-offers__timer" data-sl-so-timer hidden>
-          <span class="sl-stacked-offers__timer-label" data-sl-so-timer-label>{{ 'sections.sl_stacked_offers.timer_label' | t | default: 'Ends in' }}</span>
-          <span class="sl-stacked-offers__timer-value" data-sl-so-timer-value>--:--:--</span>
-        </span>
-        <div class="sl-stacked-offers__deal sl-stacked-offers__deal--inline">
-          <div class="sl-stacked-offers__deal-title">
-            {{ 'sections.sl_stacked_offers.bundle_title' | t | default: 'Buy 3 for' }}
-            <span class="sl-stacked-offers__deal-price" data-sl-so-offer-price-text>{{ offer_price_cents | money_without_trailing_zeros }}</span>
-          </div>
-          <div class="sl-stacked-offers__deal-meta">
-            <span class="sl-stacked-offers__save">
-              {{ 'sections.sl_stacked_offers.save' | t | default: 'Save' }}
-              <span data-sl-so-save-value>{{ savings_cents | money_without_trailing_zeros }}</span>
-            </span>
-            <span class="sl-stacked-offers__instead">
-              {{ 'sections.sl_stacked_offers.instead_of' | t | default: 'Instead of' }}
-              <span class="sl-stacked-offers__was" data-sl-so-regular-total-text>{{ regular_total_cents | money_without_trailing_zeros }}</span>
-            </span>
-          </div>
+
+      {%- comment -%}── Hero: deal summary ──{%- endcomment -%}
+      <div class="sl-stacked-offers__hero">
+        <div class="sl-stacked-offers__hero-top">
+          <span class="sl-stacked-offers__collection">{{ qualifying_collection.title }}</span>
+          <span class="sl-stacked-offers__save">
+            {{ 'sections.sl_stacked_offers.save' | t | default: 'Save' }}
+            <span data-sl-so-save-value>{{ savings_cents | money_without_trailing_zeros }}</span>
+          </span>
+        </div>
+        <div class="sl-stacked-offers__headline">
+          <span class="sl-stacked-offers__deal-label">{{ 'sections.sl_stacked_offers.bundle_title' | t | default: 'Buy 3 for' }}</span>
+          <span class="sl-stacked-offers__deal-price" data-sl-so-offer-price-text>{{ offer_price_cents | money_without_trailing_zeros }}</span>
+        </div>
+        <div class="sl-stacked-offers__was-line">
+          <span class="sl-stacked-offers__instead">{{ 'sections.sl_stacked_offers.instead_of' | t | default: 'instead of' }}</span>
+          <span class="sl-stacked-offers__was" data-sl-so-regular-total-text>{{ regular_total_cents | money_without_trailing_zeros }}</span>
         </div>
       </div>
 
-      <div class="sl-stacked-offers__progress">
-        <div class="sl-stacked-offers__line">
-          <span class="sl-stacked-offers__icon" aria-hidden="true">🧴</span>
-          <span class="sl-stacked-offers__text" data-sl-so-bundle-msg>{{ 'sections.sl_stacked_offers.loading' | t | default: 'Checking your cart…' }}</span>
+      <div class="sl-stacked-offers__sep" aria-hidden="true"></div>
+
+      {%- comment -%}── Bundle progress row ──{%- endcomment -%}
+      <div class="sl-stacked-offers__row sl-stacked-offers__row--bundle">
+        <div class="sl-stacked-offers__row-head">
+          <span class="sl-stacked-offers__row-icon" aria-hidden="true">🧴</span>
+          <span class="sl-stacked-offers__row-msg" data-sl-so-bundle-msg>{{ 'sections.sl_stacked_offers.loading' | t | default: 'Checking your cart…' }}</span>
+        </div>
+        <div class="sl-stacked-offers__track" aria-hidden="true">
+          <div class="sl-stacked-offers__fill" data-sl-so-bundle-fill style="--progress:0%">
+            <span class="sl-stacked-offers__stripes"></span>
+          </div>
         </div>
         <div class="sl-stacked-offers__earned" data-sl-so-earned hidden>
-          <div class="sl-stacked-offers__earned-bars" data-sl-so-earned-bars aria-hidden="true"></div>
-          <div class="sl-stacked-offers__earned-claimed" data-sl-so-earned-claimed></div>
-          <div class="sl-stacked-offers__earned-total" data-sl-so-earned-total></div>
-        </div>
-        <div class="sl-stacked-offers__track" aria-hidden="true">
-          <div class="sl-stacked-offers__fill" data-sl-so-bundle-fill style="--progress:0%"><span class="sl-stacked-offers__stripes"></span></div>
+          <span class="sl-stacked-offers__earned-claimed" data-sl-so-earned-claimed></span>
+          <span class="sl-stacked-offers__earned-bars" data-sl-so-earned-bars aria-hidden="true"></span>
         </div>
       </div>
 
-      <div class="sl-stacked-offers__progress" data-sl-so-ship-wrap>
-        <div class="sl-stacked-offers__line">
-          <span class="sl-stacked-offers__icon" aria-hidden="true">🚚</span>
-          <span class="sl-stacked-offers__text" data-sl-so-ship-msg>{{ 'sections.sl_stacked_offers.loading' | t | default: 'Checking your cart…' }}</span>
+      {%- comment -%}── Shipping progress row ──{%- endcomment -%}
+      <div class="sl-stacked-offers__row sl-stacked-offers__row--ship" data-sl-so-ship-wrap>
+        <div class="sl-stacked-offers__row-head">
+          <span class="sl-stacked-offers__row-icon" aria-hidden="true">🚚</span>
+          <span class="sl-stacked-offers__row-msg" data-sl-so-ship-msg>{{ 'sections.sl_stacked_offers.loading' | t | default: 'Checking your cart…' }}</span>
         </div>
         <div class="sl-stacked-offers__track" aria-hidden="true">
-          <div class="sl-stacked-offers__fill" data-sl-so-ship-fill style="--progress:0%"><span class="sl-stacked-offers__stripes"></span></div>
+          <div class="sl-stacked-offers__fill" data-sl-so-ship-fill style="--progress:0%">
+            <span class="sl-stacked-offers__stripes"></span>
+          </div>
         </div>
       </div>
+
+      {%- comment -%}── Total saved — CSS hides when text is empty ──{%- endcomment -%}
+      <div class="sl-stacked-offers__savings-row" data-sl-so-earned-total-row>
+        <div class="sl-stacked-offers__savings" data-sl-so-earned-total>
+          <span class="sl-stacked-offers__savings-icon" aria-hidden="true">💰</span>
+          <span data-sl-so-earned-total-text></span>
+        </div>
+      </div>
+
     </div>
 
     <div class="sl-stacked-offers__toast" data-sl-so-toast aria-live="polite" aria-atomic="true"></div>
   </section>
 
   <style>
-    #sl-stacked-offers-{{ section.id }}.sl-stacked-offers{
-      width:100%;
+    /* ── Card ─────────────────────────────────────────────── */
+    #sl-stacked-offers-{{ section.id }}.sl-stacked-offers {
+      --sl-so-accent-light: rgba(22,163,74,.10);
+      --sl-so-accent-mid:   rgba(22,163,74,.22);
+      --sl-so-text:         #111827;
+      --sl-so-text-2:       #374151;
+      --sl-so-text-3:       #6b7280;
+      --sl-so-border:       rgba(15,23,42,.09);
+      width: 100%;
       max-width: {{ section.settings.max_width | default: 560 | plus: 0 }}px;
       margin: {{ section.settings.margin_vertical | default: 16 | plus: 0 }}px auto;
-      padding: {{ section.settings.padding_block | default: 16 | plus: 0 }}px {{ section.settings.padding_inline | default: 18 | plus: 0 }}px;
-      background:#fff;
-      border-radius:14px;
-      border:1px solid rgba(15,23,42,.10);
-      box-shadow:0 10px 28px rgba(15,23,42,.14);
-      overflow:hidden;
-      position:relative;
+      background: #ffffff;
+      border-radius: 16px;
+      border: 1.5px solid var(--sl-so-border);
+      box-shadow: 0 1px 4px rgba(15,23,42,.06), 0 6px 20px rgba(15,23,42,.09);
+      overflow: hidden;
+      position: relative;
       font-family: var(--font-body-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif);
+      font-size: 14px;
+      color: var(--sl-so-text);
     }
-    #sl-stacked-offers-{{ section.id }}.sl-stacked-offers::before{
-      content:"";
-      position:absolute;inset:0;pointer-events:none;
-      background: radial-gradient(800px 220px at 20% -20%, rgba(34, 197, 94, 0.18), transparent 60%),
-                  radial-gradient(700px 240px at 120% 0%, rgba(59, 130, 246, 0.14), transparent 55%);
+    #sl-stacked-offers-{{ section.id }}.sl-stacked-offers--urgency {
+      border-color: rgba(22,163,74,.28);
+      box-shadow: 0 1px 4px rgba(15,23,42,.06), 0 8px 28px rgba(15,23,42,.12), 0 0 0 3px rgba(22,163,74,.09);
+      animation: sl-so-card-glow 3s ease-in-out infinite;
     }
-
-    #sl-stacked-offers-{{ section.id }}.sl-stacked-offers--clean::before{ opacity: 0.45; }
-    #sl-stacked-offers-{{ section.id }}.sl-stacked-offers--clean{ border-color: rgba(15,23,42,.10); }
-
-    #sl-stacked-offers-{{ section.id }}.sl-stacked-offers--urgency{
-      border-color: rgba(15, 23, 42, 0.14);
-      box-shadow: 0 18px 50px rgba(15,23,42,.22);
-      outline: 2px solid rgba(34, 197, 94, 0.22);
-      outline-offset: 0;
-      animation: sl-so-card-pop 2.4s ease-in-out infinite;
+    @keyframes sl-so-card-glow {
+      0%,100% { box-shadow: 0 1px 4px rgba(15,23,42,.06), 0 8px 28px rgba(15,23,42,.12), 0 0 0 3px rgba(22,163,74,.09); }
+      50%      { box-shadow: 0 1px 4px rgba(15,23,42,.06), 0 8px 28px rgba(15,23,42,.14), 0 0 0 5px rgba(22,163,74,.18); }
     }
-    #sl-stacked-offers-{{ section.id }}.sl-stacked-offers--urgency::before{ opacity: 1; }
-    @keyframes sl-so-card-pop{ 0%,100%{ transform: translateZ(0) scale(1); } 50%{ transform: translateZ(0) scale(1.01); } }
-    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__inner{display:grid;gap:10px;position:relative}
-    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__top{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__hero-row{row-gap:8px}
-    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__badge{
-      display:inline-flex;align-items:center;gap:8px;
-      padding:4px 10px;border-radius:999px;
-      background:rgba(15,23,42,.06);
-      border:1px solid rgba(15,23,42,.12);
-      color:#0f172a;font-weight:900;font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;
-      box-shadow:0 10px 22px rgba(15,23,42,.12);
-      animation: sl-so-pulse 1.4s ease-in-out infinite;
-      position:relative;isolation:isolate;
-    }
-    #sl-stacked-offers-{{ section.id }}.sl-stacked-offers--clean .sl-stacked-offers__badge{
-      animation: none;
-      box-shadow: none;
-    }
-    #sl-stacked-offers-{{ section.id }}.sl-stacked-offers--urgency .sl-stacked-offers__badge{
-      background: rgba(15,23,42,0.08);
-      box-shadow: 0 12px 26px rgba(15,23,42,0.16);
-    }
-    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__badge::after{
-      content:"";position:absolute;inset:-6px;border-radius:999px;
-      border:2px solid rgba(34,197,94,.35);
-      opacity:0;transform:scale(.92);
-      animation: sl-so-ring 1.4s ease-out infinite;
-      z-index:-1;
-    }
-    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__dot{width:8px;height:8px;border-radius:999px;background:#22c55e;box-shadow:0 0 0 4px rgba(34,197,94,.18)}
-    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__label{font-weight:850;color:#111827;font-size:.92rem}
-    #sl-stacked-offers-{{ section.id }}.sl-stacked-offers--urgency .sl-stacked-offers__label{ font-weight: 950; }
-    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__timer{
+    /* ── Corner chips (urgency only) ─────────────────────── */
+    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__badge { display: none; }
+    #sl-stacked-offers-{{ section.id }}.sl-stacked-offers--urgency .sl-stacked-offers__badge {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      padding: 4px 10px;
+      gap: 6px;
+      position: absolute;
+      top: 10px;
+      inset-inline-start: 12px;
+      z-index: 2;
+      padding: 3px 10px;
       border-radius: 999px;
-      background: rgba(239, 68, 68, 0.10);
-      border: 1px solid rgba(239, 68, 68, 0.22);
-      color: #7f1d1d;
-      font-weight: 900;
-      font-size: 0.78rem;
-      letter-spacing: 0.03em;
+      background: rgba(15,23,42,.06);
+      border: 1px solid rgba(15,23,42,.12);
+      color: #0f172a;
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
       white-space: nowrap;
     }
-    #sl-stacked-offers-{{ section.id }}.sl-stacked-offers--clean .sl-stacked-offers__timer{ display: none !important; }
-    #sl-stacked-offers-{{ section.id }}.sl-stacked-offers--urgency .sl-stacked-offers__timer{
+    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #22c55e;
+      flex-shrink: 0;
+      animation: sl-so-dot-ping 1.4s ease-in-out infinite;
+    }
+    @keyframes sl-so-dot-ping {
+      0%,100% { box-shadow: 0 0 0 0 rgba(34,197,94,.5); }
+      50%      { box-shadow: 0 0 0 4px rgba(34,197,94,0); }
+    }
+    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__timer { display: none !important; }
+    #sl-stacked-offers-{{ section.id }}.sl-stacked-offers--urgency .sl-stacked-offers__timer {
+      display: inline-flex !important;
+      align-items: center;
+      gap: 5px;
+      position: absolute;
+      top: 10px;
+      inset-inline-end: 12px;
+      z-index: 2;
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: rgba(22,163,74,.12);
+      border: 1px solid rgba(22,163,74,.26);
+      color: #14532d;
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .02em;
+      white-space: nowrap;
+    }
+    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__timer-value {
+      font-variant-numeric: tabular-nums; font-weight: 800;
+    }
+    /* ── Inner layout ─────────────────────────────────────── */
+    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__inner { display: flex; flex-direction: column; }
+    #sl-stacked-offers-{{ section.id }}.sl-stacked-offers--urgency .sl-stacked-offers__inner { padding-top: 36px; }
+    /* ── Hero ─────────────────────────────────────────────── */
+    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__hero {
+      padding: {{ section.settings.padding_block | default: 16 | plus: 0 }}px {{ section.settings.padding_inline | default: 18 | plus: 0 }}px {{ section.settings.padding_block | default: 16 | plus: 0 | minus: 2 }}px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__hero-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 2px;
+    }
+    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__collection {
+      font-size: .72rem;
+      font-weight: 700;
+      color: var(--sl-so-text-3);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__save {
       display: inline-flex;
-      animation: sl-so-timer-pop 1.2s ease-in-out infinite;
+      align-items: center;
+      gap: 3px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: var(--sl-so-accent-light);
+      border: 1.5px solid var(--sl-so-accent-mid);
+      color: #15803d;
+      font-size: .78rem;
+      font-weight: 700;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
-    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__timer-value{
-      font-variant-numeric: tabular-nums;
-      color: #991b1b;
+    #sl-stacked-offers-{{ section.id }}.sl-stacked-offers--urgency .sl-stacked-offers__save {
+      background: linear-gradient(135deg, rgba(34,197,94,.16), rgba(250,204,21,.12));
+      border-color: rgba(34,197,94,.35);
+      animation: sl-so-save-bounce 2s ease-in-out infinite;
     }
-    @keyframes sl-so-timer-pop { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); } }
-
-    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__deal{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
-    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__deal--inline{flex:1 1 420px}
-    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__deal-title{font-size:1.05rem;font-weight:950;color:#111827;letter-spacing:.01em;display:inline-flex;gap:8px;align-items:baseline;text-align:start;flex:1 1 auto}
-    #sl-stacked-offers-{{ section.id }}.sl-stacked-offers--urgency .sl-stacked-offers__deal-title{ font-size: 1.12rem; }
-    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__deal-price{color:#15803d;font-weight:950;white-space:nowrap}
-    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__deal-meta{display:inline-flex;align-items:baseline;gap:10px;flex-wrap:wrap;justify-content:flex-end;color:#374151;font-size:.92rem;flex:0 0 auto}
-    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__save{color:#0f172a;font-weight:900;background:rgba(34,197,94,.14);border:1px solid rgba(34,197,94,.22);padding:3px 10px;border-radius:999px;white-space:nowrap;box-shadow:0 10px 22px rgba(34,197,94,.18)}
-    #sl-stacked-offers-{{ section.id }}.sl-stacked-offers--clean .sl-stacked-offers__save{ box-shadow: none; }
-    #sl-stacked-offers-{{ section.id }}.sl-stacked-offers--urgency .sl-stacked-offers__save{
-      background: linear-gradient(90deg, rgba(34,197,94,.22), rgba(250,204,21,.18));
-      border-color: rgba(34,197,94,.28);
-      animation: sl-so-save-pop 1.2s ease-in-out infinite;
+    @keyframes sl-so-save-bounce { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__headline {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      flex-wrap: wrap;
     }
-    @keyframes sl-so-save-pop{ 0%,100%{ transform: scale(1); } 50%{ transform: scale(1.03); } }
-    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__instead{white-space:nowrap;opacity:.9}
-    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__was{text-decoration:line-through;opacity:.85}
-
-    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__progress{display:grid;gap:8px}
-    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__earned{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      flex-wrap:wrap;
-      color:#0f172a;
-      font-size:0.86rem;
-      font-weight:750;
-      margin-top:-2px;
+    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__deal-label {
+      font-size: 1.18rem;
+      font-weight: 700;
+      color: var(--sl-so-text);
+      line-height: 1.25;
     }
-    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__earned-bars{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
-    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__earned-claimed{opacity:0.9;white-space:nowrap}
-    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__earned-bar{
-      width:34px;
-      height:6px;
-      border-radius:999px;
-      background:linear-gradient(90deg,var(--sl-so-fill-start,#4ade80),var(--sl-so-fill-end,#16a34a));
-      box-shadow:0 6px 14px rgba(34,197,94,.18);
-      opacity:0.95;
+    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__deal-price {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #16a34a;
+      line-height: 1.25;
+      white-space: nowrap;
     }
-    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__earned-more{
-      padding:2px 8px;
-      border-radius:999px;
-      border:1px solid rgba(15,23,42,.12);
-      background:rgba(15,23,42,.06);
-      font-weight:850;
+    #sl-stacked-offers-{{ section.id }}.sl-stacked-offers--urgency .sl-stacked-offers__deal-price { font-size: 1.42rem; }
+    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__was-line { display: flex; align-items: center; gap: 4px; }
+    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__instead,
+    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__was { font-size: .82rem; color: var(--sl-so-text-3); }
+    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__was { text-decoration: line-through; }
+    /* ── Separator ────────────────────────────────────────── */
+    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__sep {
+      height: 1px;
+      background: var(--sl-so-border);
+      margin: 0 {{ section.settings.padding_inline | default: 18 | plus: 0 }}px;
     }
-    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__earned-total{
-      background:rgba(34,197,94,.12);
-      border:1px solid rgba(34,197,94,.20);
-      padding:3px 10px;
-      border-radius:999px;
-      white-space:nowrap;
+    /* ── Progress rows ────────────────────────────────────── */
+    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__row {
+      padding: 14px {{ section.settings.padding_inline | default: 18 | plus: 0 }}px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
-    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__line{display:flex;gap:10px;align-items:center;justify-content:center;text-align:center;color:#374151;font-size:.92rem;font-weight:600}
-    #sl-stacked-offers-{{ section.id }}.sl-stacked-offers--clean .sl-stacked-offers__line{ font-size: 0.9rem; font-weight: 600; }
-    #sl-stacked-offers-{{ section.id }}.sl-stacked-offers--urgency .sl-stacked-offers__line{ font-size: 0.95rem; font-weight: 800; color: #0f172a; }
-    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__icon{font-size:1.1rem;line-height:1}
-    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__track{position:relative;width:100%;height:10px;background:#eee;border-radius:10px;overflow:hidden}
-    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__fill{position:absolute;inset:0;width:var(--progress,0%);height:100%;background:linear-gradient(90deg,var(--sl-so-fill-start,#4ade80),var(--sl-so-fill-end,#16a34a));border-radius:10px;transition:width .45s cubic-bezier(.2,.8,.2,1);overflow:hidden}
-    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__stripes{
-      position:absolute;inset:0;
-      background-image:linear-gradient(45deg,rgba(255,255,255,.25) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.25) 50%,rgba(255,255,255,.25) 75%,transparent 75%,transparent);
-      background-size:14px 14px;animation: sl-so-stripes 1s linear infinite;pointer-events:none;
+    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__row + .sl-stacked-offers__row {
+      border-top: 1px solid var(--sl-so-border);
     }
-
-    #sl-stacked-offers-{{ section.id }}.sl-stacked-offers--rtl .sl-stacked-offers__deal{flex-direction:row-reverse}
-    #sl-stacked-offers-{{ section.id }}.sl-stacked-offers--rtl .sl-stacked-offers__deal-meta{justify-content:flex-start}
-    #sl-stacked-offers-{{ section.id }}.sl-stacked-offers--rtl .sl-stacked-offers__deal-title{text-align:start}
-    #sl-stacked-offers-{{ section.id }}.sl-stacked-offers--rtl .sl-stacked-offers__top{justify-content:flex-start}
-
-    @keyframes sl-so-stripes{from{background-position:0 0}to{background-position:14px 0}}
-    @keyframes sl-so-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.03)}}
-    @keyframes sl-so-ring{0%{opacity:0;transform:scale(.92)}30%{opacity:.55}100%{opacity:0;transform:scale(1.12)}}
-    @media (prefers-reduced-motion: reduce){
-      #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__fill,
-      #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__stripes,
-      #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__badge,
-      #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__badge::after,
-      #sl-stacked-offers-{{ section.id }}.sl-stacked-offers--urgency,
-      #sl-stacked-offers-{{ section.id }}.sl-stacked-offers--urgency .sl-stacked-offers__save,
-      #sl-stacked-offers-{{ section.id }}.sl-stacked-offers--urgency .sl-stacked-offers__timer{
-        animation:none !important;
-        transition:none !important;
-      }
+    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__row-head { display: flex; align-items: flex-start; gap: 8px; }
+    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__row-icon { font-size: 1rem; line-height: 1.4; flex-shrink: 0; }
+    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__row-msg {
+      font-size: .88rem;
+      font-weight: 600;
+      color: var(--sl-so-text-2);
+      line-height: 1.4;
+      text-align: start;
     }
-    @media screen and (max-width:749px){
-      #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__deal{justify-content:flex-start}
-      #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__deal-meta{width:100%;justify-content:flex-start}
+    #sl-stacked-offers-{{ section.id }}.sl-stacked-offers--urgency .sl-stacked-offers__row-msg {
+      font-weight: 700; color: var(--sl-so-text);
     }
-
-    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__toast{
+    /* ── Progress bar ─────────────────────────────────────── */
+    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__track {
+      position: relative;
+      width: 100%;
+      height: 9px;
+      background: rgba(15,23,42,.07);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__fill {
+      position: absolute;
+      inset: 0;
+      width: var(--progress, 0%);
+      height: 100%;
+      background: linear-gradient(90deg, var(--sl-so-fill-start,#4ade80), var(--sl-so-fill-end,#16a34a));
+      border-radius: 10px;
+      transition: width .5s cubic-bezier(.2,.8,.2,1);
+      overflow: hidden;
+    }
+    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__stripes {
+      position: absolute; inset: 0;
+      background-image: linear-gradient(
+        45deg,
+        rgba(255,255,255,.28) 25%, transparent 25%,
+        transparent 50%, rgba(255,255,255,.28) 50%,
+        rgba(255,255,255,.28) 75%, transparent 75%
+      );
+      background-size: 12px 12px;
+      animation: sl-so-stripes .8s linear infinite;
+    }
+    @keyframes sl-so-stripes { from { background-position: 0 0; } to { background-position: 12px 0; } }
+    /* ── Earned state (inside bundle row) ────────────────── */
+    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__earned {
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    }
+    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__earned-claimed {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: var(--sl-so-accent-light);
+      border: 1px solid var(--sl-so-accent-mid);
+      color: #15803d;
+      font-size: .75rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__earned-bars { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
+    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__earned-bar {
+      width: 26px; height: 5px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--sl-so-fill-start,#4ade80), var(--sl-so-fill-end,#16a34a));
+      opacity: .9;
+    }
+    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__earned-more {
+      font-size: .72rem; font-weight: 700; color: var(--sl-so-text-3);
+      background: rgba(15,23,42,.05); border: 1px solid var(--sl-so-border);
+      padding: 1px 6px; border-radius: 999px;
+    }
+    /* ── Savings row (CSS hides when text empty) ─────────── */
+    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__savings-row {
+      border-top: 1px solid var(--sl-so-border);
+      padding: 12px {{ section.settings.padding_inline | default: 18 | plus: 0 }}px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__savings-row:has([data-sl-so-earned-total-text]:empty) { display: none; }
+    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__savings {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 14px;
+      border-radius: 999px;
+      background: var(--sl-so-accent-light);
+      border: 1.5px solid var(--sl-so-accent-mid);
+      color: #15803d;
+      font-size: .85rem;
+      font-weight: 700;
+    }
+    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__savings-icon { font-size: .95rem; line-height: 1; }
+    /* ── Toast ────────────────────────────────────────────── */
+    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__toast {
       position: fixed;
       inset-inline: 16px;
       bottom: 16px;
       z-index: 99999;
       max-width: 520px;
       margin-inline: auto;
-      padding: 12px 14px;
-      border-radius: 14px;
-      background: rgba(15, 23, 42, 0.92);
+      padding: 12px 16px;
+      border-radius: 12px;
+      background: rgba(15,23,42,.92);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
       color: #fff;
-      font-weight: 750;
-      letter-spacing: 0.01em;
-      box-shadow: 0 16px 40px rgba(0,0,0,0.28);
+      font-size: .9rem;
+      font-weight: 600;
+      letter-spacing: .01em;
+      box-shadow: 0 12px 36px rgba(0,0,0,.24);
       transform: translateY(16px);
       opacity: 0;
       pointer-events: none;
       transition: transform 260ms cubic-bezier(.2,.8,.2,1), opacity 260ms ease;
       text-align: start;
     }
-    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__toast.is-active{
-      transform: translateY(0);
-      opacity: 1;
-    }
-    #sl-stacked-offers-{{ section.id }}.sl-stacked-offers--rtl .sl-stacked-offers__toast{ text-align: right; }
-    @media (prefers-reduced-motion: reduce){
-      #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__toast{ transition: none !important; }
+    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__toast.is-active { transform: translateY(0); opacity: 1; }
+    /* ── Reduce motion ────────────────────────────────────── */
+    @media (prefers-reduced-motion: reduce) {
+      #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__fill,
+      #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__stripes,
+      #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__dot,
+      #sl-stacked-offers-{{ section.id }}.sl-stacked-offers--urgency,
+      #sl-stacked-offers-{{ section.id }}.sl-stacked-offers--urgency .sl-stacked-offers__save,
+      #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__toast {
+        animation: none !important; transition: none !important;
+      }
     }
   </style>
 
@@ -511,7 +625,8 @@
       var offerQty = parseInt(root.getAttribute('data-sl-so-offer-qty') || '3', 10) || 3;
       var savings = parseInt(root.getAttribute('data-sl-so-savings') || '0', 10) || 0;
       var shipThreshold = parseInt(root.getAttribute('data-sl-so-free-ship-threshold') || '0', 10) || 0;
-      var currency = root.getAttribute('data-sl-so-currency') || (cart && cart.currency) || 'EGP';
+      var currency = (cart && cart.currency) ? cart.currency : (root.getAttribute('data-sl-so-currency') || 'EGP');
+      try { root.setAttribute('data-sl-so-currency', currency); } catch (e0) {}
 
       var qty = qtyForIds(cart, idsMap);
       var deals = offerQty > 0 ? Math.floor(qty / offerQty) : 0;
@@ -543,8 +658,8 @@
       var earnedWrap = root.querySelector('[data-sl-so-earned]');
       var earnedBars = root.querySelector('[data-sl-so-earned-bars]');
       var earnedClaimed = root.querySelector('[data-sl-so-earned-claimed]');
-      var earnedTotal = root.querySelector('[data-sl-so-earned-total]');
-      if (earnedWrap && earnedBars && earnedTotal && earnedClaimed) {
+      var earnedTotalText = root.querySelector('[data-sl-so-earned-total-text]');
+      if (earnedWrap && earnedBars && earnedTotalText && earnedClaimed) {
         if (deals > 0) {
           earnedWrap.hidden = false;
           var maxBars = 5;
@@ -560,12 +675,12 @@
 
           var totalSavedCents = deals * savings;
           var tplTotal = root.getAttribute('data-sl-so-total_saved') || 'Total saved: %amount%';
-          earnedTotal.textContent = tplTotal.replace(/%amount%/g, formatMoneyNoDecimals(totalSavedCents, currency));
+          earnedTotalText.textContent = tplTotal.replace(/%amount%/g, formatMoneyNoDecimals(totalSavedCents, currency));
         } else {
           earnedWrap.hidden = true;
           earnedBars.innerHTML = '';
           earnedClaimed.textContent = '';
-          earnedTotal.textContent = '';
+          earnedTotalText.textContent = '';
         }
       }
 
@@ -603,9 +718,9 @@
       }
       setProgress(shipFill, shipPct);
 
-      if (earnedWrap && earnedBars && earnedTotal && deals > 0 && shipReached) {
+      if (earnedWrap && earnedBars && earnedTotalText && deals > 0 && shipReached) {
         var badge = root.getAttribute('data-sl-so-free_ship_badge') || '';
-        if (badge) earnedTotal.textContent = earnedTotal.textContent + ' ' + badge;
+        if (badge) earnedTotalText.textContent = earnedTotalText.textContent + ' ' + badge;
       }
 
       var didEarnDeal = (prevDeals != null) && (deals > prevDeals);
