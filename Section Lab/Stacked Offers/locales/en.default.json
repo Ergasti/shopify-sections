@@ -11,12 +11,15 @@
       "bundle_earned": "Unlocked %deals% deal(s). Add %count% more to unlock another and save %save%.",
       "total_saved": "Total saved: %amount%",
       "free_ship_badge": "+ Free delivery",
+      "claimed": "Claimed %deals% deal(s)",
       "ship_next": "Add %amount% more to get free delivery.",
       "ship_tier_almost": "Almost there! Add %amount% more for free delivery.",
       "ship_tier_close": "You’re close! Add %amount% more for free delivery.",
       "ship_tier_mid": "Add %amount% more to get free delivery.",
       "ship_tier_far": "Free delivery when you add %amount% more.",
       "ship_earned": "Free delivery unlocked!",
+      "toast_bundle": "Deal unlocked! You now have %deals% deal(s).",
+      "toast_ship": "Free delivery unlocked!",
       "missing_collection": "Choose a qualifying collection in settings."
     }
   }

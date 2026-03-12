@@ -11,12 +11,15 @@
       "bundle_earned": "اتفعل %deals% عرض. زوّد %count% كمان عشان تفعل عرض كمان وتوفّر %save%.",
       "total_saved": "إجمالي التوفير: %amount%",
       "free_ship_badge": "+ توصيل مجاني",
+      "claimed": "اتفعّل %deals% عرض",
       "ship_next": "زوّد %amount% كمان عشان التوصيل يبقى مجاني.",
       "ship_tier_almost": "قربتي جدًا! فاضل %amount% بس للشحن المجاني",
       "ship_tier_close": "قربتي! زودي منتجات بـ %amount% وخدي الشحن مجانًا",
       "ship_tier_mid": "فاضل %amount% ويوصلك الشحن المجاني",
       "ship_tier_far": "ضيفي منتجات بـ %amount% عشان تحصلي على الشحن المجاني",
-      "ship_earned": "التوصيل المجاني اتفعل!",
+      "ship_earned": "مبروك! التوصيل المجاني اتفعل!",
+      "toast_bundle": "مبروك! العرض اتفعل. عندك دلوقتي %deals% عرض.",
+      "toast_ship": "مبروك! التوصيل المجاني اتفعل.",
       "missing_collection": "اختار كولكشن من إعدادات السكشن."
     }
   }

@@ -65,6 +65,9 @@
     data-sl-so-msg-bundle-none="{{ 'sections.sl_stacked_offers.bundle_none' | t | default: 'Add %count% more to unlock your first deal and save %save%.' | escape }}"
     data-sl-so-total_saved="{{ 'sections.sl_stacked_offers.total_saved' | t | default: 'Total saved: %amount%' | escape }}"
     data-sl-so-free_ship_badge="{{ 'sections.sl_stacked_offers.free_ship_badge' | t | default: '+ Free delivery' | escape }}"
+    data-sl-so-claimed="{{ 'sections.sl_stacked_offers.claimed' | t | default: 'Claimed %deals% deal(s)' | escape }}"
+    data-sl-so-toast-bundle="{{ 'sections.sl_stacked_offers.toast_bundle' | t | default: 'Deal unlocked! You now have %deals% deal(s).' | escape }}"
+    data-sl-so-toast-ship="{{ 'sections.sl_stacked_offers.toast_ship' | t | default: 'Free delivery unlocked!' | escape }}"
     data-sl-so-msg-ship-next="{{ 'sections.sl_stacked_offers.ship_next' | t | default: 'Add %amount% more to get free delivery.' | escape }}"
     data-sl-so-msg-ship-earned="{{ 'sections.sl_stacked_offers.ship_earned' | t | default: 'Free delivery unlocked!' | escape }}"
     data-sl-so-msg-ship-tier-almost="{{ 'sections.sl_stacked_offers.ship_tier_almost' | t | default: 'Almost there! Add %amount% more for free delivery.' | escape }}"
@@ -105,6 +108,7 @@
         </div>
         <div class="sl-stacked-offers__earned" data-sl-so-earned hidden>
           <div class="sl-stacked-offers__earned-bars" data-sl-so-earned-bars aria-hidden="true"></div>
+          <div class="sl-stacked-offers__earned-claimed" data-sl-so-earned-claimed></div>
           <div class="sl-stacked-offers__earned-total" data-sl-so-earned-total></div>
         </div>
         <div class="sl-stacked-offers__track" aria-hidden="true">
@@ -122,6 +126,8 @@
         </div>
       </div>
     </div>
+
+    <div class="sl-stacked-offers__toast" data-sl-so-toast aria-live="polite" aria-atomic="true"></div>
   </div>
 
   <style>
@@ -188,6 +194,7 @@
       margin-top:-2px;
     }
     #sl-stacked-offers-{{ sid }} .sl-stacked-offers__earned-bars{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+    #sl-stacked-offers-{{ sid }} .sl-stacked-offers__earned-claimed{opacity:0.9;white-space:nowrap}
     #sl-stacked-offers-{{ sid }} .sl-stacked-offers__earned-bar{
       width:34px;
       height:6px;
@@ -237,6 +244,35 @@
       #sl-stacked-offers-{{ sid }} .sl-stacked-offers__deal{justify-content:flex-start}
       #sl-stacked-offers-{{ sid }} .sl-stacked-offers__deal-meta{width:100%;justify-content:flex-start}
     }
+
+    #sl-stacked-offers-{{ sid }} .sl-stacked-offers__toast{
+      position: fixed;
+      inset-inline: 16px;
+      bottom: 16px;
+      z-index: 99999;
+      max-width: 520px;
+      margin-inline: auto;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: rgba(15, 23, 42, 0.92);
+      color: #fff;
+      font-weight: 750;
+      letter-spacing: 0.01em;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.28);
+      transform: translateY(16px);
+      opacity: 0;
+      pointer-events: none;
+      transition: transform 260ms cubic-bezier(.2,.8,.2,1), opacity 260ms ease;
+      text-align: start;
+    }
+    #sl-stacked-offers-{{ sid }} .sl-stacked-offers__toast.is-active{
+      transform: translateY(0);
+      opacity: 1;
+    }
+    #sl-stacked-offers-{{ sid }}.sl-stacked-offers--rtl .sl-stacked-offers__toast{ text-align: right; }
+    @media (prefers-reduced-motion: reduce){
+      #sl-stacked-offers-{{ sid }} .sl-stacked-offers__toast{ transition: none !important; }
+    }
   </style>
 
   <script>
@@ -247,6 +283,18 @@
     var cache = window.__slStackedOffersCollectionCache = window.__slStackedOffersCollectionCache || {};
     var prevDeals = null;
     var prevShipReached = null;
+    var toastTimer = null;
+
+    function showToast(message) {
+      var toast = root.querySelector('[data-sl-so-toast]');
+      if (!toast) return;
+      if (toastTimer) window.clearTimeout(toastTimer);
+      toast.textContent = message;
+      toast.classList.add('is-active');
+      toastTimer = window.setTimeout(function() {
+        toast.classList.remove('is-active');
+      }, 3200);
+    }
 
     var CONFETTI_SCRIPT = 'https://cdn.jsdelivr.net/npm/@hiseb/confetti@2.1.0/dist/confetti.min.js';
     var confettiLoaded = false;
@@ -383,8 +431,9 @@
 
       var earnedWrap = root.querySelector('[data-sl-so-earned]');
       var earnedBars = root.querySelector('[data-sl-so-earned-bars]');
+      var earnedClaimed = root.querySelector('[data-sl-so-earned-claimed]');
       var earnedTotal = root.querySelector('[data-sl-so-earned-total]');
-      if (earnedWrap && earnedBars && earnedTotal) {
+      if (earnedWrap && earnedBars && earnedTotal && earnedClaimed) {
         if (deals > 0) {
           earnedWrap.hidden = false;
           var maxBars = 5;
@@ -395,12 +444,16 @@
           if (extra > 0) html += '<span class=\"sl-stacked-offers__earned-more\">+' + extra + '</span>';
           earnedBars.innerHTML = html;
 
+          var claimedTpl = root.getAttribute('data-sl-so-claimed') || '';
+          earnedClaimed.textContent = claimedTpl ? claimedTpl.replace(/%deals%/g, String(deals)) : '';
+
           var totalSavedCents = deals * savings;
           var tplTotal = root.getAttribute('data-sl-so-total_saved') || 'Total saved: %amount%';
           earnedTotal.textContent = tplTotal.replace(/%amount%/g, formatMoneyNoDecimals(totalSavedCents, currency));
         } else {
           earnedWrap.hidden = true;
           earnedBars.innerHTML = '';
+          earnedClaimed.textContent = '';
           earnedTotal.textContent = '';
         }
       }
@@ -446,6 +499,14 @@
       prevDeals = deals;
       prevShipReached = shipReached;
       if (didEarnDeal || didReachShip) playConfetti();
+
+      if (didEarnDeal) {
+        var tplToastBundle = root.getAttribute('data-sl-so-toast-bundle') || '';
+        if (tplToastBundle) showToast(tplToastBundle.replace(/%deals%/g, String(deals)));
+      } else if (didReachShip) {
+        var tplToastShip = root.getAttribute('data-sl-so-toast-ship') || '';
+        if (tplToastShip) showToast(tplToastShip);
+      }
     }
 
     function refresh() {
