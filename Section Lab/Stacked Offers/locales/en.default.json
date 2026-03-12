@@ -20,6 +20,7 @@
       "ship_earned": "Free delivery unlocked!",
       "toast_bundle": "Deal unlocked! You now have %deals% deal(s).",
       "toast_ship": "Free delivery unlocked!",
+      "timer_label": "Ends in",
       "missing_collection": "Choose a qualifying collection in settings."
     }
   }

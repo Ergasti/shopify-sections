@@ -35,6 +35,9 @@
 
 {% assign fill_color_start = fill_color_start | default: '#4ade80' | strip %}
 {% assign fill_color_end = fill_color_end | default: '#16a34a' | strip %}
+{% assign style_variant = style_variant | default: style | default: 'clean' | strip %}
+{% assign evergreen_timer_hours = evergreen_timer_hours | default: timer_hours | default: 6 | plus: 0 %}
+{% if evergreen_timer_hours <= 0 %}{% assign evergreen_timer_hours = 6 %}{% endif %}
 
 {% assign locale_iso = request.locale.iso_code | default: 'en' %}
 {% assign is_rtl = false %}
@@ -50,7 +53,7 @@
 {% else %}
   <div
     id="sl-stacked-offers-{{ sid }}"
-    class="sl-stacked-offers{% if is_rtl %} sl-stacked-offers--rtl{% endif %}"
+    class="sl-stacked-offers sl-stacked-offers--{{ style_variant }}{% if is_rtl %} sl-stacked-offers--rtl{% endif %}"
     style="--sl-so-fill-start: {{ fill_color_start }}; --sl-so-fill-end: {{ fill_color_end }};"
     data-sl-stacked-offers
     data-sl-so-collection-handle="{{ handle }}"
@@ -74,6 +77,8 @@
     data-sl-so-msg-ship-tier-close="{{ 'sections.sl_stacked_offers.ship_tier_close' | t | default: 'You’re close! Add %amount% more for free delivery.' | escape }}"
     data-sl-so-msg-ship-tier-mid="{{ 'sections.sl_stacked_offers.ship_tier_mid' | t | default: 'Add %amount% more to get free delivery.' | escape }}"
     data-sl-so-msg-ship-tier-far="{{ 'sections.sl_stacked_offers.ship_tier_far' | t | default: 'Free delivery when you add %amount% more.' | escape }}"
+    data-sl-so-timer-hours="{{ evergreen_timer_hours }}"
+    data-sl-so-timer-label="{{ 'sections.sl_stacked_offers.timer_label' | t | default: 'Ends in' | escape }}"
     {% if is_rtl %}dir="rtl"{% endif %}
   >
     <div class="sl-stacked-offers__inner">
@@ -83,6 +88,10 @@
           {{ 'sections.sl_stacked_offers.urgency' | t | default: 'Stack & save' }}
         </span>
         <span class="sl-stacked-offers__label">{{ title }}</span>
+        <span class="sl-stacked-offers__timer" data-sl-so-timer hidden>
+          <span class="sl-stacked-offers__timer-label" data-sl-so-timer-label>{{ 'sections.sl_stacked_offers.timer_label' | t | default: 'Ends in' }}</span>
+          <span class="sl-stacked-offers__timer-value" data-sl-so-timer-value>--:--:--</span>
+        </span>
         <div class="sl-stacked-offers__deal sl-stacked-offers__deal--inline">
           <div class="sl-stacked-offers__deal-title">
             {{ 'sections.sl_stacked_offers.bundle_title' | t | default: 'Buy 3 for' }}
@@ -116,7 +125,7 @@
         </div>
       </div>
 
-      <div class="sl-stacked-offers__progress">
+      <div class="sl-stacked-offers__progress" data-sl-so-ship-wrap>
         <div class="sl-stacked-offers__line">
           <span class="sl-stacked-offers__icon" aria-hidden="true">🚚</span>
           <span class="sl-stacked-offers__text" data-sl-so-ship-msg>{{ 'sections.sl_stacked_offers.loading' | t | default: 'Checking your cart…' }}</span>
@@ -139,9 +148,10 @@
       background:#fff;
       border-radius:14px;
       border:1px solid rgba(15,23,42,.10);
-      box-shadow:0 14px 34px rgba(15,23,42,.16);
+      box-shadow:0 10px 28px rgba(15,23,42,.14);
       overflow:hidden;
       position:relative;
+      font-family: var(--font-body-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif);
     }
     #sl-stacked-offers-{{ sid }}.sl-stacked-offers::before{
       content:"";
@@ -149,6 +159,17 @@
       background: radial-gradient(800px 220px at 20% -20%, rgba(34, 197, 94, 0.18), transparent 60%),
                   radial-gradient(700px 240px at 120% 0%, rgba(59, 130, 246, 0.14), transparent 55%);
     }
+    #sl-stacked-offers-{{ sid }}.sl-stacked-offers--clean::before{ opacity: 0.45; }
+    #sl-stacked-offers-{{ sid }}.sl-stacked-offers--clean{ border-color: rgba(15,23,42,.10); }
+    #sl-stacked-offers-{{ sid }}.sl-stacked-offers--urgency{
+      border-color: rgba(15, 23, 42, 0.14);
+      box-shadow: 0 18px 50px rgba(15,23,42,.22);
+      outline: 2px solid rgba(34, 197, 94, 0.22);
+      outline-offset: 0;
+      animation: sl-so-card-pop 2.4s ease-in-out infinite;
+    }
+    #sl-stacked-offers-{{ sid }}.sl-stacked-offers--urgency::before{ opacity: 1; }
+    @keyframes sl-so-card-pop{ 0%,100%{ transform: translateZ(0) scale(1); } 50%{ transform: translateZ(0) scale(1.01); } }
     #sl-stacked-offers-{{ sid }} .sl-stacked-offers__inner{display:grid;gap:10px;position:relative}
     #sl-stacked-offers-{{ sid }} .sl-stacked-offers__top{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
     #sl-stacked-offers-{{ sid }} .sl-stacked-offers__hero-row{row-gap:8px}
@@ -162,6 +183,14 @@
       animation: sl-so-pulse 1.4s ease-in-out infinite;
       position:relative;isolation:isolate;
     }
+    #sl-stacked-offers-{{ sid }}.sl-stacked-offers--clean .sl-stacked-offers__badge{
+      animation: none;
+      box-shadow: none;
+    }
+    #sl-stacked-offers-{{ sid }}.sl-stacked-offers--urgency .sl-stacked-offers__badge{
+      background: rgba(15,23,42,0.08);
+      box-shadow: 0 12px 26px rgba(15,23,42,0.16);
+    }
     #sl-stacked-offers-{{ sid }} .sl-stacked-offers__badge::after{
       content:"";position:absolute;inset:-6px;border-radius:999px;
       border:2px solid rgba(34,197,94,.35);
@@ -171,13 +200,46 @@
     }
     #sl-stacked-offers-{{ sid }} .sl-stacked-offers__dot{width:8px;height:8px;border-radius:999px;background:#22c55e;box-shadow:0 0 0 4px rgba(34,197,94,.18)}
     #sl-stacked-offers-{{ sid }} .sl-stacked-offers__label{font-weight:850;color:#111827;font-size:.92rem}
+    #sl-stacked-offers-{{ sid }}.sl-stacked-offers--urgency .sl-stacked-offers__label{ font-weight: 950; }
+    #sl-stacked-offers-{{ sid }} .sl-stacked-offers__timer{
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(239, 68, 68, 0.10);
+      border: 1px solid rgba(239, 68, 68, 0.22);
+      color: #7f1d1d;
+      font-weight: 900;
+      font-size: 0.78rem;
+      letter-spacing: 0.03em;
+      white-space: nowrap;
+    }
+    #sl-stacked-offers-{{ sid }}.sl-stacked-offers--clean .sl-stacked-offers__timer{ display: none !important; }
+    #sl-stacked-offers-{{ sid }}.sl-stacked-offers--urgency .sl-stacked-offers__timer{
+      display: inline-flex;
+      animation: sl-so-timer-pop 1.2s ease-in-out infinite;
+    }
+    #sl-stacked-offers-{{ sid }} .sl-stacked-offers__timer-value{
+      font-variant-numeric: tabular-nums;
+      color: #991b1b;
+    }
+    @keyframes sl-so-timer-pop { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); } }
 
     #sl-stacked-offers-{{ sid }} .sl-stacked-offers__deal{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
     #sl-stacked-offers-{{ sid }} .sl-stacked-offers__deal--inline{flex:1 1 420px}
-    #sl-stacked-offers-{{ sid }} .sl-stacked-offers__deal-title{font-size:1.12rem;font-weight:950;color:#111827;letter-spacing:.01em;display:inline-flex;gap:8px;align-items:baseline;text-align:start;flex:1 1 auto}
+    #sl-stacked-offers-{{ sid }} .sl-stacked-offers__deal-title{font-size:1.05rem;font-weight:950;color:#111827;letter-spacing:.01em;display:inline-flex;gap:8px;align-items:baseline;text-align:start;flex:1 1 auto}
+    #sl-stacked-offers-{{ sid }}.sl-stacked-offers--urgency .sl-stacked-offers__deal-title{ font-size: 1.12rem; }
     #sl-stacked-offers-{{ sid }} .sl-stacked-offers__deal-price{color:#15803d;font-weight:950;white-space:nowrap}
     #sl-stacked-offers-{{ sid }} .sl-stacked-offers__deal-meta{display:inline-flex;align-items:baseline;gap:10px;flex-wrap:wrap;justify-content:flex-end;color:#374151;font-size:.92rem;flex:0 0 auto}
     #sl-stacked-offers-{{ sid }} .sl-stacked-offers__save{color:#0f172a;font-weight:900;background:rgba(34,197,94,.14);border:1px solid rgba(34,197,94,.22);padding:3px 10px;border-radius:999px;white-space:nowrap;box-shadow:0 10px 22px rgba(34,197,94,.18)}
+    #sl-stacked-offers-{{ sid }}.sl-stacked-offers--clean .sl-stacked-offers__save{ box-shadow: none; }
+    #sl-stacked-offers-{{ sid }}.sl-stacked-offers--urgency .sl-stacked-offers__save{
+      background: linear-gradient(90deg, rgba(34,197,94,.22), rgba(250,204,21,.18));
+      border-color: rgba(34,197,94,.28);
+      animation: sl-so-save-pop 1.2s ease-in-out infinite;
+    }
+    @keyframes sl-so-save-pop{ 0%,100%{ transform: scale(1); } 50%{ transform: scale(1.03); } }
     #sl-stacked-offers-{{ sid }} .sl-stacked-offers__instead{white-space:nowrap;opacity:.9}
     #sl-stacked-offers-{{ sid }} .sl-stacked-offers__was{text-decoration:line-through;opacity:.85}
 
@@ -218,6 +280,8 @@
       white-space:nowrap;
     }
     #sl-stacked-offers-{{ sid }} .sl-stacked-offers__line{display:flex;gap:10px;align-items:center;justify-content:center;text-align:center;color:#374151;font-size:.92rem;font-weight:600}
+    #sl-stacked-offers-{{ sid }}.sl-stacked-offers--clean .sl-stacked-offers__line{ font-size: 0.9rem; font-weight: 600; }
+    #sl-stacked-offers-{{ sid }}.sl-stacked-offers--urgency .sl-stacked-offers__line{ font-size: 0.95rem; font-weight: 800; color: #0f172a; }
     #sl-stacked-offers-{{ sid }} .sl-stacked-offers__icon{font-size:1.1rem;line-height:1}
     #sl-stacked-offers-{{ sid }} .sl-stacked-offers__track{position:relative;width:100%;height:10px;background:#eee;border-radius:10px;overflow:hidden}
     #sl-stacked-offers-{{ sid }} .sl-stacked-offers__fill{position:absolute;inset:0;width:var(--progress,0%);height:100%;background:linear-gradient(90deg,var(--sl-so-fill-start,#4ade80),var(--sl-so-fill-end,#16a34a));border-radius:10px;transition:width .45s cubic-bezier(.2,.8,.2,1);overflow:hidden}
@@ -238,7 +302,13 @@
       #sl-stacked-offers-{{ sid }} .sl-stacked-offers__fill,
       #sl-stacked-offers-{{ sid }} .sl-stacked-offers__stripes,
       #sl-stacked-offers-{{ sid }} .sl-stacked-offers__badge,
-      #sl-stacked-offers-{{ sid }} .sl-stacked-offers__badge::after{animation:none !important;transition:none !important}
+      #sl-stacked-offers-{{ sid }} .sl-stacked-offers__badge::after,
+      #sl-stacked-offers-{{ sid }}.sl-stacked-offers--urgency,
+      #sl-stacked-offers-{{ sid }}.sl-stacked-offers--urgency .sl-stacked-offers__save,
+      #sl-stacked-offers-{{ sid }}.sl-stacked-offers--urgency .sl-stacked-offers__timer{
+        animation:none !important;
+        transition:none !important;
+      }
     }
     @media screen and (max-width:749px){
       #sl-stacked-offers-{{ sid }} .sl-stacked-offers__deal{justify-content:flex-start}
@@ -284,6 +354,56 @@
     var prevDeals = null;
     var prevShipReached = null;
     var toastTimer = null;
+    var countdownInterval = null;
+
+    function timerKey() {
+      var handle = root.getAttribute('data-sl-so-collection-handle') || 'collection';
+      var hours = root.getAttribute('data-sl-so-timer-hours') || '6';
+      return 'sl_so_timer_end_' + handle + '_' + hours;
+    }
+
+    function ensureTimerEndMs() {
+      var hours = parseInt(root.getAttribute('data-sl-so-timer-hours') || '6', 10) || 6;
+      var key = timerKey();
+      var now = Date.now();
+      var stored = null;
+      try { stored = window.sessionStorage ? window.sessionStorage.getItem(key) : null; } catch (e) {}
+      var endMs = stored ? parseInt(stored, 10) : 0;
+      if (!endMs || endMs < now) {
+        endMs = now + (hours * 60 * 60 * 1000);
+        try { if (window.sessionStorage) window.sessionStorage.setItem(key, String(endMs)); } catch (e2) {}
+      }
+      return endMs;
+    }
+
+    function formatHMS(ms) {
+      var total = Math.max(0, Math.floor(ms / 1000));
+      var h = Math.floor(total / 3600);
+      var m = Math.floor((total % 3600) / 60);
+      var s = total % 60;
+      function pad(n) { return (n < 10 ? '0' : '') + String(n); }
+      return pad(h) + ':' + pad(m) + ':' + pad(s);
+    }
+
+    function startEvergreenTimer() {
+      if (!root.classList.contains('sl-stacked-offers--urgency')) return;
+      var wrap = root.querySelector('[data-sl-so-timer]');
+      var valueEl = root.querySelector('[data-sl-so-timer-value]');
+      var labelEl = root.querySelector('[data-sl-so-timer-label]');
+      if (!wrap || !valueEl) return;
+      wrap.hidden = false;
+      if (labelEl) labelEl.textContent = root.getAttribute('data-sl-so-timer-label') || labelEl.textContent || '';
+
+      if (countdownInterval) window.clearInterval(countdownInterval);
+      var endMs = ensureTimerEndMs();
+      countdownInterval = window.setInterval(function() {
+        var now = Date.now();
+        if (now >= endMs) {
+          endMs = ensureTimerEndMs();
+        }
+        valueEl.textContent = formatHMS(endMs - now);
+      }, 250);
+    }
 
     function showToast(message) {
       var toast = root.querySelector('[data-sl-so-toast]');
@@ -459,6 +579,11 @@
       }
 
       var total = cart && typeof cart.total_price === 'number' ? cart.total_price : 0;
+      var shipWrap = root.querySelector('[data-sl-so-ship-wrap]');
+      if (shipWrap) {
+        if (total <= 0) shipWrap.style.display = 'none';
+        else shipWrap.style.display = '';
+      }
       var remainingShip = Math.max(0, shipThreshold - total);
       var shipPct = shipThreshold > 0 ? Math.min(100, (total / shipThreshold) * 100) : 0;
       var shipReached = remainingShip <= 0;
@@ -517,6 +642,7 @@
     }
 
     refresh();
+    startEvergreenTimer();
     ['cart:refresh','cart:change','cart:updated','product:added'].forEach(function(name){
       document.addEventListener(name, function(e){
         var detail = e && e.detail ? e.detail : null;
