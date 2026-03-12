@@ -49,24 +49,26 @@
     data-sl-so-free-ship-threshold="{{ free_shipping_threshold_cents }}"
     data-sl-so-currency="{{ cart.currency | default: shop.currency | default: 'EGP' }}"
     data-sl-so-msg-bundle-next="{{ 'sections.sl_stacked_offers.bundle_next' | t | default: 'Add %count% more to unlock the next deal and save %save%.' | escape }}"
-    data-sl-so-msg-bundle-earned="{{ 'sections.sl_stacked_offers.bundle_earned' | t | default: 'Unlocked %deals% deal(s). Add %count% more to unlock another.' | escape }}"
+    data-sl-so-msg-bundle-earned="{{ 'sections.sl_stacked_offers.bundle_earned' | t | default: 'Unlocked %deals% deal(s). Add %count% more to unlock another and save %save%.' | escape }}"
     data-sl-so-msg-bundle-none="{{ 'sections.sl_stacked_offers.bundle_none' | t | default: 'Add %count% more to unlock your first deal and save %save%.' | escape }}"
     data-sl-so-total_saved="{{ 'sections.sl_stacked_offers.total_saved' | t | default: 'Total saved: %amount%' | escape }}"
+    data-sl-so-free_ship_badge="{{ 'sections.sl_stacked_offers.free_ship_badge' | t | default: '+ Free delivery' | escape }}"
     data-sl-so-msg-ship-next="{{ 'sections.sl_stacked_offers.ship_next' | t | default: 'Add %amount% more to get free delivery.' | escape }}"
     data-sl-so-msg-ship-earned="{{ 'sections.sl_stacked_offers.ship_earned' | t | default: 'Free delivery unlocked!' | escape }}"
+    data-sl-so-msg-ship-tier-almost="{{ 'sections.sl_stacked_offers.ship_tier_almost' | t | default: 'Almost there! Add %amount% more for free delivery.' | escape }}"
+    data-sl-so-msg-ship-tier-close="{{ 'sections.sl_stacked_offers.ship_tier_close' | t | default: 'You’re close! Add %amount% more for free delivery.' | escape }}"
+    data-sl-so-msg-ship-tier-mid="{{ 'sections.sl_stacked_offers.ship_tier_mid' | t | default: 'Add %amount% more to get free delivery.' | escape }}"
+    data-sl-so-msg-ship-tier-far="{{ 'sections.sl_stacked_offers.ship_tier_far' | t | default: 'Free delivery when you add %amount% more.' | escape }}"
     {% if is_rtl %}dir="rtl"{% endif %}
   >
     <div class="sl-stacked-offers__inner">
-      <div class="sl-stacked-offers__top">
+      <div class="sl-stacked-offers__top sl-stacked-offers__hero-row">
         <span class="sl-stacked-offers__badge">
           <span class="sl-stacked-offers__dot" aria-hidden="true"></span>
           {{ 'sections.sl_stacked_offers.urgency' | t | default: 'Stack & save' }}
         </span>
         <span class="sl-stacked-offers__label">{{ qualifying_collection.title }}</span>
-      </div>
-
-      <div class="sl-stacked-offers__row">
-        <div class="sl-stacked-offers__deal">
+        <div class="sl-stacked-offers__deal sl-stacked-offers__deal--inline">
           <div class="sl-stacked-offers__deal-title">
             {{ 'sections.sl_stacked_offers.bundle_title' | t | default: 'Buy 3 for' }}
             <span class="sl-stacked-offers__deal-price" data-sl-so-offer-price-text>{{ offer_price_cents | money_without_trailing_zeros }}</span>
@@ -131,6 +133,7 @@
     }
     #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__inner{display:grid;gap:10px;position:relative}
     #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__top{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__hero-row{row-gap:8px}
     #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__badge{
       display:inline-flex;align-items:center;gap:8px;
       padding:4px 10px;border-radius:999px;
@@ -149,9 +152,10 @@
       z-index:-1;
     }
     #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__dot{width:8px;height:8px;border-radius:999px;background:#22c55e;box-shadow:0 0 0 4px rgba(34,197,94,.18)}
-    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__label{font-weight:650;color:#111827;font-size:.92rem}
+    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__label{font-weight:850;color:#111827;font-size:.92rem}
 
     #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__deal{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__deal--inline{flex:1 1 420px}
     #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__deal-title{font-size:1.12rem;font-weight:950;color:#111827;letter-spacing:.01em;display:inline-flex;gap:8px;align-items:baseline;text-align:start;flex:1 1 auto}
     #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__deal-price{color:#15803d;font-weight:950;white-space:nowrap}
     #sl-stacked-offers-{{ section.id }} .sl-stacked-offers__deal-meta{display:inline-flex;align-items:baseline;gap:10px;flex-wrap:wrap;justify-content:flex-end;color:#374151;font-size:.92rem;flex:0 0 auto}
@@ -207,6 +211,7 @@
     #sl-stacked-offers-{{ section.id }}.sl-stacked-offers--rtl .sl-stacked-offers__deal{flex-direction:row-reverse}
     #sl-stacked-offers-{{ section.id }}.sl-stacked-offers--rtl .sl-stacked-offers__deal-meta{justify-content:flex-start}
     #sl-stacked-offers-{{ section.id }}.sl-stacked-offers--rtl .sl-stacked-offers__deal-title{text-align:start}
+    #sl-stacked-offers-{{ section.id }}.sl-stacked-offers--rtl .sl-stacked-offers__top{justify-content:flex-start}
 
     @keyframes sl-so-stripes{from{background-position:0 0}to{background-position:14px 0}}
     @keyframes sl-so-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.03)}}
@@ -229,6 +234,39 @@
     if (!root) return;
 
     var cache = window.__slStackedOffersCollectionCache = window.__slStackedOffersCollectionCache || {};
+    var prevDeals = null;
+    var prevShipReached = null;
+
+    var CONFETTI_SCRIPT = 'https://cdn.jsdelivr.net/npm/@hiseb/confetti@2.1.0/dist/confetti.min.js';
+    var confettiLoaded = false;
+
+    function shootConfetti() {
+      if (typeof window.confetti !== 'function') return;
+      var positions = [
+        { x: window.innerWidth * 0.5, y: window.innerHeight * 0.5 },
+        { x: window.innerWidth * 0.25, y: window.innerHeight * 0.4 },
+        { x: window.innerWidth * 0.75, y: window.innerHeight * 0.35 }
+      ];
+      for (var i = 0; i < positions.length; i++) {
+        (function(pos, idx) {
+          setTimeout(function() {
+            window.confetti({ position: { x: pos.x, y: pos.y }, count: 80, size: 1.2, velocity: 220, fade: true });
+          }, idx * 250);
+        })(positions[i], i);
+      }
+    }
+
+    function playConfetti() {
+      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      function run() { shootConfetti(); setTimeout(shootConfetti, 150); setTimeout(shootConfetti, 300); }
+      if (typeof window.confetti === 'function') { run(); return; }
+      if (confettiLoaded) return;
+      confettiLoaded = true;
+      var s = document.createElement('script');
+      s.src = CONFETTI_SCRIPT;
+      s.onload = run;
+      document.head.appendChild(s);
+    }
 
     function formatMoneyNoDecimals(cents, currency) {
       cents = Math.max(0, cents || 0);
@@ -319,14 +357,16 @@
         var tplEarned = root.getAttribute('data-sl-so-msg-bundle-earned') || '';
         var msg;
         if (deals <= 0) {
-          msg = tplNone.replace(/%count%/g, String(nextCount)).replace(/%save%/g, formatMoneyNoDecimals(savings, currency));
+          msg = tplNone;
+        } else if (remainder > 0) {
+          msg = tplNext;
         } else {
-          msg = tplEarned
-            .replace(/%deals%/g, String(deals))
-            .replace(/%count%/g, String(nextCount))
-            .replace(/%save%/g, formatMoneyNoDecimals(savings, currency));
+          msg = tplEarned;
         }
-        bundleMsgEl.textContent = msg;
+        bundleMsgEl.textContent = msg
+          .replace(/%deals%/g, String(deals))
+          .replace(/%count%/g, String(nextCount))
+          .replace(/%save%/g, formatMoneyNoDecimals(savings, currency));
       }
       setProgress(bundleFill, bundlePct);
 
@@ -357,17 +397,42 @@
       var total = cart && typeof cart.total_price === 'number' ? cart.total_price : 0;
       var remainingShip = Math.max(0, shipThreshold - total);
       var shipPct = shipThreshold > 0 ? Math.min(100, (total / shipThreshold) * 100) : 0;
+      var shipReached = remainingShip <= 0;
       var shipMsgEl = root.querySelector('[data-sl-so-ship-msg]');
       var shipFill = root.querySelector('[data-sl-so-ship-fill]');
       if (shipMsgEl) {
-        if (remainingShip <= 0) {
+        if (shipReached) {
           shipMsgEl.textContent = root.getAttribute('data-sl-so-msg-ship-earned') || '';
         } else {
+          var TIER_ALMOST_CENTS = 1000;
+          var TIER_CLOSE_CENTS = 3000;
+          var TIER_MID_CENTS = 5000;
+
           var tplShip = root.getAttribute('data-sl-so-msg-ship-next') || '';
+          if (remainingShip < TIER_ALMOST_CENTS) {
+            tplShip = root.getAttribute('data-sl-so-msg-ship-tier-almost') || tplShip;
+          } else if (remainingShip < TIER_CLOSE_CENTS) {
+            tplShip = root.getAttribute('data-sl-so-msg-ship-tier-close') || tplShip;
+          } else if (remainingShip < TIER_MID_CENTS) {
+            tplShip = root.getAttribute('data-sl-so-msg-ship-tier-mid') || tplShip;
+          } else {
+            tplShip = root.getAttribute('data-sl-so-msg-ship-tier-far') || tplShip;
+          }
           shipMsgEl.textContent = tplShip.replace(/%amount%/g, formatMoneyNoDecimals(remainingShip, currency));
         }
       }
       setProgress(shipFill, shipPct);
+
+      if (earnedWrap && earnedBars && earnedTotal && deals > 0 && shipReached) {
+        var badge = root.getAttribute('data-sl-so-free_ship_badge') || '';
+        if (badge) earnedTotal.textContent = earnedTotal.textContent + ' ' + badge;
+      }
+
+      var didEarnDeal = (prevDeals != null) && (deals > prevDeals);
+      var didReachShip = (prevShipReached != null) && (shipReached && !prevShipReached);
+      prevDeals = deals;
+      prevShipReached = shipReached;
+      if (didEarnDeal || didReachShip) playConfetti();
     }
 
     function refresh() {

@@ -60,16 +60,16 @@ Example — Arabic (Egyptian), threshold 650:
 ```liquid
 {% render 'sl-free-shipping-progress-bar',
   threshold_amount: 650,
-  success_message: "وصلكم الشحن المجاني!",
-  progress_message_template: "ضيفوا %amount% زيادة عشان الشحن المجاني",
+  success_message: "مبروك! وصلتي للشحن المجاني 🎉",
+  progress_message_template: "فاضل %amount% بس ويوصلك الشحن المجاني",
   hide_when_cart_empty: true,
   fill_color_start: "#4ade80",
   fill_color_end: "#16a34a",
   show_stripes: true,
-  tier_message_almost: "قربتم! باقي %amount% والشحن المجاني وصلكم",
-  tier_message_close: "قربتم! ضيفوا %amount% زيادة عشان الشحن المجاني",
-  tier_message_mid: "ضيفوا %amount% زيادة عشان توصلكم الشحن المجاني",
-  tier_message_far: "الشحن مجاني لما تضيفوا %amount% زيادة"
+  tier_message_almost: "قربتي جدًا! فاضل %amount% بس للشحن المجاني",
+  tier_message_close: "قربتي! زودي منتجات بـ %amount% وخدي الشحن مجانًا",
+  tier_message_mid: "فاضل %amount% ويوصلك الشحن المجاني",
+  tier_message_far: "ضيفي منتجات بـ %amount% عشان تحصلي على الشحن المجاني"
 %}
 ```
 
