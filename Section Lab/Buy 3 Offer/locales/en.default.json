@@ -1,0 +1,15 @@
+{
+  "sections": {
+    "sl_buy3_offer": {
+      "badge": "Offer",
+      "title": "Buy 3 for",
+      "instead_of": "Instead of",
+      "save": "Save",
+      "loading": "Checking your cart…",
+      "add_more": "Add %count% more to unlock the offer and save %save%.",
+      "unlocked": "Offer unlocked! You got the deal.",
+      "missing_product": "Add this section to a product page, or choose a product in settings."
+    }
+  }
+}
+

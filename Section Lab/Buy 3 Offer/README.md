@@ -1,0 +1,76 @@
+# SL - Buy 3 Offer
+
+Product-page promo card that highlights a fixed offer (default: **Buy 3 for 299** instead of **750**) and **tracks how many of that product are already in the cart**, showing:
+
+- **Add X more** to unlock the offer
+- **Save Y** (regular total − offer price)
+- **Progress bar** (same card/track styling approach as the SL Free Shipping Progress Bar)
+
+**Category:** Product / Promotional
+
+---
+
+## How it works
+
+- The section targets a product:
+  - **Current product** (when added to a product template), or
+  - A **selected product** via the section setting.
+- On load and on cart changes, it fetches ` /cart.js ` and sums the cart quantity for that product.
+- It calculates:
+  - Remaining items \(X = \max(0, \text{offer\_qty} - \text{qty\_in\_cart})\)
+  - Savings \(Y = \max(0, \text{regular\_total} - \text{offer\_price})\)
+  - Progress \(= \min(100, \text{qty} / \text{offer\_qty} \times 100)\)
+
+---
+
+## Install
+
+1. Copy files into your theme:
+   - `sections/sl-buy-3-offer.liquid` → `sections/sl-buy-3-offer.liquid` (optional if you want it as a section)
+   - `snippets/sl-buy-3-offer.liquid` → `snippets/sl-buy-3-offer.liquid` (for rendering inside other sections/snippets)
+2. Merge locale keys:
+   - `locales/en.default.json` → your theme’s `locales/en.default.json`
+   - `locales/ar.json` → your theme’s `locales/ar.json` (if you use Arabic)
+3. In the theme editor, add **“SL - Buy 3 Offer”** to your **product template** (recommended).
+
+---
+
+## Snippet usage
+
+Render the snippet anywhere (recommended near the product Add to Cart):
+
+```liquid
+{% render 'sl-buy-3-offer',
+  product: product,
+  offer_qty: 3,
+  offer_price: 299,
+  regular_total: 750,
+  fill_color_start: '#4ade80',
+  fill_color_end: '#16a34a',
+  show_stripes: true,
+  section_id: section.id
+%}
+```
+
+### Snippet parameters
+
+- `product` (required): the product to track in cart.
+- `offer_qty` (default: 3)
+- `offer_price` (default: 299) — currency units.
+- `regular_total` (default: 750) — currency units for that quantity.
+- `fill_color_start`, `fill_color_end` (optional)
+- `show_stripes` (default: true)
+- `section_id` (recommended): unique id to avoid duplicate IDs when the snippet is rendered multiple times.
+
+---
+
+## Settings
+
+- **Offer quantity** (default: 3)
+- **Offer price** (default: 299)
+- **Regular total** for that quantity (default: 750)
+- Card sizing/padding
+- Progress bar gradient + stripes
+
+**Last updated:** 2026-03-12
+

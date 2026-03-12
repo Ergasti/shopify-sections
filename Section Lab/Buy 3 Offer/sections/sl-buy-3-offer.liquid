@@ -1,0 +1,451 @@
+{% comment %}
+  SL - Buy 3 Offer (Section)
+  Product-page promo card that mirrors the Free Shipping Progress Bar card style.
+  Tracks cart quantity of the chosen product via /cart.js and shows:
+   - Buy 3 for 299 (instead of 750 EGP)
+   - Add X more to unlock
+   - Save Y
+{% endcomment %}
+
+{% assign target_product = product | default: nil %}
+{% if section.settings.product != blank %}
+  {% assign target_product = section.settings.product %}
+{% endif %}
+
+{% assign offer_qty = section.settings.offer_qty | default: 3 | plus: 0 %}
+{% assign offer_price_cents = section.settings.offer_price | default: 299 | plus: 0 | times: 100 %}
+{% assign regular_total_cents = section.settings.regular_total | default: 750 | plus: 0 | times: 100 %}
+{% assign savings_cents = regular_total_cents | minus: offer_price_cents %}
+{% if savings_cents < 0 %}{% assign savings_cents = 0 %}{% endif %}
+
+{% assign fill_color_start = section.settings.fill_color_start | default: '#4ade80' | strip %}
+{% assign fill_color_end = section.settings.fill_color_end | default: '#16a34a' | strip %}
+{% assign show_stripes = section.settings.show_stripes %}
+{% if show_stripes == false or show_stripes == 'false' %}
+  {% assign show_stripes = false %}
+{% else %}
+  {% assign show_stripes = true %}
+{% endif %}
+
+{% assign locale_iso = request.locale.iso_code | default: 'en' %}
+{% assign is_rtl = false %}
+{% if locale_iso == 'ar' or locale_iso == 'he' or locale_iso == 'fa' or locale_iso == 'ur' or locale_iso == 'yi' %}{% assign is_rtl = true %}{% endif %}
+
+{% if offer_qty <= 0 %}
+  {% assign offer_qty = 3 %}
+{% endif %}
+
+{% if target_product == blank %}
+  {% if request.design_mode %}
+    <div style="padding: 16px; border: 1px dashed #ccc; border-radius: 8px; background: #fafafa;">
+      <strong>SL - Buy 3 Offer</strong><br>
+      {{ 'sections.sl_buy3_offer.missing_product' | t | default: 'Add this section to a product page, or choose a product in settings.' }}
+    </div>
+  {% endif %}
+{% else %}
+  <section
+    id="sl-buy3-offer-{{ section.id }}"
+    class="sl-buy3-offer{% if is_rtl %} sl-buy3-offer--rtl{% endif %}{% unless show_stripes %} sl-buy3-offer--no-stripes{% endunless %}"
+    style="--sl-buy3-fill-start: {{ fill_color_start }}; --sl-buy3-fill-end: {{ fill_color_end }};"
+    data-sl-buy3-offer
+    data-sl-buy3-product-id="{{ target_product.id }}"
+    data-sl-buy3-offer-qty="{{ offer_qty }}"
+    data-sl-buy3-offer-price="{{ offer_price_cents }}"
+    data-sl-buy3-regular-total="{{ regular_total_cents }}"
+    data-sl-buy3-savings="{{ savings_cents }}"
+    data-sl-buy3-currency="{{ cart.currency | default: shop.currency | default: 'EGP' }}"
+    {% if is_rtl %}dir="rtl"{% endif %}
+  >
+    <div class="sl-buy3-offer__inner">
+      <p class="sl-buy3-offer__kicker">
+        <span class="sl-buy3-offer__badge">{{ 'sections.sl_buy3_offer.badge' | t | default: 'Offer' }}</span>
+        <span class="sl-buy3-offer__product">{{ target_product.title }}</span>
+      </p>
+
+      <h3 class="sl-buy3-offer__title">
+        {{ 'sections.sl_buy3_offer.title' | t | default: 'Buy 3 for' }}
+        <span class="sl-buy3-offer__price" data-sl-buy3-offer-price-text>{{ offer_price_cents | money }}</span>
+      </h3>
+
+      <p class="sl-buy3-offer__subtitle">
+        {{ 'sections.sl_buy3_offer.instead_of' | t | default: 'Instead of' }}
+        <span class="sl-buy3-offer__was" data-sl-buy3-regular-total-text>{{ regular_total_cents | money }}</span>
+        <span class="sl-buy3-offer__save" data-sl-buy3-save-text>
+          {{ 'sections.sl_buy3_offer.save' | t | default: 'Save' }}
+          {{ savings_cents | money }}
+        </span>
+      </p>
+
+      <div class="sl-buy3-offer__message" aria-live="polite">
+        <span class="sl-buy3-offer__icon" aria-hidden="true">🛍️</span>
+        <span class="sl-buy3-offer__message-text" data-sl-buy3-message>
+          {{ 'sections.sl_buy3_offer.loading' | t | default: 'Checking your cart…' }}
+        </span>
+      </div>
+
+      <div class="sl-buy3-offer__track-wrap" style="--progress: 0%">
+        <div class="sl-buy3-offer__track">
+          <div class="sl-buy3-offer__fill" style="--progress: 0%" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+            <div class="sl-buy3-offer__stripes"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <style>
+    #sl-buy3-offer-{{ section.id }}.sl-buy3-offer {
+      width: 100%;
+      max-width: {{ section.settings.max_width | default: 520 | plus: 0 }}px;
+      margin: {{ section.settings.margin_vertical | default: 16 | plus: 0 }}px auto;
+      padding: {{ section.settings.padding_block | default: 16 | plus: 0 }}px {{ section.settings.padding_inline | default: 20 | plus: 0 }}px;
+      background: #ffffff;
+      border-radius: 12px;
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      box-shadow: 0 10px 26px rgba(15, 23, 42, 0.12);
+      overflow: hidden;
+    }
+    #sl-buy3-offer-{{ section.id }} .sl-buy3-offer__inner { display: grid; gap: 10px; }
+    #sl-buy3-offer-{{ section.id }} .sl-buy3-offer__kicker {
+      margin: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      color: #374151;
+      font-size: 0.92rem;
+      letter-spacing: 0.01em;
+      font-weight: 500;
+    }
+    #sl-buy3-offer-{{ section.id }} .sl-buy3-offer__badge {
+      display: inline-flex;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.04);
+      color: #111827;
+      font-weight: 600;
+      font-size: 0.8rem;
+    }
+    #sl-buy3-offer-{{ section.id }} .sl-buy3-offer__product { font-weight: 600; color: #111827; }
+    #sl-buy3-offer-{{ section.id }} .sl-buy3-offer__title {
+      margin: 0;
+      font-size: 1.15rem;
+      line-height: 1.25;
+      color: #111827;
+      letter-spacing: 0.01em;
+      font-weight: 750;
+    }
+    #sl-buy3-offer-{{ section.id }} .sl-buy3-offer__price {
+      color: #15803d;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    #sl-buy3-offer-{{ section.id }} .sl-buy3-offer__subtitle {
+      margin: 0;
+      color: #374151;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    #sl-buy3-offer-{{ section.id }} .sl-buy3-offer__was {
+      text-decoration: line-through;
+      opacity: 0.85;
+      white-space: nowrap;
+    }
+    #sl-buy3-offer-{{ section.id }} .sl-buy3-offer__save {
+      margin-inline-start: auto;
+      color: #0f172a;
+      font-weight: 650;
+      background: rgba(34, 197, 94, 0.12);
+      border: 1px solid rgba(34, 197, 94, 0.18);
+      padding: 3px 10px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+    #sl-buy3-offer-{{ section.id }} .sl-buy3-offer__message {
+      margin: 6px 0 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      text-align: center;
+      color: #374151;
+      font-size: 0.95rem;
+      letter-spacing: 0.01em;
+      font-weight: 520;
+    }
+    #sl-buy3-offer-{{ section.id }} .sl-buy3-offer__icon { font-size: 1.1rem; line-height: 1; }
+
+    #sl-buy3-offer-{{ section.id }} .sl-buy3-offer__track-wrap { position: relative; width: 100%; margin-top: 6px; }
+    #sl-buy3-offer-{{ section.id }} .sl-buy3-offer__track {
+      position: relative;
+      width: 100%;
+      height: 10px;
+      background: #eeeeee;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    #sl-buy3-offer-{{ section.id }} .sl-buy3-offer__fill {
+      position: absolute;
+      inset: 0;
+      width: var(--progress, 0%);
+      height: 100%;
+      background: linear-gradient(90deg, var(--sl-buy3-fill-start, #4ade80), var(--sl-buy3-fill-end, #16a34a));
+      border-radius: 10px;
+      transition: width 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+      transform-origin: left center;
+      overflow: hidden;
+    }
+    #sl-buy3-offer-{{ section.id }} .sl-buy3-offer__stripes {
+      position: absolute;
+      inset: 0;
+      background-image: linear-gradient(
+        45deg,
+        rgba(255, 255, 255, 0.25) 25%,
+        transparent 25%,
+        transparent 50%,
+        rgba(255, 255, 255, 0.25) 50%,
+        rgba(255, 255, 255, 0.25) 75%,
+        transparent 75%,
+        transparent
+      );
+      background-size: 14px 14px;
+      animation: sl-buy3-stripes 1s linear infinite;
+      pointer-events: none;
+    }
+    #sl-buy3-offer-{{ section.id }}.sl-buy3-offer--no-stripes .sl-buy3-offer__stripes { display: none; }
+
+    @keyframes sl-buy3-stripes { from { background-position: 0 0; } to { background-position: 14px 0; } }
+
+    #sl-buy3-offer-{{ section.id }}.sl-buy3-offer--rtl .sl-buy3-offer__subtitle { flex-direction: row-reverse; }
+    #sl-buy3-offer-{{ section.id }}.sl-buy3-offer--rtl .sl-buy3-offer__save { margin-inline-start: 0; margin-inline-end: auto; }
+
+    @media (prefers-reduced-motion: reduce) {
+      #sl-buy3-offer-{{ section.id }} .sl-buy3-offer__fill,
+      #sl-buy3-offer-{{ section.id }} .sl-buy3-offer__stripes {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+  </style>
+
+  <script>
+  (function() {
+    var root = document.querySelector('#sl-buy3-offer-{{ section.id }}[data-sl-buy3-offer]');
+    if (!root) return;
+
+    function formatMoney(cents, currency) {
+      cents = Math.max(0, cents || 0);
+      currency = (currency || '').toUpperCase() || 'EGP';
+      try {
+        if (window.Shopify && typeof window.Shopify.formatMoney === 'function') {
+          var fmt = window.money_format || window.Shopify.money_format || '${{amount}}';
+          return window.Shopify.formatMoney(cents, fmt);
+        }
+      } catch (e) {}
+      try {
+        return new Intl.NumberFormat(undefined, { style: 'currency', currency: currency, minimumFractionDigits: 2 }).format(cents / 100);
+      } catch (e2) {}
+      return (cents / 100).toFixed(2);
+    }
+
+    function getQtyForProduct(cart, productId) {
+      if (!cart || !cart.items || !cart.items.length) return 0;
+      var sum = 0;
+      for (var i = 0; i < cart.items.length; i++) {
+        var it = cart.items[i];
+        if (String(it.product_id) === String(productId)) sum += (it.quantity || 0);
+      }
+      return sum;
+    }
+
+    function updateUI(cart) {
+      var productId = root.getAttribute('data-sl-buy3-product-id');
+      var offerQty = parseInt(root.getAttribute('data-sl-buy3-offer-qty') || '3', 10) || 3;
+      var offerPrice = parseInt(root.getAttribute('data-sl-buy3-offer-price') || '0', 10) || 0;
+      var regularTotal = parseInt(root.getAttribute('data-sl-buy3-regular-total') || '0', 10) || 0;
+      var savings = parseInt(root.getAttribute('data-sl-buy3-savings') || '0', 10) || 0;
+      var currency = root.getAttribute('data-sl-buy3-currency') || (cart && cart.currency) || 'EGP';
+
+      var qty = getQtyForProduct(cart, productId);
+      var remaining = Math.max(0, offerQty - qty);
+      var progress = Math.min(100, (qty / offerQty) * 100);
+
+      var fillEl = root.querySelector('.sl-buy3-offer__fill');
+      var trackWrap = root.querySelector('.sl-buy3-offer__track-wrap');
+      var msgEl = root.querySelector('[data-sl-buy3-message]');
+
+      if (fillEl) {
+        fillEl.style.setProperty('--progress', progress + '%');
+        fillEl.setAttribute('aria-valuenow', String(Math.round(progress)));
+      }
+      if (trackWrap) trackWrap.style.setProperty('--progress', progress + '%');
+
+      var offerPriceText = root.querySelector('[data-sl-buy3-offer-price-text]');
+      var regularTotalText = root.querySelector('[data-sl-buy3-regular-total-text]');
+      var saveText = root.querySelector('[data-sl-buy3-save-text]');
+      if (offerPriceText) offerPriceText.textContent = formatMoney(offerPrice, currency);
+      if (regularTotalText) regularTotalText.textContent = formatMoney(regularTotal, currency);
+      if (saveText) saveText.textContent = (root.getAttribute('data-sl-buy3-save-prefix') || '') + (saveText.textContent || '').split(' ').slice(0, 1).join(' ') + ' ' + formatMoney(savings, currency);
+
+      if (!msgEl) return;
+      if (remaining <= 0) {
+        msgEl.textContent = root.getAttribute('data-sl-buy3-msg-unlocked') || '{{ "sections.sl_buy3_offer.unlocked" | t | default: "Offer unlocked! You got the deal." | escape }}';
+      } else {
+        var tpl = root.getAttribute('data-sl-buy3-msg-remaining') || '{{ "sections.sl_buy3_offer.add_more" | t | default: "Add %count% more to unlock the offer and save %save%." | escape }}';
+        msgEl.textContent = tpl
+          .replace(/%count%/g, String(remaining))
+          .replace(/%save%/g, formatMoney(savings, currency));
+      }
+    }
+
+    function fetchCart() {
+      try {
+        return fetch('/cart.js', { credentials: 'same-origin' }).then(function(r) { return r.json(); });
+      } catch (e) {
+        return Promise.reject(e);
+      }
+    }
+
+    function refresh() {
+      fetchCart().then(function(cart) { updateUI(cart); }).catch(function() {});
+    }
+
+    root.setAttribute('data-sl-buy3-msg-unlocked', '{{ "sections.sl_buy3_offer.unlocked" | t | default: "Offer unlocked! You got the deal." | escape }}');
+    root.setAttribute('data-sl-buy3-msg-remaining', '{{ "sections.sl_buy3_offer.add_more" | t | default: "Add %count% more to unlock the offer and save %save%." | escape }}');
+
+    refresh();
+
+    ['cart:refresh', 'cart:change', 'cart:updated', 'product:added'].forEach(function(eventName) {
+      document.addEventListener(eventName, function(e) {
+        var detail = e && e.detail ? e.detail : null;
+        var cart = detail && (detail.cart || detail);
+        if (cart) updateUI(cart);
+        else setTimeout(refresh, 120);
+      });
+    });
+
+    var _fetch = window.fetch;
+    if (typeof _fetch === 'function') {
+      window.fetch = function() {
+        var url = (arguments[0] && arguments[0].url) ? arguments[0].url : arguments[0];
+        var watches = typeof url === 'string' && (
+          url.indexOf('/cart/add') !== -1 ||
+          url.indexOf('/cart/change') !== -1 ||
+          url.indexOf('/cart/update') !== -1 ||
+          url.indexOf('/cart/clear') !== -1
+        );
+        return _fetch.apply(this, arguments).then(function(res) {
+          if (watches) setTimeout(refresh, 150);
+          return res;
+        });
+      };
+    }
+  })();
+  </script>
+
+  {% schema %}
+  {
+    "name": "SL - Buy 3 Offer",
+    "tag": "section",
+    "class": "sl-buy3-offer-section",
+    "settings": [
+      {
+        "type": "product",
+        "id": "product",
+        "label": "Product (optional)",
+        "info": "Leave blank to use the current product when placed on a product template."
+      },
+      {
+        "type": "range",
+        "id": "offer_qty",
+        "min": 2,
+        "max": 10,
+        "step": 1,
+        "label": "Offer quantity",
+        "default": 3
+      },
+      {
+        "type": "number",
+        "id": "offer_price",
+        "label": "Offer price (currency units)",
+        "default": 299
+      },
+      {
+        "type": "number",
+        "id": "regular_total",
+        "label": "Regular total for that quantity (currency units)",
+        "default": 750
+      },
+      {
+        "type": "header",
+        "content": "Layout"
+      },
+      {
+        "type": "range",
+        "id": "max_width",
+        "min": 320,
+        "max": 900,
+        "step": 10,
+        "label": "Max width (px)",
+        "default": 520
+      },
+      {
+        "type": "range",
+        "id": "margin_vertical",
+        "min": 0,
+        "max": 60,
+        "step": 2,
+        "label": "Vertical margin (px)",
+        "default": 16
+      },
+      {
+        "type": "range",
+        "id": "padding_block",
+        "min": 8,
+        "max": 60,
+        "step": 2,
+        "label": "Padding (top/bottom) (px)",
+        "default": 16
+      },
+      {
+        "type": "range",
+        "id": "padding_inline",
+        "min": 8,
+        "max": 60,
+        "step": 2,
+        "label": "Padding (left/right) (px)",
+        "default": 20
+      },
+      {
+        "type": "header",
+        "content": "Progress bar"
+      },
+      {
+        "type": "color",
+        "id": "fill_color_start",
+        "label": "Gradient start",
+        "default": "#4ade80"
+      },
+      {
+        "type": "color",
+        "id": "fill_color_end",
+        "label": "Gradient end",
+        "default": "#16a34a"
+      },
+      {
+        "type": "checkbox",
+        "id": "show_stripes",
+        "label": "Show diagonal stripes",
+        "default": true
+      }
+    ],
+    "presets": [
+      { "name": "SL - Buy 3 Offer" }
+    ]
+  }
+  {% endschema %}
+{% endif %}
+
