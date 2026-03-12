@@ -151,21 +151,20 @@
     #sl-stacked-offers-{{ section.id }}.sl-stacked-offers {
       --sl-so-accent-light: rgba(22,163,74,.10);
       --sl-so-accent-mid:   rgba(22,163,74,.22);
-      --sl-so-text:         #111827;
-      --sl-so-text-2:       #374151;
-      --sl-so-text-3:       #6b7280;
-      --sl-so-border:       rgba(15,23,42,.09);
+      --sl-so-text:         var(--color-foreground, #111827);
+      --sl-so-text-2:       rgba(17,24,39,.75);
+      --sl-so-text-3:       rgba(17,24,39,.60);
+      --sl-so-border:       var(--color-border, rgba(15,23,42,.09));
       width: 100%;
       max-width: {{ section.settings.max_width | default: 560 | plus: 0 }}px;
       margin: {{ section.settings.margin_vertical | default: 16 | plus: 0 }}px auto;
-      background: #ffffff;
+      background: var(--color-background, #ffffff);
       border-radius: 16px;
       border: 1.5px solid var(--sl-so-border);
       box-shadow: 0 1px 4px rgba(15,23,42,.06), 0 6px 20px rgba(15,23,42,.09);
       overflow: hidden;
       position: relative;
       font-family: var(--font-body-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif);
-      font-size: 14px;
       color: var(--sl-so-text);
     }
     #sl-stacked-offers-{{ section.id }}.sl-stacked-offers--urgency {
@@ -220,9 +219,9 @@
       z-index: 2;
       padding: 3px 10px;
       border-radius: 999px;
-      background: rgba(22,163,74,.12);
-      border: 1px solid rgba(22,163,74,.26);
-      color: #14532d;
+      background: linear-gradient(90deg, #f97373, #ef4444);
+      border: 1px solid rgba(248,113,113,0.95);
+      color: #fff;
       font-size: .72rem;
       font-weight: 700;
       letter-spacing: .02em;
