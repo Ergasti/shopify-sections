@@ -3,6 +3,7 @@
     "sl_stacked_offers": {
       "urgency": "زوّد ووفّر",
       "bundle_title": "اشتري 3 بـ",
+      "offer_label": "اشتري %qty% بـ",
       "instead_of": "بدل",
       "save": "وفّر",
       "loading": "بنراجع السلة…",

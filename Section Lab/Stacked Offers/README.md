@@ -9,6 +9,13 @@ One compact promo card that shows **two stacked incentives** at the same time:
 
 **Category:** Cart / Product / Promotional
 
+**Files in this folder:**  
+- `sections/sl-stacked-offers.liquid` — Section for the stacked offers card.  
+- `snippets/sl-stacked-offers.liquid` — Snippet version of the same card.  
+- `snippets/sl-product-card-offer-label.liquid` — “BUY 3 for 299” label for **collection/card** product images.  
+- `snippets/product-media-with-offer-label.liquid` — Product **media** wrapper that shows the same label on the **product page** gallery.  
+- `locales/en.default.json`, `locales/ar.json` — Translations (include `offer_label` for the label).
+
 ---
 
 ## How it works
@@ -60,5 +67,76 @@ One compact promo card that shows **two stacked incentives** at the same time:
 - `free_shipping_threshold_amount` (default: 650)
 - `section_id` (recommended)
 
-**Last updated:** 2026-03-12
+---
+
+## Offer label on product cards
+
+To show a **"BUY 3 for 299"** (or Arabic: **"اشتري 3 بـ 299"**) label on top of product cards (e.g. on collection pages):
+
+1. Copy `snippets/sl-product-card-offer-label.liquid` into your theme's `snippets/` folder.
+2. Merge the `offer_label` key from `locales/en.default.json` and `locales/ar.json` into your theme locales.
+3. In your theme's product card snippet (e.g. `snippets/card-product.liquid`), inside the **card__media** div and at the **top** (before the image), add:
+
+```liquid
+{% render 'sl-product-card-offer-label', offer_qty: 3, offer_price: 299 %}
+```
+
+Optional: pass `show: false` to hide the label, or change `offer_qty` / `offer_price` to match your offer. The label is positioned absolutely on top of the card image and supports RTL (Arabic, etc.) via `request.locale`.
+
+---
+
+## Offer label on the product page (main image)
+
+The same offer label can appear on the **product page** gallery (main image and all slides). Use the wrapper snippet `product-media-with-offer-label.liquid`, which wraps your theme’s product media output in a `position: relative` container and renders the label on top.
+
+### Prerequisites
+
+- `snippets/sl-product-card-offer-label.liquid` is in your theme.
+- The `offer_label` locale key is in your theme’s `locales/en.default.json` and `locales/ar.json` (see “Offer label on product cards” above).
+
+### Step 1: Add the wrapper snippet
+
+Copy **`snippets/product-media-with-offer-label.liquid`** from this folder into your theme’s `snippets/` folder.
+
+### Step 2: Use it in the product gallery
+
+Your theme usually renders the main product image via a snippet such as `product-thumbnail`, which in turn calls `product-media`. You can either replace `product-media` or switch the render to the new snippet.
+
+**Option A — Replace `product-media` (label on every gallery slide)**
+
+1. In your theme, back up `snippets/product-media.liquid`.
+2. Replace the contents of `snippets/product-media.liquid` with the contents of `product-media-with-offer-label.liquid`.
+3. No other file changes needed. The label will show on all product media (images, video posters, 3D) in the main gallery.
+
+**Option B — Use the new snippet only where you want the label**
+
+1. Find where your theme renders the product media (often inside `snippets/product-thumbnail.liquid` or the main product section).
+2. Change the render from `product-media` to `product-media-with-offer-label` and pass the offer options. Example:
+
+```liquid
+{% render 'product-media-with-offer-label',
+  media: media,
+  loop: section.settings.enable_video_looping,
+  variant_image: variant_image,
+  show_offer_label: true,
+  offer_qty: 3,
+  offer_price: 299
+%}
+```
+
+3. Repeat for every place you want the label (e.g. each `render 'product-media'` in the gallery).
+
+### Parameters (product page snippet)
+
+| Parameter          | Default | Description                                      |
+|--------------------|--------|--------------------------------------------------|
+| `show_offer_label` | `true` | Set to `false` to hide the label on this media.  |
+| `offer_qty`        | `3`    | Quantity in the offer (e.g. “BUY 3 for”).        |
+| `offer_price`      | `299`  | Price in currency units (e.g. 299).              |
+
+All other parameters are the same as your theme’s `product-media` snippet (`media`, `loop`, `variant_image`, etc.).
+
+To hide the label only on the product page, pass `show_offer_label: false` when rendering. The label does not affect layout; it is absolutely positioned over the media.
+
+**Last updated:** 2026-03-15
 

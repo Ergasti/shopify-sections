@@ -18,12 +18,14 @@
 
 {% if show_label %}
   {% assign locale_iso = request.locale.iso_code | default: 'en' %}
-  {% assign label_text = 'sections.sl_stacked_offers.offer_label' | t: qty: qty %}
-  {% if label_text contains 'offer_label' or label_text == blank %}
-    {% if locale_iso == 'ar' %}
-      {% assign label_text = 'اشتري ' | append: qty | append: ' بـ' %}
-    {% else %}
-      {% assign label_text = 'BUY ' | append: qty | append: ' for' %}
+  {% assign qty_str = qty | append: '' %}
+  {% if locale_iso == 'ar' %}
+    {% assign label_text = 'اشتري ' | append: qty_str | append: ' بـ' %}
+  {% else %}
+    {% assign label_text = 'sections.sl_stacked_offers.offer_label' | t %}
+    {% assign label_text = label_text | replace: '%qty%', qty_str %}
+    {% if label_text contains '%qty%' or label_text == blank or label_text contains 'offer_label' %}
+      {% assign label_text = 'BUY ' | append: qty_str | append: ' for' %}
     {% endif %}
   {% endif %}
   <span
@@ -31,32 +33,56 @@
     aria-hidden="true"
     {% if locale_iso == 'ar' %}dir="rtl"{% endif %}
   >
+    <span class="sl-product-card-offer-label__emoji" aria-hidden="true">🔥</span>
     <span class="sl-product-card-offer-label__text">{{ label_text }}</span>
     <span class="sl-product-card-offer-label__price">{{ price_cents | money_without_trailing_zeros }}</span>
   </span>
   <style>
     .sl-product-card-offer-label {
       position: absolute;
-      top: 10px;
-      left: 10px;
+      top: 4px;
+      left: 4px;
       z-index: 2;
       display: inline-flex;
       align-items: center;
-      gap: 4px;
-      padding: 4px 10px;
-      border-radius: 999px;
-      background: rgba(22, 163, 74, 0.95);
+      gap: 2px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
       color: #fff;
-      font-size: 0.72rem;
+      font-size: 1rem;
       font-weight: 700;
-      letter-spacing: 0.02em;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
       white-space: nowrap;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 2px 10px rgba(194, 65, 12, 0.4);
+      opacity: 0;
+      transform: translateY(-6px) scale(0.97);
+      animation: sl-product-card-offer-label-in 0.55s cubic-bezier(0.34, 1.2, 0.64, 1) forwards;
     }
-    .sl-product-card-offer-label--rtl { left: auto; right: 10px; }
-    .sl-product-card-offer-label__price { font-weight: 800; }
+    .sl-product-card-offer-label--rtl { left: auto; right: 4px; }
+    .sl-product-card-offer-label__emoji {
+      display: inline-block;
+      animation: sl-product-card-offer-emoji-pulse 1.2s ease-in-out infinite;
+    }
+    .sl-product-card-offer-label__price { font-weight: 800; letter-spacing: 0.02em; }
+    @keyframes sl-product-card-offer-emoji-pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+    }
+    @keyframes sl-product-card-offer-label-in {
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
     @media (prefers-reduced-motion: reduce) {
-      .sl-product-card-offer-label { transition: none; }
+      .sl-product-card-offer-label {
+        animation: none;
+        opacity: 1;
+        transform: none;
+      }
+      .sl-product-card-offer-label__emoji { animation: none; }
     }
   </style>
 {% endif %}
