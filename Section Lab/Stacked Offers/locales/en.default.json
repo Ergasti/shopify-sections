@@ -3,6 +3,7 @@
     "sl_stacked_offers": {
       "urgency": "Stack & save",
       "bundle_title": "Buy 3 for",
+      "offer_label": "BUY %qty% for",
       "instead_of": "Instead of",
       "save": "Save",
       "loading": "Checking your cart…",

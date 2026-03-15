@@ -1,0 +1,62 @@
+{% comment %}
+  SL - Product card offer label
+  Renders a "BUY 3 for 299" style label on top of a product card. Use inside card__media.
+
+  Accepts:
+  - offer_qty: {Number} Quantity in the offer (default: 3)
+  - offer_price: {Number} Price in currency units (default: 299)
+  - show: {Boolean} Show the label (default: true)
+
+  Usage (in card-product or similar, inside card__media at the top):
+  {% render 'sl-product-card-offer-label', offer_qty: 3, offer_price: 299 %}
+{% endcomment %}
+{% assign qty = offer_qty | default: 3 | plus: 0 %}
+{% if qty <= 0 %}{% assign qty = 3 %}{% endif %}
+{% assign price_cents = offer_price | default: 299 | plus: 0 | times: 100 %}
+{% assign show_label = show | default: true %}
+{% if show_label == false or show_label == 'false' %}{% assign show_label = false %}{% else %}{% assign show_label = true %}{% endif %}
+
+{% if show_label %}
+  {% assign locale_iso = request.locale.iso_code | default: 'en' %}
+  {% assign label_text = 'sections.sl_stacked_offers.offer_label' | t: qty: qty %}
+  {% if label_text contains 'offer_label' or label_text == blank %}
+    {% if locale_iso == 'ar' %}
+      {% assign label_text = 'اشتري ' | append: qty | append: ' بـ' %}
+    {% else %}
+      {% assign label_text = 'BUY ' | append: qty | append: ' for' %}
+    {% endif %}
+  {% endif %}
+  <span
+    class="sl-product-card-offer-label{% if locale_iso == 'ar' or locale_iso == 'he' or locale_iso == 'fa' %} sl-product-card-offer-label--rtl{% endif %}"
+    aria-hidden="true"
+    {% if locale_iso == 'ar' %}dir="rtl"{% endif %}
+  >
+    <span class="sl-product-card-offer-label__text">{{ label_text }}</span>
+    <span class="sl-product-card-offer-label__price">{{ price_cents | money_without_trailing_zeros }}</span>
+  </span>
+  <style>
+    .sl-product-card-offer-label {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 2;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(22, 163, 74, 0.95);
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+    .sl-product-card-offer-label--rtl { left: auto; right: 10px; }
+    .sl-product-card-offer-label__price { font-weight: 800; }
+    @media (prefers-reduced-motion: reduce) {
+      .sl-product-card-offer-label { transition: none; }
+    }
+  </style>
+{% endif %}
