@@ -174,3 +174,5 @@ Translations live under `sections.sl_volume_discount` in the locale files. Keys:
 - **Images:** `loading="lazy"`, `decoding="async"`, responsive `srcset` (220w, 360w, 520w) with `sizes="220px"`. Cards after the first two use `fetchpriority="low"` to deprioritize off-screen images.
 - **Swiper:** Loaded only when the Volume Discount section/block enters (or is within 100px of) the viewport, reducing initial page weight.
 - **Buy now:** Click handler is attached on DOMContentLoaded so it works before Swiper initializes.
+
+**Last updated:** 2026-02-28

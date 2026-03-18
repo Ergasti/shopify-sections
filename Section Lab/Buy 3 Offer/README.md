@@ -55,14 +55,17 @@ Render the snippet anywhere (recommended near the product Add to Cart):
 
 ### Snippet parameters
 
-- `collection_handle` (required): qualifying collection handle.
-- `collection_title` (recommended): display label for the collection.
-- `offer_qty` (default: 3)
-- `offer_price` (default: 299) — currency units.
-- `regular_total` (default: 750) — currency units for that quantity.
-- `fill_color_start`, `fill_color_end` (optional)
-- `show_stripes` (default: true)
-- `section_id` (recommended): unique id to avoid duplicate IDs when the snippet is rendered multiple times.
+| Parameter | Default | Description |
+|---|---|---|
+| `collection_handle` | — | **(Required)** Handle of the qualifying collection. |
+| `collection_title` | handle | Display name shown in the card heading. |
+| `offer_qty` | `3` | Items to buy to unlock the deal. |
+| `offer_price` | `299` | Deal price in currency units. |
+| `regular_total` | `750` | Regular price for `offer_qty` items (used to calculate savings). |
+| `fill_color_start` | `#4ade80` | Progress bar gradient start color. |
+| `fill_color_end` | `#16a34a` | Progress bar gradient end color. |
+| `show_stripes` | `true` | Show diagonal stripes on the progress bar fill. |
+| `section_id` | auto | Unique ID to scope styles. Use `section.id` when rendered multiple times. |
 
 ---
 

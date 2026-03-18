@@ -146,3 +146,5 @@ No extra configuration is needed: once the snippet is inside the cart drawer sec
 - `snippets/sl-free-shipping-progress-bar.liquid` — Bar markup, styles, and script (cart logic, confetti, tier messages)
 
 No separate assets; styles and script are inline in the snippet.
+
+**Last updated:** 2026-02-28

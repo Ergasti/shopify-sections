@@ -2,7 +2,7 @@
 
 A comprehensive, categorized library of Shopify sections and snippets. Copy what you need into your theme.
 
-**Library last updated:** 2026-03-12
+**Library last updated:** 2026-03-18
 
 ---
 
@@ -13,7 +13,7 @@ A comprehensive, categorized library of Shopify sections and snippets. Copy what
 - [Section Lab (all sections)](#section-lab-all-sections)
 - [Theme edits (Vogue)](#theme-edits-vogue)
 - [Folder structure](#folder-structure-per-section)
-- [Categories overview](#categories-overview)
+- [Categories](#categories)
 - [Source repositories](#source-repositories-included-in-this-library)
 - [Original sections (this repo)](#original-sections-this-repo)
 - [Plan and progress](#plan-and-progress)
@@ -28,7 +28,6 @@ A comprehensive, categorized library of Shopify sections and snippets. Copy what
 | **Carousels & Sliders** | [Marquee Products](Marquee%20Products/README.md) | bstroshek/marquee-section | 2025-02-14 |
 | | [Fancy Slick Carousel](Fancy%20Slick%20Carousel/README.md) | patrickbolle/shopify-snippets | 2025-02-14 |
 | | [Hero Slider (rocklss)](Hero%20Slider%20(rocklss)/README.md) | rocklss/shopify_section | 2025-02-14 |
-| | [Marquee Products](Marquee%20Products/README.md) | bstroshek/marquee-section | 2026-02-14 |
 | **Content & Layout** | [Double Block Section](Double%20Block%20Section/README.md) | patrickbolle/shopify-snippets | 2026-02-14 |
 | **Forms & Contact** | [Sectioned Contact Form](Sectioned%20Contact%20Form/README.md) | patrickbolle/shopify-snippets | 2026-02-14 |
 | **Snippets & Utilities** | [IP Redirection](IP%20Redirection/README.md) | patrickbolle/shopify-snippets | 2026-02-14 |
@@ -46,7 +45,8 @@ A comprehensive, categorized library of Shopify sections and snippets. Copy what
 | | [SL – Active Ingredients](Section%20Lab/Active%20Ingredients/README.md) | Section Lab (this repo) | 2026-03-07 |
 | | [SL – Highlights](Section%20Lab/Highlights/README.md) | Section Lab (this repo) | 2026-03-07 |
 | | [SL – Buy 3 Offer](Section%20Lab/Buy%203%20Offer/README.md) | Section Lab (this repo) | 2026-03-12 |
-| | [SL – Stacked Offers](Section%20Lab/Stacked%20Offers/README.md) | Section Lab (this repo) | 2026-03-12 |
+| | [SL – Stacked Offers](Section%20Lab/Stacked%20Offers/README.md) | Section Lab (this repo) | 2026-03-18 |
+| | [SL – Buy 2 Get 1](Section%20Lab/Buy%202%20Get%201/README.md) | Section Lab (this repo) | 2026-03-18 |
 | | [Product Card Label](Product%20Card%20Label/README.md) | this repo | 2026-02-25 |
 | **Theme edits** | [Vogue theme edits](theme%20edits/Vogue/README.md) | this repo | 2026-03-07 |
 | **Media & Gallery** | [Image Gallery (BoldizArt)](Image%20Gallery%20(BoldizArt)/README.md) | BoldizArt/Shopify-Image-Gallery | 2025-02-14 |
@@ -114,7 +114,8 @@ Every folder that contains `.liquid` section or snippet files. Sorted by last up
 | [SL – Active Ingredients](Section%20Lab/Active%20Ingredients/README.md) | Product active botanical ingredients accordion + popup (Yves Rocher style). | 2026-03-07 |
 | [SL – Highlights](Section%20Lab/Highlights/README.md) | Product highlights accordion: icon + label, optional popup. | 2026-03-07 |
 | [SL – Buy 3 Offer](Section%20Lab/Buy%203%20Offer/README.md) | Product/cart offer card: tracks qualifying collection quantity, shows “add X more” + savings. | 2026-03-12 |
-| [SL – Stacked Offers](Section%20Lab/Stacked%20Offers/README.md) | Combined promo card: repeating bundle deals + free delivery threshold. | 2026-03-12 |
+| [SL – Stacked Offers](Section%20Lab/Stacked%20Offers/README.md) | Combined promo card: repeating bundle deals + free delivery threshold. | 2026-03-18 |
+| [SL – Buy 2 Get 1](Section%20Lab/Buy%202%20Get%201/README.md) | Buy X Get 1 Free promo card with live cart progress bar; optional free delivery row. | 2026-03-18 |
 | [Theme edits (Vogue)](theme%20edits/Vogue/README.md) | Product card (Yves Rocher), product-card-add-to-cart (FBT-style, sold-out), collection-list, product-gallery, locales, schema settings. | 2026-03-07 |
 
 ---
@@ -153,17 +154,20 @@ Section Lab sections live under `Section Lab/`. Each has a `sections/` folder an
 | [SL – Active Ingredients](Section%20Lab/Active%20Ingredients/README.md) | Product active botanical ingredients accordion + popup (Yves Rocher style). | 2026-03-07 |
 | [SL – Highlights](Section%20Lab/Highlights/README.md) | Product highlights accordion: icon + label list, optional popup per item. | 2026-03-07 |
 | [SL – Buy 3 Offer](Section%20Lab/Buy%203%20Offer/README.md) | Product/cart offer card: qualifying collection quantity tracker with savings + progress. | 2026-03-12 |
-| [SL – Stacked Offers](Section%20Lab/Stacked%20Offers/README.md) | Stacked incentives: repeating bundle deals + free delivery threshold in one card. | 2026-03-12 |
+| [SL – Stacked Offers](Section%20Lab/Stacked%20Offers/README.md) | Stacked incentives: repeating bundle deals + free delivery threshold in one card. | 2026-03-18 |
+| [SL – Buy 2 Get 1](Section%20Lab/Buy%202%20Get%201/README.md) | Buy X Get 1 Free promo card: collection-based cart tracker + confetti + free delivery row. | 2026-03-18 |
+
 ## Folder structure (per section)
 
 Each section or snippet group lives in its own folder:
 
 ```
 SectionName/
-├── sections/       # .liquid section files (if section)
-├── snippets/      # .liquid snippets (if used)
-├── assets/         # .js, .css (if used)
-└── README.md       # Description, install steps, source, last updated
+├── sections/    # .liquid section files (if section)
+├── snippets/    # .liquid snippets (if used)
+├── assets/      # .js, .css (if used)
+├── locales/     # en.default.json, ar.json (if translated)
+└── README.md    # Description, install steps, source, last updated
 ```
 
 ---
@@ -204,7 +208,7 @@ SectionName/
 | [iShopifyExpert/custom-slider](https://github.com/iShopifyExpert/custom-slider) | Custom / gallery slider (reference) |
 | [uxhacks/shopify-sections](https://github.com/uxhacks/shopify-sections) | Sections (reference) |
 | [jydykun/Shopify-Sections](https://github.com/jydykun/Shopify-Sections) | Skeleton theme (reference) |
-| **Section Lab** (this repo / paid bundle) | Active Ingredients, Bundle, How to Use, FBT, Volume Discount, Free Shipping Progress Bar, Buy 3 Offer, Stacked Offers, Price Bubble, Icon List, Payment Icons, Announcement Bar, Delivery Countdown, Face Proof Bubble, Nudges, Story Navigation, Scrolling Content, Native Video Slider, UGC Videos, Social Proof Video, Before And After, Real Results |
+| **Section Lab** (this repo / paid bundle) | Active Ingredients, Bundle, How to Use, FBT, Volume Discount, Free Shipping Progress Bar, Buy 3 Offer, Stacked Offers, Buy 2 Get 1, Price Bubble, Icon List, Payment Icons, Announcement Bar, Delivery Countdown, Face Proof Bubble, Nudges, Story Navigation, Scrolling Content, Native Video Slider, UGC Videos, Social Proof Video, Before And After, Real Results, Highlights |
 
 ---
 
@@ -223,11 +227,11 @@ See **[PLAN.md](PLAN.md)** for the build plan, repo mapping, and progress log.
 
 ---
 
-## Authors
+## Authors & license
 
 - **Mircea Piturca** — [Sections.Design](https://sections.design) (original sections)
 - Sections from other repos are attributed in each section’s README and in the table above.
 
-## License
+### License
 
 This project is licensed under the MIT License. Individual section sources may have different licenses; see each section’s README and the source repository.

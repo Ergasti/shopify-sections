@@ -1,0 +1,545 @@
+{% comment %}
+  SL - Buy 2 Get 1 (Snippet)
+  Use when you need a "Buy X Get 1 Free" promo card renderable from any template.
+
+  Render example:
+  {% render 'sl-buy2get1',
+    collection_handle: collection.handle,
+    collection_title:  collection.title,
+    offer_qty:         2,
+    free_item_value:   199,
+    free_shipping_threshold_amount: 500,
+    fill_color_start:  '#fb923c',
+    fill_color_end:    '#ea580c',
+    section_id:        section.id
+  %}
+{% endcomment %}
+
+{% assign sid = section_id | default: id | default: block_id | default: 'sl-b2g1' %}
+
+{% assign handle = collection_handle | default: '' %}
+{% assign title  = collection_title  | default: handle %}
+
+{% assign offer_qty = offer_qty | default: 2 | plus: 0 %}
+{% if offer_qty <= 0 %}{% assign offer_qty = 2 %}{% endif %}
+
+{% assign free_item_value_cents          = free_item_value                   | default: 0   | plus: 0 | times: 100 %}
+{% assign free_shipping_threshold_cents  = free_shipping_threshold_amount    | default: 0   | plus: 0 | times: 100 %}
+
+{% assign fill_color_start      = fill_color_start      | default: '#fb923c' | strip %}
+{% assign fill_color_end        = fill_color_end        | default: '#ea580c' | strip %}
+{% assign style_variant         = style_variant         | default: style | default: 'clean' | strip %}
+{% assign evergreen_timer_hours = evergreen_timer_hours | default: timer_hours | default: 6 | plus: 0 %}
+{% if evergreen_timer_hours <= 0 %}{% assign evergreen_timer_hours = 6 %}{% endif %}
+
+{% assign locale_iso = request.locale.iso_code | default: 'en' %}
+{% assign is_rtl = false %}
+{% if locale_iso == 'ar' or locale_iso == 'he' or locale_iso == 'fa' or locale_iso == 'ur' or locale_iso == 'yi' %}{% assign is_rtl = true %}{% endif %}
+
+{% if handle == blank %}
+  {% if request.design_mode %}
+    <div style="padding: 16px; border: 1px dashed #ccc; border-radius: 8px; background: #fafafa;">
+      <strong>SL - Buy 2 Get 1 (Snippet)</strong><br>
+      {{ 'sections.sl_b2g1.missing_collection' | t | default: 'Pass collection_handle when rendering this snippet.' }}
+    </div>
+  {% endif %}
+{% else %}
+  <div
+    id="sl-b2g1-{{ sid }}"
+    class="sl-b2g1 sl-b2g1--{{ style_variant }}{% if is_rtl %} sl-b2g1--rtl{% endif %}"
+    style="--sl-b2g1-fill-start: {{ fill_color_start }}; --sl-b2g1-fill-end: {{ fill_color_end }};"
+    data-sl-b2g1
+    data-sl-b2g1-collection-handle="{{ handle }}"
+    data-sl-b2g1-offer-qty="{{ offer_qty }}"
+    data-sl-b2g1-free-item-value="{{ free_item_value_cents }}"
+    data-sl-b2g1-free-ship-threshold="{{ free_shipping_threshold_cents }}"
+    data-sl-b2g1-currency="{{ cart.currency | default: shop.currency | default: 'EGP' }}"
+    data-sl-b2g1-msg-none="{{ 'sections.sl_b2g1.msg_none' | t | default: 'Add %count% item(s) from this collection to get 1 FREE!' | escape }}"
+    data-sl-b2g1-msg-progress="{{ 'sections.sl_b2g1.msg_progress' | t | default: 'Add %count% more to unlock your FREE item!' | escape }}"
+    data-sl-b2g1-msg-ready="{{ 'sections.sl_b2g1.msg_ready' | t | default: 'FREE item unlocked! Add it to your cart.' | escape }}"
+    data-sl-b2g1-msg-earned="{{ 'sections.sl_b2g1.msg_earned' | t | default: 'You have %free% FREE item(s)! Add %count% more for another.' | escape }}"
+    data-sl-b2g1-msg-earned-ready="{{ 'sections.sl_b2g1.msg_earned_ready' | t | default: 'Another FREE item ready! Add it to your cart.' | escape }}"
+    data-sl-b2g1-claimed="{{ 'sections.sl_b2g1.claimed' | t | default: '%free% FREE item(s) earned' | escape }}"
+    data-sl-b2g1-total-saved="{{ 'sections.sl_b2g1.total_saved' | t | default: 'Total saved: %amount%' | escape }}"
+    data-sl-b2g1-free-ship-badge="{{ 'sections.sl_b2g1.free_ship_badge' | t | default: '+ Free delivery' | escape }}"
+    data-sl-b2g1-toast-free="{{ 'sections.sl_b2g1.toast_free' | t | default: 'FREE item unlocked! 🎁' | escape }}"
+    data-sl-b2g1-toast-ship="{{ 'sections.sl_b2g1.toast_ship' | t | default: 'Free delivery unlocked!' | escape }}"
+    data-sl-b2g1-msg-ship-next="{{ 'sections.sl_b2g1.ship_next' | t | default: 'Add %amount% more to get free delivery.' | escape }}"
+    data-sl-b2g1-msg-ship-earned="{{ 'sections.sl_b2g1.ship_earned' | t | default: 'Free delivery unlocked!' | escape }}"
+    data-sl-b2g1-msg-ship-tier-almost="{{ 'sections.sl_b2g1.ship_tier_almost' | t | default: 'Almost there! Add %amount% more for free delivery.' | escape }}"
+    data-sl-b2g1-msg-ship-tier-close="{{ 'sections.sl_b2g1.ship_tier_close' | t | default: 'You&#39;re close! Add %amount% more for free delivery.' | escape }}"
+    data-sl-b2g1-msg-ship-tier-mid="{{ 'sections.sl_b2g1.ship_tier_mid' | t | default: 'Add %amount% more to get free delivery.' | escape }}"
+    data-sl-b2g1-msg-ship-tier-far="{{ 'sections.sl_b2g1.ship_tier_far' | t | default: 'Free delivery when you add %amount% more.' | escape }}"
+    data-sl-b2g1-timer-hours="{{ evergreen_timer_hours }}"
+    data-sl-b2g1-timer-label="{{ 'sections.sl_b2g1.timer_label' | t | default: 'Ends in' | escape }}"
+    {% if is_rtl %}dir="rtl"{% endif %}
+  >
+    {{- '' -}}
+    <span class="sl-b2g1__badge" aria-hidden="true">
+      <span class="sl-b2g1__dot"></span>
+      {{ 'sections.sl_b2g1.urgency' | t | default: 'Buy 2 Get 1 Free' }}
+    </span>
+    <span class="sl-b2g1__timer" data-sl-b2g1-timer hidden>
+      <span data-sl-b2g1-timer-label>{{ 'sections.sl_b2g1.timer_label' | t | default: 'Ends in' }}</span>
+      <span class="sl-b2g1__timer-value" data-sl-b2g1-timer-value>--:--:--</span>
+    </span>
+
+    <div class="sl-b2g1__inner">
+
+      <div class="sl-b2g1__hero">
+        <div class="sl-b2g1__hero-top">
+          <span class="sl-b2g1__collection">{{ title }}</span>
+          <span class="sl-b2g1__free-badge">
+            🎁 {{ 'sections.sl_b2g1.free_badge_label' | t | default: '1 FREE' }}
+          </span>
+        </div>
+        <div class="sl-b2g1__headline">
+          <span class="sl-b2g1__deal-label">{{ 'sections.sl_b2g1.deal_buy' | t | default: 'Buy' }}</span>
+          <span class="sl-b2g1__qty-badge">{{ offer_qty }}</span>
+          <span class="sl-b2g1__deal-get">{{ 'sections.sl_b2g1.get_one_free' | t | default: 'Get 1 FREE' }}</span>
+        </div>
+        {% if free_item_value_cents > 0 %}
+        <div class="sl-b2g1__value-line">
+          <span class="sl-b2g1__value-text">{{ 'sections.sl_b2g1.free_item_worth' | t | default: 'Free item worth' }}</span>
+          <span class="sl-b2g1__value-amount">{{ free_item_value_cents | money_without_trailing_zeros }}</span>
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="sl-b2g1__sep" aria-hidden="true"></div>
+
+      <div class="sl-b2g1__row sl-b2g1__row--bundle">
+        <div class="sl-b2g1__row-head">
+          <span class="sl-b2g1__row-icon" aria-hidden="true">🎁</span>
+          <span class="sl-b2g1__row-msg" data-sl-b2g1-bundle-msg>{{ 'sections.sl_b2g1.loading' | t | default: 'Checking your cart…' }}</span>
+        </div>
+        <div class="sl-b2g1__track" aria-hidden="true">
+          <div class="sl-b2g1__fill" data-sl-b2g1-bundle-fill style="--progress:0%">
+            <span class="sl-b2g1__stripes"></span>
+          </div>
+        </div>
+        <div class="sl-b2g1__earned" data-sl-b2g1-earned hidden>
+          <span class="sl-b2g1__earned-claimed" data-sl-b2g1-earned-claimed></span>
+          <span class="sl-b2g1__earned-bars" data-sl-b2g1-earned-bars aria-hidden="true"></span>
+        </div>
+      </div>
+
+      {% if free_shipping_threshold_cents > 0 %}
+      <div class="sl-b2g1__row sl-b2g1__row--ship" data-sl-b2g1-ship-wrap>
+        <div class="sl-b2g1__row-head">
+          <span class="sl-b2g1__row-icon" aria-hidden="true">🚚</span>
+          <span class="sl-b2g1__row-msg" data-sl-b2g1-ship-msg>{{ 'sections.sl_b2g1.loading' | t | default: 'Checking your cart…' }}</span>
+        </div>
+        <div class="sl-b2g1__track" aria-hidden="true">
+          <div class="sl-b2g1__fill" data-sl-b2g1-ship-fill style="--progress:0%">
+            <span class="sl-b2g1__stripes"></span>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      <div class="sl-b2g1__savings-row" data-sl-b2g1-savings-row>
+        <div class="sl-b2g1__savings" data-sl-b2g1-savings>
+          <span class="sl-b2g1__savings-icon" aria-hidden="true">💰</span>
+          <span data-sl-b2g1-savings-text></span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="sl-b2g1__toast" data-sl-b2g1-toast aria-live="polite" aria-atomic="true"></div>
+  </div>
+
+  <style>
+    #sl-b2g1-{{ sid }}.sl-b2g1 {
+      --sl-b2g1-accent-light: rgba(234,88,12,.10);
+      --sl-b2g1-accent-mid:   rgba(234,88,12,.22);
+      --sl-b2g1-text:         var(--color-foreground, #111827);
+      --sl-b2g1-text-2:       rgba(17,24,39,.75);
+      --sl-b2g1-text-3:       rgba(17,24,39,.60);
+      --sl-b2g1-border:       var(--color-border, rgba(15,23,42,.09));
+      width: 100%;
+      max-width: 560px;
+      margin: 16px auto;
+      background: var(--color-background, #ffffff);
+      border-radius: 16px;
+      border: 1.5px solid var(--sl-b2g1-border);
+      box-shadow: 0 1px 4px rgba(15,23,42,.06), 0 6px 20px rgba(15,23,42,.09);
+      overflow: hidden;
+      position: relative;
+      font-family: var(--font-body-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif);
+      color: var(--sl-b2g1-text);
+    }
+    #sl-b2g1-{{ sid }}.sl-b2g1--urgency {
+      border-color: rgba(234,88,12,.28);
+      box-shadow: 0 1px 4px rgba(15,23,42,.06), 0 8px 28px rgba(15,23,42,.12), 0 0 0 3px rgba(234,88,12,.09);
+      animation: sl-b2g1-card-glow 3s ease-in-out infinite;
+    }
+    @keyframes sl-b2g1-card-glow {
+      0%,100% { box-shadow: 0 1px 4px rgba(15,23,42,.06), 0 8px 28px rgba(15,23,42,.12), 0 0 0 3px rgba(234,88,12,.09); }
+      50%      { box-shadow: 0 1px 4px rgba(15,23,42,.06), 0 8px 28px rgba(15,23,42,.14), 0 0 0 5px rgba(234,88,12,.18); }
+    }
+    #sl-b2g1-{{ sid }} .sl-b2g1__badge { display: none; }
+    #sl-b2g1-{{ sid }}.sl-b2g1--urgency .sl-b2g1__badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      position: absolute; top: 10px; inset-inline-start: 12px; z-index: 2;
+      padding: 3px 10px; border-radius: 999px;
+      background: rgba(15,23,42,.80); border: 1px solid rgba(15,23,42,.90);
+      color: #fefce8; font-size: .72rem; font-weight: 700; letter-spacing: .06em;
+      text-transform: uppercase; white-space: nowrap;
+      box-shadow: 0 10px 22px rgba(15,23,42,.50);
+      animation: sl-b2g1-pulse 1.4s ease-in-out infinite; isolation: isolate;
+    }
+    #sl-b2g1-{{ sid }} .sl-b2g1__dot {
+      width: 7px; height: 7px; border-radius: 50%; background: #fb923c; flex-shrink: 0;
+      animation: sl-b2g1-dot-ping 1.4s ease-in-out infinite;
+    }
+    @keyframes sl-b2g1-dot-ping {
+      0%,100% { box-shadow: 0 0 0 0 rgba(251,146,60,.5); }
+      50%      { box-shadow: 0 0 0 4px rgba(251,146,60,0); }
+    }
+    #sl-b2g1-{{ sid }} .sl-b2g1__timer { display: none !important; }
+    #sl-b2g1-{{ sid }}.sl-b2g1--urgency .sl-b2g1__timer {
+      display: inline-flex !important; align-items: center; gap: 5px;
+      position: absolute; top: 10px; inset-inline-end: 12px; z-index: 2;
+      padding: 3px 10px; border-radius: 999px;
+      background: linear-gradient(90deg, #f97316, #dc2626);
+      border: 1px solid rgba(251,146,60,0.95); color: #fff;
+      font-size: .72rem; font-weight: 700; letter-spacing: .02em; white-space: nowrap;
+    }
+    #sl-b2g1-{{ sid }} .sl-b2g1__timer-value { font-variant-numeric: tabular-nums; font-weight: 800; }
+    #sl-b2g1-{{ sid }} .sl-b2g1__inner { display: flex; flex-direction: column; }
+    #sl-b2g1-{{ sid }}.sl-b2g1--urgency .sl-b2g1__inner { padding-top: 36px; }
+    #sl-b2g1-{{ sid }} .sl-b2g1__hero {
+      padding: 16px 18px 14px; display: flex; flex-direction: column; gap: 4px;
+    }
+    #sl-b2g1-{{ sid }} .sl-b2g1__hero-top {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 8px; flex-wrap: wrap; margin-bottom: 2px;
+    }
+    #sl-b2g1-{{ sid }} .sl-b2g1__collection {
+      font-size: .72rem; font-weight: 700; color: var(--sl-b2g1-text-3);
+      text-transform: uppercase; letter-spacing: .08em;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    #sl-b2g1-{{ sid }} .sl-b2g1__free-badge {
+      display: inline-flex; align-items: center; gap: 3px;
+      padding: 3px 10px; border-radius: 999px;
+      background: var(--sl-b2g1-accent-light); border: 1.5px solid var(--sl-b2g1-accent-mid);
+      color: #c2410c; font-size: .78rem; font-weight: 700; white-space: nowrap; flex-shrink: 0;
+    }
+    #sl-b2g1-{{ sid }}.sl-b2g1--urgency .sl-b2g1__free-badge {
+      background: linear-gradient(135deg, rgba(251,146,60,.16), rgba(250,204,21,.12));
+      border-color: rgba(251,146,60,.35);
+      animation: sl-b2g1-badge-bounce 2s ease-in-out infinite;
+    }
+    @keyframes sl-b2g1-badge-bounce { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+    #sl-b2g1-{{ sid }} .sl-b2g1__headline {
+      display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap;
+    }
+    #sl-b2g1-{{ sid }} .sl-b2g1__deal-label { font-size: 1.18rem; font-weight: 700; color: var(--sl-b2g1-text); line-height: 1.25; }
+    #sl-b2g1-{{ sid }} .sl-b2g1__qty-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 2rem; height: 2rem; border-radius: 50%;
+      background: linear-gradient(135deg, var(--sl-b2g1-fill-start,#fb923c), var(--sl-b2g1-fill-end,#ea580c));
+      color: #fff; font-size: 1.18rem; font-weight: 800; line-height: 1; flex-shrink: 0;
+    }
+    #sl-b2g1-{{ sid }} .sl-b2g1__deal-get { font-size: 1.35rem; font-weight: 800; color: #ea580c; line-height: 1.25; white-space: nowrap; }
+    #sl-b2g1-{{ sid }}.sl-b2g1--urgency .sl-b2g1__deal-get { font-size: 1.42rem; }
+    #sl-b2g1-{{ sid }} .sl-b2g1__value-line { display: flex; align-items: center; gap: 4px; margin-top: 2px; }
+    #sl-b2g1-{{ sid }} .sl-b2g1__value-text,
+    #sl-b2g1-{{ sid }} .sl-b2g1__value-amount { font-size: .82rem; color: var(--sl-b2g1-text-3); }
+    #sl-b2g1-{{ sid }} .sl-b2g1__value-amount { font-weight: 700; color: #ea580c; text-decoration: line-through; }
+    #sl-b2g1-{{ sid }} .sl-b2g1__sep { height: 1px; background: var(--sl-b2g1-border); margin: 0 18px; }
+    #sl-b2g1-{{ sid }} .sl-b2g1__row {
+      padding: 14px 18px; display: flex; flex-direction: column; gap: 8px;
+    }
+    #sl-b2g1-{{ sid }} .sl-b2g1__row + .sl-b2g1__row { border-top: 1px solid var(--sl-b2g1-border); }
+    #sl-b2g1-{{ sid }} .sl-b2g1__row-head { display: flex; align-items: flex-start; gap: 8px; }
+    #sl-b2g1-{{ sid }} .sl-b2g1__row-icon { font-size: 1rem; line-height: 1.4; flex-shrink: 0; }
+    #sl-b2g1-{{ sid }} .sl-b2g1__row-msg {
+      font-size: .88rem; font-weight: 600; color: var(--sl-b2g1-text-2); line-height: 1.4; text-align: start;
+    }
+    #sl-b2g1-{{ sid }}.sl-b2g1--urgency .sl-b2g1__row-msg { font-weight: 700; color: var(--sl-b2g1-text); }
+    #sl-b2g1-{{ sid }} .sl-b2g1__track {
+      position: relative; width: 100%; height: 9px;
+      background: rgba(15,23,42,.07); border-radius: 10px; overflow: hidden;
+    }
+    #sl-b2g1-{{ sid }} .sl-b2g1__fill {
+      position: absolute; inset: 0;
+      width: var(--progress, 0%); height: 100%;
+      background: linear-gradient(90deg, var(--sl-b2g1-fill-start,#fb923c), var(--sl-b2g1-fill-end,#ea580c));
+      border-radius: 10px; transition: width .5s cubic-bezier(.2,.8,.2,1); overflow: hidden;
+    }
+    #sl-b2g1-{{ sid }} .sl-b2g1__stripes {
+      position: absolute; inset: 0;
+      background-image: linear-gradient(45deg, rgba(255,255,255,.28) 25%, transparent 25%, transparent 50%, rgba(255,255,255,.28) 50%, rgba(255,255,255,.28) 75%, transparent 75%);
+      background-size: 12px 12px;
+      animation: sl-b2g1-stripes .8s linear infinite;
+    }
+    @keyframes sl-b2g1-stripes { from { background-position: 0 0; } to { background-position: 12px 0; } }
+    @keyframes sl-b2g1-pulse {
+      0%,100% { transform: scale(1); box-shadow: 0 10px 22px rgba(15,23,42,.45); }
+      50%     { transform: scale(1.03); box-shadow: 0 14px 30px rgba(15,23,42,.65); }
+    }
+    #sl-b2g1-{{ sid }} .sl-b2g1__earned { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    #sl-b2g1-{{ sid }} .sl-b2g1__earned-claimed {
+      display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 999px;
+      background: var(--sl-b2g1-accent-light); border: 1px solid var(--sl-b2g1-accent-mid);
+      color: #c2410c; font-size: .75rem; font-weight: 700; white-space: nowrap;
+    }
+    #sl-b2g1-{{ sid }} .sl-b2g1__earned-bars { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
+    #sl-b2g1-{{ sid }} .sl-b2g1__earned-bar {
+      width: 26px; height: 5px; border-radius: 999px;
+      background: linear-gradient(90deg, var(--sl-b2g1-fill-start,#fb923c), var(--sl-b2g1-fill-end,#ea580c)); opacity: .9;
+    }
+    #sl-b2g1-{{ sid }} .sl-b2g1__earned-more {
+      font-size: .72rem; font-weight: 700; color: var(--sl-b2g1-text-3);
+      background: rgba(15,23,42,.05); border: 1px solid var(--sl-b2g1-border); padding: 1px 6px; border-radius: 999px;
+    }
+    #sl-b2g1-{{ sid }} .sl-b2g1__savings-row {
+      border-top: 1px solid var(--sl-b2g1-border); padding: 12px 18px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    #sl-b2g1-{{ sid }} .sl-b2g1__savings-row:has([data-sl-b2g1-savings-text]:empty) { display: none; }
+    #sl-b2g1-{{ sid }} .sl-b2g1__savings {
+      display: inline-flex; align-items: center; gap: 6px; padding: 5px 14px; border-radius: 999px;
+      background: var(--sl-b2g1-accent-light); border: 1.5px solid var(--sl-b2g1-accent-mid);
+      color: #c2410c; font-size: .85rem; font-weight: 700;
+    }
+    #sl-b2g1-{{ sid }} .sl-b2g1__savings-icon { font-size: .95rem; line-height: 1; }
+    #sl-b2g1-{{ sid }} .sl-b2g1__toast {
+      position: fixed; right: 16px; left: auto; bottom: 16px; z-index: 99999;
+      max-width: 320px; width: min(320px, 90vw); margin: 0; padding: 12px 16px;
+      border-radius: 12px; background: rgba(15,23,42,.92);
+      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+      color: #fff; font-size: .9rem; font-weight: 600; letter-spacing: .01em;
+      box-shadow: 0 12px 36px rgba(0,0,0,.24);
+      transform: translateY(16px); opacity: 0; pointer-events: none;
+      transition: transform 260ms cubic-bezier(.2,.8,.2,1), opacity 260ms ease;
+      text-align: start;
+    }
+    #sl-b2g1-{{ sid }} .sl-b2g1__toast.is-active { transform: translateY(0); opacity: 1; }
+    #sl-b2g1-{{ sid }}.sl-b2g1--rtl .sl-b2g1__toast { right: auto; left: 16px; text-align: right; }
+    @media (prefers-reduced-motion: reduce) {
+      #sl-b2g1-{{ sid }} .sl-b2g1__fill,
+      #sl-b2g1-{{ sid }} .sl-b2g1__stripes,
+      #sl-b2g1-{{ sid }} .sl-b2g1__dot,
+      #sl-b2g1-{{ sid }}.sl-b2g1--urgency,
+      #sl-b2g1-{{ sid }}.sl-b2g1--urgency .sl-b2g1__free-badge,
+      #sl-b2g1-{{ sid }} .sl-b2g1__toast {
+        animation: none !important; transition: none !important;
+      }
+    }
+  </style>
+
+  <script>
+  (function() {
+    var root = document.getElementById('sl-b2g1-{{ sid }}');
+    if (!root) return;
+
+    var cache = window.__slB2g1CollectionCache = window.__slB2g1CollectionCache || {};
+    var prevFreeEarned = null, prevShipReached = null, toastTimer = null, countdownInterval = null;
+
+    function timerKey() {
+      return 'sl_b2g1_timer_end_' + (root.getAttribute('data-sl-b2g1-collection-handle') || 'b2g1') + '_' + (root.getAttribute('data-sl-b2g1-timer-hours') || '6');
+    }
+    function ensureTimerEndMs() {
+      var hours = parseInt(root.getAttribute('data-sl-b2g1-timer-hours') || '6', 10) || 6;
+      var key = timerKey(), now = Date.now(), stored = null;
+      try { stored = window.sessionStorage ? window.sessionStorage.getItem(key) : null; } catch (e) {}
+      var endMs = stored ? parseInt(stored, 10) : 0;
+      if (!endMs || endMs < now) {
+        endMs = now + hours * 3600000;
+        try { if (window.sessionStorage) window.sessionStorage.setItem(key, String(endMs)); } catch (e2) {}
+      }
+      return endMs;
+    }
+    function formatHMS(ms) {
+      var t = Math.max(0, Math.floor(ms / 1000));
+      function p(n) { return (n < 10 ? '0' : '') + n; }
+      return p(Math.floor(t / 3600)) + ':' + p(Math.floor((t % 3600) / 60)) + ':' + p(t % 60);
+    }
+    function startEvergreenTimer() {
+      if (!root.classList.contains('sl-b2g1--urgency')) return;
+      var wrap = root.querySelector('[data-sl-b2g1-timer]'), valEl = root.querySelector('[data-sl-b2g1-timer-value]'), lblEl = root.querySelector('[data-sl-b2g1-timer-label]');
+      if (!wrap || !valEl) return;
+      wrap.hidden = false;
+      if (lblEl) lblEl.textContent = root.getAttribute('data-sl-b2g1-timer-label') || lblEl.textContent;
+      if (countdownInterval) clearInterval(countdownInterval);
+      var endMs = ensureTimerEndMs();
+      countdownInterval = setInterval(function() {
+        var now = Date.now(); if (now >= endMs) endMs = ensureTimerEndMs();
+        valEl.textContent = formatHMS(endMs - now);
+      }, 250);
+    }
+    function showToast(msg) {
+      var t = root.querySelector('[data-sl-b2g1-toast]'); if (!t) return;
+      if (toastTimer) clearTimeout(toastTimer);
+      t.textContent = msg; t.classList.add('is-active');
+      toastTimer = setTimeout(function() { t.classList.remove('is-active'); }, 3200);
+    }
+    var CONFETTI_SRC = 'https://cdn.jsdelivr.net/npm/@hiseb/confetti@2.1.0/dist/confetti.min.js', confettiLoaded = false;
+    function shootConfetti() {
+      if (typeof window.confetti !== 'function') return;
+      [{ x: innerWidth*.5, y: innerHeight*.5 }, { x: innerWidth*.25, y: innerHeight*.4 }, { x: innerWidth*.75, y: innerHeight*.35 }].forEach(function(p, i) {
+        setTimeout(function() { window.confetti({ position: p, count: 80, size: 1.2, velocity: 220, fade: true }); }, i * 250);
+      });
+    }
+    function playConfetti() {
+      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      function run() { shootConfetti(); setTimeout(shootConfetti, 150); setTimeout(shootConfetti, 300); }
+      if (typeof window.confetti === 'function') { run(); return; }
+      if (confettiLoaded) return; confettiLoaded = true;
+      var s = document.createElement('script'); s.src = CONFETTI_SRC; s.onload = run; document.head.appendChild(s);
+    }
+    function formatMoney(cents, currency) {
+      cents = Math.max(0, cents || 0); currency = (currency || 'EGP').toUpperCase();
+      try {
+        if (window.Shopify && typeof window.Shopify.formatMoney === 'function') {
+          var fmt = (window.money_format || window.Shopify.money_format || '${{amount}}')
+            .replace('amount_with_comma_separator','amount_no_decimals_with_comma_separator')
+            .replace('amount_with_period_and_space_separator','amount_no_decimals_with_period_and_space_separator')
+            .replace('amount_with_space_separator','amount_no_decimals_with_space_separator')
+            .replace('amount_with_apostrophe_separator','amount_no_decimals_with_apostrophe_separator')
+            .replace('amount','amount_no_decimals');
+          return window.Shopify.formatMoney(cents, fmt);
+        }
+      } catch(e) {}
+      try { return new Intl.NumberFormat(undefined, { style:'currency', currency:currency, minimumFractionDigits:0, maximumFractionDigits:0 }).format(cents/100); } catch(e2) {}
+      return String(Math.round(cents/100));
+    }
+    function fetchCollectionIds(handle) {
+      if (!handle) return Promise.resolve({});
+      if (cache[handle] && cache[handle].promise) return cache[handle].promise;
+      var ids = {}, page = 1;
+      function loadNext() {
+        return fetch('/collections/' + encodeURIComponent(handle) + '/products.json?limit=250&page=' + page, { credentials: 'same-origin' })
+          .then(function(r) { return r.json(); })
+          .then(function(d) {
+            var prods = (d && d.products) || [];
+            prods.forEach(function(p) { if (p && p.id) ids[String(p.id)] = true; });
+            if (!prods.length || page >= 10) return ids;
+            page++; return loadNext();
+          });
+      }
+      cache[handle] = cache[handle] || {};
+      cache[handle].promise = loadNext().catch(function() { return ids; });
+      return cache[handle].promise;
+    }
+    function fetchCart() { return fetch('/cart.js', { credentials: 'same-origin' }).then(function(r) { return r.json(); }); }
+    function qtyForIds(cart, ids) {
+      if (!cart || !cart.items) return 0;
+      return cart.items.reduce(function(s, it) { return s + (ids && ids[String(it.product_id)] ? (it.quantity||0) : 0); }, 0);
+    }
+    function setProgress(el, pct) { if (!el) return; el.style.setProperty('--progress', pct+'%'); el.style.width = pct+'%'; }
+
+    function update(cart, idsMap) {
+      var offerQty = parseInt(root.getAttribute('data-sl-b2g1-offer-qty')||'2',10)||2;
+      var freeVal  = parseInt(root.getAttribute('data-sl-b2g1-free-item-value')||'0',10)||0;
+      var shipThr  = parseInt(root.getAttribute('data-sl-b2g1-free-ship-threshold')||'0',10)||0;
+      var currency = (cart && cart.currency) || root.getAttribute('data-sl-b2g1-currency') || 'EGP';
+      try { root.setAttribute('data-sl-b2g1-currency', currency); } catch(e) {}
+
+      var cycle = offerQty + 1;
+      var qty = qtyForIds(cart, idsMap);
+      var freeEarned = Math.floor(qty / cycle);
+      var remainder  = qty % cycle;
+      var ready      = remainder >= offerQty;
+      var nextCount  = ready ? 1 : (offerQty - remainder);
+      var bundlePct  = ready ? 100 : Math.min(100, (remainder / offerQty) * 100);
+
+      var msgEl = root.querySelector('[data-sl-b2g1-bundle-msg]');
+      var fill  = root.querySelector('[data-sl-b2g1-bundle-fill]');
+      if (msgEl) {
+        var msg;
+        if (ready && freeEarned > 0)     msg = root.getAttribute('data-sl-b2g1-msg-earned-ready') || '';
+        else if (ready)                  msg = root.getAttribute('data-sl-b2g1-msg-ready') || '';
+        else if (freeEarned > 0)         msg = (root.getAttribute('data-sl-b2g1-msg-earned')||'').replace(/%free%/g,String(freeEarned)).replace(/%count%/g,String(nextCount));
+        else if (remainder > 0)          msg = (root.getAttribute('data-sl-b2g1-msg-progress')||'').replace(/%count%/g,String(nextCount));
+        else                             msg = (root.getAttribute('data-sl-b2g1-msg-none')||'').replace(/%count%/g,String(offerQty));
+        msgEl.textContent = msg;
+      }
+      setProgress(fill, bundlePct);
+
+      var earnedWrap = root.querySelector('[data-sl-b2g1-earned]');
+      var earnedBars = root.querySelector('[data-sl-b2g1-earned-bars]');
+      var earnedClaimed = root.querySelector('[data-sl-b2g1-earned-claimed]');
+      var savText    = root.querySelector('[data-sl-b2g1-savings-text]');
+      if (earnedWrap && earnedBars && earnedClaimed) {
+        if (freeEarned > 0) {
+          earnedWrap.hidden = false;
+          var show = Math.min(5, freeEarned), extra = freeEarned - show, html = '';
+          for (var b = 0; b < show; b++) html += '<span class="sl-b2g1__earned-bar"></span>';
+          if (extra > 0) html += '<span class="sl-b2g1__earned-more">+' + extra + '</span>';
+          earnedBars.innerHTML = html;
+          earnedClaimed.textContent = (root.getAttribute('data-sl-b2g1-claimed')||'').replace(/%free%/g,String(freeEarned));
+          if (savText && freeVal > 0) {
+            savText.textContent = (root.getAttribute('data-sl-b2g1-total-saved')||'Total saved: %amount%').replace(/%amount%/g, formatMoney(freeEarned*freeVal, currency));
+          } else if (savText) { savText.textContent = ''; }
+        } else {
+          earnedWrap.hidden = true; earnedBars.innerHTML = ''; earnedClaimed.textContent = '';
+          if (savText) savText.textContent = '';
+        }
+      }
+
+      var shipWrap = root.querySelector('[data-sl-b2g1-ship-wrap]');
+      var cartTotal = (cart && typeof cart.total_price === 'number') ? cart.total_price : 0;
+      if (shipWrap) {
+        shipWrap.style.display = cartTotal <= 0 ? 'none' : '';
+        var remaining = Math.max(0, shipThr - cartTotal);
+        var shipPct = shipThr > 0 ? Math.min(100, (cartTotal / shipThr) * 100) : 0;
+        var shipReached = remaining <= 0;
+        var shipMsgEl = root.querySelector('[data-sl-b2g1-ship-msg]');
+        var shipFill  = root.querySelector('[data-sl-b2g1-ship-fill]');
+        if (shipMsgEl) {
+          if (shipReached) { shipMsgEl.textContent = root.getAttribute('data-sl-b2g1-msg-ship-earned')||''; }
+          else {
+            var tpl = root.getAttribute('data-sl-b2g1-msg-ship-next')||'';
+            if (remaining<1000)      tpl = root.getAttribute('data-sl-b2g1-msg-ship-tier-almost')||tpl;
+            else if (remaining<3000) tpl = root.getAttribute('data-sl-b2g1-msg-ship-tier-close')||tpl;
+            else if (remaining<5000) tpl = root.getAttribute('data-sl-b2g1-msg-ship-tier-mid')||tpl;
+            else                     tpl = root.getAttribute('data-sl-b2g1-msg-ship-tier-far')||tpl;
+            shipMsgEl.textContent = tpl.replace(/%amount%/g, formatMoney(remaining, currency));
+          }
+        }
+        setProgress(shipFill, shipPct);
+        if (shipReached && savText && savText.textContent) {
+          var badge = root.getAttribute('data-sl-b2g1-free-ship-badge')||'';
+          if (badge) savText.textContent += ' ' + badge;
+        }
+        var didReachShip = (prevShipReached != null) && (shipReached && !prevShipReached);
+        prevShipReached = shipReached;
+        if (didReachShip) { playConfetti(); var ts = root.getAttribute('data-sl-b2g1-toast-ship')||''; if(ts) showToast(ts); }
+      }
+
+      var didEarnFree = (prevFreeEarned != null) && (freeEarned > prevFreeEarned);
+      prevFreeEarned = freeEarned;
+      if (didEarnFree) { playConfetti(); var tf = root.getAttribute('data-sl-b2g1-toast-free')||''; if(tf) showToast(tf); }
+    }
+
+    function refresh() {
+      var handle = root.getAttribute('data-sl-b2g1-collection-handle');
+      return fetchCollectionIds(handle).then(function(ids) { return fetchCart().then(function(cart) { update(cart, ids); }); }).catch(function(){});
+    }
+
+    refresh(); startEvergreenTimer();
+    ['cart:refresh','cart:change','cart:updated','product:added'].forEach(function(name) {
+      document.addEventListener(name, function(e) {
+        var detail = e && e.detail ? e.detail : null, cart = detail && (detail.cart || detail);
+        if (!cart) { setTimeout(refresh, 120); return; }
+        var handle = root.getAttribute('data-sl-b2g1-collection-handle');
+        fetchCollectionIds(handle).then(function(ids){ update(cart,ids); }).catch(function(){ update(cart,{}); });
+      });
+    });
+    var _fetch = window.fetch;
+    if (typeof _fetch === 'function') {
+      window.fetch = function() {
+        var url = (arguments[0] && arguments[0].url) ? arguments[0].url : arguments[0];
+        var watches = typeof url==='string' && (url.indexOf('/cart/add')!==-1||url.indexOf('/cart/change')!==-1||url.indexOf('/cart/update')!==-1||url.indexOf('/cart/clear')!==-1);
+        return _fetch.apply(this, arguments).then(function(res) { if (watches) setTimeout(refresh,150); return res; });
+      };
+    }
+  })();
+  </script>
+{% endif %}

@@ -1,0 +1,105 @@
+{% comment %}
+  SL - Product Card B2G1 Label
+  Renders a "BUY 2 GET 1 FREE" badge on top of a product card image.
+  Position it inside card__media at the top (before the product image).
+
+  Accepts:
+  - offer_qty:  {Number}  Items to buy (default: 2)
+  - show:       {Boolean} Whether to show the label (default: true)
+  - style:      {String}  'default' | 'compact' (default: 'default')
+
+  Usage:
+  {% render 'sl-product-card-b2g1-label', offer_qty: 2 %}
+  {% render 'sl-product-card-b2g1-label', offer_qty: 2, style: 'compact' %}
+{% endcomment %}
+
+{% assign b2g1_qty      = offer_qty   | default: 2 | plus: 0 %}
+{% if b2g1_qty <= 0 %}{% assign b2g1_qty = 2 %}{% endif %}
+{% assign b2g1_style    = style       | default: 'default' | strip %}
+{% assign b2g1_show     = show        | default: true %}
+{% if b2g1_show == false or b2g1_show == 'false' %}{% assign b2g1_show = false %}{% else %}{% assign b2g1_show = true %}{% endif %}
+
+{% if b2g1_show %}
+  {% assign locale_iso = request.locale.iso_code | default: 'en' %}
+  {% assign qty_str = b2g1_qty | append: '' %}
+
+  {%- comment -%}Build label text with locale support{%- endcomment -%}
+  {% if locale_iso == 'ar' %}
+    {% assign b2g1_label = 'اشتري ' | append: qty_str | append: ' واحصل على 1 مجاناً' %}
+  {% else %}
+    {% assign b2g1_label_tpl = 'sections.sl_b2g1.offer_label' | t %}
+    {% assign b2g1_label = b2g1_label_tpl | replace: '%qty%', qty_str %}
+    {% if b2g1_label contains '%qty%' or b2g1_label == blank or b2g1_label contains 'offer_label' %}
+      {% assign b2g1_label = 'BUY ' | append: qty_str | append: ' GET 1 FREE' %}
+    {% endif %}
+  {% endif %}
+
+  <span
+    class="sl-b2g1-card-label sl-b2g1-card-label--{{ b2g1_style }}{% if locale_iso == 'ar' or locale_iso == 'he' or locale_iso == 'fa' %} sl-b2g1-card-label--rtl{% endif %}"
+    aria-hidden="true"
+    {% if locale_iso == 'ar' %}dir="rtl"{% endif %}
+  >
+    {%- if b2g1_style == 'compact' -%}
+      <span class="sl-b2g1-card-label__text">{{ b2g1_label }}</span>
+    {%- else -%}
+      <span class="sl-b2g1-card-label__icon" aria-hidden="true">🎁</span>
+      <span class="sl-b2g1-card-label__text">{{ b2g1_label }}</span>
+    {%- endif -%}
+  </span>
+
+  <style>
+    .sl-b2g1-card-label {
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      z-index: 2;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+      color: #fff;
+      font-size: .82rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      box-shadow: 0 2px 12px rgba(234, 88, 12, 0.45);
+      opacity: 0;
+      transform: translateY(-6px) scale(0.96);
+      animation: sl-b2g1-label-in 0.55s cubic-bezier(0.34, 1.2, 0.64, 1) forwards;
+    }
+    .sl-b2g1-card-label--compact {
+      padding: 2px 6px;
+      font-size: .72rem;
+      border-radius: 4px;
+      gap: 0;
+    }
+    .sl-b2g1-card-label--rtl { left: auto; right: 6px; }
+    .sl-b2g1-card-label__icon {
+      display: inline-block;
+      animation: sl-b2g1-icon-pulse 1.4s ease-in-out infinite;
+      line-height: 1;
+    }
+    .sl-b2g1-card-label__text {
+      font-weight: 800;
+      letter-spacing: 0.04em;
+    }
+    @keyframes sl-b2g1-icon-pulse {
+      0%, 100% { transform: scale(1) rotate(0deg); }
+      50%       { transform: scale(1.25) rotate(-8deg); }
+    }
+    @keyframes sl-b2g1-label-in {
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .sl-b2g1-card-label {
+        animation: none;
+        opacity: 1;
+        transform: none;
+      }
+      .sl-b2g1-card-label__icon { animation: none; }
+    }
+  </style>
+{% endif %}

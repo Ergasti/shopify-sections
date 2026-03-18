@@ -58,14 +58,20 @@ One compact promo card that shows **two stacked incentives** at the same time:
 
 ### Snippet parameters
 
-- `collection_handle` (required)
-- `collection_title` (recommended)
-- `show_total_saved` (default: true) — show/hide the “Total saved” row.
-- `offer_qty` (default: 3)
-- `offer_price` (default: 299)
-- `regular_total` (default: 750)
-- `free_shipping_threshold_amount` (default: 650)
-- `section_id` (recommended)
+| Parameter | Default | Description |
+|---|---|---|
+| `collection_handle` | — | **(Required)** Handle of the qualifying collection. |
+| `collection_title` | handle | Display name shown above the headline. |
+| `offer_qty` | `3` | Items to buy to unlock the deal (e.g. 3 = Buy 3). |
+| `offer_price` | `299` | Deal price in currency units. |
+| `regular_total` | `750` | Regular price for `offer_qty` items (used to show savings). |
+| `free_shipping_threshold_amount` | `0` | Cart total threshold for free delivery. Set to `0` to hide the shipping row. |
+| `show_total_saved` | `true` | Show/hide the “Total saved” summary row. |
+| `fill_color_start` | `#4ade80` | Progress bar gradient start color. |
+| `fill_color_end` | `#16a34a` | Progress bar gradient end color. |
+| `style_variant` | `clean` | `clean` or `urgency` (glowing border + pulsing badge + countdown timer). |
+| `evergreen_timer_hours` | `6` | Countdown timer duration in hours (urgency style only). |
+| `section_id` | auto | Unique ID to scope styles. Use `section.id` to avoid clashes when rendered multiple times. |
 
 ---
 
@@ -138,5 +144,5 @@ All other parameters are the same as your theme’s `product-media` snippet (`me
 
 To hide the label only on the product page, pass `show_offer_label: false` when rendering. The label does not affect layout; it is absolutely positioned over the media.
 
-**Last updated:** 2026-03-15
+**Last updated:** 2026-03-18
 

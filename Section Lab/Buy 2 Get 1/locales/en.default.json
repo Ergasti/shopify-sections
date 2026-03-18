@@ -1,0 +1,31 @@
+{
+  "sections": {
+    "sl_b2g1": {
+      "urgency":          "Buy 2 Get 1 Free",
+      "deal_buy":         "Buy",
+      "get_one_free":     "Get 1 FREE",
+      "free_badge_label": "1 FREE",
+      "free_item_worth":  "Free item worth",
+      "offer_label":      "BUY %qty% GET 1 FREE",
+      "loading":          "Checking your cart…",
+      "msg_none":         "Add %count% item(s) from this collection to get 1 FREE!",
+      "msg_progress":     "Add %count% more to unlock your FREE item!",
+      "msg_ready":        "FREE item unlocked! Add it to your cart.",
+      "msg_earned":       "You have %free% FREE item(s)! Add %count% more for another.",
+      "msg_earned_ready": "Another FREE item ready! Add it to your cart.",
+      "claimed":          "%free% FREE item(s) earned",
+      "total_saved":      "Total saved: %amount%",
+      "free_ship_badge":  "+ Free delivery",
+      "toast_free":       "FREE item unlocked! 🎁",
+      "toast_ship":       "Free delivery unlocked!",
+      "ship_next":        "Add %amount% more to get free delivery.",
+      "ship_tier_almost": "Almost there! Add %amount% more for free delivery.",
+      "ship_tier_close":  "You're close! Add %amount% more for free delivery.",
+      "ship_tier_mid":    "Add %amount% more to get free delivery.",
+      "ship_tier_far":    "Free delivery when you add %amount% more.",
+      "ship_earned":      "Free delivery unlocked!",
+      "timer_label":      "Ends in",
+      "missing_collection": "Choose a qualifying collection in settings."
+    }
+  }
+}
