@@ -2,7 +2,7 @@
 
 A comprehensive, categorized library of Shopify sections and snippets. Copy what you need into your theme.
 
-**Library last updated:** 2026-03-18
+**Library last updated:** 2026-03-30
 
 ---
 
@@ -50,7 +50,8 @@ A comprehensive, categorized library of Shopify sections and snippets. Copy what
 | | [Product Card Label](Product%20Card%20Label/README.md) | this repo | 2026-02-25 |
 | **Theme edits** | [Vogue theme edits](theme%20edits/Vogue/README.md) | this repo | 2026-03-07 |
 | **Media & Gallery** | [Image Gallery (BoldizArt)](Image%20Gallery%20(BoldizArt)/README.md) | BoldizArt/Shopify-Image-Gallery | 2025-02-14 |
-| **Video / Media** | [SL - Native Video Slider](Section%20Lab/Native%20Video%20Slider/README.md) | Section Lab (paid) | 2025-02-14 |
+| **Video / Media** | [SL - UGC Videos Carousel](Section%20Lab/UGC%20Videos%20Carousel/README.md) | Section Lab (this repo) | 2026-03-30 |
+| | [SL - Native Video Slider](Section%20Lab/Native%20Video%20Slider/README.md) | Section Lab (paid) | 2025-02-14 |
 | | [Media Slider Snap](Media%20Slider%20Snap/README.md) | Custom (video-section2) | 2025-02-14 |
 | | [Videos Slider (Mixed Media Carousel)](Videos%20Slider/README.md) | Custom (SS section) | 2025-02-14 |
 | | [Video Slider](Video%20Slider/README.md) | Meetanshi blog | 2025-02-14 |
@@ -108,6 +109,7 @@ Every folder that contains `.liquid` section or snippet files. Sorted by last up
 | [SL – How to Use](Section%20Lab/How%20To%20Use/README.md) | Product "how to use" steps (metaobject or blocks). | 2026-02-27 |
 | [SL – Social Proof Video](Section%20Lab/Social%20Proof%20Video/README.md) | Social proof video section. | 2026-02-27 |
 | [SL – UGC Videos Homepage](Section%20Lab/UGC%20Videos%20Homepage/README.md) | UGC videos on homepage. | 2026-02-27 |
+| [SL – UGC Videos Carousel](Section%20Lab/UGC%20Videos%20Carousel/README.md) | UGC video carousel (video-only blocks; no product strip or metafields). | 2026-03-30 |
 | [SL – Free Shipping Progress Bar](Section%20Lab/Free%20Shipping%20Progress%20Bar/README.md) | Cart free-shipping threshold progress bar. | 2026-02-28 |
 | [SL – Sales Nudge Widget](Section%20Lab/Nudges%20Widget/README.md) | Sales nudge / urgency widget. | 2026-02-28 |
 | [SL – Volume Discount](Section%20Lab/Volume%20Discount/README.md) | Volume/quantity discount tiers (metaobject). | 2026-02-28 |
@@ -148,6 +150,7 @@ Section Lab sections live under `Section Lab/`. Each has a `sections/` folder an
 | [SL – How to Use](Section%20Lab/How%20To%20Use/README.md) | Product "how to use" steps (metaobject or blocks). | 2026-02-27 |
 | [SL – Social Proof Video](Section%20Lab/Social%20Proof%20Video/README.md) | Social proof video section. | 2026-02-27 |
 | [SL – UGC Videos Homepage](Section%20Lab/UGC%20Videos%20Homepage/README.md) | UGC videos on homepage. | 2026-02-27 |
+| [SL – UGC Videos Carousel](Section%20Lab/UGC%20Videos%20Carousel/README.md) | UGC video carousel (video-only blocks; no product strip or metafields). | 2026-03-30 |
 | [SL – Free Shipping Progress Bar](Section%20Lab/Free%20Shipping%20Progress%20Bar/README.md) | Cart free-shipping threshold progress bar. | 2026-02-28 |
 | [SL – Sales Nudge Widget](Section%20Lab/Nudges%20Widget/README.md) | Sales nudge / urgency widget. | 2026-02-28 |
 | [SL – Volume Discount](Section%20Lab/Volume%20Discount/README.md) | Volume/quantity discount tiers (metaobject). | 2026-02-28 |
@@ -208,7 +211,7 @@ SectionName/
 | [iShopifyExpert/custom-slider](https://github.com/iShopifyExpert/custom-slider) | Custom / gallery slider (reference) |
 | [uxhacks/shopify-sections](https://github.com/uxhacks/shopify-sections) | Sections (reference) |
 | [jydykun/Shopify-Sections](https://github.com/jydykun/Shopify-Sections) | Skeleton theme (reference) |
-| **Section Lab** (this repo / paid bundle) | Active Ingredients, Bundle, How to Use, FBT, Volume Discount, Free Shipping Progress Bar, Buy 3 Offer, Stacked Offers, Buy 2 Get 1, Price Bubble, Icon List, Payment Icons, Announcement Bar, Delivery Countdown, Face Proof Bubble, Nudges, Story Navigation, Scrolling Content, Native Video Slider, UGC Videos, Social Proof Video, Before And After, Real Results, Highlights |
+| **Section Lab** (this repo / paid bundle) | Active Ingredients, Bundle, How to Use, FBT, Volume Discount, Free Shipping Progress Bar, Buy 3 Offer, Stacked Offers, Buy 2 Get 1, Price Bubble, Icon List, Payment Icons, Announcement Bar, Delivery Countdown, Face Proof Bubble, Nudges, Story Navigation, Scrolling Content, Native Video Slider, UGC Videos Homepage, UGC Videos Carousel, Social Proof Video, Before And After, Real Results, Highlights |
 
 ---
 
