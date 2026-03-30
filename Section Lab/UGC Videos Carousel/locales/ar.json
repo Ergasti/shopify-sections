@@ -2,7 +2,13 @@
   "sections": {
     "sl_ugc_carousel": {
       "close_video": "إغلاق الفيديو",
-      "loading": "جاري تحميل الفيديو..."
+      "loading": "جاري تحميل الفيديو...",
+      "reviews": "تقييمات",
+      "add_to_cart": "أضف إلى السلة",
+      "adding": "جاري الإضافة...",
+      "added": "تمت الإضافة!",
+      "sold_out": "نفذت الكمية",
+      "view_product": "عرض المنتج"
     }
   }
 }

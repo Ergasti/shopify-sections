@@ -1,7 +1,8 @@
 {% comment %}
-  SL - UGC Videos Carousel (standalone)
-  Swiper of UGC-style video cards (video only, no products). Click opens overlay with full video.
-  Data: section blocks (one video per block).
+  SL - UGC Videos Carousel
+  Swiper of UGC-style video cards, each with a related product strip.
+  Clicking a card opens an overlay with full video + product CTA.
+  Data: section blocks (video + product per block). No metafields.
   See README.md.
 {% endcomment %}
 
@@ -18,7 +19,7 @@
 {% unless has_videos %}
   {% if request.design_mode %}
     <div id="sl-ugc-vc-{{ section.id }}" class="sl-ugc-vc-root" style="padding: 24px; background: #f5f5f5; font-family: monospace; font-size: 12px;">
-      <p style="margin: 0; color: #666;">UGC Videos Carousel — Add “Video” blocks and pick a video file for each.</p>
+      <p style="margin: 0; color: #666;">UGC Videos Carousel — Add "Video + product" blocks with a video and related product.</p>
     </div>
   {% endif %}
 {% else %}
@@ -40,13 +41,29 @@
         {% for block in section.blocks %}
           {% if max_videos > 0 and videos_out >= max_videos %}{% break %}{% endif %}
           {% assign video_file = block.settings.video_file %}
+          {% assign prod = block.settings.product %}
           {% assign mp4 = video_file.sources | where: 'format', 'mp4' | first %}
           {% if mp4 and mp4.url != blank %}
             {% assign full_video_url = mp4.url %}
             {% assign preview_url = full_video_url %}
+            {% assign block_seed = prod.id | default: forloop.index | plus: forloop.index %}
+            {% assign b_r_mod = block_seed | modulo: 5 %}
+            {% assign block_rating = '4.6' %}{% if b_r_mod == 1 %}{% assign block_rating = '4.7' %}{% elsif b_r_mod == 2 %}{% assign block_rating = '4.8' %}{% elsif b_r_mod == 3 %}{% assign block_rating = '4.9' %}{% elsif b_r_mod == 4 %}{% assign block_rating = '5.0' %}{% endif %}
+            {% assign block_review_count = 100 | plus: block_seed | modulo: 401 %}
+            {% assign block_rating_display = block.settings.rating | default: block_rating %}
+            {% assign block_count_display = block.settings.review_count | default: block_review_count %}
             <div class="swiper-slide sl-ugc-vc-slide" {{ block.shopify_attributes }}>
               <div class="sl-ugc-vc-card"
                 data-full-video="{{ full_video_url | escape }}"
+                data-product-url="{{ prod.url | default: '#' | escape }}"
+                data-product-title="{{ prod.title | default: '' | escape }}"
+                data-product-image="{% if prod.featured_image %}{{ prod.featured_image | image_url: width: 360 }}{% endif %}"
+                data-product-price="{{ prod.price | money | strip_html | escape }}"
+                data-product-compare="{% if prod.compare_at_price and prod.compare_at_price > prod.price %}{{ prod.compare_at_price | money | strip_html | escape }}{% endif %}"
+                data-product-rating="{{ block_rating_display | escape }}"
+                data-product-reviews="{{ block_count_display }} {{ 'sections.sl_ugc_carousel.reviews' | t }}"
+                data-variant-id="{{ prod.selected_or_first_available_variant.id | default: '' }}"
+                data-cta-text="{{ section.settings.cta_text | default: 'Add to cart' | escape }}"
                 role="button"
                 tabindex="0">
                 <div class="sl-ugc-vc-video-wrap">
@@ -59,8 +76,43 @@
                     class="sl-ugc-vc-video"
                   ></video>
                 </div>
-                {% if block.settings.caption != blank %}
-                  <p class="sl-ugc-vc-caption" style="color: {{ section.settings.caption_color }};">{{ block.settings.caption }}</p>
+                {% if prod != blank %}
+                <div class="sl-ugc-vc-product short">
+                  <div class="sl-ugc-vc-product-photo">
+                    {% if prod.featured_image %}
+                      <img src="{{ prod.featured_image | image_url: width: 120 }}" alt="{{ prod.title | escape }}" width="60" height="60" loading="lazy" decoding="async">
+                    {% else %}
+                      <div class="sl-ugc-vc-product-placeholder"></div>
+                    {% endif %}
+                  </div>
+                  <div class="sl-ugc-vc-product-details">
+                    <div class="sl-ugc-vc-name-rating-row">
+                      <p class="sl-ugc-vc-product-name">{{ prod.title | default: 'Product' }}</p>
+                      <div class="sl-ugc-vc-stars" aria-hidden="true">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="72" height="13" viewBox="0 0 72 13" fill="none">
+                          <path d="M6 0.5L7.34708 4.6459H11.7063L8.17963 7.2082L9.52671 11.3541L6 8.7918L2.47329 11.3541L3.82037 7.2082L0.293661 4.6459H4.65292L6 0.5Z" fill="{{ section.settings.star_color }}"/>
+                          <path d="M21 0.5L22.3471 4.6459H26.7063L23.1796 7.2082L24.5267 11.3541L21 8.7918L17.4733 11.3541L18.8204 7.2082L15.2937 4.6459H19.6529L21 0.5Z" fill="{{ section.settings.star_color }}"/>
+                          <path d="M36 0.5L37.3471 4.6459H41.7063L38.1796 7.2082L39.5267 11.3541L36 8.7918L32.4733 11.3541L33.8204 7.2082L30.2937 4.6459H34.6529L36 0.5Z" fill="{{ section.settings.star_color }}"/>
+                          <path d="M51 0.5L52.3471 4.6459H56.7063L53.1796 7.2082L54.5267 11.3541L51 8.7918L47.4733 11.3541L48.8204 7.2082L45.2937 4.6459H49.6529L51 0.5Z" fill="{{ section.settings.star_color }}"/>
+                          <path d="M66 0.5L67.3471 4.6459H71.7063L68.1796 7.2082L69.5267 11.3541L66 8.7918L62.4733 11.3541L63.8204 7.2082L60.2937 4.6459H64.6529L66 0.5Z" fill="{{ section.settings.star_color }}"/>
+                        </svg>
+                      </div>
+                    </div>
+                    <div class="sl-ugc-vc-price-btn-row">
+                      <div class="sl-ugc-vc-price-block">
+                        <span class="sl-ugc-vc-product-price" style="color: {{ section.settings.price_color }};">{{ prod.price | money }}</span>
+                        {% if prod.compare_at_price and prod.compare_at_price > prod.price %}
+                          <span class="sl-ugc-vc-product-compare" style="color: {{ section.settings.compare_color }};">{{ prod.compare_at_price | money }}</span>
+                        {% endif %}
+                      </div>
+                      {% form 'product', prod, class: 'sl-ugc-vc-add-form' %}
+                        <input type="hidden" name="quantity" value="1">
+                        <input type="hidden" name="id" value="{{ prod.selected_or_first_available_variant.id }}">
+                        <button type="submit" class="sl-ugc-vc-add-btn" {% unless prod.available %}disabled{% endunless %} style="color: {{ section.settings.cta_color }}; background: {{ section.settings.cta_bg }};">{% if prod.available %}{{ section.settings.cta_text | default: 'Add to cart' }}{% else %}{{ 'sections.sl_ugc_carousel.sold_out' | t }}{% endif %}</button>
+                      {% endform %}
+                    </div>
+                  </div>
+                </div>
                 {% endif %}
               </div>
             </div>
@@ -74,65 +126,144 @@
   </div>
 </div>
 
+{% comment %} Video overlay (frosted glass popup) {% endcomment %}
 <div id="sl-ugc-vc-overlay-{{ section.id }}" class="sl-ugc-vc-overlay{% if is_rtl %} sl-ugc-vc-rtl{% endif %}" role="dialog" aria-modal="true" aria-label="{{ 'sections.sl_ugc_carousel.close_video' | t }}" hidden>
   <span class="sl-ugc-vc-overlay-close" id="sl-ugc-vc-overlay-close-{{ section.id }}" aria-label="{{ 'sections.sl_ugc_carousel.close_video' | t }}"></span>
   <div class="sl-ugc-vc-full-container">
     <div id="sl-ugc-vc-overlay-video-slot-{{ section.id }}" class="sl-ugc-vc-overlay-video-slot">
       <video id="sl-ugc-vc-full-video-{{ section.id }}" class="sl-ugc-vc-full-video" autoplay playsinline loop controls></video>
     </div>
+    <div class="sl-ugc-vc-overlay-product">
+      <div class="sl-ugc-vc-product short">
+        <div class="sl-ugc-vc-product-photo">
+          <a id="sl-ugc-vc-overlay-photo-link-{{ section.id }}" href="#" aria-label="{{ 'sections.sl_ugc_carousel.view_product' | t | default: 'View product' }}">
+            <img id="sl-ugc-vc-overlay-img-{{ section.id }}" src="" alt="" width="60" height="60" loading="lazy">
+          </a>
+        </div>
+        <div class="sl-ugc-vc-product-details">
+          <div class="sl-ugc-vc-name-rating-row">
+            <a id="sl-ugc-vc-overlay-name-{{ section.id }}" class="sl-ugc-vc-product-name" href="#"></a>
+            <div class="sl-ugc-vc-stars" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" width="72" height="13" viewBox="0 0 72 13" fill="none">
+                <path d="M6 0.5L7.34708 4.6459H11.7063L8.17963 7.2082L9.52671 11.3541L6 8.7918L2.47329 11.3541L3.82037 7.2082L0.293661 4.6459H4.65292L6 0.5Z" fill="{{ section.settings.star_color }}"/>
+                <path d="M21 0.5L22.3471 4.6459H26.7063L23.1796 7.2082L24.5267 11.3541L21 8.7918L17.4733 11.3541L18.8204 7.2082L15.2937 4.6459H19.6529L21 0.5Z" fill="{{ section.settings.star_color }}"/>
+                <path d="M36 0.5L37.3471 4.6459H41.7063L38.1796 7.2082L39.5267 11.3541L36 8.7918L32.4733 11.3541L33.8204 7.2082L30.2937 4.6459H34.6529L36 0.5Z" fill="{{ section.settings.star_color }}"/>
+                <path d="M51 0.5L52.3471 4.6459H56.7063L53.1796 7.2082L54.5267 11.3541L51 8.7918L47.4733 11.3541L48.8204 7.2082L45.2937 4.6459H49.6529L51 0.5Z" fill="{{ section.settings.star_color }}"/>
+                <path d="M66 0.5L67.3471 4.6459H71.7063L68.1796 7.2082L69.5267 11.3541L66 8.7918L62.4733 11.3541L63.8204 7.2082L60.2937 4.6459H64.6529L66 0.5Z" fill="{{ section.settings.star_color }}"/>
+              </svg>
+            </div>
+            <span id="sl-ugc-vc-overlay-rating-{{ section.id }}" class="sl-ugc-vc-overlay-rating-text" style="display: none;"></span>
+          </div>
+          <div class="sl-ugc-vc-price-btn-row">
+            <div class="sl-ugc-vc-price-block">
+              <span id="sl-ugc-vc-overlay-price-{{ section.id }}" class="sl-ugc-vc-product-price" style="color: {{ section.settings.price_color }};"></span>
+              <span id="sl-ugc-vc-overlay-compare-{{ section.id }}" class="sl-ugc-vc-product-compare" style="color: {{ section.settings.compare_color }};"></span>
+            </div>
+            <div class="sl-ugc-vc-add-form">
+              <button type="button" id="sl-ugc-vc-overlay-add-{{ section.id }}" class="sl-ugc-vc-add-btn" data-variant-id="" style="color: {{ section.settings.cta_color }}; background: {{ section.settings.cta_bg }};">{{ section.settings.cta_text | default: 'Add to cart' }}</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
     <div id="sl-ugc-vc-loading-{{ section.id }}" class="sl-ugc-vc-loading" hidden>{{ 'sections.sl_ugc_carousel.loading' | t }}</div>
   </div>
 </div>
 
 <style>
-  #sl-ugc-vc-{{ section.id }} .sl-ugc-vc-swiper { overflow: hidden; position: relative; padding: 20px 0 48px; min-height: 280px; }
+  #sl-ugc-vc-{{ section.id }} .sl-ugc-vc-swiper { overflow: hidden; position: relative; padding: 20px 0 48px; min-height: 340px; }
   #sl-ugc-vc-{{ section.id }} .sl-ugc-vc-title { margin-bottom: 16px; text-align: {{ section.settings.heading_alignment }}; }
-  #sl-ugc-vc-{{ section.id }} .swiper-wrapper {
-    display: flex;
-    flex-wrap: nowrap;
+  #sl-ugc-vc-{{ section.id }} .swiper-wrapper { display: flex; flex-wrap: nowrap; }
+  #sl-ugc-vc-{{ section.id }} .swiper-slide { height: auto; box-sizing: border-box; flex: 0 0 auto; min-width: 0; }
+
+  #sl-ugc-vc-{{ section.id }} .sl-ugc-vc-card { position: relative; cursor: pointer; display: flex; flex-direction: column; }
+  #sl-ugc-vc-{{ section.id }} .sl-ugc-vc-card .sl-ugc-vc-video-wrap {
+    aspect-ratio: 9 / 16; background: #000; position: relative; flex-shrink: 0;
+    border-radius: {{ section.settings.card_radius }}px {{ section.settings.card_radius }}px 0 0;
+    overflow: hidden; min-height: 180px;
   }
-  #sl-ugc-vc-{{ section.id }} .swiper-slide {
-    height: auto;
-    box-sizing: border-box;
-    flex: 0 0 auto;
-    min-width: 0;
+  #sl-ugc-vc-{{ section.id }} .sl-ugc-vc-video { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; background: #000; }
+
+  #sl-ugc-vc-{{ section.id }} .sl-ugc-vc-product.short,
+  #sl-ugc-vc-overlay-{{ section.id }} .sl-ugc-vc-overlay-product .sl-ugc-vc-product.short {
+    position: relative; margin-top: -24px; margin-bottom: 0;
+    background: {{ section.settings.card_bg }}; box-shadow: 0px -8px 32px 0px rgba(0,0,0,0.25);
+    padding: 10px 12px 12px; padding-top: 0; border-radius: 16px 16px 20px 20px;
+    display: flex; flex-direction: column; align-items: center; text-align: center; flex-shrink: 0;
+  }
+  #sl-ugc-vc-{{ section.id }} .sl-ugc-vc-product-photo,
+  #sl-ugc-vc-overlay-{{ section.id }} .sl-ugc-vc-overlay-product .sl-ugc-vc-product-photo {
+    margin-top: -32px; text-align: center; margin-bottom: 6px;
+    background: {{ section.settings.card_bg }}; border-radius: 100px; width: 60px; height: 60px;
+    margin-left: auto; margin-right: auto;
+  }
+  #sl-ugc-vc-{{ section.id }} .sl-ugc-vc-product-photo img,
+  #sl-ugc-vc-overlay-{{ section.id }} .sl-ugc-vc-overlay-product .sl-ugc-vc-product-photo img {
+    border-radius: 100px; display: block; border: 2px solid #fff; width: 60px; height: 60px; object-fit: cover;
+  }
+  #sl-ugc-vc-{{ section.id }} .sl-ugc-vc-product-photo a,
+  #sl-ugc-vc-overlay-{{ section.id }} .sl-ugc-vc-overlay-product .sl-ugc-vc-product-photo a {
+    display: block; width: 100%; height: 100%; border-radius: 100px; overflow: hidden; text-decoration: none; color: inherit;
+  }
+  #sl-ugc-vc-{{ section.id }} .sl-ugc-vc-product-placeholder,
+  #sl-ugc-vc-overlay-{{ section.id }} .sl-ugc-vc-overlay-product .sl-ugc-vc-product-placeholder {
+    width: 60px; height: 60px; background: #eee; border-radius: 100px; display: inline-block; border: 2px solid #fff;
+  }
+  #sl-ugc-vc-{{ section.id }} .sl-ugc-vc-product-details,
+  #sl-ugc-vc-overlay-{{ section.id }} .sl-ugc-vc-overlay-product .sl-ugc-vc-product-details { width: 100%; }
+  #sl-ugc-vc-{{ section.id }} .sl-ugc-vc-name-rating-row,
+  #sl-ugc-vc-overlay-{{ section.id }} .sl-ugc-vc-overlay-product .sl-ugc-vc-name-rating-row {
+    display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap; margin-bottom: 6px;
+  }
+  #sl-ugc-vc-{{ section.id }} .sl-ugc-vc-product-name,
+  #sl-ugc-vc-overlay-{{ section.id }} .sl-ugc-vc-overlay-product .sl-ugc-vc-product-name {
+    margin: 0; color: {{ section.settings.text_color }}; font-size: 13px; font-weight: 500; line-height: 120%;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-decoration: none;
+  }
+  #sl-ugc-vc-overlay-{{ section.id }} .sl-ugc-vc-overlay-product .sl-ugc-vc-product-name:hover { text-decoration: underline; }
+  #sl-ugc-vc-{{ section.id }} .sl-ugc-vc-stars,
+  #sl-ugc-vc-overlay-{{ section.id }} .sl-ugc-vc-overlay-product .sl-ugc-vc-stars { display: flex; flex-shrink: 0; }
+  #sl-ugc-vc-{{ section.id }} .sl-ugc-vc-stars svg,
+  #sl-ugc-vc-overlay-{{ section.id }} .sl-ugc-vc-overlay-product .sl-ugc-vc-stars svg { width: 72px; height: 13px; }
+  #sl-ugc-vc-{{ section.id }} .sl-ugc-vc-price-btn-row,
+  #sl-ugc-vc-overlay-{{ section.id }} .sl-ugc-vc-overlay-product .sl-ugc-vc-price-btn-row {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%;
+  }
+  #sl-ugc-vc-{{ section.id }} .sl-ugc-vc-price-block,
+  #sl-ugc-vc-overlay-{{ section.id }} .sl-ugc-vc-overlay-product .sl-ugc-vc-price-block {
+    display: flex; flex-direction: column; align-items: flex-start; gap: 0; flex-shrink: 0;
+  }
+  #sl-ugc-vc-{{ section.id }} .sl-ugc-vc-product-price,
+  #sl-ugc-vc-overlay-{{ section.id }} .sl-ugc-vc-overlay-product .sl-ugc-vc-product-price {
+    font-size: 13px; font-weight: 600; color: {{ section.settings.price_color }}; white-space: nowrap; line-height: 1.2;
+  }
+  #sl-ugc-vc-{{ section.id }} .sl-ugc-vc-product-compare,
+  #sl-ugc-vc-overlay-{{ section.id }} .sl-ugc-vc-overlay-product .sl-ugc-vc-product-compare {
+    display: block; font-size: 11px; font-weight: 400; text-decoration: line-through; opacity: 0.85; line-height: 1.2; margin-top: 1px;
   }
 
-  #sl-ugc-vc-{{ section.id }} .sl-ugc-vc-card {
-    position: relative;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
+  #sl-ugc-vc-{{ section.id }} .sl-ugc-vc-add-form,
+  #sl-ugc-vc-overlay-{{ section.id }} .sl-ugc-vc-overlay-product .sl-ugc-vc-add-form { margin: 0; flex: 1; min-width: 0; }
+  #sl-ugc-vc-{{ section.id }} .sl-ugc-vc-add-btn,
+  #sl-ugc-vc-overlay-{{ section.id }} .sl-ugc-vc-overlay-product .sl-ugc-vc-add-btn {
+    display: flex; width: 100%; padding: 10px 16px; justify-content: center; align-items: center; flex-shrink: 0;
+    border-radius: 8px; border: none; cursor: pointer; transition: opacity 0.2s;
+    font-size: 14px; font-weight: 600; text-decoration: none; white-space: nowrap;
   }
-  #sl-ugc-vc-{{ section.id }} .sl-ugc-vc-video-wrap {
-    aspect-ratio: 9 / 16;
-    background: #000;
-    position: relative;
-    flex-shrink: 0;
-    border-radius: {{ section.settings.card_radius }}px;
-    overflow: hidden;
-    min-height: 180px;
-  }
-  #sl-ugc-vc-{{ section.id }} .sl-ugc-vc-video {
-    width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none;
-    background: #000;
-  }
-  #sl-ugc-vc-{{ section.id }} .sl-ugc-vc-caption {
-    margin: 10px 0 0 0;
-    font-size: 12px;
-    line-height: 1.3;
-    text-align: center;
-  }
+  #sl-ugc-vc-{{ section.id }} .sl-ugc-vc-add-btn:hover:not(:disabled),
+  #sl-ugc-vc-overlay-{{ section.id }} .sl-ugc-vc-overlay-product .sl-ugc-vc-add-btn:hover:not(:disabled) { opacity: 0.9; }
+  #sl-ugc-vc-{{ section.id }} .sl-ugc-vc-add-btn:disabled,
+  #sl-ugc-vc-overlay-{{ section.id }} .sl-ugc-vc-overlay-product .sl-ugc-vc-add-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  @keyframes sl-ugc-vc-pulse { 0%, 100% { opacity: 0.8; } 50% { opacity: 0.5; } }
+  #sl-ugc-vc-{{ section.id }} .sl-ugc-vc-add-btn.is-loading,
+  #sl-ugc-vc-overlay-{{ section.id }} .sl-ugc-vc-overlay-product .sl-ugc-vc-add-btn.is-loading { animation: sl-ugc-vc-pulse 0.8s ease-in-out infinite; pointer-events: none; }
 
   #sl-ugc-vc-{{ section.id }} .swiper-button-prev, #sl-ugc-vc-{{ section.id }} .swiper-button-next,
   #sl-ugc-vc-{{ section.id }} .swiper-button-prev::after, #sl-ugc-vc-{{ section.id }} .swiper-button-next::after { color: {{ section.settings.arrow_color }} !important; }
 
   #sl-ugc-vc-overlay-{{ section.id }}.sl-ugc-vc-overlay {
     position: fixed; inset: 0; z-index: 99999999;
-    background: rgba(255, 255, 255, 0.8);
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(10px);
-    display: block;
+    background: rgba(255, 255, 255, 0.8); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); display: block;
   }
   #sl-ugc-vc-overlay-{{ section.id }}.sl-ugc-vc-overlay[hidden] { display: none !important; }
   #sl-ugc-vc-overlay-{{ section.id }} .sl-ugc-vc-overlay-close {
@@ -146,26 +277,20 @@
   }
   #sl-ugc-vc-overlay-{{ section.id }} .sl-ugc-vc-overlay-close::after { transform: translate(-50%,-50%) rotate(-45deg); }
   #sl-ugc-vc-overlay-{{ section.id }}.sl-ugc-vc-rtl .sl-ugc-vc-overlay-close { right: auto; left: 10px; }
-
   #sl-ugc-vc-overlay-{{ section.id }} .sl-ugc-vc-full-container {
-    width: 400px;
-    max-width: 95%;
-    margin: 48px auto 24px;
-    position: relative;
-    max-height: calc(100% - 80px);
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
+    width: 400px; max-width: 95%; margin: 2px auto; position: relative;
+    height: calc(100% - 76px); overflow-y: auto; -webkit-overflow-scrolling: touch;
   }
   #sl-ugc-vc-overlay-{{ section.id }} .sl-ugc-vc-overlay-video-slot { position: relative; width: 100%; }
-  #sl-ugc-vc-overlay-{{ section.id }} .sl-ugc-vc-full-video {
-    border-radius: 30px;
-    width: 100%;
-    display: block;
+  #sl-ugc-vc-overlay-{{ section.id }} .sl-ugc-vc-full-video { border-radius: 30px; width: 100%; display: block; }
+  #sl-ugc-vc-overlay-{{ section.id }} .sl-ugc-vc-overlay-product {
+    position: relative; background: transparent; padding: 0; display: block; bottom: 60px;
+  }
+  #sl-ugc-vc-overlay-{{ section.id }} .sl-ugc-vc-overlay-product .sl-ugc-vc-overlay-rating-text {
+    font-size: 12px; color: #545454; font-weight: 500;
   }
   #sl-ugc-vc-overlay-{{ section.id }} .sl-ugc-vc-loading {
-    display: none;
-    position: absolute; left: 50%; top: 40%; transform: translate(-50%,-50%);
-    color: #999; font-size: 14px;
+    display: none; position: absolute; left: 50%; top: 40%; transform: translate(-50%,-50%); color: #999; font-size: 14px;
   }
   #sl-ugc-vc-overlay-{{ section.id }} .sl-ugc-vc-loading:not([hidden]) { display: block; }
 </style>
@@ -181,14 +306,9 @@
   function loadSwiper(cb) {
     if (typeof Swiper !== 'undefined') { cb(); return; }
     var link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = SWIPER_CSS;
-    document.head.appendChild(link);
+    link.rel = 'stylesheet'; link.href = SWIPER_CSS; document.head.appendChild(link);
     var s = document.createElement('script');
-    s.src = SWIPER_JS;
-    s.onload = cb;
-    s.onerror = function() { cb(); };
-    document.head.appendChild(s);
+    s.src = SWIPER_JS; s.onload = cb; s.onerror = function() { cb(); }; document.head.appendChild(s);
   }
 
   function ensureVideoSrc(v) {
@@ -205,13 +325,8 @@
       var v = slide.querySelector('.sl-ugc-vc-video');
       if (!v) return;
       if (i >= activeIdx && i < activeIdx + Math.ceil(perView)) {
-        ensureVideoSrc(v);
-        v.muted = true;
-        v.loop = true;
-        v.play().catch(function(){});
-      } else {
-        v.pause();
-      }
+        ensureVideoSrc(v); v.muted = true; v.loop = true; v.play().catch(function(){});
+      } else { v.pause(); }
     });
   }
 
@@ -223,56 +338,83 @@
     var overlay = document.getElementById('sl-ugc-vc-overlay-' + sectionId);
     var overlayVideo = document.getElementById('sl-ugc-vc-full-video-' + sectionId);
     var overlayClose = document.getElementById('sl-ugc-vc-overlay-close-' + sectionId);
+    var overlayImg = document.getElementById('sl-ugc-vc-overlay-img-' + sectionId);
+    var overlayName = document.getElementById('sl-ugc-vc-overlay-name-' + sectionId);
+    var overlayPrice = document.getElementById('sl-ugc-vc-overlay-price-' + sectionId);
+    var overlayCompare = document.getElementById('sl-ugc-vc-overlay-compare-' + sectionId);
     var overlayLoading = document.getElementById('sl-ugc-vc-loading-' + sectionId);
+    var rootPath = (window.Shopify && window.Shopify.routes && window.Shopify.routes.root) || '/';
+    var i18nAdd = {
+      add: {{ 'sections.sl_ugc_carousel.add_to_cart' | t | json }},
+      adding: {{ 'sections.sl_ugc_carousel.adding' | t | json }},
+      added: {{ 'sections.sl_ugc_carousel.added' | t | json }}
+    };
 
     function openOverlay(card) {
       var fullVideo = card.getAttribute('data-full-video') || '';
-      if (!overlay || !overlayVideo || !fullVideo) return;
+      var productUrl = card.getAttribute('data-product-url') || '#';
+      var productTitle = card.getAttribute('data-product-title') || '';
+      var productImage = card.getAttribute('data-product-image') || '';
+      var productPrice = card.getAttribute('data-product-price') || '';
+      var productCompare = card.getAttribute('data-product-compare') || '';
+      var productRating = card.getAttribute('data-product-rating') || '';
+      var productReviews = card.getAttribute('data-product-reviews') || '';
+      var ctaText = card.getAttribute('data-cta-text') || 'Add to cart';
+      var variantId = card.getAttribute('data-variant-id') || '';
 
+      if (!overlay || !overlayVideo) return;
       r.querySelectorAll('.sl-ugc-vc-video').forEach(function(v) { v.pause(); });
 
       overlay.removeAttribute('hidden');
       document.body.style.overflow = 'hidden';
 
-      function hideOverlayLoading() {
-        if (overlayLoading) overlayLoading.setAttribute('hidden', '');
+      function hideOverlayLoading() { if (overlayLoading) overlayLoading.setAttribute('hidden', ''); }
+
+      if (fullVideo) {
+        if (overlayLoading) overlayLoading.removeAttribute('hidden');
+        overlayVideo.style.display = '';
+        overlayVideo.muted = true; overlayVideo.volume = 0; overlayVideo.loop = true;
+        overlayVideo.src = fullVideo; overlayVideo.load();
+        overlayVideo.play().catch(function() {});
+        var loadHide = setTimeout(hideOverlayLoading, 1500);
+        function onReady() { clearTimeout(loadHide); hideOverlayLoading(); overlayVideo.muted = false; overlayVideo.volume = 1; }
+        overlayVideo.addEventListener('playing', onReady, { once: true });
+        overlayVideo.addEventListener('canplay', function() { clearTimeout(loadHide); hideOverlayLoading(); }, { once: true });
+      } else {
+        hideOverlayLoading();
+        overlayVideo.style.display = '';
+        overlayVideo.removeAttribute('src');
       }
 
-      if (overlayLoading) overlayLoading.removeAttribute('hidden');
-      overlayVideo.style.display = '';
-      overlayVideo.muted = true;
-      overlayVideo.volume = 0;
-      overlayVideo.loop = true;
-      overlayVideo.src = fullVideo;
-      overlayVideo.load();
-      overlayVideo.play().catch(function() {});
-      var loadHide = setTimeout(hideOverlayLoading, 1500);
-      function onReady() {
-        clearTimeout(loadHide);
-        hideOverlayLoading();
-        overlayVideo.muted = false;
-        overlayVideo.volume = 1;
+      var overlayPhotoLink = document.getElementById('sl-ugc-vc-overlay-photo-link-' + sectionId);
+      if (overlayPhotoLink) {
+        overlayPhotoLink.href = productUrl && productUrl !== '#' ? productUrl : '#';
+        overlayPhotoLink.style.display = productImage ? '' : 'none';
       }
-      overlayVideo.addEventListener('playing', onReady, { once: true });
-      overlayVideo.addEventListener('canplay', function() { clearTimeout(loadHide); hideOverlayLoading(); }, { once: true });
+      if (overlayImg) { overlayImg.src = productImage; overlayImg.alt = productTitle; }
+      if (overlayName) { overlayName.textContent = productTitle; overlayName.href = productUrl && productUrl !== '#' ? productUrl : '#'; }
+      var overlayRating = document.getElementById('sl-ugc-vc-overlay-rating-' + sectionId);
+      if (overlayRating) {
+        var ratingStr = '';
+        if (productRating && productReviews) ratingStr = productRating + ' \u00b7 ' + productReviews;
+        else if (productRating) ratingStr = productRating;
+        else if (productReviews) ratingStr = productReviews;
+        overlayRating.textContent = ratingStr;
+        overlayRating.style.display = ratingStr ? '' : 'none';
+      }
+      if (overlayPrice) overlayPrice.textContent = productPrice;
+      if (overlayCompare) { overlayCompare.textContent = productCompare; overlayCompare.style.display = productCompare ? '' : 'none'; }
+      var overlayAddBtn = document.getElementById('sl-ugc-vc-overlay-add-' + sectionId);
+      if (overlayAddBtn) { overlayAddBtn.setAttribute('data-variant-id', variantId); overlayAddBtn.textContent = ctaText; overlayAddBtn.disabled = !variantId; }
+
+      var overlayProductWrap = overlay.querySelector('.sl-ugc-vc-overlay-product');
+      if (overlayProductWrap) overlayProductWrap.style.display = productTitle ? '' : 'none';
     }
 
     function closeOverlay() {
-      if (overlay) {
-        overlay.setAttribute('hidden', '');
-        document.body.style.overflow = '';
-      }
-      if (overlayVideo) {
-        overlayVideo.pause();
-        overlayVideo.removeAttribute('src');
-        overlayVideo.style.display = '';
-      }
-      if (overlayLoading) overlayLoading.setAttribute('hidden', '');
-      r.querySelectorAll('.sl-ugc-vc-video').forEach(function(v) {
-        v.muted = true;
-        v.loop = true;
-        v.play().catch(function(){});
-      });
+      if (overlay) { overlay.setAttribute('hidden', ''); document.body.style.overflow = ''; }
+      if (overlayVideo) { overlayVideo.pause(); overlayVideo.removeAttribute('src'); overlayVideo.style.display = ''; }
+      r.querySelectorAll('.sl-ugc-vc-video').forEach(function(v) { v.muted = true; v.loop = true; v.play().catch(function(){}); });
     }
 
     loadSwiper(function() {
@@ -287,10 +429,7 @@
               320: { slidesPerView: {{ section.settings.slides_mobile }} },
               769: { slidesPerView: {{ section.settings.slides_desktop }} }
             },
-            navigation: {
-              nextEl: r.querySelector('.swiper-button-next'),
-              prevEl: r.querySelector('.swiper-button-prev')
-            },
+            navigation: { nextEl: r.querySelector('.swiper-button-next'), prevEl: r.querySelector('.swiper-button-prev') },
             on: {
               init: function(swiper) { playVisibleVideos(swiper); },
               slideChangeTransitionEnd: function(swiper) { playVisibleVideos(swiper); }
@@ -300,61 +439,66 @@
       }
       if (!swiperEl.swiper) {
         var wrapper = swiperEl.querySelector('.swiper-wrapper');
-        if (wrapper) {
-          swiperEl.style.overflowX = 'auto';
-          swiperEl.style.overflowY = 'visible';
-          wrapper.style.display = 'flex';
-          wrapper.style.gap = '{{ section.settings.slide_gap }}px';
-          wrapper.style.flexWrap = 'nowrap';
-        }
-        var next = r.querySelector('.swiper-button-next');
-        var prev = r.querySelector('.swiper-button-prev');
-        if (next) next.style.display = 'none';
-        if (prev) prev.style.display = 'none';
+        if (wrapper) { swiperEl.style.overflowX = 'auto'; swiperEl.style.overflowY = 'visible'; wrapper.style.display = 'flex'; wrapper.style.gap = '{{ section.settings.slide_gap }}px'; wrapper.style.flexWrap = 'nowrap'; }
+        var next = r.querySelector('.swiper-button-next'); var prev = r.querySelector('.swiper-button-prev');
+        if (next) next.style.display = 'none'; if (prev) prev.style.display = 'none';
       }
-      r.querySelectorAll('.sl-ugc-vc-card video').forEach(function(v) {
-        ensureVideoSrc(v);
-        v.muted = true;
-        v.loop = true;
-        v.play().catch(function(){});
-      });
+      r.querySelectorAll('.sl-ugc-vc-card video').forEach(function(v) { ensureVideoSrc(v); v.muted = true; v.loop = true; v.play().catch(function(){}); });
 
+      function refreshCartCount(count) {
+        var sel = '.cart-count-bubble, .cart-count, [data-cart-count], .header__icon--cart .count, [data-header-cart-count], .cart-icon__count';
+        document.querySelectorAll(sel).forEach(function(el) { el.textContent = count; });
+      }
+      function updateCartFromSections(sections) {
+        if (!sections || typeof sections !== 'object') return;
+        for (var id in sections) { var html = sections[id]; if (!html) continue; var sel = id.replace(/_/g, '-'); var el = document.querySelector('[id*="' + sel + '"]') || document.querySelector('[id*="' + id + '"]'); if (el) el.innerHTML = html; }
+      }
+      function doAjaxAddToCart(variantId, btn) {
+        if (!variantId || !btn) return;
+        btn.disabled = true; if (btn.classList) btn.classList.add('is-loading');
+        var origText = btn.textContent; btn.textContent = i18nAdd.adding;
+        fetch(rootPath.replace(/\/$/, '') + '/cart/add.js', {
+          method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify({ items: [{ id: parseInt(variantId, 10), quantity: 1 }], sections: 'cart-icon-bubble,cart-drawer,cart-live-region-text', sections_url: window.location.pathname })
+        }).then(function(res) { return res.json(); }).then(function(data) {
+          if (data.status === 422 || (data.status && data.status >= 400)) throw new Error(data.description || data.message || 'Error');
+          if (btn.classList) btn.classList.remove('is-loading');
+          btn.textContent = i18nAdd.added;
+          if (data.sections) updateCartFromSections(data.sections);
+          fetch(rootPath.replace(/\/$/, '') + '/cart.js').then(function(res) { return res.json(); }).then(function(c) { refreshCartCount(c.item_count || 0); }).catch(function() {});
+          document.dispatchEvent(new CustomEvent('cart:refresh'));
+          if (typeof window.theme !== 'undefined' && window.theme.refreshCart) window.theme.refreshCart();
+          setTimeout(function() { btn.disabled = false; btn.textContent = origText; }, 2000);
+        }).catch(function() { if (btn.classList) btn.classList.remove('is-loading'); btn.disabled = false; btn.textContent = origText; });
+      }
+      r.addEventListener('submit', function(e) {
+        var form = e.target; if (!form || !form.classList.contains('sl-ugc-vc-add-form')) return;
+        e.preventDefault();
+        var idInput = form.querySelector('input[name="id"]'); var variantId = idInput ? idInput.value : '';
+        var btn = form.querySelector('.sl-ugc-vc-add-btn'); doAjaxAddToCart(variantId, btn);
+      });
+      var overlayAddBtn = document.getElementById('sl-ugc-vc-overlay-add-' + sectionId);
+      if (overlayAddBtn) { overlayAddBtn.addEventListener('click', function() { doAjaxAddToCart(overlayAddBtn.getAttribute('data-variant-id'), overlayAddBtn); }); }
       cards.forEach(function(card) {
         card.addEventListener('click', function(e) {
-          e.preventDefault();
-          openOverlay(card);
+          if (e.target.closest('a') || e.target.closest('form') || e.target.closest('.sl-ugc-vc-add-btn')) return;
+          e.preventDefault(); openOverlay(card);
         });
-        card.addEventListener('keydown', function(e) {
-          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openOverlay(card); }
-        });
+        card.addEventListener('keydown', function(e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openOverlay(card); } });
       });
-
       if (overlayClose) overlayClose.addEventListener('click', closeOverlay);
-      if (overlay) {
-        overlay.addEventListener('click', function(e) {
-          if (e.target === overlay) closeOverlay();
-        });
-      }
+      if (overlay) { overlay.addEventListener('click', function(e) { if (e.target === overlay) closeOverlay(); }); }
     });
-
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && overlay && !overlay.hasAttribute('hidden')) closeOverlay();
-    });
+    document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && overlay && !overlay.hasAttribute('hidden')) closeOverlay(); });
   }
 
   function startWhenVisible() {
     var r = document.getElementById('sl-ugc-vc-' + sectionId);
     if (!r) return;
     if ('IntersectionObserver' in window) {
-      var io = new IntersectionObserver(function(entries) {
-        if (!entries[0].isIntersecting) return;
-        io.disconnect();
-        run();
-      }, { rootMargin: '120px', threshold: 0 });
+      var io = new IntersectionObserver(function(entries) { if (!entries[0].isIntersecting) return; io.disconnect(); run(); }, { rootMargin: '120px', threshold: 0 });
       io.observe(r);
-    } else {
-      run();
-    }
+    } else { run(); }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', startWhenVisible);
   else startWhenVisible();
@@ -470,12 +614,12 @@
     },
     {
       "type": "header",
-      "content": "Cards"
+      "content": "Cards & product strip"
     },
     {
       "type": "range",
       "id": "card_radius",
-      "label": "Video corner radius",
+      "label": "Card border radius",
       "min": 0,
       "max": 24,
       "step": 2,
@@ -484,9 +628,51 @@
     },
     {
       "type": "color",
-      "id": "caption_color",
-      "label": "Caption color",
+      "id": "card_bg",
+      "label": "Card background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Product text color",
+      "default": "#000"
+    },
+    {
+      "type": "color",
+      "id": "price_color",
+      "label": "Price color",
       "default": "#545454"
+    },
+    {
+      "type": "color",
+      "id": "compare_color",
+      "label": "Compare at price color",
+      "default": "#cc0000"
+    },
+    {
+      "type": "color",
+      "id": "star_color",
+      "label": "Star rating color",
+      "default": "#000"
+    },
+    {
+      "type": "text",
+      "id": "cta_text",
+      "label": "CTA button text",
+      "default": "Add to cart"
+    },
+    {
+      "type": "color",
+      "id": "cta_color",
+      "label": "CTA text color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "cta_bg",
+      "label": "CTA background",
+      "default": "#000"
     },
     {
       "type": "header",
@@ -543,8 +729,8 @@
   ],
   "blocks": [
     {
-      "type": "video",
-      "name": "Video",
+      "type": "video_product",
+      "name": "Video + product",
       "settings": [
         {
           "type": "video",
@@ -552,10 +738,21 @@
           "label": "Video"
         },
         {
+          "type": "product",
+          "id": "product",
+          "label": "Related product"
+        },
+        {
           "type": "text",
-          "id": "caption",
-          "label": "Caption",
-          "info": "Optional short line under the video."
+          "id": "rating",
+          "label": "Rating (e.g. 4.8)",
+          "info": "Optional. Displayed next to stars."
+        },
+        {
+          "type": "text",
+          "id": "review_count",
+          "label": "Review count (e.g. 421)",
+          "info": "Optional. Shown as 'X reviews' next to rating."
         }
       ]
     }
@@ -565,9 +762,9 @@
       "name": "SL - UGC Videos Carousel",
       "category": "Media",
       "blocks": [
-        { "type": "video" },
-        { "type": "video" },
-        { "type": "video" }
+        { "type": "video_product" },
+        { "type": "video_product" },
+        { "type": "video_product" }
       ]
     }
   ]

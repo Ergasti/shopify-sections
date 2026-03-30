@@ -5,6 +5,8 @@
 
 Home page section: a **Swiper** of UGC-style video cards, each with a **related product** strip below. Clicking a card opens a **full-screen overlay** with the video (autoplay, controls) and the same product CTA (“Get the product”).
 
+**Related:** [SL - UGC Videos Carousel](../UGC%20Videos%20Carousel/README.md) uses manual blocks (video + product per block) instead of metafields — works on any template.
+
 **Category:** Media  
 **Templates:** Home page (`index` only)
 

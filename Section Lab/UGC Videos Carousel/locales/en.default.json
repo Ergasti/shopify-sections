@@ -2,7 +2,13 @@
   "sections": {
     "sl_ugc_carousel": {
       "close_video": "Close video",
-      "loading": "Loading the video..."
+      "loading": "Loading the video...",
+      "reviews": "reviews",
+      "add_to_cart": "Add to cart",
+      "adding": "Adding...",
+      "added": "Added!",
+      "sold_out": "Sold out",
+      "view_product": "View product"
     }
   }
 }
