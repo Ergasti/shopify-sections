@@ -108,7 +108,7 @@ Every folder that contains `.liquid` section or snippet files. Sorted by last up
 | [SL – Frequently Bought Together](Section%20Lab/Frequently%20Bought%20Together/README.md) | Product slider (recommendations or manual). | 2026-02-27 |
 | [SL – How to Use](Section%20Lab/How%20To%20Use/README.md) | Product "how to use" steps (metaobject or blocks). | 2026-02-27 |
 | [SL – Social Proof Video](Section%20Lab/Social%20Proof%20Video/README.md) | Social proof video section. | 2026-02-27 |
-| [SL – UGC Videos Homepage](Section%20Lab/UGC%20Videos%20Homepage/README.md) | UGC videos + product strip from product metafield (selected products). | 2026-03-30 |
+| [SL – UGC Videos Homepage](Section%20Lab/UGC%20Videos%20Homepage/README.md) | UGC videos + product strip (manual blocks, home page). | 2026-03-30 |
 | [SL – UGC Videos Carousel](Section%20Lab/UGC%20Videos%20Carousel/README.md) | UGC video + product carousel (manual blocks with AJAX add-to-cart). | 2026-03-30 |
 | [SL – Free Shipping Progress Bar](Section%20Lab/Free%20Shipping%20Progress%20Bar/README.md) | Cart free-shipping threshold progress bar. | 2026-02-28 |
 | [SL – Sales Nudge Widget](Section%20Lab/Nudges%20Widget/README.md) | Sales nudge / urgency widget. | 2026-02-28 |
@@ -149,7 +149,7 @@ Section Lab sections live under `Section Lab/`. Each has a `sections/` folder an
 | [SL – Frequently Bought Together](Section%20Lab/Frequently%20Bought%20Together/README.md) | Product slider (recommendations or manual). | 2026-02-27 |
 | [SL – How to Use](Section%20Lab/How%20To%20Use/README.md) | Product "how to use" steps (metaobject or blocks). | 2026-02-27 |
 | [SL – Social Proof Video](Section%20Lab/Social%20Proof%20Video/README.md) | Social proof video section. | 2026-02-27 |
-| [SL – UGC Videos Homepage](Section%20Lab/UGC%20Videos%20Homepage/README.md) | UGC videos + product strip from product metafield (selected products). | 2026-03-30 |
+| [SL – UGC Videos Homepage](Section%20Lab/UGC%20Videos%20Homepage/README.md) | UGC videos + product strip (manual blocks, home page). | 2026-03-30 |
 | [SL – UGC Videos Carousel](Section%20Lab/UGC%20Videos%20Carousel/README.md) | UGC video + product carousel (manual blocks with AJAX add-to-cart). | 2026-03-30 |
 | [SL – Free Shipping Progress Bar](Section%20Lab/Free%20Shipping%20Progress%20Bar/README.md) | Cart free-shipping threshold progress bar. | 2026-02-28 |
 | [SL – Sales Nudge Widget](Section%20Lab/Nudges%20Widget/README.md) | Sales nudge / urgency widget. | 2026-02-28 |
