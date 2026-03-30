@@ -2,111 +2,24 @@
   SL - UGC Videos Homepage
   Home page section: Swiper of UGC video cards, each with a related product.
   Clicking a card opens an overlay with full video + product CTA.
-  Data: section blocks (video + product per block) OR product metafield (videos from products).
+  Data: section blocks (video + product per block).
   See README.md.
 {% endcomment %}
 
-{% assign video_source = section.settings.video_source | default: 'section_blocks' %}
 {% assign has_videos = false %}
-
-{% if video_source == 'product_metafield' %}
-  {% assign metafield_key = section.settings.videos_metafield | default: 'custom.social_proof_videos' %}
-  {% for prod in section.settings.products %}
-    {% assign ugc_list = prod.metafields.custom.social_proof_videos.value %}
-    {% if metafield_key == 'custom.before_after_videos' %}
-      {% assign ugc_list = prod.metafields.custom.before_after_videos.value %}
-    {% endif %}
-    {% if ugc_list != blank and ugc_list.size > 0 %}
-      {% for entry in ugc_list %}
-        {% assign vf = entry.video %}
-        {% if vf != blank %}
-          {% assign video_url_check = nil %}
-          {% assign file_obj = vf.value | default: vf %}
-          {% assign mp4_src = vf.sources | where: 'format', 'mp4' | first %}
-          {% if mp4_src and mp4_src.url != blank %}
-            {% assign video_url_check = mp4_src.url %}
-          {% elsif vf.url != blank %}
-            {% assign video_url_check = vf.url %}
-          {% elsif file_obj.url != blank %}
-            {% assign video_url_check = file_obj.url %}
-          {% endif %}
-          {% if video_url_check != blank %}
-            {% assign has_videos = true %}
-            {% break %}
-          {% endif %}
-          {% assign mtag_check = vf | metafield_tag %}
-          {% if mtag_check != blank %}
-            {% assign has_videos = true %}
-            {% break %}
-          {% endif %}
-        {% endif %}
-      {% endfor %}
-      {% if has_videos %}{% break %}{% endif %}
-    {% endif %}
-  {% endfor %}
-{% else %}
-  {% for block in section.blocks %}
-    {% assign vf = block.settings.video_file %}
-    {% assign mp4 = vf.sources | where: 'format', 'mp4' | first %}
-    {% if mp4 and mp4.url != blank %}
-      {% assign has_videos = true %}
-      {% break %}
-    {% endif %}
-  {% endfor %}
-{% endif %}
+{% for block in section.blocks %}
+  {% assign vf = block.settings.video_file %}
+  {% assign mp4 = vf.sources | where: 'format', 'mp4' | first %}
+  {% if mp4 and mp4.url != blank %}
+    {% assign has_videos = true %}
+    {% break %}
+  {% endif %}
+{% endfor %}
 
 {% unless has_videos %}
   {% if request.design_mode %}
     <div id="sl-ugc-hp-{{ section.id }}" class="sl-ugc-hp-root" style="padding: 24px; background: #f5f5f5; font-family: monospace; font-size: 12px;">
-      <p style="margin: 0 0 12px 0; color: #666;">UGC Videos Homepage — {% if video_source == 'product_metafield' %}Pick products with videos in their metafield (Social proof videos or Before and after videos).{% else %}Add "Video + product" blocks with a video and related product.{% endif %}</p>
-      {% comment %} Debug (design mode, empty section) {% endcomment %}
-      <details style="margin-top: 12px; padding: 12px; background: #fff; border: 1px solid #ddd; border-radius: 6px; text-align: left;">
-        <summary style="cursor: pointer; font-weight: 600; color: #333;">Debug info</summary>
-        <ul style="margin: 8px 0 0 0; padding-left: 20px; color: #333;">
-          <li><strong>Video source:</strong> {{ video_source }}</li>
-          {% if video_source == 'product_metafield' %}
-            {% assign mf_setting = section.settings.videos_metafield | default: 'custom.social_proof_videos' %}
-            <li><strong>Metafield setting:</strong> {{ mf_setting }}</li>
-            {% assign products_list = section.settings.products %}
-            <li><strong>Products selected:</strong> {{ products_list.size | default: 0 }}</li>
-            {% for prod in products_list %}
-              {% assign ugc_val = prod.metafields.custom.social_proof_videos.value %}
-              {% if mf_setting == 'custom.before_after_videos' %}
-                {% assign ugc_val = prod.metafields.custom.before_after_videos.value %}
-              {% endif %}
-              <li style="margin-top: 8px;">
-                <strong>Product "{{ prod.title | escape }}":</strong>
-                <ul style="margin: 4px 0 0 0; padding-left: 16px;">
-                  <li>Metafield present: {% if ugc_val != blank %}yes{% else %}no{% endif %}</li>
-                  <li>Entries count: {{ ugc_val.size | default: 0 }}</li>
-                  {% if ugc_val != blank and ugc_val.size > 0 %}
-                    {% for entry in ugc_val %}
-                      {% assign v = entry.video %}
-                      {% assign video_mtag_debug = v | metafield_tag %}
-                      <li>Entry {{ forloop.index }}: video {% if v != blank %}present{% else %}missing{% endif %}
-                        {% if v != blank %}
-                          {% assign fo = v.value | default: v %}
-                          {% assign src = v.sources | where: 'format', 'mp4' | first %}
-                          — mp4: {% if src != blank and src.url != blank %}yes{% else %}no{% endif %}
-                          | v.url: {% if v.url != blank %}yes{% else %}no{% endif %}
-                          | v.value.url: {% if fo.url != blank %}yes{% else %}no{% endif %}
-                          | metafield_tag: {% if video_mtag_debug != blank %}yes (use this){% else %}no{% endif %}
-                          {% if forloop.first %} — first entry v.value type: {{ v.value | json | slice: 0, 120 }}…{% endif %}
-                        {% endif %}
-                      </li>
-                    {% endfor %}
-                  {% endif %}
-                </ul>
-              </li>
-            {% endfor %}
-            {% if products_list == blank or products_list.size == 0 %}
-              <li style="margin-top: 8px; color: #c00;">No products selected in section settings.</li>
-            {% endif %}
-          {% else %}
-            <li><strong>Blocks count:</strong> {{ section.blocks.size }}</li>
-          {% endif %}
-        </ul>
-      </details>
+      <p style="margin: 0; color: #666;">UGC Videos Homepage — Add "Video + product" blocks with a video and related product.</p>
     </div>
   {% endif %}
 {% else %}
@@ -123,169 +36,6 @@
 
     <div class="sl-ugc-hp-swiper swiper">
       <div class="swiper-wrapper">
-        {% if video_source == 'product_metafield' %}
-          {% assign mf_key = section.settings.videos_metafield | default: 'custom.social_proof_videos' %}
-          {% assign max_videos = section.settings.max_videos | default: 0 %}
-          {% assign max_per_product = section.settings.max_videos_per_product | default: 0 %}
-          {% assign videos_output = 0 %}
-          {% for prod in section.settings.products %}
-            {% if max_videos > 0 and videos_output >= max_videos %}{% break %}{% endif %}
-            {% assign ugc_list = prod.metafields.custom.social_proof_videos.value %}
-            {% if mf_key == 'custom.before_after_videos' %}
-              {% assign ugc_list = prod.metafields.custom.before_after_videos.value %}
-            {% endif %}
-            {% if ugc_list != blank %}
-              {% assign videos_from_product = 0 %}
-              {% for entry in ugc_list %}
-                {% if max_videos > 0 and videos_output >= max_videos %}{% break %}{% endif %}
-                {% if max_per_product > 0 and videos_from_product >= max_per_product %}{% break %}{% endif %}
-                {% assign video_file = entry.video %}
-                {% if video_file != blank %}
-                  {% assign full_video_url = nil %}
-                  {% assign file_obj = video_file.value | default: video_file %}
-                  {% assign mp4_src = video_file.sources | where: 'format', 'mp4' | first %}
-                  {% if mp4_src and mp4_src.url != blank %}
-                    {% assign full_video_url = mp4_src.url %}
-                  {% elsif video_file.url != blank %}
-                    {% assign full_video_url = video_file.url %}
-                  {% elsif file_obj.url != blank %}
-                    {% assign full_video_url = file_obj.url %}
-                  {% endif %}
-                  {% assign video_mtag = video_file | metafield_tag %}
-                  {% assign card_seed = prod.id | plus: forloop.index %}
-                  {% assign r_mod = card_seed | modulo: 5 %}
-                  {% assign rating_display = '4.6' %}{% if r_mod == 1 %}{% assign rating_display = '4.7' %}{% elsif r_mod == 2 %}{% assign rating_display = '4.8' %}{% elsif r_mod == 3 %}{% assign rating_display = '4.9' %}{% elsif r_mod == 4 %}{% assign rating_display = '5.0' %}{% endif %}
-                  {% assign review_count = 100 | plus: card_seed | modulo: 401 %}
-                  {% if full_video_url != blank %}
-                  {% assign preview_url = full_video_url %}
-                  <div class="swiper-slide sl-ugc-hp-slide">
-                    <div class="sl-ugc-hp-card"
-                      data-full-video="{{ full_video_url | escape }}"
-                      data-product-url="{{ prod.url | default: '#' | escape }}"
-                      data-product-title="{{ prod.title | default: '' | escape }}"
-                      data-product-image="{% if prod.featured_image %}{{ prod.featured_image | image_url: width: 360 }}{% endif %}"
-                      data-product-price="{{ prod.price | money | strip_html | escape }}"
-                      data-product-compare="{% if prod.compare_at_price and prod.compare_at_price > prod.price %}{{ prod.compare_at_price | money | strip_html | escape }}{% endif %}"
-                      data-product-rating="{{ rating_display | escape }}"
-                      data-product-reviews="{{ review_count }} {{ 'sections.sl_ugc_hp.reviews' | t }}"
-                      data-variant-id="{{ prod.selected_or_first_available_variant.id | default: '' }}"
-                      data-cta-text="{{ section.settings.cta_text | default: 'Add to cart' | escape }}"
-                      role="button"
-                      tabindex="0">
-                      <div class="sl-ugc-hp-video-wrap">
-                        <video
-                          data-src="{{ preview_url }}"
-                          poster="{% if video_file.preview_image %}{{ video_file.preview_image | image_url: width: 600 }}{% endif %}"
-                          muted loop playsinline
-                          preload="none"
-                          loading="lazy"
-                          class="sl-ugc-hp-video"
-                        ></video>
-                      </div>
-                      <div class="sl-ugc-hp-product short">
-                        <div class="sl-ugc-hp-product-photo">
-                          {% if prod.featured_image %}
-                            <img src="{{ prod.featured_image | image_url: width: 120 }}" alt="{{ prod.title | escape }}" width="60" height="60" loading="lazy" decoding="async">
-                          {% else %}
-                            <div class="sl-ugc-hp-product-placeholder"></div>
-                          {% endif %}
-                        </div>
-                        <div class="sl-ugc-hp-product-details">
-                          <div class="sl-ugc-hp-name-rating-row">
-                            <p class="sl-ugc-hp-product-name">{{ prod.title | default: 'Product' }}</p>
-                            <div class="sl-ugc-hp-stars" aria-hidden="true">
-                              <svg xmlns="http://www.w3.org/2000/svg" width="72" height="13" viewBox="0 0 72 13" fill="none">
-                                <path d="M6 0.5L7.34708 4.6459H11.7063L8.17963 7.2082L9.52671 11.3541L6 8.7918L2.47329 11.3541L3.82037 7.2082L0.293661 4.6459H4.65292L6 0.5Z" fill="{{ section.settings.star_color }}"/>
-                                <path d="M21 0.5L22.3471 4.6459H26.7063L23.1796 7.2082L24.5267 11.3541L21 8.7918L17.4733 11.3541L18.8204 7.2082L15.2937 4.6459H19.6529L21 0.5Z" fill="{{ section.settings.star_color }}"/>
-                                <path d="M36 0.5L37.3471 4.6459H41.7063L38.1796 7.2082L39.5267 11.3541L36 8.7918L32.4733 11.3541L33.8204 7.2082L30.2937 4.6459H34.6529L36 0.5Z" fill="{{ section.settings.star_color }}"/>
-                                <path d="M51 0.5L52.3471 4.6459H56.7063L53.1796 7.2082L54.5267 11.3541L51 8.7918L47.4733 11.3541L48.8204 7.2082L45.2937 4.6459H49.6529L51 0.5Z" fill="{{ section.settings.star_color }}"/>
-                                <path d="M66 0.5L67.3471 4.6459H71.7063L68.1796 7.2082L69.5267 11.3541L66 8.7918L62.4733 11.3541L63.8204 7.2082L60.2937 4.6459H64.6529L66 0.5Z" fill="{{ section.settings.star_color }}"/>
-                              </svg>
-                            </div>
-                          </div>
-                          <div class="sl-ugc-hp-price-btn-row">
-                            <div class="sl-ugc-hp-price-block">
-                              <span class="sl-ugc-hp-product-price" style="color: {{ section.settings.price_color }};">{{ prod.price | money }}</span>
-                              {% if prod.compare_at_price and prod.compare_at_price > prod.price %}
-                                <span class="sl-ugc-hp-product-compare" style="color: {{ section.settings.compare_color }};">{{ prod.compare_at_price | money }}</span>
-                              {% endif %}
-                            </div>
-                            {% form 'product', prod, class: 'sl-ugc-hp-add-form' %}
-                              <input type="hidden" name="quantity" value="1">
-                              <input type="hidden" name="id" value="{{ prod.selected_or_first_available_variant.id }}">
-                              <button type="submit" class="sl-ugc-hp-add-btn" {% unless prod.available %}disabled{% endunless %} style="color: {{ section.settings.cta_color }}; background: {{ section.settings.cta_bg }};">{% if prod.available %}{{ section.settings.cta_text | default: 'Add to cart' }}{% else %}{{ 'sections.sl_ugc_hp.sold_out' | t }}{% endif %}</button>
-                            {% endform %}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  {% assign videos_from_product = videos_from_product | plus: 1 %}
-                  {% assign videos_output = videos_output | plus: 1 %}
-                {% elsif video_mtag != blank %}
-                  <div class="swiper-slide sl-ugc-hp-slide">
-                    <div class="sl-ugc-hp-card sl-ugc-hp-card--metafield"
-                      data-full-video=""
-                      data-product-url="{{ prod.url | default: '#' | escape }}"
-                      data-product-title="{{ prod.title | default: '' | escape }}"
-                      data-product-image="{% if prod.featured_image %}{{ prod.featured_image | image_url: width: 360 }}{% endif %}"
-                      data-product-price="{{ prod.price | money | strip_html | escape }}"
-                      data-product-compare="{% if prod.compare_at_price and prod.compare_at_price > prod.price %}{{ prod.compare_at_price | money | strip_html | escape }}{% endif %}"
-                      data-product-rating="{{ rating_display | escape }}"
-                      data-product-reviews="{{ review_count }} {{ 'sections.sl_ugc_hp.reviews' | t }}"
-                      data-variant-id="{{ prod.selected_or_first_available_variant.id | default: '' }}"
-                      data-cta-text="{{ section.settings.cta_text | default: 'Add to cart' | escape }}"
-                      role="button"
-                      tabindex="0">
-                      <div class="sl-ugc-hp-video-wrap sl-ugc-hp-metafield-wrap">
-                        {{ video_mtag }}
-                      </div>
-                      <div class="sl-ugc-hp-product short">
-                        <div class="sl-ugc-hp-product-photo">
-                          {% if prod.featured_image %}
-                            <img src="{{ prod.featured_image | image_url: width: 120 }}" alt="{{ prod.title | escape }}" width="60" height="60" loading="lazy" decoding="async">
-                          {% else %}
-                            <div class="sl-ugc-hp-product-placeholder"></div>
-                          {% endif %}
-                        </div>
-                        <div class="sl-ugc-hp-product-details">
-                          <div class="sl-ugc-hp-name-rating-row">
-                            <p class="sl-ugc-hp-product-name">{{ prod.title | default: 'Product' }}</p>
-                            <div class="sl-ugc-hp-stars" aria-hidden="true">
-                              <svg xmlns="http://www.w3.org/2000/svg" width="72" height="13" viewBox="0 0 72 13" fill="none">
-                                <path d="M6 0.5L7.34708 4.6459H11.7063L8.17963 7.2082L9.52671 11.3541L6 8.7918L2.47329 11.3541L3.82037 7.2082L0.293661 4.6459H4.65292L6 0.5Z" fill="{{ section.settings.star_color }}"/>
-                                <path d="M21 0.5L22.3471 4.6459H26.7063L23.1796 7.2082L24.5267 11.3541L21 8.7918L17.4733 11.3541L18.8204 7.2082L15.2937 4.6459H19.6529L21 0.5Z" fill="{{ section.settings.star_color }}"/>
-                                <path d="M36 0.5L37.3471 4.6459H41.7063L38.1796 7.2082L39.5267 11.3541L36 8.7918L32.4733 11.3541L33.8204 7.2082L30.2937 4.6459H34.6529L36 0.5Z" fill="{{ section.settings.star_color }}"/>
-                                <path d="M51 0.5L52.3471 4.6459H56.7063L53.1796 7.2082L54.5267 11.3541L51 8.7918L47.4733 11.3541L48.8204 7.2082L45.2937 4.6459H49.6529L51 0.5Z" fill="{{ section.settings.star_color }}"/>
-                                <path d="M66 0.5L67.3471 4.6459H71.7063L68.1796 7.2082L69.5267 11.3541L66 8.7918L62.4733 11.3541L63.8204 7.2082L60.2937 4.6459H64.6529L66 0.5Z" fill="{{ section.settings.star_color }}"/>
-                              </svg>
-                            </div>
-                          </div>
-                          <div class="sl-ugc-hp-price-btn-row">
-                            <div class="sl-ugc-hp-price-block">
-                              <span class="sl-ugc-hp-product-price" style="color: {{ section.settings.price_color }};">{{ prod.price | money }}</span>
-                              {% if prod.compare_at_price and prod.compare_at_price > prod.price %}
-                                <span class="sl-ugc-hp-product-compare" style="color: {{ section.settings.compare_color }};">{{ prod.compare_at_price | money }}</span>
-                              {% endif %}
-                            </div>
-                            {% form 'product', prod, class: 'sl-ugc-hp-add-form' %}
-                              <input type="hidden" name="quantity" value="1">
-                              <input type="hidden" name="id" value="{{ prod.selected_or_first_available_variant.id }}">
-                              <button type="submit" class="sl-ugc-hp-add-btn" {% unless prod.available %}disabled{% endunless %} style="color: {{ section.settings.cta_color }}; background: {{ section.settings.cta_bg }};">{% if prod.available %}{{ section.settings.cta_text | default: 'Add to cart' }}{% else %}{{ 'sections.sl_ugc_hp.sold_out' | t }}{% endif %}</button>
-                            {% endform %}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  {% assign videos_from_product = videos_from_product | plus: 1 %}
-                  {% assign videos_output = videos_output | plus: 1 %}
-                {% endif %}
-                {% endif %}
-              {% endfor %}
-            {% endif %}
-          {% endfor %}
-        {% else %}
         {% assign max_videos_blocks = section.settings.max_videos | default: 0 %}
         {% assign videos_output_blocks = 0 %}
         {% for block in section.blocks %}
@@ -367,7 +117,6 @@
             {% assign videos_output_blocks = videos_output_blocks | plus: 1 %}
           {% endif %}
         {% endfor %}
-        {% endif %}
       </div>
       <div class="swiper-button-prev"></div>
       <div class="swiper-button-next"></div>
@@ -454,13 +203,6 @@
   }
   #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-video-wrap .sl-ugc-hp-video {
     background: #000;
-  }
-  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-metafield-wrap {
-    position: absolute; inset: 0; width: 100%; height: 100%;
-  }
-  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-metafield-wrap video,
-  #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-metafield-wrap iframe {
-    width: 100%; height: 100%; object-fit: cover; display: block; position: absolute; inset: 0;
   }
   #sl-ugc-hp-{{ section.id }} .sl-ugc-hp-video {
     width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none;
@@ -653,16 +395,6 @@
     width: 100%;
     display: block;
   }
-  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-video-slot .sl-ugc-hp-overlay-metafield-clone {
-    width: 100%; position: relative;
-  }
-  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-video-slot .sl-ugc-hp-overlay-metafield-clone video {
-    border-radius: 30px; width: 100%; display: block;
-  }
-  #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-video-slot .sl-ugc-hp-overlay-metafield-clone iframe {
-    width: 100%; aspect-ratio: 9/16; border-radius: 30px; display: block;
-  }
-
   /* ===== OVERLAY PRODUCT STRIP (wrapper only; inner uses same .sl-ugc-hp-product as swiper) ===== */
   #sl-ugc-hp-overlay-{{ section.id }} .sl-ugc-hp-overlay-product {
     position: relative;
@@ -765,12 +497,6 @@
 
       r.querySelectorAll('.sl-ugc-hp-video').forEach(function(v) { v.pause(); });
 
-      var overlaySlot = document.getElementById('sl-ugc-hp-overlay-video-slot-' + sectionId);
-      if (overlaySlot) {
-        var prev = overlaySlot.querySelector('.sl-ugc-hp-overlay-metafield-clone');
-        if (prev) prev.remove();
-      }
-
       overlay.removeAttribute('hidden');
       document.body.style.overflow = 'hidden';
 
@@ -798,26 +524,8 @@
         overlayVideo.addEventListener('canplay', function() { clearTimeout(loadHide); hideOverlayLoading(); }, { once: true });
       } else {
         hideOverlayLoading();
-        var metafieldWrap = card.querySelector('.sl-ugc-hp-metafield-wrap');
-        if (overlaySlot && metafieldWrap && metafieldWrap.innerHTML.trim()) {
-          overlayVideo.style.display = 'none';
-          var wrap = document.createElement('div');
-          wrap.className = 'sl-ugc-hp-overlay-metafield-clone';
-          wrap.innerHTML = metafieldWrap.innerHTML;
-          overlaySlot.appendChild(wrap);
-          var cloneVideo = wrap.querySelector('video');
-          if (cloneVideo) { cloneVideo.muted = false; cloneVideo.controls = true; cloneVideo.loop = true; cloneVideo.play().catch(function() {}); }
-          var cloneIframe = wrap.querySelector('iframe');
-          if (cloneIframe) { cloneIframe.style.width = '100%'; cloneIframe.style.height = '100%'; }
-        } else {
-          if (productUrl && productUrl !== '#') {
-            closeOverlay();
-            window.location.href = productUrl;
-            return;
-          }
-          overlayVideo.style.display = '';
-          overlayVideo.removeAttribute('src');
-        }
+        overlayVideo.style.display = '';
+        overlayVideo.removeAttribute('src');
       }
 
       var overlayPhotoLink = document.getElementById('sl-ugc-hp-overlay-photo-link-' + sectionId);
@@ -865,11 +573,6 @@
         overlayVideo.pause();
         overlayVideo.removeAttribute('src');
         overlayVideo.style.display = '';
-      }
-      var overlaySlot = document.getElementById('sl-ugc-hp-overlay-video-slot-' + sectionId);
-      if (overlaySlot) {
-        var cloneContainer = overlaySlot.querySelector('.sl-ugc-hp-overlay-metafield-clone');
-        if (cloneContainer) cloneContainer.remove();
       }
       r.querySelectorAll('.sl-ugc-hp-video').forEach(function(v) {
         v.muted = true;
@@ -1036,57 +739,14 @@
   "class": "sl-ugc-videos-homepage",
   "settings": [
     {
-      "type": "header",
-      "content": "Video source"
-    },
-    {
-      "type": "select",
-      "id": "video_source",
-      "label": "Video source",
-      "info": "Section blocks = add videos manually. Product metafield = pull videos from products' UGC metafield.",
-      "options": [
-        { "value": "section_blocks", "label": "Section blocks (manual)" },
-        { "value": "product_metafield", "label": "Product metafield" }
-      ],
-      "default": "section_blocks"
-    },
-    {
-      "type": "product_list",
-      "id": "products",
-      "label": "Products (for metafield source)",
-      "info": "When using Product metafield, pick products. Videos come from each product's Social proof videos metafield. The product is shown as the related product.",
-      "limit": 20
-    },
-    {
-      "type": "select",
-      "id": "videos_metafield",
-      "label": "Videos metafield",
-      "info": "Which product metafield to use for videos.",
-      "options": [
-        { "value": "custom.social_proof_videos", "label": "Social proof videos" },
-        { "value": "custom.before_after_videos", "label": "Before and after videos" }
-      ],
-      "default": "custom.social_proof_videos"
-    },
-    {
       "type": "range",
       "id": "max_videos",
-      "label": "Max videos per section",
+      "label": "Max videos",
       "info": "Limit total videos shown. 0 = no limit.",
       "min": 0,
       "max": 50,
       "step": 1,
       "default": 0
-    },
-    {
-      "type": "range",
-      "id": "max_videos_per_product",
-      "label": "Max videos per product (metafield source)",
-      "info": "When using Product metafield, limit how many videos to show from each product so the carousel mixes products. 0 = no limit.",
-      "min": 0,
-      "max": 10,
-      "step": 1,
-      "default": 2
     },
     {
       "type": "header",
