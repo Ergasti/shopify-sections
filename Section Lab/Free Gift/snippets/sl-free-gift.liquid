@@ -537,6 +537,45 @@
       return fetch('/cart.js', { credentials: 'same-origin' }).then(function(r) { return r.json(); });
     }
 
+    /* --- Refresh theme cart UI (cart page, mini cart, cart drawer, cart icon) --- */
+    function refreshCartUI(cart) {
+      /* 1. Dispatch events that most themes listen for */
+      var evt = { detail: { cart: cart } };
+      ['cart:change', 'cart:updated', 'cart:refresh'].forEach(function(name) {
+        try { document.dispatchEvent(new CustomEvent(name, evt)); } catch(e) {}
+      });
+
+      /* 2. Update cart icon bubble count (common selectors across themes) */
+      var countEls = document.querySelectorAll(
+        '.cart-count-bubble span, .cart-count, [data-cart-count], .js-cart-count, ' +
+        '#cart-icon-bubble span, .header__cart-count, .site-header__cart-count'
+      );
+      if (cart && typeof cart.item_count === 'number') {
+        countEls.forEach(function(el) { el.textContent = String(cart.item_count); });
+      }
+
+      /* 3. Section Rendering API — re-render cart drawer and cart page sections */
+      var sectionsToRender = [];
+      /* Detect which cart sections exist on the page */
+      document.querySelectorAll('[id^="shopify-section-"]').forEach(function(el) {
+        var id = el.id.replace('shopify-section-', '');
+        if (id.indexOf('cart') !== -1 || id.indexOf('mini-cart') !== -1 || id.indexOf('cart-drawer') !== -1 || id.indexOf('cart-icon') !== -1) {
+          sectionsToRender.push(id);
+        }
+      });
+      if (sectionsToRender.length) {
+        fetch('/?sections=' + encodeURIComponent(sectionsToRender.join(',')), { credentials: 'same-origin' })
+          .then(function(r) { return r.json(); })
+          .then(function(sections) {
+            Object.keys(sections).forEach(function(key) {
+              var wrapper = document.getElementById('shopify-section-' + key);
+              if (wrapper) wrapper.innerHTML = sections[key];
+            });
+          })
+          .catch(function() {});
+      }
+    }
+
     function qtyForCollection(cart, collectionIds) {
       if (!cart || !cart.items) return 0;
       var giftPid = String(CFG.giftProductId);
@@ -636,6 +675,7 @@
             showToast(msg('toast-added'));
             playConfetti();
           }
+          refreshCartUI(updatedCart);
           return updatedCart;
         });
       } else {
@@ -671,6 +711,7 @@
           /* Re-update UI with REAL cart state after removal */
           var newGiftsInCart = giftQtyInCart(updatedCart);
           updateUI(giftsEarned, newGiftsInCart, qualifyingQty, remainder, nextCount);
+          refreshCartUI(updatedCart);
           return updatedCart;
         });
       }
