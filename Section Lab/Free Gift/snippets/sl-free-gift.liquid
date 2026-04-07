@@ -539,41 +539,87 @@
 
     /* --- Refresh theme cart UI (cart page, mini cart, cart drawer, cart icon) --- */
     function refreshCartUI(cart) {
-      /* 1. Dispatch events that most themes listen for */
-      var evt = { detail: { cart: cart } };
-      ['cart:change', 'cart:updated', 'cart:refresh'].forEach(function(name) {
-        try { document.dispatchEvent(new CustomEvent(name, evt)); } catch(e) {}
+      /* 1. Dispatch ALL common cart events across theme ecosystems */
+      var detail = { cart: cart, source: 'sl-free-gift' };
+      [
+        'cart:change', 'cart:updated', 'cart:refresh', 'cart:build',
+        'ajaxProduct:added', 'product:added',
+        'theme:cart:change', 'theme:cart:update',
+        'dispatch:cart:update', 'cart-update'
+      ].forEach(function(name) {
+        try { document.dispatchEvent(new CustomEvent(name, { detail: detail, bubbles: true })); } catch(e) {}
       });
 
-      /* 2. Update cart icon bubble count (common selectors across themes) */
-      var countEls = document.querySelectorAll(
-        '.cart-count-bubble span, .cart-count, [data-cart-count], .js-cart-count, ' +
-        '#cart-icon-bubble span, .header__cart-count, .site-header__cart-count'
-      );
+      /* Also try body-level events (some themes listen there) */
+      try { document.body.dispatchEvent(new CustomEvent('cart:refresh', { detail: detail, bubbles: true })); } catch(e) {}
+
+      /* 2. Update cart icon bubble count (broad selectors) */
       if (cart && typeof cart.item_count === 'number') {
-        countEls.forEach(function(el) { el.textContent = String(cart.item_count); });
+        var count = String(cart.item_count);
+        document.querySelectorAll(
+          '.cart-count-bubble span, .cart-count-bubble, .cart-count, [data-cart-count], ' +
+          '.js-cart-count, #cart-icon-bubble span, #CartCount, .cart-link__count, ' +
+          '.header__cart-count, .site-header__cart-count, .cart__count, ' +
+          '.mini-cart__count, .cart-drawer__count, .cart-quantity, ' +
+          '[data-cart-item-count], .cart-item-count, .cart-count-tag'
+        ).forEach(function(el) {
+          el.textContent = count;
+          el.setAttribute('data-cart-count', count);
+        });
       }
 
-      /* 3. Section Rendering API — re-render cart drawer and cart page sections */
+      /* 3. Section Rendering API — find ALL cart-related sections and re-render */
       var sectionsToRender = [];
-      /* Detect which cart sections exist on the page */
       document.querySelectorAll('[id^="shopify-section-"]').forEach(function(el) {
         var id = el.id.replace('shopify-section-', '');
-        if (id.indexOf('cart') !== -1 || id.indexOf('mini-cart') !== -1 || id.indexOf('cart-drawer') !== -1 || id.indexOf('cart-icon') !== -1) {
+        /* Match any section with cart, drawer, mini, header, notification in its ID */
+        if (/cart|drawer|mini-cart|header|notification|icon-bubble/.test(id)) {
           sectionsToRender.push(id);
         }
       });
+
+      /* Also try well-known section IDs that might not have wrappers visible */
+      ['cart-drawer', 'cart-notification', 'cart-icon-bubble', 'header', 'main-cart-items', 'main-cart-footer'].forEach(function(id) {
+        if (sectionsToRender.indexOf(id) === -1 && document.getElementById('shopify-section-' + id)) {
+          sectionsToRender.push(id);
+        }
+      });
+
       if (sectionsToRender.length) {
-        fetch('/?sections=' + encodeURIComponent(sectionsToRender.join(',')), { credentials: 'same-origin' })
+        var url = window.location.pathname + '?sections=' + encodeURIComponent(sectionsToRender.join(','));
+        fetch(url, { credentials: 'same-origin' })
           .then(function(r) { return r.json(); })
           .then(function(sections) {
             Object.keys(sections).forEach(function(key) {
               var wrapper = document.getElementById('shopify-section-' + key);
-              if (wrapper) wrapper.innerHTML = sections[key];
+              if (wrapper) {
+                wrapper.innerHTML = sections[key];
+                /* Re-run any inline scripts in the refreshed section */
+                wrapper.querySelectorAll('script').forEach(function(oldScript) {
+                  var newScript = document.createElement('script');
+                  if (oldScript.src) { newScript.src = oldScript.src; }
+                  else { newScript.textContent = oldScript.textContent; }
+                  oldScript.parentNode.replaceChild(newScript, oldScript);
+                });
+              }
             });
           })
           .catch(function() {});
       }
+
+      /* 4. Fallback: try triggering theme-specific cart refresh methods */
+      try {
+        /* Dawn / Shopify 2.0 themes */
+        if (window.Shopify && window.Shopify.theme && typeof window.Shopify.theme.cart === 'object') {
+          window.Shopify.theme.cart.getCart();
+        }
+      } catch(e) {}
+      try {
+        /* Themes using a global cartUpdate function */
+        if (typeof window.cartUpdate === 'function') window.cartUpdate();
+        if (typeof window.refreshCart === 'function') window.refreshCart();
+        if (typeof window.ajaxCart === 'object' && typeof window.ajaxCart.load === 'function') window.ajaxCart.load();
+      } catch(e) {}
     }
 
     function qtyForCollection(cart, collectionIds) {
