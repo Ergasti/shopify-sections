@@ -1,0 +1,795 @@
+{% comment %}
+  SL - Free Gift (Snippet)
+  Auto-adds a free gift product to the cart when the customer buys X items
+  from a qualifying collection. Works with Shopify Buy X Get Y discounts.
+
+  Render example:
+  {% render 'sl-free-gift',
+    collection_handle:   'body-splash',
+    collection_title:    'Body Splash',
+    buy_qty:             3,
+    gift_product:        all_products['razor-pack'],
+    discount_code:       '333',
+    show_progress_bar:   true,
+    show_gift_preview:   true,
+    show_confetti:       true,
+    show_toast:          true,
+    fill_color_start:    '#4ade80',
+    fill_color_end:      '#16a34a',
+    style_variant:       'clean',
+    section_id:          section.id
+  %}
+{% endcomment %}
+
+{% assign sid = section_id | default: id | default: block_id | default: 'sl-fg' %}
+
+{% assign handle          = collection_handle | default: '' %}
+{% assign title           = collection_title  | default: handle %}
+{% assign buy_qty         = buy_qty | default: 3 | plus: 0 %}
+{% if buy_qty <= 0 %}{% assign buy_qty = 3 %}{% endif %}
+{% assign discount_code   = discount_code | default: '' | strip %}
+
+{% assign show_progress_bar = show_progress_bar | default: true %}
+{% assign show_gift_preview = show_gift_preview | default: true %}
+{% assign show_confetti     = show_confetti     | default: true %}
+{% assign show_toast        = show_toast        | default: true %}
+
+{% assign fill_color_start = fill_color_start | default: '#4ade80' | strip %}
+{% assign fill_color_end   = fill_color_end   | default: '#16a34a' | strip %}
+{% assign style_variant    = style_variant    | default: 'clean'   | strip %}
+
+{% assign locale_iso = request.locale.iso_code | default: 'en' %}
+{% assign is_rtl = false %}
+{% if locale_iso == 'ar' or locale_iso == 'he' or locale_iso == 'fa' or locale_iso == 'ur' or locale_iso == 'yi' %}
+  {% assign is_rtl = true %}
+{% endif %}
+
+{% comment %} --- Validate gift product --- {% endcomment %}
+{% assign gift_valid = false %}
+{% assign gift_variant_id = '' %}
+{% assign gift_product_id = '' %}
+{% assign gift_error = '' %}
+
+{% if gift_product == blank %}
+  {% assign gift_error = 'no_product' %}
+{% elsif gift_product.variants.size > 1 %}
+  {% assign gift_error = 'multi_variant' %}
+{% elsif gift_product.available == false %}
+  {% assign gift_error = 'out_of_stock' %}
+{% else %}
+  {% assign gift_valid = true %}
+  {% assign gift_variant_id = gift_product.variants.first.id %}
+  {% assign gift_product_id = gift_product.id %}
+{% endif %}
+
+{% if handle == blank %}
+  {% if request.design_mode %}
+    <div style="padding: 16px; border: 1px dashed #ccc; border-radius: 8px; background: #fafafa;">
+      <strong>SL - Free Gift</strong><br>
+      {{ 'sections.sl_free_gift.missing_collection' | t | default: 'Choose a qualifying collection in settings.' }}
+    </div>
+  {% endif %}
+{% elsif gift_error == 'no_product' %}
+  {% if request.design_mode %}
+    <div style="padding: 16px; border: 1px dashed #ccc; border-radius: 8px; background: #fafafa;">
+      <strong>SL - Free Gift</strong><br>
+      {{ 'sections.sl_free_gift.missing_product' | t | default: 'Choose a gift product in settings.' }}
+    </div>
+  {% endif %}
+{% elsif gift_error == 'multi_variant' %}
+  <div
+    id="sl-fg-{{ sid }}"
+    class="sl-fg sl-fg--error{% if is_rtl %} sl-fg--rtl{% endif %}"
+    {% if is_rtl %}dir="rtl"{% endif %}
+  >
+    <div class="sl-fg__error-card">
+      <span class="sl-fg__error-icon" aria-hidden="true">⚠️</span>
+      <p class="sl-fg__error-text">
+        {{ 'sections.sl_free_gift.error_multi_variant' | t | default: 'Free gift error: The selected gift product has multiple variants. Please select a product with exactly one variant.' }}
+      </p>
+    </div>
+  </div>
+  <style>
+    #sl-fg-{{ sid }}.sl-fg--error .sl-fg__error-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 14px 16px;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 10px;
+    }
+    #sl-fg-{{ sid }} .sl-fg__error-icon { font-size: 20px; flex-shrink: 0; }
+    #sl-fg-{{ sid }} .sl-fg__error-text { margin: 0; font-size: 13px; color: #991b1b; line-height: 1.5; }
+  </style>
+{% elsif gift_error == 'out_of_stock' %}
+  <div
+    id="sl-fg-{{ sid }}"
+    class="sl-fg sl-fg--oos{% if is_rtl %} sl-fg--rtl{% endif %}"
+    {% if is_rtl %}dir="rtl"{% endif %}
+  >
+    {% if show_gift_preview and gift_product.featured_image %}
+      <div class="sl-fg__preview">
+        <div class="sl-fg__preview-img-wrap">
+          <img
+            src="{{ gift_product.featured_image | image_url: width: 200 }}"
+            alt="{{ gift_product.title | escape }}"
+            width="80" height="80"
+            loading="lazy" decoding="async"
+            class="sl-fg__preview-img"
+            style="opacity: .5; filter: grayscale(1);"
+          >
+        </div>
+        <div class="sl-fg__preview-info">
+          <p class="sl-fg__preview-title" style="margin: 0 0 4px; font-size: 14px; font-weight: 600; color: #111827;">{{ gift_product.title | escape }}</p>
+          <p style="margin: 0; font-size: 12px; color: #92400e;">{{ 'sections.sl_free_gift.msg_out_of_stock' | t | default: 'Sorry, the free gift is currently out of stock.' }}</p>
+        </div>
+      </div>
+    {% else %}
+      <div class="sl-fg__oos-banner" style="display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: #fef3c7; border: 1px solid #fde68a; border-radius: 8px;">
+        <span style="font-size: 18px; flex-shrink: 0;" aria-hidden="true">📦</span>
+        <p style="margin: 0; font-size: 13px; color: #92400e;">{{ 'sections.sl_free_gift.msg_out_of_stock' | t | default: 'Sorry, the free gift is currently out of stock.' }}</p>
+      </div>
+    {% endif %}
+  </div>
+  <style>
+    #sl-fg-{{ sid }}.sl-fg--oos {
+      border: 1px solid #fde68a;
+      border-radius: 12px;
+      padding: 16px 18px;
+      background: #fffbeb;
+    }
+    #sl-fg-{{ sid }}.sl-fg--oos .sl-fg__preview { display: flex; align-items: center; gap: 12px; }
+    #sl-fg-{{ sid }}.sl-fg--oos .sl-fg__preview-img-wrap { flex-shrink: 0; width: 80px; height: 80px; }
+    #sl-fg-{{ sid }}.sl-fg--oos .sl-fg__preview-img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
+  </style>
+{% else %}
+  <div
+    id="sl-fg-{{ sid }}"
+    class="sl-fg sl-fg--{{ style_variant }}{% if is_rtl %} sl-fg--rtl{% endif %}"
+    style="--sl-fg-fill-start: {{ fill_color_start }}; --sl-fg-fill-end: {{ fill_color_end }};"
+    data-sl-fg
+    data-sl-fg-collection-handle="{{ handle }}"
+    data-sl-fg-buy-qty="{{ buy_qty }}"
+    data-sl-fg-gift-variant-id="{{ gift_variant_id }}"
+    data-sl-fg-gift-product-id="{{ gift_product_id }}"
+    data-sl-fg-discount-code="{{ discount_code | escape }}"
+    data-sl-fg-show-progress="{{ show_progress_bar }}"
+    data-sl-fg-show-preview="{{ show_gift_preview }}"
+    data-sl-fg-show-confetti="{{ show_confetti }}"
+    data-sl-fg-show-toast="{{ show_toast }}"
+    data-sl-fg-currency="{{ cart.currency | default: shop.currency | default: 'EGP' }}"
+    data-sl-fg-gift-available="{{ gift_product.available }}"
+    data-sl-fg-msg-none="{{ 'sections.sl_free_gift.msg_none' | t | default: 'Add %count% item(s) from %collection% to get a FREE gift!' | escape }}"
+    data-sl-fg-msg-progress="{{ 'sections.sl_free_gift.msg_progress' | t | default: 'Add %count% more to unlock your FREE gift!' | escape }}"
+    data-sl-fg-msg-earned="{{ 'sections.sl_free_gift.msg_earned' | t | default: 'You earned %free% FREE gift(s)! Add %count% more for another.' | escape }}"
+    data-sl-fg-msg-ready="{{ 'sections.sl_free_gift.msg_ready' | t | default: 'FREE gift added to your cart!' | escape }}"
+    data-sl-fg-msg-all-earned="{{ 'sections.sl_free_gift.msg_all_earned' | t | default: '%free% FREE gift(s) in your cart!' | escape }}"
+    data-sl-fg-msg-out-of-stock="{{ 'sections.sl_free_gift.msg_out_of_stock' | t | default: 'Sorry, the free gift is currently out of stock.' | escape }}"
+    data-sl-fg-toast-added="{{ 'sections.sl_free_gift.toast_added' | t | default: 'FREE gift added! 🎁' | escape }}"
+    data-sl-fg-toast-removed="{{ 'sections.sl_free_gift.toast_removed' | t | default: 'Free gift removed from cart.' | escape }}"
+    data-sl-fg-collection-title="{{ title | escape }}"
+    {% if is_rtl %}dir="rtl"{% endif %}
+  >
+    {{- '' -}}
+
+    {% comment %} --- Gift preview card --- {% endcomment %}
+    <div class="sl-fg__preview" data-sl-fg-preview {% unless show_gift_preview %}hidden{% endunless %}>
+      <div class="sl-fg__preview-img-wrap">
+        {% if gift_product.featured_image %}
+          <img
+            src="{{ gift_product.featured_image | image_url: width: 200 }}"
+            srcset="{{ gift_product.featured_image | image_url: width: 100 }} 100w,
+                    {{ gift_product.featured_image | image_url: width: 200 }} 200w"
+            sizes="80px"
+            alt="{{ gift_product.title | escape }}"
+            width="80"
+            height="80"
+            loading="lazy"
+            decoding="async"
+            class="sl-fg__preview-img"
+          >
+        {% else %}
+          <div class="sl-fg__preview-placeholder" aria-hidden="true">🎁</div>
+        {% endif %}
+        <span class="sl-fg__free-badge">{{ 'sections.sl_free_gift.free_badge' | t | default: 'FREE' }}</span>
+      </div>
+      <div class="sl-fg__preview-info">
+        <p class="sl-fg__preview-title">{{ gift_product.title | escape }}</p>
+        <p class="sl-fg__preview-subtitle" data-sl-fg-gift-status></p>
+      </div>
+    </div>
+
+    {% comment %} --- Progress bar --- {% endcomment %}
+    <div class="sl-fg__progress-wrap" data-sl-fg-progress-wrap {% unless show_progress_bar %}hidden{% endunless %}>
+      <p class="sl-fg__msg" data-sl-fg-msg></p>
+      <div class="sl-fg__track">
+        <div class="sl-fg__fill" data-sl-fg-fill style="width: 0%;"></div>
+      </div>
+      <div class="sl-fg__earned-row" data-sl-fg-earned hidden>
+        <span class="sl-fg__earned-dots" data-sl-fg-earned-dots></span>
+        <span class="sl-fg__earned-text" data-sl-fg-earned-text></span>
+      </div>
+    </div>
+
+    {% comment %} --- Out-of-stock banner --- {% endcomment %}
+    <div class="sl-fg__oos-banner" data-sl-fg-oos hidden>
+      <span class="sl-fg__oos-icon" aria-hidden="true">📦</span>
+      <p class="sl-fg__oos-text" data-sl-fg-oos-text></p>
+    </div>
+
+    {% comment %} --- Toast --- {% endcomment %}
+    <div class="sl-fg__toast" data-sl-fg-toast aria-live="polite" aria-atomic="true"></div>
+  </div>
+
+  <style>
+    #sl-fg-{{ sid }} {
+      --sl-fg-fill-start: {{ fill_color_start }};
+      --sl-fg-fill-end: {{ fill_color_end }};
+      font-family: inherit;
+      box-sizing: border-box;
+    }
+    #sl-fg-{{ sid }} *, #sl-fg-{{ sid }} *::before, #sl-fg-{{ sid }} *::after { box-sizing: inherit; }
+
+    /* --- Card base --- */
+    #sl-fg-{{ sid }}.sl-fg {
+      position: relative;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 16px 18px;
+      background: #fff;
+      box-shadow: 0 1px 3px rgba(0,0,0,.06);
+      overflow: hidden;
+    }
+    #sl-fg-{{ sid }}.sl-fg--urgency {
+      border-color: #f59e0b;
+      box-shadow: 0 0 0 1px #f59e0b33, 0 2px 8px rgba(245,158,11,.12);
+    }
+
+    /* --- Gift preview --- */
+    #sl-fg-{{ sid }} .sl-fg__preview {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    #sl-fg-{{ sid }} .sl-fg__preview-img-wrap {
+      position: relative;
+      flex-shrink: 0;
+      width: 80px;
+      height: 80px;
+    }
+    #sl-fg-{{ sid }} .sl-fg__preview-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid #f3f4f6;
+    }
+    #sl-fg-{{ sid }} .sl-fg__preview-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      background: #f9fafb;
+      border-radius: 8px;
+      border: 1px solid #f3f4f6;
+    }
+    #sl-fg-{{ sid }} .sl-fg__free-badge {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      background: #16a34a;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .04em;
+      padding: 2px 7px;
+      border-radius: 6px;
+      line-height: 1.4;
+      text-transform: uppercase;
+    }
+    #sl-fg-{{ sid }}.sl-fg--rtl .sl-fg__free-badge { right: auto; left: -6px; }
+    #sl-fg-{{ sid }} .sl-fg__preview-info { flex: 1; min-width: 0; }
+    #sl-fg-{{ sid }} .sl-fg__preview-title {
+      margin: 0 0 4px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #111827;
+      line-height: 1.3;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    #sl-fg-{{ sid }} .sl-fg__preview-subtitle {
+      margin: 0;
+      font-size: 12px;
+      color: #6b7280;
+      line-height: 1.3;
+    }
+
+    /* --- Progress bar --- */
+    #sl-fg-{{ sid }} .sl-fg__progress-wrap { margin-bottom: 4px; }
+    #sl-fg-{{ sid }} .sl-fg__msg {
+      margin: 0 0 8px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #374151;
+      line-height: 1.4;
+    }
+    #sl-fg-{{ sid }} .sl-fg__track {
+      height: 10px;
+      background: #f3f4f6;
+      border-radius: 99px;
+      overflow: hidden;
+      position: relative;
+    }
+    #sl-fg-{{ sid }} .sl-fg__fill {
+      height: 100%;
+      border-radius: 99px;
+      background: linear-gradient(90deg, var(--sl-fg-fill-start), var(--sl-fg-fill-end));
+      transition: width .4s cubic-bezier(.16,1,.3,1);
+      position: relative;
+    }
+    #sl-fg-{{ sid }} .sl-fg__fill::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        -45deg,
+        transparent,
+        transparent 5px,
+        rgba(255,255,255,.18) 5px,
+        rgba(255,255,255,.18) 10px
+      );
+      border-radius: 99px;
+    }
+
+    /* --- Earned row --- */
+    #sl-fg-{{ sid }} .sl-fg__earned-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    #sl-fg-{{ sid }} .sl-fg__earned-dots { display: flex; gap: 4px; }
+    #sl-fg-{{ sid }} .sl-fg__earned-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--sl-fg-fill-end);
+      display: inline-block;
+    }
+    #sl-fg-{{ sid }} .sl-fg__earned-more {
+      font-size: 11px;
+      color: #6b7280;
+      font-weight: 500;
+    }
+    #sl-fg-{{ sid }} .sl-fg__earned-text {
+      font-size: 12px;
+      color: #16a34a;
+      font-weight: 600;
+    }
+
+    /* --- Out of stock --- */
+    #sl-fg-{{ sid }} .sl-fg__oos-banner {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      background: #fef3c7;
+      border: 1px solid #fde68a;
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+    #sl-fg-{{ sid }} .sl-fg__oos-icon { font-size: 18px; flex-shrink: 0; }
+    #sl-fg-{{ sid }} .sl-fg__oos-text { margin: 0; font-size: 13px; color: #92400e; line-height: 1.4; }
+
+    /* --- Error card --- */
+    #sl-fg-{{ sid }}.sl-fg--error .sl-fg__error-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 14px 16px;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 10px;
+    }
+    #sl-fg-{{ sid }} .sl-fg__error-icon { font-size: 20px; flex-shrink: 0; }
+    #sl-fg-{{ sid }} .sl-fg__error-text { margin: 0; font-size: 13px; color: #991b1b; line-height: 1.5; }
+
+    /* --- Toast --- */
+    #sl-fg-{{ sid }} .sl-fg__toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #111827;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 10px 20px;
+      border-radius: 10px;
+      z-index: 9999;
+      opacity: 0;
+      pointer-events: none;
+      transition: transform .35s cubic-bezier(.16,1,.3,1), opacity .35s ease;
+      white-space: nowrap;
+    }
+    #sl-fg-{{ sid }} .sl-fg__toast.sl-fg__toast--visible {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* --- RTL --- */
+    #sl-fg-{{ sid }}.sl-fg--rtl { direction: rtl; }
+    #sl-fg-{{ sid }}.sl-fg--rtl .sl-fg__fill {
+      background: linear-gradient(-90deg, var(--sl-fg-fill-start), var(--sl-fg-fill-end));
+    }
+    #sl-fg-{{ sid }}.sl-fg--rtl .sl-fg__fill::after {
+      background: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 5px,
+        rgba(255,255,255,.18) 5px,
+        rgba(255,255,255,.18) 10px
+      );
+    }
+  </style>
+
+  <script>
+  (function() {
+    'use strict';
+    var root = document.getElementById('sl-fg-{{ sid }}');
+    if (!root || !root.hasAttribute('data-sl-fg')) return;
+
+    /* --- Config from data attributes --- */
+    var CFG = {
+      collectionHandle: root.getAttribute('data-sl-fg-collection-handle') || '',
+      buyQty:           parseInt(root.getAttribute('data-sl-fg-buy-qty') || '3', 10) || 3,
+      giftVariantId:    root.getAttribute('data-sl-fg-gift-variant-id') || '',
+      giftProductId:    root.getAttribute('data-sl-fg-gift-product-id') || '',
+      discountCode:     root.getAttribute('data-sl-fg-discount-code') || '',
+      showProgress:     root.getAttribute('data-sl-fg-show-progress') === 'true',
+      showPreview:      root.getAttribute('data-sl-fg-show-preview') === 'true',
+      showConfetti:     root.getAttribute('data-sl-fg-show-confetti') === 'true',
+      showToast:        root.getAttribute('data-sl-fg-show-toast') === 'true',
+      giftAvailable:    root.getAttribute('data-sl-fg-gift-available') === 'true',
+      currency:         root.getAttribute('data-sl-fg-currency') || 'EGP',
+      collectionTitle:  root.getAttribute('data-sl-fg-collection-title') || ''
+    };
+
+    /* --- State --- */
+    var cache = {};
+    var prevFreeEarned = null;
+    var reconciling = false;      /* mutex to prevent infinite loops */
+    var discountApplied = false;
+    var toastTimer = null;
+
+    /* --- DOM refs --- */
+    var msgEl       = root.querySelector('[data-sl-fg-msg]');
+    var fillEl      = root.querySelector('[data-sl-fg-fill]');
+    var earnedRow   = root.querySelector('[data-sl-fg-earned]');
+    var earnedDots  = root.querySelector('[data-sl-fg-earned-dots]');
+    var earnedText  = root.querySelector('[data-sl-fg-earned-text]');
+    var oosEl       = root.querySelector('[data-sl-fg-oos]');
+    var oosTextEl   = root.querySelector('[data-sl-fg-oos-text]');
+    var toastEl     = root.querySelector('[data-sl-fg-toast]');
+    var statusEl    = root.querySelector('[data-sl-fg-gift-status]');
+
+    /* --- Helpers --- */
+    function msg(key) { return root.getAttribute('data-sl-fg-' + key) || ''; }
+
+    function showToast(text) {
+      if (!CFG.showToast || !toastEl) return;
+      toastEl.textContent = text;
+      toastEl.classList.add('sl-fg__toast--visible');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(function() { toastEl.classList.remove('sl-fg__toast--visible'); }, 3200);
+    }
+
+    function playConfetti() {
+      if (!CFG.showConfetti) return;
+      if (typeof window.confetti === 'function') {
+        window.confetti({ particleCount: 80, spread: 60, origin: { y: 0.7 } });
+        return;
+      }
+      var s = document.createElement('script');
+      s.src = 'https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js';
+      s.integrity = 'sha384-Rv68Y7adOjMMJc1/xFMcdNvXre/HF51to4GZjBALmXr7ABnVl5V4UajJwBu7zbhN';
+      s.crossOrigin = 'anonymous';
+      s.onload = function() {
+        if (typeof window.confetti === 'function') {
+          window.confetti({ particleCount: 80, spread: 60, origin: { y: 0.7 } });
+        }
+      };
+      document.head.appendChild(s);
+    }
+
+    function setProgress(pct) {
+      if (fillEl) { fillEl.style.width = Math.min(100, Math.max(0, pct)) + '%'; }
+    }
+
+    /* --- Collection IDs --- */
+    function fetchCollectionIds(handle) {
+      if (!handle) return Promise.resolve({});
+      if (cache[handle] && cache[handle].promise) return cache[handle].promise;
+      var ids = {}, page = 1;
+      function loadNext() {
+        return fetch('/collections/' + encodeURIComponent(handle) + '/products.json?limit=250&page=' + page, { credentials: 'same-origin' })
+          .then(function(r) { return r.json(); })
+          .then(function(d) {
+            var prods = (d && d.products) || [];
+            prods.forEach(function(p) { if (p && p.id) ids[String(p.id)] = true; });
+            if (!prods.length || page >= 10) return ids;
+            page++; return loadNext();
+          });
+      }
+      cache[handle] = cache[handle] || {};
+      cache[handle].promise = loadNext().catch(function() { return ids; });
+      return cache[handle].promise;
+    }
+
+    /* --- Cart --- */
+    function fetchCart() {
+      return fetch('/cart.js', { credentials: 'same-origin' }).then(function(r) { return r.json(); });
+    }
+
+    function qtyForCollection(cart, collectionIds) {
+      if (!cart || !cart.items) return 0;
+      var giftPid = String(CFG.giftProductId);
+      return cart.items.reduce(function(sum, item) {
+        var pid = String(item.product_id);
+        /* Exclude the gift product from qualifying count */
+        if (pid === giftPid) return sum;
+        return sum + (collectionIds[pid] ? (item.quantity || 0) : 0);
+      }, 0);
+    }
+
+    function giftQtyInCart(cart) {
+      if (!cart || !cart.items) return 0;
+      var vid = String(CFG.giftVariantId);
+      var found = 0;
+      cart.items.forEach(function(item) {
+        if (String(item.variant_id) === vid) found += (item.quantity || 0);
+      });
+      return found;
+    }
+
+    function giftLineKeys(cart) {
+      if (!cart || !cart.items) return [];
+      var vid = String(CFG.giftVariantId);
+      var keys = [];
+      cart.items.forEach(function(item) {
+        if (String(item.variant_id) === vid) keys.push({ key: item.key, quantity: item.quantity || 0 });
+      });
+      return keys;
+    }
+
+    /* --- Discount --- */
+    function applyDiscount() {
+      if (!CFG.discountCode || discountApplied) return Promise.resolve();
+      discountApplied = true;
+      return fetch('/discount/' + encodeURIComponent(CFG.discountCode), {
+        credentials: 'same-origin',
+        redirect: 'follow'
+      }).catch(function() { /* ignore errors, discount might already be applied */ });
+    }
+
+    /* --- Reconcile cart (add/remove gift) --- */
+    function reconcile(cart, collectionIds) {
+      var qualifyingQty = qtyForCollection(cart, collectionIds);
+      var giftsEarned   = Math.floor(qualifyingQty / CFG.buyQty);
+      var giftsInCart    = giftQtyInCart(cart);
+      var remainder      = qualifyingQty % CFG.buyQty;
+      var nextCount      = CFG.buyQty - remainder;
+
+      /* --- Update UI --- */
+      updateUI(giftsEarned, giftsInCart, qualifyingQty, remainder, nextCount);
+
+      /* --- Determine action --- */
+      var diff = giftsEarned - giftsInCart;
+      if (diff === 0) return Promise.resolve(cart);
+
+      if (reconciling) return Promise.resolve(cart);
+      reconciling = true;
+
+      var promise;
+
+      if (diff > 0) {
+        /* Need to add gift(s) */
+        if (!CFG.giftAvailable) {
+          reconciling = false;
+          showOutOfStock();
+          return Promise.resolve(cart);
+        }
+        promise = fetch('/cart/add.js', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ items: [{ id: parseInt(CFG.giftVariantId, 10), quantity: diff }] })
+        }).then(function(r) {
+          if (!r.ok) {
+            return r.json().then(function(d) {
+              /* Shopify returns 422 for OOS/quantity-limit errors regardless of locale */
+              if (r.status === 422) {
+                CFG.giftAvailable = false;
+                showOutOfStock();
+              }
+              throw new Error(d.description || 'add failed');
+            });
+          }
+          return r.json();
+        }).then(function() {
+          return applyDiscount();
+        }).then(function() {
+          showToast(msg('toast-added'));
+          playConfetti();
+          return fetchCart();
+        });
+      } else {
+        /* Need to remove gift(s) — handle multiple line items for same variant */
+        var lines = giftLineKeys(cart);
+        if (!lines.length) { reconciling = false; return Promise.resolve(cart); }
+        var target = Math.max(0, giftsEarned);
+        var remaining = target;
+        var changes = [];
+        lines.forEach(function(line) {
+          if (remaining >= line.quantity) {
+            /* Keep this line as-is */
+            remaining -= line.quantity;
+          } else {
+            /* Set this line to whatever is left (could be 0) */
+            changes.push({ id: line.key, quantity: remaining });
+            remaining = 0;
+          }
+        });
+        function applyChanges(idx) {
+          if (idx >= changes.length) return Promise.resolve();
+          return fetch('/cart/change.js', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(changes[idx])
+          }).then(function(r) { return r.json(); }).then(function() { return applyChanges(idx + 1); });
+        }
+        promise = applyChanges(0).then(function() {
+          if (target === 0) showToast(msg('toast-removed'));
+          return fetchCart();
+        });
+      }
+
+      return promise.catch(function() {
+        return fetchCart();
+      }).then(function(updatedCart) {
+        reconciling = false;
+        return updatedCart;
+      });
+    }
+
+    /* --- UI updates --- */
+    function updateUI(giftsEarned, giftsInCart, qualifyingQty, remainder, nextCount) {
+      /* Progress bar */
+      var pct = CFG.buyQty > 0 ? Math.min(100, (remainder / CFG.buyQty) * 100) : 0;
+      if (giftsEarned > 0 && remainder === 0) pct = 100;
+      setProgress(pct);
+
+      /* Message */
+      if (msgEl) {
+        var text;
+        if (qualifyingQty === 0) {
+          text = msg('msg-none')
+            .replace(/%count%/g, String(CFG.buyQty))
+            .replace(/%collection%/g, CFG.collectionTitle);
+        } else if (giftsEarned > 0 && remainder === 0) {
+          text = msg('msg-all-earned').replace(/%free%/g, String(giftsEarned));
+        } else if (giftsEarned > 0) {
+          text = msg('msg-earned')
+            .replace(/%free%/g, String(giftsEarned))
+            .replace(/%count%/g, String(nextCount));
+        } else {
+          text = msg('msg-progress').replace(/%count%/g, String(nextCount));
+        }
+        msgEl.textContent = text;
+      }
+
+      /* Status below gift preview */
+      if (statusEl) {
+        if (giftsEarned > 0 && giftsInCart >= giftsEarned) {
+          statusEl.textContent = msg('msg-ready');
+          statusEl.style.color = '#16a34a';
+        } else if (giftsEarned > 0 && giftsInCart < giftsEarned) {
+          statusEl.textContent = msg('msg-earned')
+            .replace(/%free%/g, String(giftsEarned))
+            .replace(/%count%/g, String(nextCount));
+          statusEl.style.color = '#d97706';
+        } else {
+          statusEl.textContent = msg('msg-progress').replace(/%count%/g, String(nextCount));
+          statusEl.style.color = '#6b7280';
+        }
+      }
+
+      /* Earned dots */
+      if (earnedRow && earnedDots && earnedText) {
+        if (giftsEarned > 0) {
+          earnedRow.hidden = false;
+          var show = Math.min(5, giftsEarned), extra = giftsEarned - show, html = '';
+          for (var i = 0; i < show; i++) html += '<span class="sl-fg__earned-dot"></span>';
+          if (extra > 0) html += '<span class="sl-fg__earned-more">+' + extra + '</span>';
+          earnedDots.innerHTML = html;
+          earnedText.textContent = msg('msg-all-earned').replace(/%free%/g, String(giftsEarned));
+        } else {
+          earnedRow.hidden = true;
+          earnedDots.innerHTML = '';
+          earnedText.textContent = '';
+        }
+      }
+
+      /* Confetti/toast on newly earned */
+      if (prevFreeEarned !== null && giftsEarned > prevFreeEarned) {
+        playConfetti();
+        showToast(msg('toast-added'));
+      }
+      prevFreeEarned = giftsEarned;
+    }
+
+    function showOutOfStock() {
+      if (oosEl && oosTextEl) {
+        oosEl.hidden = false;
+        oosTextEl.textContent = msg('msg-out-of-stock');
+      }
+    }
+
+    /* --- Main refresh --- */
+    function refresh() {
+      return fetchCollectionIds(CFG.collectionHandle)
+        .then(function(ids) {
+          return fetchCart().then(function(cart) { return reconcile(cart, ids); });
+        })
+        .catch(function() {});
+    }
+
+    /* --- Shared debounce --- */
+    var refreshTimer = null;
+    function scheduleRefresh() {
+      if (reconciling) return;
+      clearTimeout(refreshTimer);
+      refreshTimer = setTimeout(refresh, 250);
+    }
+
+    /* --- Init --- */
+    refresh();
+
+    /* --- Cart event listeners --- */
+    ['cart:refresh', 'cart:change', 'cart:updated', 'product:added'].forEach(function(name) {
+      document.addEventListener(name, function() { scheduleRefresh(); });
+    });
+
+    /* --- Fetch interception (shared event bus for multi-instance support) --- */
+    if (!window.__slFgCallbacks) window.__slFgCallbacks = [];
+    window.__slFgCallbacks.push(scheduleRefresh);
+
+    if (!window.__slFgPatched) {
+      window.__slFgPatched = true;
+      var _fetch = window.fetch;
+      window.fetch = function() {
+        var url = (arguments[0] && arguments[0].url) ? arguments[0].url : arguments[0];
+        var isCartCall = typeof url === 'string' && (
+          url.indexOf('/cart/add') !== -1 ||
+          url.indexOf('/cart/change') !== -1 ||
+          url.indexOf('/cart/update') !== -1 ||
+          url.indexOf('/cart/clear') !== -1
+        );
+        return _fetch.apply(this, arguments).then(function(res) {
+          if (isCartCall) {
+            (window.__slFgCallbacks || []).forEach(function(cb) { cb(); });
+          }
+          return res;
+        });
+      };
+    }
+  })();
+  </script>
+{% endif %}

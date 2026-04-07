@@ -1,0 +1,18 @@
+{
+  "sections": {
+    "sl_free_gift": {
+      "missing_collection": "Choose a qualifying collection in settings.",
+      "missing_product": "Choose a gift product in settings.",
+      "error_multi_variant": "Free gift error: The selected gift product has multiple variants. Please select a product with exactly one variant.",
+      "free_badge": "FREE",
+      "msg_none": "Add %count% item(s) from %collection% to get a FREE gift!",
+      "msg_progress": "Add %count% more to unlock your FREE gift!",
+      "msg_earned": "You earned %free% FREE gift(s)! Add %count% more for another.",
+      "msg_ready": "FREE gift added to your cart!",
+      "msg_all_earned": "%free% FREE gift(s) in your cart!",
+      "msg_out_of_stock": "Sorry, the free gift is currently out of stock.",
+      "toast_added": "FREE gift added! \uD83C\uDF81",
+      "toast_removed": "Free gift removed from cart."
+    }
+  }
+}

@@ -1,0 +1,193 @@
+{% comment %}
+  SL - Free Gift (Section)
+  Auto-adds a free gift product to the cart when the customer buys X items
+  from a qualifying collection. Works with Shopify Buy X Get Y discounts.
+
+  The Shopify discount handles pricing (makes the gift free).
+  This section handles auto-adding/removing the gift to/from the cart.
+{% endcomment %}
+
+{% assign qualifying_collection = section.settings.collection | default: nil %}
+{% assign gift_product = section.settings.gift_product | default: nil %}
+
+{% assign buy_qty = section.settings.buy_qty | default: 3 | plus: 0 %}
+{% if buy_qty <= 0 %}{% assign buy_qty = 3 %}{% endif %}
+
+{% assign discount_code    = section.settings.discount_code | default: '' | strip %}
+{% assign style_variant    = section.settings.style_variant | default: 'clean' | strip %}
+{% assign fill_color_start = section.settings.fill_color_start | default: '#4ade80' | strip %}
+{% assign fill_color_end   = section.settings.fill_color_end   | default: '#16a34a' | strip %}
+
+{% assign show_progress_bar = section.settings.show_progress_bar %}
+{% assign show_gift_preview = section.settings.show_gift_preview %}
+{% assign show_confetti     = section.settings.show_confetti %}
+{% assign show_toast        = section.settings.show_toast %}
+
+<div
+  id="sl-free-gift-section-{{ section.id }}"
+  class="sl-free-gift-section"
+  style="
+    max-width: {{ section.settings.max_width | default: 560 }}px;
+    margin: {{ section.settings.margin_vertical | default: 16 }}px auto;
+    padding: {{ section.settings.padding_block | default: 0 }}px {{ section.settings.padding_inline | default: 0 }}px;
+  "
+>
+  {% render 'sl-free-gift',
+    collection_handle: qualifying_collection.handle,
+    collection_title:  qualifying_collection.title,
+    buy_qty:           buy_qty,
+    gift_product:      gift_product,
+    discount_code:     discount_code,
+    show_progress_bar: show_progress_bar,
+    show_gift_preview: show_gift_preview,
+    show_confetti:     show_confetti,
+    show_toast:        show_toast,
+    fill_color_start:  fill_color_start,
+    fill_color_end:    fill_color_end,
+    style_variant:     style_variant,
+    section_id:        section.id
+  %}
+</div>
+
+{% schema %}
+{
+  "name": "SL - Free Gift",
+  "tag": "section",
+  "class": "sl-free-gift-section-wrap",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Offer configuration"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Qualifying collection",
+      "info": "Products from this collection count toward the buy quantity."
+    },
+    {
+      "type": "product",
+      "id": "gift_product",
+      "label": "Gift product",
+      "info": "The free gift to auto-add. Must have exactly ONE variant — multi-variant products will show an error."
+    },
+    {
+      "type": "range",
+      "id": "buy_qty",
+      "min": 1,
+      "max": 20,
+      "step": 1,
+      "label": "Buy quantity (X)",
+      "info": "How many items the customer must buy to earn 1 free gift. Recursive: buy 6 = 2 gifts, buy 9 = 3 gifts, etc.",
+      "default": 3
+    },
+    {
+      "type": "text",
+      "id": "discount_code",
+      "label": "Discount code",
+      "info": "The Shopify Buy X Get Y discount code. Auto-applied when the gift is added to the cart.",
+      "placeholder": "e.g. BUYGIFT"
+    },
+    {
+      "type": "header",
+      "content": "UI toggles"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_progress_bar",
+      "label": "Show progress bar",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_gift_preview",
+      "label": "Show gift product preview",
+      "info": "Displays the gift product image and name.",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_confetti",
+      "label": "Show confetti on unlock",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_toast",
+      "label": "Show toast notification",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Style"
+    },
+    {
+      "type": "select",
+      "id": "style_variant",
+      "label": "Style variant",
+      "options": [
+        { "value": "clean",   "label": "Clean (premium)" },
+        { "value": "urgency", "label": "Urgency (high converting)" }
+      ],
+      "default": "clean"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "min": 320,
+      "max": 900,
+      "step": 10,
+      "label": "Max width (px)",
+      "default": 560
+    },
+    {
+      "type": "range",
+      "id": "margin_vertical",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "label": "Vertical margin (px)",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "padding_block",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "label": "Padding top/bottom (px)",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_inline",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "label": "Padding left/right (px)",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Progress bar colors"
+    },
+    {
+      "type": "color",
+      "id": "fill_color_start",
+      "label": "Gradient start",
+      "default": "#4ade80"
+    },
+    {
+      "type": "color",
+      "id": "fill_color_end",
+      "label": "Gradient end",
+      "default": "#16a34a"
+    }
+  ],
+  "presets": [{ "name": "SL - Free Gift" }]
+}
+{% endschema %}
