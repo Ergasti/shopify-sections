@@ -586,7 +586,7 @@
       var remainder      = qualifyingQty % CFG.buyQty;
       var nextCount      = CFG.buyQty - remainder;
 
-      /* --- Update UI --- */
+      /* --- Update UI with ACTUAL cart state (not optimistic) --- */
       updateUI(giftsEarned, giftsInCart, qualifyingQty, remainder, nextCount);
 
       /* --- Determine action --- */
@@ -613,21 +613,30 @@
         }).then(function(r) {
           if (!r.ok) {
             return r.json().then(function(d) {
-              /* Shopify returns 422 for OOS/quantity-limit errors regardless of locale */
+              var errMsg = (d && d.description) || (d && d.message) || 'add failed';
+              /* Log for debugging — remove in production */
+              console.error('[SL-FreeGift] /cart/add.js failed (' + r.status + '):', errMsg, 'variant:', CFG.giftVariantId);
               if (r.status === 422) {
                 CFG.giftAvailable = false;
                 showOutOfStock();
               }
-              throw new Error(d.description || 'add failed');
+              throw new Error(errMsg);
             });
           }
           return r.json();
         }).then(function() {
           return applyDiscount();
         }).then(function() {
-          showToast(msg('toast-added'));
-          playConfetti();
           return fetchCart();
+        }).then(function(updatedCart) {
+          /* Re-update UI with REAL cart state after successful add */
+          var newGiftsInCart = giftQtyInCart(updatedCart);
+          updateUI(giftsEarned, newGiftsInCart, qualifyingQty, remainder, nextCount);
+          if (newGiftsInCart > giftsInCart) {
+            showToast(msg('toast-added'));
+            playConfetti();
+          }
+          return updatedCart;
         });
       } else {
         /* Need to remove gift(s) — handle multiple line items for same variant */
@@ -658,11 +667,21 @@
         promise = applyChanges(0).then(function() {
           if (target === 0) showToast(msg('toast-removed'));
           return fetchCart();
+        }).then(function(updatedCart) {
+          /* Re-update UI with REAL cart state after removal */
+          var newGiftsInCart = giftQtyInCart(updatedCart);
+          updateUI(giftsEarned, newGiftsInCart, qualifyingQty, remainder, nextCount);
+          return updatedCart;
         });
       }
 
       return promise.catch(function() {
-        return fetchCart();
+        /* On error, re-fetch cart and update UI with actual state */
+        return fetchCart().then(function(errCart) {
+          var errGiftsInCart = giftQtyInCart(errCart);
+          updateUI(giftsEarned, errGiftsInCart, qualifyingQty, remainder, nextCount);
+          return errCart;
+        });
       }).then(function(updatedCart) {
         reconciling = false;
         return updatedCart;
@@ -676,33 +695,40 @@
       if (giftsEarned > 0 && remainder === 0) pct = 100;
       setProgress(pct);
 
-      /* Message */
+      /* Message — based on ACTUAL cart state, not desired state */
       if (msgEl) {
         var text;
         if (qualifyingQty === 0) {
+          /* No qualifying items yet */
           text = msg('msg-none')
             .replace(/%count%/g, String(CFG.buyQty))
             .replace(/%collection%/g, CFG.collectionTitle);
-        } else if (giftsEarned > 0 && remainder === 0) {
-          text = msg('msg-all-earned').replace(/%free%/g, String(giftsEarned));
-        } else if (giftsEarned > 0) {
+        } else if (giftsInCart > 0 && giftsInCart >= giftsEarned) {
+          /* All earned gifts ARE in the cart */
+          text = msg('msg-all-earned').replace(/%free%/g, String(giftsInCart));
+        } else if (giftsInCart > 0) {
+          /* Some gifts in cart, working toward another */
           text = msg('msg-earned')
-            .replace(/%free%/g, String(giftsEarned))
+            .replace(/%free%/g, String(giftsInCart))
             .replace(/%count%/g, String(nextCount));
-        } else {
+        } else if (remainder > 0) {
+          /* Progress toward first gift */
           text = msg('msg-progress').replace(/%count%/g, String(nextCount));
+        } else {
+          /* Threshold met but gift not in cart yet (being added or failed) */
+          text = msg('msg-progress').replace(/%count%/g, '0');
         }
         msgEl.textContent = text;
       }
 
       /* Status below gift preview */
       if (statusEl) {
-        if (giftsEarned > 0 && giftsInCart >= giftsEarned) {
+        if (giftsInCart > 0 && giftsInCart >= giftsEarned) {
           statusEl.textContent = msg('msg-ready');
           statusEl.style.color = '#16a34a';
         } else if (giftsEarned > 0 && giftsInCart < giftsEarned) {
           statusEl.textContent = msg('msg-earned')
-            .replace(/%free%/g, String(giftsEarned))
+            .replace(/%free%/g, String(giftsInCart))
             .replace(/%count%/g, String(nextCount));
           statusEl.style.color = '#d97706';
         } else {
@@ -711,15 +737,15 @@
         }
       }
 
-      /* Earned dots */
+      /* Earned dots — show only for gifts ACTUALLY in cart */
       if (earnedRow && earnedDots && earnedText) {
-        if (giftsEarned > 0) {
+        if (giftsInCart > 0) {
           earnedRow.hidden = false;
-          var show = Math.min(5, giftsEarned), extra = giftsEarned - show, html = '';
+          var show = Math.min(5, giftsInCart), extra = giftsInCart - show, html = '';
           for (var i = 0; i < show; i++) html += '<span class="sl-fg__earned-dot"></span>';
           if (extra > 0) html += '<span class="sl-fg__earned-more">+' + extra + '</span>';
           earnedDots.innerHTML = html;
-          earnedText.textContent = msg('msg-all-earned').replace(/%free%/g, String(giftsEarned));
+          earnedText.textContent = msg('msg-all-earned').replace(/%free%/g, String(giftsInCart));
         } else {
           earnedRow.hidden = true;
           earnedDots.innerHTML = '';
@@ -727,11 +753,6 @@
         }
       }
 
-      /* Confetti/toast on newly earned */
-      if (prevFreeEarned !== null && giftsEarned > prevFreeEarned) {
-        playConfetti();
-        showToast(msg('toast-added'));
-      }
       prevFreeEarned = giftsEarned;
     }
 
