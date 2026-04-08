@@ -678,7 +678,7 @@
       var diff = giftsEarned - giftsInCart;
       if (diff === 0) return Promise.resolve(cart);
 
-      if (reconciling) return Promise.resolve(cart);
+      if (reconciling) { refreshPending = true; return Promise.resolve(cart); }
       reconciling = true;
 
       var promise;
@@ -771,6 +771,8 @@
         });
       }).then(function(updatedCart) {
         reconciling = false;
+        /* If a cart event fired while we were reconciling, re-check now */
+        if (refreshPending) { refreshPending = false; scheduleRefresh(); }
         return updatedCart;
       });
     }
@@ -861,10 +863,11 @@
 
     /* --- Shared debounce --- */
     var refreshTimer = null;
+    var refreshPending = false;  /* tracks if a refresh was requested during reconcile */
     function scheduleRefresh() {
-      if (reconciling) return;
+      if (reconciling) { refreshPending = true; return; }
       clearTimeout(refreshTimer);
-      refreshTimer = setTimeout(refresh, 250);
+      refreshTimer = setTimeout(refresh, 100);
     }
 
     /* --- Init --- */
