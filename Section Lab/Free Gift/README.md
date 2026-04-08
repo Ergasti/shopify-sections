@@ -58,12 +58,24 @@ Auto-adds a free gift product to the cart when the customer buys X items from a 
 2. Merge locale keys:
    - `locales/en.default.json` → your theme's `locales/en.default.json`
    - `locales/ar.json` → your theme's `locales/ar.json` (if you use Arabic)
-3. In the theme editor, add **"SL - Free Gift"** to your product page, cart page, or cart drawer.
+3. In the theme editor, add **"SL - Free Gift"** to your cart page or cart drawer.
 4. Configure:
    - **Qualifying collection** — the collection whose products count toward the offer
    - **Gift product** — the exact product to auto-add (single variant only)
    - **Buy quantity** — items to buy per free gift (e.g. 3 = buy 3 get 1 free)
    - **Discount code** — the Shopify discount code to auto-apply
+
+### Recommended: Add a hidden helper to the footer
+
+To ensure the free gift auto-adds on **every page** (product pages, collection pages, cart, etc.), add a second instance of the section to your theme's **footer group**:
+
+1. In the theme editor, go to **Footer** (or any global section group)
+2. Add **"SL - Free Gift"**
+3. Set **Display mode** → **Hidden helper (auto-add only)**
+4. Configure the same collection, gift product, buy quantity, and discount code
+5. Toast and confetti will still fire — no visible card is shown
+
+This ensures the gift is auto-added as soon as the customer reaches the threshold, regardless of which page they're on. The cart page instance (set to **Full display**) shows the progress UI.
 
 ---
 

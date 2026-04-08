@@ -186,10 +186,10 @@
               src="{{ gift_product.featured_image | image_url: width: 200 }}"
               srcset="{{ gift_product.featured_image | image_url: width: 100 }} 100w,
                       {{ gift_product.featured_image | image_url: width: 200 }} 200w"
-              sizes="80px"
+              sizes="72px"
               alt="{{ gift_product.title | escape }}"
-              width="80"
-              height="80"
+              width="72"
+              height="72"
               loading="lazy"
               decoding="async"
               class="sl-fg__preview-img"
@@ -201,19 +201,17 @@
         </div>
         <div class="sl-fg__preview-info">
           <p class="sl-fg__preview-title">{{ gift_product.title | escape }}</p>
-          <p class="sl-fg__preview-subtitle" data-sl-fg-gift-status></p>
         </div>
       </div>
 
-      {% comment %} --- Progress bar --- {% endcomment %}
+      {% comment %} --- Progress section --- {% endcomment %}
       <div class="sl-fg__progress-wrap" data-sl-fg-progress-wrap {% unless show_progress_bar %}hidden{% endunless %}>
-        <p class="sl-fg__msg" data-sl-fg-msg></p>
+        <div class="sl-fg__msg-row">
+          <p class="sl-fg__msg" data-sl-fg-msg></p>
+          <span class="sl-fg__earned-dots" data-sl-fg-earned-dots></span>
+        </div>
         <div class="sl-fg__track">
           <div class="sl-fg__fill" data-sl-fg-fill style="width: 0%;"></div>
-        </div>
-        <div class="sl-fg__earned-row" data-sl-fg-earned hidden>
-          <span class="sl-fg__earned-dots" data-sl-fg-earned-dots></span>
-          <span class="sl-fg__earned-text" data-sl-fg-earned-text></span>
         </div>
       </div>
 
@@ -252,36 +250,37 @@
     #sl-fg-{{ sid }}.sl-fg {
       position: relative;
       border: 1px solid #e5e7eb;
-      border-radius: 12px;
-      padding: 16px 18px;
+      border-radius: 14px;
+      padding: 20px;
       background: #fff;
-      box-shadow: 0 1px 3px rgba(0,0,0,.06);
-      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,.05);
     }
     #sl-fg-{{ sid }}.sl-fg--urgency {
       border-color: #f59e0b;
-      box-shadow: 0 0 0 1px #f59e0b33, 0 2px 8px rgba(245,158,11,.12);
+      box-shadow: 0 0 0 1px #f59e0b33, 0 2px 8px rgba(245,158,11,.10);
     }
 
     /* --- Gift preview --- */
     #sl-fg-{{ sid }} .sl-fg__preview {
       display: flex;
       align-items: center;
-      gap: 12px;
-      margin-bottom: 14px;
+      gap: 14px;
+      padding-bottom: 16px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid #f3f4f6;
     }
     #sl-fg-{{ sid }} .sl-fg__preview-img-wrap {
       position: relative;
       flex-shrink: 0;
-      width: 80px;
-      height: 80px;
+      width: 72px;
+      height: 72px;
     }
     #sl-fg-{{ sid }} .sl-fg__preview-img {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      border-radius: 8px;
-      border: 1px solid #f3f4f6;
+      border-radius: 10px;
+      border: 1px solid #e5e7eb;
     }
     #sl-fg-{{ sid }} .sl-fg__preview-placeholder {
       width: 100%;
@@ -289,55 +288,74 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 32px;
+      font-size: 28px;
       background: #f9fafb;
-      border-radius: 8px;
-      border: 1px solid #f3f4f6;
+      border-radius: 10px;
+      border: 1px solid #e5e7eb;
     }
     #sl-fg-{{ sid }} .sl-fg__free-badge {
       position: absolute;
-      top: -6px;
-      right: -6px;
+      top: 4px;
+      right: 4px;
       background: #16a34a;
       color: #fff;
-      font-size: 10px;
+      font-size: 9px;
       font-weight: 700;
-      letter-spacing: .04em;
-      padding: 2px 7px;
-      border-radius: 6px;
+      letter-spacing: .05em;
+      padding: 2px 6px;
+      border-radius: 4px;
       line-height: 1.4;
       text-transform: uppercase;
     }
-    #sl-fg-{{ sid }}.sl-fg--rtl .sl-fg__free-badge { right: auto; left: -6px; }
+    #sl-fg-{{ sid }}.sl-fg--rtl .sl-fg__free-badge { right: auto; left: 4px; }
     #sl-fg-{{ sid }} .sl-fg__preview-info { flex: 1; min-width: 0; }
     #sl-fg-{{ sid }} .sl-fg__preview-title {
-      margin: 0 0 4px;
-      font-size: 14px;
+      margin: 0;
+      font-size: 15px;
       font-weight: 600;
       color: #111827;
-      line-height: 1.3;
+      line-height: 1.35;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
-    #sl-fg-{{ sid }} .sl-fg__preview-subtitle {
-      margin: 0;
-      font-size: 12px;
-      color: #6b7280;
-      line-height: 1.3;
-    }
 
-    /* --- Progress bar --- */
-    #sl-fg-{{ sid }} .sl-fg__progress-wrap { margin-bottom: 4px; }
+    /* --- Progress section --- */
+    #sl-fg-{{ sid }} .sl-fg__progress-wrap { }
+    #sl-fg-{{ sid }} .sl-fg__msg-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
     #sl-fg-{{ sid }} .sl-fg__msg {
-      margin: 0 0 8px;
+      margin: 0;
       font-size: 13px;
       font-weight: 500;
       color: #374151;
       line-height: 1.4;
+      flex: 1;
+    }
+    #sl-fg-{{ sid }} .sl-fg__earned-dots {
+      display: flex;
+      gap: 3px;
+      flex-shrink: 0;
+    }
+    #sl-fg-{{ sid }} .sl-fg__earned-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--sl-fg-fill-end);
+      display: inline-block;
+    }
+    #sl-fg-{{ sid }} .sl-fg__earned-more {
+      font-size: 10px;
+      color: #6b7280;
+      font-weight: 600;
     }
     #sl-fg-{{ sid }} .sl-fg__track {
-      height: 10px;
+      height: 12px;
       background: #f3f4f6;
       border-radius: 99px;
       overflow: hidden;
@@ -362,32 +380,6 @@
         rgba(255,255,255,.18) 10px
       );
       border-radius: 99px;
-    }
-
-    /* --- Earned row --- */
-    #sl-fg-{{ sid }} .sl-fg__earned-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-top: 8px;
-    }
-    #sl-fg-{{ sid }} .sl-fg__earned-dots { display: flex; gap: 4px; }
-    #sl-fg-{{ sid }} .sl-fg__earned-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: var(--sl-fg-fill-end);
-      display: inline-block;
-    }
-    #sl-fg-{{ sid }} .sl-fg__earned-more {
-      font-size: 11px;
-      color: #6b7280;
-      font-weight: 500;
-    }
-    #sl-fg-{{ sid }} .sl-fg__earned-text {
-      font-size: 12px;
-      color: #16a34a;
-      font-weight: 600;
     }
 
     /* --- Out of stock --- */
@@ -495,12 +487,9 @@
     /* --- DOM refs --- */
     var msgEl       = root.querySelector('[data-sl-fg-msg]');
     var fillEl      = root.querySelector('[data-sl-fg-fill]');
-    var earnedRow   = root.querySelector('[data-sl-fg-earned]');
     var earnedDots  = root.querySelector('[data-sl-fg-earned-dots]');
-    var earnedText  = root.querySelector('[data-sl-fg-earned-text]');
     var oosEl       = root.querySelector('[data-sl-fg-oos]');
     var oosTextEl   = root.querySelector('[data-sl-fg-oos-text]');
-    var statusEl    = root.querySelector('[data-sl-fg-gift-status]');
 
     /* --- Global toast element (shared across instances, lives on document.body) --- */
     var toastEl = document.getElementById('sl-fg-toast-global');
@@ -818,61 +807,36 @@
       if (giftsEarned > 0 && remainder === 0) pct = 100;
       setProgress(pct);
 
-      /* Message — based on ACTUAL cart state, not desired state */
+      /* Single message — based on ACTUAL cart state */
       if (msgEl) {
         var text;
         if (qualifyingQty === 0) {
-          /* No qualifying items yet */
           text = msg('msg-none')
             .replace(/%count%/g, String(CFG.buyQty))
             .replace(/%collection%/g, CFG.collectionTitle);
         } else if (giftsInCart > 0 && giftsInCart >= giftsEarned) {
-          /* All earned gifts ARE in the cart */
           text = msg('msg-all-earned').replace(/%free%/g, String(giftsInCart));
         } else if (giftsInCart > 0) {
-          /* Some gifts in cart, working toward another */
           text = msg('msg-earned')
             .replace(/%free%/g, String(giftsInCart))
             .replace(/%count%/g, String(nextCount));
         } else if (remainder > 0) {
-          /* Progress toward first gift */
           text = msg('msg-progress').replace(/%count%/g, String(nextCount));
         } else {
-          /* Threshold met but gift not in cart yet (being added or failed) */
           text = msg('msg-progress').replace(/%count%/g, '0');
         }
         msgEl.textContent = text;
       }
 
-      /* Status below gift preview */
-      if (statusEl) {
-        if (giftsInCart > 0 && giftsInCart >= giftsEarned) {
-          statusEl.textContent = msg('msg-ready');
-          statusEl.style.color = '#16a34a';
-        } else if (giftsEarned > 0 && giftsInCart < giftsEarned) {
-          statusEl.textContent = msg('msg-earned')
-            .replace(/%free%/g, String(giftsInCart))
-            .replace(/%count%/g, String(nextCount));
-          statusEl.style.color = '#d97706';
-        } else {
-          statusEl.textContent = msg('msg-progress').replace(/%count%/g, String(nextCount));
-          statusEl.style.color = '#6b7280';
-        }
-      }
-
-      /* Earned dots — show only for gifts ACTUALLY in cart */
-      if (earnedRow && earnedDots && earnedText) {
+      /* Earned dots — compact indicator next to message */
+      if (earnedDots) {
         if (giftsInCart > 0) {
-          earnedRow.hidden = false;
           var show = Math.min(5, giftsInCart), extra = giftsInCart - show, html = '';
           for (var i = 0; i < show; i++) html += '<span class="sl-fg__earned-dot"></span>';
           if (extra > 0) html += '<span class="sl-fg__earned-more">+' + extra + '</span>';
           earnedDots.innerHTML = html;
-          earnedText.textContent = msg('msg-all-earned').replace(/%free%/g, String(giftsInCart));
         } else {
-          earnedRow.hidden = true;
           earnedDots.innerHTML = '';
-          earnedText.textContent = '';
         }
       }
 
