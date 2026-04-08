@@ -22,6 +22,7 @@ Auto-adds a free gift product to the cart when the customer buys X items from a 
 - **RTL support** — Full right-to-left support for Arabic, Hebrew, Farsi, Urdu
 - **Real-time updates** — Listens for cart events + intercepts fetch calls to `/cart/*`
 - **Two style variants** — Clean (premium) and Urgency (high converting)
+- **Hidden helper mode** — Invisible on any page (product, collection, etc.) — still auto-adds gift + toast + confetti, no visible card
 
 ---
 
@@ -81,6 +82,7 @@ Render the snippet anywhere (cart drawer, product page, etc.):
   show_gift_preview: true,
   show_confetti:     true,
   show_toast:        true,
+  display_mode:      'full',
   fill_color_start:  '#4ade80',
   fill_color_end:    '#16a34a',
   style_variant:     'clean',
@@ -101,6 +103,7 @@ Render the snippet anywhere (cart drawer, product page, etc.):
 | `show_gift_preview` | `true` | Show/hide the gift product image and name. |
 | `show_confetti` | `true` | Show/hide confetti on unlock. |
 | `show_toast` | `true` | Show/hide toast notifications. |
+| `display_mode` | `full` | `full` (card + progress) or `hidden` (helper only — no visible UI, still auto-adds gift + toast + confetti). |
 | `fill_color_start` | `#4ade80` | Progress bar gradient start (lighter). |
 | `fill_color_end` | `#16a34a` | Progress bar gradient end (darker). |
 | `style_variant` | `clean` | `clean` or `urgency`. |
@@ -116,6 +119,7 @@ Render the snippet anywhere (cart drawer, product page, etc.):
 | Gift product | product | — | Auto-add product (single variant) |
 | Buy quantity (X) | range 1-20 | 3 | Items per free gift cycle |
 | Discount code | text | — | Shopify discount code |
+| Display mode | select | full | Full display or Hidden helper (auto-add only) |
 | Show progress bar | checkbox | on | Toggle progress bar UI |
 | Show gift preview | checkbox | on | Toggle gift product card |
 | Show confetti | checkbox | on | Toggle confetti celebration |

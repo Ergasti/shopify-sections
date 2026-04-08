@@ -18,6 +18,7 @@
 {% assign fill_color_start = section.settings.fill_color_start | default: '#4ade80' | strip %}
 {% assign fill_color_end   = section.settings.fill_color_end   | default: '#16a34a' | strip %}
 
+{% assign display_mode      = section.settings.display_mode | default: 'full' | strip %}
 {% assign show_progress_bar = section.settings.show_progress_bar %}
 {% assign show_gift_preview = section.settings.show_gift_preview %}
 {% assign show_confetti     = section.settings.show_confetti %}
@@ -42,6 +43,7 @@
     show_gift_preview: show_gift_preview,
     show_confetti:     show_confetti,
     show_toast:        show_toast,
+    display_mode:      display_mode,
     fill_color_start:  fill_color_start,
     fill_color_end:    fill_color_end,
     style_variant:     style_variant,
@@ -87,6 +89,21 @@
       "label": "Discount code",
       "info": "The Shopify Buy X Get Y discount code. Auto-applied when the gift is added to the cart.",
       "placeholder": "e.g. BUYGIFT"
+    },
+    {
+      "type": "header",
+      "content": "Display"
+    },
+    {
+      "type": "select",
+      "id": "display_mode",
+      "label": "Display mode",
+      "options": [
+        { "value": "full",   "label": "Full display (card + progress)" },
+        { "value": "hidden", "label": "Hidden helper (auto-add only)" }
+      ],
+      "default": "full",
+      "info": "Hidden helper: no visible UI, but still auto-adds the gift, shows toast & confetti. Use on product/collection pages."
     },
     {
       "type": "header",
