@@ -43,14 +43,14 @@
 {% endif %}
 
 {% if gender_raw != blank %}
-  {%- assign gender_lower = gender_raw | downcase -%}
-  {%- if gender_lower contains 'him' and gender_lower contains 'her' -%}
+  {%- assign gender_lower = gender_raw | downcase | strip -%}
+  {%- if gender_lower == 'both' or gender_lower == 'unisex' or gender_lower == 'him/her' or gender_lower == 'her/him' -%}
     {%- assign gender_icon = '&#9792;&#xFE0E; &#9794;&#xFE0E;' -%}
     {%- assign gender_text = 'Unisex' -%}
-  {%- elsif gender_lower contains 'him' -%}
+  {%- elsif gender_lower == 'him' or gender_lower == 'for him' or gender_lower == 'male' or gender_lower == 'men' -%}
     {%- assign gender_icon = '&#9794;&#xFE0E;' -%}
     {%- assign gender_text = 'For Him' -%}
-  {%- elsif gender_lower contains 'her' -%}
+  {%- elsif gender_lower == 'her' or gender_lower == 'for her' or gender_lower == 'female' or gender_lower == 'women' -%}
     {%- assign gender_icon = '&#9792;&#xFE0E;' -%}
     {%- assign gender_text = 'For Her' -%}
   {%- else -%}
@@ -92,7 +92,7 @@
       bottom: {{ _position_bottom | escape }};
       left: {{ _position_left | escape }};
     ">
-      <p aria-label="{{ gender_text | escape }}" style="
+      <p role="img" aria-label="{{ gender_text | escape }}" style="
         height: fit-content;
         line-height: normal;
         max-height: 21px;
