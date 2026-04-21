@@ -11,11 +11,11 @@
   Customizable styles via render parameters:
     {% render 'gender-label',
       product: product,
-      font_size: '10px',
+      font_size: '11px',
       font_weight: 'bold',
-      padding: '3px 8px',
-      bg_color: '#FFFFFF',
-      text_color: '#000000',
+      padding: '4px 8px',
+      bg_color: '#000000',
+      text_color: '#FFFFFF',
       border_color: '#000000',
       border_width: '1px',
       border_radius: '0px',
@@ -57,11 +57,11 @@
     {%- assign gender_text = gender_raw -%}
   {%- endif -%}
 
-  {%- assign _font_size = font_size | default: '10px' -%}
+  {%- assign _font_size = font_size | default: '11px' -%}
   {%- assign _font_weight = font_weight | default: 'bold' -%}
-  {%- assign _padding = padding | default: '3px 8px' -%}
-  {%- assign _bg_color = bg_color | default: '#FFFFFF' -%}
-  {%- assign _text_color = text_color | default: '#000000' -%}
+  {%- assign _padding = padding | default: '4px 8px' -%}
+  {%- assign _bg_color = bg_color | default: '#000000' -%}
+  {%- assign _text_color = text_color | default: '#FFFFFF' -%}
   {%- assign _border_color = border_color | default: '#000000' -%}
   {%- assign _border_width = border_width | default: '1px' -%}
   {%- assign _border_radius = border_radius | default: '0px' -%}
