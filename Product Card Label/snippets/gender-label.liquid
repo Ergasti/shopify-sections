@@ -19,6 +19,7 @@
       border_color: '#000000',
       border_width: '1px',
       border_radius: '0px',
+      position: 'absolute',
       position_top: '0px',
       position_right: '0px',
       position_bottom: 'auto',
@@ -44,16 +45,16 @@
 {% if gender_raw != blank %}
   {%- assign gender_lower = gender_raw | downcase -%}
   {%- if gender_lower contains 'him' and gender_lower contains 'her' -%}
-    {%- assign gender_icon = '&#9792;&#65039; &#9794;&#65039;' -%}
+    {%- assign gender_icon = '&#9792;&#xFE0E; &#9794;&#xFE0E;' -%}
     {%- assign gender_text = 'Unisex' -%}
   {%- elsif gender_lower contains 'him' -%}
-    {%- assign gender_icon = '&#9794;&#65039;' -%}
+    {%- assign gender_icon = '&#9794;&#xFE0E;' -%}
     {%- assign gender_text = 'For Him' -%}
   {%- elsif gender_lower contains 'her' -%}
-    {%- assign gender_icon = '&#9792;&#65039;' -%}
+    {%- assign gender_icon = '&#9792;&#xFE0E;' -%}
     {%- assign gender_text = 'For Her' -%}
   {%- else -%}
-    {%- assign gender_icon = '' -%}
+    {%- assign gender_icon = '&#9899;&#xFE0E;' -%}
     {%- assign gender_text = gender_raw -%}
   {%- endif -%}
 
@@ -72,6 +73,16 @@
   {%- assign _z_index = z_index | default: '999' -%}
   {%- assign _position = position | default: 'absolute' -%}
 
+  <style>
+    .gender_label_icon {
+      font-size: 10px;
+      line-height: 1;
+      vertical-align: middle;
+    }
+    @media (max-width: 749px) {
+      .gender_label_text { display: none !important; }
+    }
+  </style>
   <div class="gender_label_div">
     <div class="gender_label_inner" style="
       position: {{ _position | escape }};
@@ -81,9 +92,11 @@
       bottom: {{ _position_bottom | escape }};
       left: {{ _position_left | escape }};
     ">
-      <p style="
+      <p aria-label="{{ gender_text | escape }}" style="
         height: fit-content;
         line-height: normal;
+        max-height: 21px;
+        overflow: hidden;
         font-size: {{ _font_size | escape }};
         font-weight: {{ _font_weight | escape }};
         padding: {{ _padding | escape }};
@@ -93,7 +106,8 @@
         border: {{ _border_width | escape }} solid {{ _border_color | escape }};
         border-radius: {{ _border_radius | escape }};
       ">
-        {{ gender_icon }} {{ gender_text | escape }}
+        <span class="gender_label_icon" aria-hidden="true">{{ gender_icon }}</span>
+        <span class="gender_label_text"> {{ gender_text | escape }}</span>
       </p>
     </div>
   </div>
