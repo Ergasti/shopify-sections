@@ -53,10 +53,11 @@
   {%- assign _position_right = position_right | default: 'auto' -%}
   {%- assign _position_bottom = position_bottom | default: 'auto' -%}
   {%- assign _z_index = z_index | default: '5' -%}
+  {%- assign _position = position | default: 'absolute' -%}
 
   <div class="labelly_collection_label_div">
     <div class="labelly_label_div labelly_label_0" style="
-      position: absolute;
+      position: {{ _position | escape }};
       z-index: {{ _z_index | escape }};
       top: {{ _position_top | escape }};
       right: {{ _position_right | escape }};
