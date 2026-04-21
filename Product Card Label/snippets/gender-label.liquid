@@ -1,0 +1,100 @@
+{% comment %}
+  Gender suitability label for product cards and product pages.
+  Reads from product metafield: custom.signature_hims_hers
+
+  Usage — Product Card (inside .card__inner, after .card__media):
+    {% render 'gender-label', product: card_product %}
+
+  Usage — Product Page (inside product media wrapper):
+    {% render 'gender-label', product: product %}
+
+  Customizable styles via render parameters:
+    {% render 'gender-label',
+      product: product,
+      font_size: '10px',
+      font_weight: 'bold',
+      padding: '3px 8px',
+      bg_color: '#FFFFFF',
+      text_color: '#000000',
+      border_color: '#000000',
+      border_width: '1px',
+      border_radius: '0px',
+      position_top: '0px',
+      position_right: '0px',
+      position_bottom: 'auto',
+      position_left: 'auto',
+      z_index: '999'
+    %}
+
+  Metafield: custom.signature_hims_hers (rich text or single line text).
+  Create in Settings → Custom data → Products → "Signature(Hims/Hers)"
+{% endcomment %}
+
+{% assign gender_mf = product.metafields.custom.signature_hims_hers %}
+{% if gender_mf != blank %}
+  {% if gender_mf.type == 'rich_text_field' %}
+    {% assign gender_raw = gender_mf | metafield_text | strip %}
+  {% else %}
+    {% assign gender_raw = gender_mf.value | default: gender_mf | strip %}
+  {% endif %}
+{% else %}
+  {% assign gender_raw = '' %}
+{% endif %}
+
+{% if gender_raw != blank %}
+  {%- assign gender_lower = gender_raw | downcase -%}
+  {%- if gender_lower contains 'him' and gender_lower contains 'her' -%}
+    {%- assign gender_icon = '&#9792;&#65039; &#9794;&#65039;' -%}
+    {%- assign gender_text = 'Unisex' -%}
+  {%- elsif gender_lower contains 'him' -%}
+    {%- assign gender_icon = '&#9794;&#65039;' -%}
+    {%- assign gender_text = 'For Him' -%}
+  {%- elsif gender_lower contains 'her' -%}
+    {%- assign gender_icon = '&#9792;&#65039;' -%}
+    {%- assign gender_text = 'For Her' -%}
+  {%- else -%}
+    {%- assign gender_icon = '' -%}
+    {%- assign gender_text = gender_raw -%}
+  {%- endif -%}
+
+  {%- assign _font_size = font_size | default: '10px' -%}
+  {%- assign _font_weight = font_weight | default: 'bold' -%}
+  {%- assign _padding = padding | default: '3px 8px' -%}
+  {%- assign _bg_color = bg_color | default: '#FFFFFF' -%}
+  {%- assign _text_color = text_color | default: '#000000' -%}
+  {%- assign _border_color = border_color | default: '#000000' -%}
+  {%- assign _border_width = border_width | default: '1px' -%}
+  {%- assign _border_radius = border_radius | default: '0px' -%}
+  {%- assign _position_top = position_top | default: '0px' -%}
+  {%- assign _position_right = position_right | default: '0px' -%}
+  {%- assign _position_bottom = position_bottom | default: 'auto' -%}
+  {%- assign _position_left = position_left | default: 'auto' -%}
+  {%- assign _z_index = z_index | default: '999' -%}
+  {%- assign _position = position | default: 'absolute' -%}
+
+  <div class="gender_label_div">
+    <div class="gender_label_inner" style="
+      position: {{ _position | escape }};
+      z-index: {{ _z_index | escape }};
+      top: {{ _position_top | escape }};
+      right: {{ _position_right | escape }};
+      bottom: {{ _position_bottom | escape }};
+      left: {{ _position_left | escape }};
+    ">
+      <p style="
+        height: fit-content;
+        line-height: normal;
+        font-size: {{ _font_size | escape }};
+        font-weight: {{ _font_weight | escape }};
+        padding: {{ _padding | escape }};
+        margin: 0px 0px;
+        background: {{ _bg_color | escape }};
+        color: {{ _text_color | escape }};
+        border: {{ _border_width | escape }} solid {{ _border_color | escape }};
+        border-radius: {{ _border_radius | escape }};
+      ">
+        {{ gender_icon }} {{ gender_text | escape }}
+      </p>
+    </div>
+  </div>
+{% endif %}
