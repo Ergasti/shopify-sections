@@ -1,0 +1,67 @@
+{% comment %}
+  Buy One Get One label for product cards.
+  Renders a subtle, luxury-styled BOGO note below the price.
+
+  Activation: Add the tag "bogo" to any product in Shopify admin.
+  The label only renders when the product has the "bogo" tag.
+
+  Usage — Product Card (after price render):
+    {% render 'bogo-label', product: card_product %}
+
+  Usage — Product Page:
+    {% render 'bogo-label', product: product %}
+
+  Customizable styles via render parameters:
+    {% render 'bogo-label',
+      product: card_product,
+      bogo_text: 'BUY 1 GET 1',
+      text_color: '#C4A35A',
+      font_size: '10px',
+      letter_spacing: '1.5px',
+      separator_color: '#C4A35A'
+    %}
+{% endcomment %}
+
+{% if product.tags contains 'bogo' %}
+  <style>
+    .card-wrapper .price-item--regular { font-size: 0.85em; }
+  </style>
+  {%- if request.locale.iso_code == 'ar' -%}
+    {%- assign _bogo_text = bogo_text | default: 'اشتري 2 والتالت هدية' -%}
+  {%- else -%}
+    {%- assign _bogo_text = bogo_text | default: 'BUY 2 GET 1' -%}
+  {%- endif -%}
+  {%- assign _text_color = text_color | default: '#C4A35A' -%}
+  {%- assign _font_size = font_size | default: '10px' -%}
+  {%- assign _letter_spacing = letter_spacing | default: '1.5px' -%}
+  {%- assign _separator_color = separator_color | default: '#C4A35A' -%}
+
+  <div class="bogo-label" style="
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 4px;
+    margin-bottom: 2px;
+  ">
+    <span style="
+      color: {{ _separator_color | escape }};
+      font-size: 8px;
+      line-height: 1;
+    " aria-hidden="true">&#10022;</span>
+    <span style="
+      color: {{ _text_color | escape }};
+      font-size: {{ _font_size | escape }};
+      font-weight: 700;
+      letter-spacing: {{ _letter_spacing | escape }};
+      text-transform: uppercase;
+      line-height: 1.2;
+      white-space: nowrap;
+    ">{{ _bogo_text | escape }}</span>
+    <span style="
+      color: {{ _separator_color | escape }};
+      font-size: 8px;
+      line-height: 1;
+    " aria-hidden="true">&#10022;</span>
+  </div>
+{% endif %}

@@ -1,0 +1,166 @@
+{% comment %}
+  Override styles for Starter Labs Volume Discount app block.
+  Restyled to match store branding: black/white monochrome, Anonymous Pro.
+  Adds price anchoring display, per-unit cost, and savings visibility.
+  Render once on product page: {% render 'sl-vd-override' %}
+{% endcomment %}
+<style>
+  /* ── Monochrome restyle for SL Volume Discount ── */
+  .sl-vd-block-root.sl-vd-improved {
+    font-family: 'Anonymous Pro', monospace !important;
+    --sl-vd-card-bg: #ffffff !important;
+    --sl-vd-card-border: #d4d4d4 !important;
+    --sl-vd-card-radius: 4px !important;
+    --sl-vd-improved-bg: #f5f5f5 !important;
+    --sl-vd-improved-border: #d4d4d4 !important;
+    --sl-vd-off-badge-bg: #000000 !important;
+    --sl-vd-cta-bg: #000000 !important;
+    --sl-vd-cta-hover: #333333 !important;
+  }
+  .sl-vd-improved__wrap {
+    background: #f5f5f5 !important;
+    border-color: #d4d4d4 !important;
+    border-radius: 4px !important;
+  }
+  .sl-vd-block-root .accordion__toggle {
+    font-family: 'Anonymous Pro', monospace !important;
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.03em !important;
+    text-transform: uppercase !important;
+    color: #1a1a1a !important;
+  }
+  .sl-vd-block-root .accordion__toggle .icon {
+    color: #1a1a1a !important;
+  }
+  .sl-vd-block-root .sl-vd-deal-badge {
+    font-family: 'Anonymous Pro', monospace !important;
+    font-size: 10px !important;
+    letter-spacing: 0.06em !important;
+    background: #000000 !important;
+    color: #fff !important;
+    border-radius: 2px !important;
+    padding: 3px 10px !important;
+  }
+  .sl-vd-block-root .sl-vd-card {
+    border-radius: 4px !important;
+    border-color: #d4d4d4 !important;
+    box-shadow: none !important;
+    transition: border-color 0.2s !important;
+  }
+  .sl-vd-block-root .sl-vd-card:hover {
+    border-color: #999 !important;
+  }
+  .sl-vd-block-root .sl-vd-card--best-value {
+    border-color: #000 !important;
+    border-width: 2px !important;
+    box-shadow: none !important;
+  }
+  .sl-vd-block-root .sl-vd-best-value-badge {
+    font-family: 'Anonymous Pro', monospace !important;
+    background: #000000 !important;
+    color: #fff !important;
+    border-radius: 4px 4px 0 0 !important;
+    letter-spacing: 0.06em !important;
+    font-size: 10px !important;
+  }
+  .sl-vd-block-root .sl-vd-card__figure {
+    border-radius: 3px 3px 0 0 !important;
+  }
+  .sl-vd-block-root .sl-vd-off-badge {
+    background: #000000 !important;
+    color: #fff !important;
+    border-radius: 2px !important;
+    font-family: 'Anonymous Pro', monospace !important;
+    font-size: 12px !important;
+    letter-spacing: 0.02em !important;
+  }
+  .sl-vd-block-root .sl-vd-card__info {
+    padding: 10px 12px 12px !important;
+    gap: 4px !important;
+  }
+  .sl-vd-block-root .sl-vd-offer-details {
+    font-family: 'Anonymous Pro', monospace !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: #1a1a1a !important;
+    line-height: 1.4 !important;
+    letter-spacing: 0.01em !important;
+  }
+  /* Make save line visible with monochrome styling */
+  .sl-vd-block-root .sl-vd-save-line {
+    display: inline-block !important;
+    font-family: 'Anonymous Pro', monospace !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    color: #1a1a1a !important;
+    background: #e5e5e5 !important;
+    padding: 2px 6px !important;
+    border-radius: 2px !important;
+    margin: 2px 0 0 0 !important;
+    line-height: 1.3 !important;
+    width: fit-content !important;
+  }
+  .sl-vd-block-root .sl-vd-tier-description {
+    font-family: 'Anonymous Pro', monospace !important;
+    font-size: 12px !important;
+    color: #555 !important;
+  }
+  .sl-vd-block-root .sl-vd-buy-now {
+    font-family: 'Anonymous Pro', monospace !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.08em !important;
+    background: #000000 !important;
+    color: #fff !important;
+    border-radius: 2px !important;
+    border: none !important;
+    padding: 12px 14px !important;
+    transition: background 0.2s, transform 0.1s !important;
+  }
+  .sl-vd-block-root .sl-vd-buy-now:hover {
+    background: #333333 !important;
+  }
+  .sl-vd-block-root .sl-vd-buy-now:active {
+    transform: scale(0.98) !important;
+  }
+  .sl-vd-block-root .sl-vd-buy-now:focus-visible {
+    outline: 2px solid #000 !important;
+    outline-offset: 2px !important;
+  }
+  /* Swiper nav arrows */
+  .sl-vd-block-root .swiper-button-prev,
+  .sl-vd-block-root .swiper-button-next {
+    color: #000 !important;
+  }
+  .sl-vd-block-root .swiper-button-prev::after,
+  .sl-vd-block-root .swiper-button-next::after {
+    color: #000 !important;
+    font-size: 16px !important;
+  }
+  /* Dual image layout (buy x get y) */
+  .sl-vd-block-root .sl-vd-dual__title {
+    font-family: 'Anonymous Pro', monospace !important;
+    font-size: 10px !important;
+    border-radius: 2px 2px 0 0 !important;
+  }
+  .sl-vd-block-root .sl-vd-dual__side {
+    border-radius: 2px !important;
+  }
+  .sl-vd-block-root .sl-vd-plus {
+    background: #000 !important;
+    color: #fff !important;
+    font-family: 'Anonymous Pro', monospace !important;
+    width: 18px !important;
+    height: 18px !important;
+  }
+  .sl-vd-block-root .sl-vd-label {
+    font-family: 'Anonymous Pro', monospace !important;
+    border-radius: 2px !important;
+  }
+  .sl-vd-block-root .sl-vd-dual-wrap {
+    border-color: #d4d4d4 !important;
+    border-radius: 4px !important;
+  }
+</style>

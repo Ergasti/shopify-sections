@@ -1,0 +1,107 @@
+{% comment %}
+  Shipping Progress Bar — Restyle Override
+  Tones down the Starter Labs free shipping bar to match store branding.
+  Removes heavy shadow, shrinks track, kills excessive animations,
+  and applies monochrome styling consistent with the black/white brand.
+
+  Usage — Add to layout/theme.liquid before </body>:
+    {% render 'shipping-bar-restyle' %}
+{% endcomment %}
+
+<style>
+  /* ── Base container: remove card-like appearance ── */
+  .shipping-progress-bar {
+    max-width: 100% !important;
+    margin: 4px 0 !important;
+    padding: 6px 0 !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+    border: none !important;
+    border-top: 1px solid rgba(0, 0, 0, 0.08) !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+    box-shadow: none !important;
+    overflow: hidden !important;
+  }
+
+  /* ── Layout: tighter gap ── */
+  .shipping-progress-bar__container {
+    gap: 4px !important;
+  }
+
+  /* ── Message: match store typography ── */
+  .shipping-progress-bar__message {
+    font-size: 10px !important;
+    font-weight: 600 !important;
+    line-height: 1 !important;
+    color: #000 !important;
+    letter-spacing: 0.03em !important;
+    text-transform: uppercase !important;
+    gap: 4px !important;
+  }
+
+  .shipping-progress-bar__message-text {
+    line-height: 1 !important;
+  }
+
+  .shipping-progress-bar__message--success {
+    color: #000 !important;
+    animation: none !important;
+  }
+
+  /* ── Icon: monochrome, smaller ── */
+  .shipping-progress-bar__icon-emoji {
+    font-size: 10px !important;
+    line-height: 1 !important;
+    filter: grayscale(1) !important;
+  }
+
+  /* ── Track bar: slim & monochrome ── */
+  .shipping-progress-bar__track {
+    height: 3px !important;
+    border-radius: 2px !important;
+    background: rgba(0, 0, 0, 0.1) !important;
+  }
+
+  .shipping-progress-bar__fill {
+    height: 3px !important;
+    border-radius: 2px !important;
+    background: #000 !important;
+    animation: none !important;
+  }
+
+  .shipping-progress-bar__stripes {
+    display: none !important;
+  }
+
+  /* ── Truck icon on track: smaller, monochrome ── */
+  .shipping-progress-bar__truck-inner {
+    font-size: 10px !important;
+    filter: grayscale(1) !important;
+    top: -10px !important;
+  }
+
+  .shipping-progress-bar__track-wrap {
+    height: 3px !important;
+    margin-top: 2px !important;
+  }
+
+  /* ── Kill all excessive animations ── */
+  .shipping-progress-bar--unlocked {
+    animation: none !important;
+  }
+
+  .shipping-progress-bar__confetti,
+  .shipping-progress-bar__confetti span {
+    display: none !important;
+  }
+
+  @keyframes sl-fspb-pulse {
+    0%, 100% { opacity: 1; }
+  }
+
+  /* ── Success state: subtle, not flashy ── */
+  .shipping-progress-bar__fill--complete {
+    background: #000 !important;
+    animation: none !important;
+  }
+</style>

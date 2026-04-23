@@ -1,0 +1,82 @@
+{% comment %}
+  Scent "Inspired From" label for product cards and product pages.
+  Reads from product metafield: custom.scent_inspired_from
+
+  Usage — Product Card (inside .card__media or product card wrapper):
+    {% render 'scent-label', product: product %}
+
+  Usage — Product Page (under product name):
+    {% render 'scent-label', product: product %}
+
+  Customizable styles via render parameters:
+    {% render 'scent-label',
+      product: product,
+      font_size: '13px',
+      font_weight: '600',
+      padding: '6px 12px',
+      bg_color: '#000000',
+      text_color: '#FFFFFF',
+      border_color: '#000000',
+      border_width: '1px',
+      border_radius: '0px',
+      position_top: '0px',
+      position_right: 'auto',
+      position_bottom: 'auto',
+      z_index: '5'
+    %}
+
+  Metafield: custom.scent_inspired_from (single line text).
+  Create in Settings → Custom data → Products → "Scent Inspired From"
+{% endcomment %}
+
+{% assign scent_mf = product.metafields.custom.scent_inspired_from %}
+{% if scent_mf != blank %}
+  {% if scent_mf.type == 'rich_text_field' %}
+    {% assign scent_value = scent_mf | metafield_text | strip %}
+  {% else %}
+    {% assign scent_value = scent_mf.value | default: scent_mf | strip %}
+  {% endif %}
+{% else %}
+  {% assign scent_value = '' %}
+{% endif %}
+
+{% if scent_value != blank %}
+  {%- assign _font_size = font_size | default: '11px' -%}
+  {%- assign _font_weight = font_weight | default: 'bold' -%}
+  {%- assign _padding = padding | default: '4px 8px' -%}
+  {%- assign _bg_color = bg_color | default: '#000000' -%}
+  {%- assign _text_color = text_color | default: '#FFFFFF' -%}
+  {%- assign _border_color = border_color | default: '#000000' -%}
+  {%- assign _border_width = border_width | default: '1px' -%}
+  {%- assign _border_radius = border_radius | default: '0px' -%}
+  {%- assign _position_top = position_top | default: '0px' -%}
+  {%- assign _position_right = position_right | default: 'auto' -%}
+  {%- assign _position_bottom = position_bottom | default: 'auto' -%}
+  {%- assign _z_index = z_index | default: '999' -%}
+  {%- assign _position = position | default: 'absolute' -%}
+
+  <div class="labelly_collection_label_div">
+    <div class="labelly_label_div labelly_label_0" style="
+      position: {{ _position | escape }};
+      z-index: {{ _z_index | escape }};
+      top: {{ _position_top | escape }};
+      right: {{ _position_right | escape }};
+      bottom: {{ _position_bottom | escape }};
+    ">
+      <p style="
+        height: fit-content;
+        line-height: normal;
+        font-size: {{ _font_size | escape }};
+        font-weight: {{ _font_weight | escape }};
+        padding: {{ _padding | escape }};
+        margin: 0px 0px;
+        background: {{ _bg_color | escape }};
+        color: {{ _text_color | escape }};
+        border: {{ _border_width | escape }} solid {{ _border_color | escape }};
+        border-radius: {{ _border_radius | escape }};
+      ">
+        {{ scent_value | escape }}
+      </p>
+    </div>
+  </div>
+{% endif %}

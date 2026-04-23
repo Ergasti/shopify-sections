@@ -1,0 +1,665 @@
+{% comment %}
+  SL - Free Shipping Progress Bar (Snippet)
+  Usage:
+    {% render 'sl-free-shipping-progress-bar',
+      threshold_amount: 50,
+      success_message: "You've unlocked free shipping!",
+      progress_message_template: "Add %amount% more for free shipping",
+      hide_when_cart_empty: true,
+      fill_color_start: "#4ade80",    # gradient start (lighter); defaults to green
+      fill_color_end: "#16a34a"      # gradient end (darker / primary); defaults to green
+    %}
+
+  Notes:
+  - Uses the current cart total (`cart.total_price`) by default.
+  - `threshold_amount` is required for the bar to appear.
+  - Progress bar gradient runs from `fill_color_start` to `fill_color_end`. Omit both to use
+    default green (#4ade80 → #16a34a). Set `fill_color_start` only to gradient from your
+    color to the default primary green.
+  - `show_stripes` (default: true) — set to false to hide the diagonal stripes on the fill.
+  - `progress_message_template` uses %amount% as placeholder for the remaining amount.
+{% endcomment %}
+
+{% assign threshold_amount = threshold_amount | default: 0 | plus: 0 %}
+{% assign hide_when_cart_empty = hide_when_cart_empty | default: true %}
+{% assign cart_total_cents = cart_total_cents | default: cart.total_price | default: 0 %}
+
+{% if threshold_amount > 0 %}
+  {% assign threshold_cents = threshold_amount | times: 100 %}
+  {% assign current_total = cart_total_cents | default: 0 %}
+  {% assign remaining = threshold_cents | minus: current_total %}
+
+  {% if threshold_cents > 0 %}
+    {% assign progress_percentage = current_total | times: 100 | divided_by: threshold_cents %}
+    {% assign progress_percentage = progress_percentage | at_most: 100 %}
+  {% else %}
+    {% assign progress_percentage = 0 %}
+  {% endif %}
+
+  {% if remaining <= 0 %}
+    {% assign threshold_reached = true %}
+  {% else %}
+    {% assign threshold_reached = false %}
+  {% endif %}
+
+  {% assign success_message = success_message | default: "You've unlocked free shipping!" %}
+  {% assign progress_message_template = progress_message_template | default: "Add %amount% more for free shipping" %}
+
+  {% assign remaining_formatted = remaining | at_least: 0 | money %}
+  {% assign legacy_amount_token = '{{ ' | append: 'amount }}' %}
+
+  {% capture progress_message %}
+    {{ progress_message_template
+      | replace: '%amount%', remaining_formatted
+      | replace: legacy_amount_token, remaining_formatted
+    }}
+  {% endcapture %}
+
+  {% assign should_hide = false %}
+  {% if cart == empty and hide_when_cart_empty %}
+    {% assign should_hide = true %}
+  {% endif %}
+
+  {% assign shop_currency = cart.currency | default: shop.currency | default: 'USD' %}
+  {% assign fill_color_start = fill_color_start | default: '#4ade80' | strip %}
+  {% assign fill_color_end = fill_color_end | default: '#16a34a' | strip %}
+  {% if show_stripes == false or show_stripes == 'false' %}
+    {% assign show_stripes = false %}
+  {% else %}
+    {% assign show_stripes = true %}
+  {% endif %}
+  <div
+    class="shipping-progress-bar{% if threshold_reached %} shipping-progress-bar--unlocked{% else %} shipping-progress-bar--locked{% endif %}{% unless show_stripes %} shipping-progress-bar--no-stripes{% endunless %}{% if should_hide %} hidden{% endif %}"
+    style="--sl-fspb-fill-start: {{ fill_color_start }}; --sl-fspb-fill-end: {{ fill_color_end }};"
+    data-sl-fspb-threshold="{{ threshold_cents }}"
+    {% if threshold_reached %}data-sl-fspb-unlocked-seen{% endif %}
+    data-sl-fspb-hide-empty="{{ hide_when_cart_empty }}"
+    data-sl-fspb-success-msg="{{ success_message | escape }}"
+    data-sl-fspb-template="{{ progress_message_template | escape }}"
+    data-sl-fspb-currency="{{ shop_currency }}"
+    data-sl-fspb-tier-almost="{{ tier_message_almost | escape }}"
+    data-sl-fspb-tier-close="{{ tier_message_close | escape }}"
+    data-sl-fspb-tier-mid="{{ tier_message_mid | escape }}"
+    data-sl-fspb-tier-far="{{ tier_message_far | escape }}"
+  >
+    <div class="shipping-progress-bar__container">
+      {% if threshold_reached %}
+        <p class="shipping-progress-bar__message shipping-progress-bar__message--success" aria-live="polite">
+          <span class="shipping-progress-bar__icon shipping-progress-bar__icon-emoji" aria-hidden="true">🚚</span>
+          <span class="shipping-progress-bar__message-text">{{ success_message }}</span>
+        </p>
+      {% else %}
+        <p class="shipping-progress-bar__message" aria-live="polite">
+          <span class="shipping-progress-bar__icon shipping-progress-bar__icon-emoji" aria-hidden="true">🚚</span>
+          <span class="shipping-progress-bar__message-text">{{ progress_message | strip }}</span>
+        </p>
+      {% endif %}
+
+      <div class="shipping-progress-bar__track-wrap" style="--progress: {{ progress_percentage }}%">
+        <div class="shipping-progress-bar__truck" aria-hidden="true">
+          <span class="shipping-progress-bar__truck-inner shipping-progress-bar__truck-emoji">🚚</span>
+        </div>
+        <div class="shipping-progress-bar__track">
+          <div
+            class="shipping-progress-bar__fill"
+            style="--progress: {{ progress_percentage }}%"
+            role="progressbar"
+            aria-valuenow="{{ progress_percentage }}"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            aria-label="{{ success_message }}"
+          >
+            <div class="shipping-progress-bar__stripes"></div>
+          </div>
+          <div class="shipping-progress-bar__confetti{% if threshold_reached %} shipping-progress-bar__confetti--play{% endif %}" aria-hidden="true" data-sl-fspb-confetti>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .shipping-progress-bar {
+      width: 100%;
+      max-width: 420px;
+      margin: 0.75rem auto;
+      padding: var(--padding-md, 0.85rem) var(--padding-lg, 1.4rem);
+      background: #ffffff;
+      border-radius: 12px;
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      box-shadow: 0 10px 26px rgba(15, 23, 42, 0.12);
+      overflow: hidden;
+    }
+
+    .shipping-progress-bar.hidden {
+      display: none;
+    }
+
+    .shipping-progress-bar__container {
+      display: flex;
+      flex-direction: column-reverse;
+      gap: var(--gap-sm, 0.5rem);
+    }
+
+    .shipping-progress-bar__message {
+      font-size: var(--cart-font-size--sm, 0.95rem);
+      text-align: center;
+      margin: 0;
+      color: #374151;
+      letter-spacing: 0.01em;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      font-weight: 500;
+    }
+
+    .shipping-progress-bar__message--success {
+      color: #15803d;
+      font-weight: 600;
+      animation: sl-fspb-success-pop 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .shipping-progress-bar__icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.04);
+    }
+
+    .shipping-progress-bar__track-wrap {
+      position: relative;
+      width: 100%;
+    }
+
+    .shipping-progress-bar__track {
+      position: relative;
+      width: 100%;
+      height: 10px;
+      background: #eeeeee;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .shipping-progress-bar--no-stripes .shipping-progress-bar__stripes {
+      display: none;
+    }
+
+    .shipping-progress-bar__fill {
+      position: absolute;
+      inset: 0;
+      width: var(--progress, 0%);
+      height: 100%;
+      background: linear-gradient(90deg, var(--sl-fspb-fill-start, #4ade80), var(--sl-fspb-fill-end, #16a34a));
+      border-radius: 10px;
+      transition: width 0.5s ease;
+      transform-origin: left center;
+      overflow: hidden;
+    }
+
+    .shipping-progress-bar__stripes {
+      position: absolute;
+      inset: 0;
+      background-image: linear-gradient(
+        45deg,
+        rgba(255, 255, 255, 0.25) 25%,
+        transparent 25%,
+        transparent 50%,
+        rgba(255, 255, 255, 0.25) 50%,
+        rgba(255, 255, 255, 0.25) 75%,
+        transparent 75%,
+        transparent
+      );
+      background-size: 14px 14px;
+      animation: sl-fspb-stripes 1s linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes sl-fspb-stripes {
+      from { background-position: 0 0; }
+      to { background-position: 14px 0; }
+    }
+
+    .shipping-progress-bar__icon-emoji {
+      font-size: 1.25rem;
+      line-height: 1;
+      filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15));
+    }
+
+    .shipping-progress-bar__truck {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      z-index: 2;
+    }
+
+    .shipping-progress-bar__truck-inner {
+      position: absolute;
+      left: calc(var(--progress, 0%) - 14px);
+      top: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      animation: sl-fspb-truck-bounce 0.5s ease-in-out infinite;
+      transition: left 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .shipping-progress-bar__truck-emoji {
+      font-size: 1.5rem;
+      line-height: 1;
+      filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.25));
+    }
+
+    @keyframes sl-fspb-truck-bounce {
+      0%, 100% { transform: translateY(-50%); }
+      50% { transform: translateY(calc(-50% - 3px)); }
+    }
+
+    .shipping-progress-bar--locked .shipping-progress-bar__fill {
+      background: linear-gradient(90deg, var(--sl-fspb-fill-start, #4ade80), var(--sl-fspb-fill-end, #16a34a));
+    }
+
+    .shipping-progress-bar--unlocked .shipping-progress-bar__fill {
+      background: linear-gradient(90deg, var(--sl-fspb-fill-start, #4ade80), var(--sl-fspb-fill-end, #16a34a));
+      animation: sl-fspb-pulse 1.2s ease-in-out infinite;
+    }
+
+    .shipping-progress-bar--unlocked {
+      animation: sl-fspb-success-pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes sl-fspb-success-pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.01); }
+    }
+
+    .shipping-progress-bar__confetti {
+      position: absolute;
+      inset: -8px -4px 0;
+      pointer-events: none;
+      overflow: visible;
+      z-index: 2;
+    }
+
+    .shipping-progress-bar__confetti span {
+      position: absolute;
+      width: 6px;
+      height: 10px;
+      border-radius: 2px;
+      opacity: 0;
+      transform-origin: center;
+    }
+
+    .shipping-progress-bar__confetti--play span {
+      animation: sl-fspb-confetti-fall 900ms ease-out forwards;
+    }
+
+    .shipping-progress-bar__confetti span:nth-child(1) {
+      left: 5%;
+      background: #f97316;
+      animation-delay: 0ms;
+    }
+
+    .shipping-progress-bar__confetti span:nth-child(2) {
+      left: 20%;
+      background: #22c55e;
+      animation-delay: 80ms;
+    }
+
+    .shipping-progress-bar__confetti span:nth-child(3) {
+      left: 35%;
+      background: #3b82f6;
+      animation-delay: 140ms;
+    }
+
+    .shipping-progress-bar__confetti span:nth-child(4) {
+      left: 50%;
+      background: #eab308;
+      animation-delay: 200ms;
+    }
+
+    .shipping-progress-bar__confetti span:nth-child(5) {
+      left: 65%;
+      background: #ec4899;
+      animation-delay: 260ms;
+    }
+
+    .shipping-progress-bar__confetti span:nth-child(6) {
+      left: 80%;
+      background: #6366f1;
+      animation-delay: 320ms;
+    }
+
+    .shipping-progress-bar__confetti span:nth-child(7) {
+      left: 92%;
+      background: #14b8a6;
+      animation-delay: 380ms;
+    }
+
+    .shipping-progress-bar__confetti span:nth-child(8) {
+      left: 40%;
+      background: #f97316;
+      animation-delay: 440ms;
+    }
+
+    @keyframes sl-fspb-flow {
+      0% {
+        background-position: 0% 50%;
+      }
+      50% {
+        background-position: 100% 50%;
+      }
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+    @keyframes sl-fspb-pulse {
+      0% {
+        transform: scaleX(1);
+        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.55);
+      }
+      60% {
+        transform: scaleX(1.03);
+        box-shadow: 0 0 0 10px rgba(34, 197, 94, 0);
+      }
+      100% {
+        transform: scaleX(1);
+        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+      }
+    }
+
+    @keyframes sl-fspb-success-pop {
+      0% {
+        transform: translateY(4px) scale(0.9);
+        opacity: 0;
+      }
+      60% {
+        transform: translateY(-1px) scale(1.03);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+      }
+    }
+
+    @keyframes sl-fspb-confetti-fall {
+      0% {
+        opacity: 0;
+        transform: translate3d(0, -12px, 0) rotateZ(0deg);
+      }
+      10% {
+        opacity: 1;
+      }
+      60% {
+        transform: translate3d(0, 14px, 0) rotateZ(18deg);
+      }
+      100% {
+        opacity: 0;
+        transform: translate3d(0, 28px, 0) rotateZ(-18deg);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .shipping-progress-bar,
+      .shipping-progress-bar__fill,
+      .shipping-progress-bar__stripes,
+      .shipping-progress-bar__confetti span,
+      .shipping-progress-bar__message--success,
+      .shipping-progress-bar__truck-inner,
+      .shipping-progress-bar--unlocked {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+
+    @media screen and (max-width: 749px) {
+      .shipping-progress-bar {
+        padding: var(--padding-sm, 0.5rem) var(--padding-md, 0.75rem);
+      }
+
+      .shipping-progress-bar__message {
+        font-size: var(--cart-font-size--2xs, 0.75rem);
+      }
+
+      .shipping-progress-bar__track {
+        height: 8px;
+      }
+    }
+  </style>
+  <script>
+  document.documentElement.classList.add('js');
+  (function() {
+    var roots = document.querySelectorAll('.shipping-progress-bar[data-sl-fspb-threshold]');
+    if (!roots.length) return;
+
+    var TIER_ALMOST_CENTS = 1000;
+    var TIER_CLOSE_CENTS = 3000;
+    var TIER_MID_CENTS = 5000;
+
+    function formatMoney(cents, currency) {
+      cents = Math.max(0, cents || 0);
+      currency = (currency || '').toUpperCase() || 'USD';
+      try {
+        if (window.Shopify && typeof window.Shopify.formatMoney === 'function') {
+          var fmt = window.money_format || window.Shopify.money_format || '${{amount}}';
+          return window.Shopify.formatMoney(cents, fmt);
+        }
+      } catch (e) {}
+      try {
+        return new Intl.NumberFormat(undefined, { style: 'currency', currency: currency, minimumFractionDigits: 2 }).format(cents / 100);
+      } catch (e2) {}
+      var symbols = { USD: '$', EUR: '€', GBP: '£', JPY: '¥', CAD: 'CA$', AUD: 'A$', CHF: 'CHF', CNY: '¥', INR: '₹', MXN: 'MX$', BRL: 'R$', KRW: '₩' };
+      var sym = symbols[currency] || currency + ' ';
+      return sym + (cents / 100).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+    }
+
+    function updateBar(root, cartTotalCents, currency) {
+      var threshold = parseInt(root.getAttribute('data-sl-fspb-threshold') || '0', 10);
+      if (!threshold || threshold <= 0) return;
+
+      var hideWhenEmpty = String(root.getAttribute('data-sl-fspb-hide-empty')).toLowerCase() === 'true';
+      var msgEl = root.querySelector('.shipping-progress-bar__message');
+      var msgTextEl = root.querySelector('.shipping-progress-bar__message-text');
+      var fillEl = root.querySelector('.shipping-progress-bar__fill');
+      var trackEl = root.querySelector('.shipping-progress-bar__track');
+
+      if (!fillEl || (!msgEl && !msgTextEl)) return;
+
+      var current = cartTotalCents || 0;
+      var remaining = threshold - current;
+      var progress = threshold > 0 ? Math.min(100, (current / threshold) * 100) : 0;
+      var reached = remaining <= 0;
+
+      var curr = currency || root.getAttribute('data-sl-fspb-currency') || 'USD';
+
+      var shouldHide = hideWhenEmpty && current <= 0;
+      if (shouldHide) {
+        root.classList.add('hidden');
+      } else {
+        root.classList.remove('hidden');
+      }
+
+      fillEl.style.setProperty('--progress', progress + '%');
+      fillEl.setAttribute('aria-valuenow', String(Math.round(progress)));
+      var trackWrap = trackEl && trackEl.parentElement;
+      if (trackWrap) trackWrap.style.setProperty('--progress', progress + '%');
+      if (trackEl) trackEl.style.setProperty('--progress', progress + '%');
+
+      var template = root.getAttribute('data-sl-fspb-template') || 'Add %amount% more for free shipping';
+      var successMsg = root.getAttribute('data-sl-fspb-success-msg') || "You've unlocked free shipping!";
+      var formattedRemaining = formatMoney(remaining, curr);
+
+      var text;
+      if (reached) {
+        text = successMsg;
+        root.classList.add('shipping-progress-bar--unlocked');
+        root.classList.remove('shipping-progress-bar--locked');
+        msgEl.classList.add('shipping-progress-bar__message--success');
+      } else {
+        var tierAlmost = root.getAttribute('data-sl-fspb-tier-almost');
+        var tierClose = root.getAttribute('data-sl-fspb-tier-close');
+        var tierMid = root.getAttribute('data-sl-fspb-tier-mid');
+        var tierFar = root.getAttribute('data-sl-fspb-tier-far');
+        var defaultAlmost = 'Almost there! Just %amount% away from free shipping!';
+        var defaultClose = "You're getting close! Add %amount% more for free shipping";
+        var defaultMid = 'Add %amount% more to get free shipping on your order';
+        var defaultFar = 'Free shipping when you spend %amount% more';
+        if (remaining < TIER_ALMOST_CENTS) {
+          template = (tierAlmost != null && tierAlmost !== '') ? tierAlmost : defaultAlmost;
+        } else if (remaining < TIER_CLOSE_CENTS) {
+          template = (tierClose != null && tierClose !== '') ? tierClose : defaultClose;
+        } else if (remaining < TIER_MID_CENTS) {
+          template = (tierMid != null && tierMid !== '') ? tierMid : defaultMid;
+        } else {
+          template = (tierFar != null && tierFar !== '') ? tierFar : defaultFar;
+        }
+        var legacyToken = /\{\{\s*amount\s*\}\}/g;
+        text = template.replace(/%amount%/g, formattedRemaining).replace(legacyToken, formattedRemaining);
+        root.classList.remove('shipping-progress-bar--unlocked');
+        root.classList.add('shipping-progress-bar--locked');
+        msgEl.classList.remove('shipping-progress-bar__message--success');
+      }
+
+      var textEl = msgTextEl || msgEl;
+      if (textEl) textEl.textContent = text;
+      fillEl.setAttribute('aria-label', text);
+
+      if (reached) {
+        root.setAttribute('data-sl-fspb-unlocked', '');
+        if (!root.hasAttribute('data-sl-fspb-unlocked-seen')) {
+          root.setAttribute('data-sl-fspb-unlocked-seen', '');
+          playConfetti(root);
+        }
+      } else {
+        root.removeAttribute('data-sl-fspb-unlocked');
+        root.removeAttribute('data-sl-fspb-unlocked-seen');
+      }
+    }
+
+    var CONFETTI_SCRIPT = 'https://cdn.jsdelivr.net/npm/@hiseb/confetti@2.1.0/dist/confetti.min.js';
+    var confettiLoaded = false;
+
+    function shootConfetti() {
+      if (typeof window.confetti !== 'function') return;
+      var positions = [
+        { x: window.innerWidth * 0.5, y: window.innerHeight * 0.5 },
+        { x: window.innerWidth * 0.25, y: window.innerHeight * 0.4 },
+        { x: window.innerWidth * 0.75, y: window.innerHeight * 0.35 }
+      ];
+      for (var i = 0; i < positions.length; i++) {
+        (function(pos, idx) {
+          setTimeout(function() {
+            window.confetti({
+              position: { x: pos.x, y: pos.y },
+              count: 80,
+              size: 1.2,
+              velocity: 220,
+              fade: true
+            });
+          }, idx * 250);
+        })(positions[i], i);
+      }
+    }
+
+    function playConfetti(root) {
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      function run() {
+        shootConfetti();
+        setTimeout(shootConfetti, 150);
+        setTimeout(shootConfetti, 300);
+      }
+      if (typeof window.confetti === 'function') {
+        run();
+        return;
+      }
+      if (confettiLoaded) return;
+      confettiLoaded = true;
+      var s = document.createElement('script');
+      s.src = CONFETTI_SCRIPT;
+      s.onload = run;
+      document.head.appendChild(s);
+    }
+
+    function updateAll(cart, opts) {
+      opts = opts || {};
+      var total = cart && typeof cart.total_price === 'number' ? cart.total_price : 0;
+      var currency = (cart && cart.currency) ? cart.currency : null;
+      roots.forEach(function(root) {
+        updateBar(root, total, currency);
+        if (opts.fromAdd) playConfetti(root);
+      });
+    }
+
+    function fetchCartAndUpdate(fromAdd) {
+      try {
+        fetch('/cart.js', { credentials: 'same-origin' })
+          .then(function(res) { return res.json(); })
+          .then(function(cart) {
+            if (!cart) return;
+            updateAll(cart, { fromAdd: fromAdd === true });
+          })
+          .catch(function() {});
+      } catch (e) {}
+    }
+
+    function onCartNeedsRefresh(fromAdd) {
+      setTimeout(function() { fetchCartAndUpdate(fromAdd); }, 100);
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', fetchCartAndUpdate);
+    } else {
+      fetchCartAndUpdate();
+    }
+
+    ['cart:refresh', 'cart:change', 'cart:updated', 'product:added'].forEach(function(eventName) {
+      document.addEventListener(eventName, function(e) {
+        var detail = e && e.detail ? e.detail : null;
+        var cart = detail && (detail.cart || detail);
+        var fromAdd = (eventName === 'product:added');
+        if (cart) {
+          updateAll(cart, { fromAdd: fromAdd });
+        } else {
+          onCartNeedsRefresh(fromAdd);
+        }
+      });
+    });
+
+    var _fetch = window.fetch;
+    if (typeof _fetch === 'function') {
+      window.fetch = function() {
+        var url = (arguments[0] && arguments[0].url) ? arguments[0].url : arguments[0];
+        var isAdd = typeof url === 'string' && url.indexOf('/cart/add') !== -1;
+        return _fetch.apply(this, arguments).then(function(res) {
+          if (typeof url === 'string' && (url.indexOf('/cart/add') !== -1 || url.indexOf('/cart/change') !== -1 || url.indexOf('/cart/update') !== -1 || url.indexOf('/cart/clear') !== -1)) {
+            onCartNeedsRefresh(isAdd);
+          }
+          return res;
+        });
+      };
+    }
+  })();
+  </script>
+{% elsif request.design_mode %}
+  <div class="shipping-progress-bar" style="padding: 12px 16px; border: 1px dashed #ccc; border-radius: 6px; background: #fafafa; font-size: 13px;">
+    <strong>SL - Free Shipping Progress Bar</strong><br>
+    Set the <code>threshold_amount</code> when rendering this snippet (e.g. <code>50</code> for $50).
+  </div>
+{% endif %}
