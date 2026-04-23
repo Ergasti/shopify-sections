@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>J&T Express MX Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/design-system.css">
+  <!-- MD5 library (required for J&T API signature generation) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- ── Topbar ── -->
+  <header class="topbar">
+    <a class="topbar-logo" href="#dashboard">
+      <span class="topbar-logo-badge">J&T</span>
+      Express MX Dashboard
+    </a>
+    <div class="topbar-spacer"></div>
+    <div class="conn-badge" id="conn-badge">
+      <span class="dot"></span>
+      <span class="conn-label">Not configured</span>
+    </div>
+  </header>
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Overview</div>
+      <a class="nav-item" data-page="dashboard">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/></svg>
+        Dashboard
+      </a>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Analytics</div>
+      <a class="nav-item" data-page="zones">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>
+        Orders by Zone
+      </a>
+      <a class="nav-item" data-page="freight">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"/><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd"/></svg>
+        Freight Rates
+      </a>
+    </div>
+
+    <div class="sidebar-section" style="margin-top:auto">
+      <div class="sidebar-label">Configuration</div>
+      <a class="nav-item" data-page="settings">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/></svg>
+        Settings
+      </a>
+    </div>
+  </aside>
+
+  <!-- ── Main content ── -->
+  <main class="main-content" id="main-content">
+    <div class="empty-state">
+      <div class="spinner"></div>
+    </div>
+  </main>
+
+</div>
+
+<!-- ── Bootstrap: define registerPage BEFORE page scripts load ── -->
+<script src="js/api.js"></script>
+<script>
+(function () {
+  // Page registry — populated by each page script calling window.registerPage()
+  window.pages = {};
+
+  window.registerPage = function (id, page) {
+    window.pages[id] = page;
+  };
+
+  const main = document.getElementById('main-content');
+
+  window.navigateTo = function (id, params) {
+    const hash = params ? `#${id}?${new URLSearchParams(params)}` : `#${id}`;
+    window.location.hash = hash;
+  };
+
+  function parseHash() {
+    const raw = window.location.hash.slice(1) || 'dashboard';
+    const [id, qs] = raw.split('?');
+    const params = qs ? Object.fromEntries(new URLSearchParams(qs)) : {};
+    return { id, params };
+  }
+
+  function navigate() {
+    const { id, params } = parseHash();
+    const page = window.pages[id] || window.pages['dashboard'];
+
+    // Update sidebar active state
+    document.querySelectorAll('.nav-item').forEach(el => {
+      el.classList.toggle('active', el.dataset.page === (page === window.pages[id] ? id : 'dashboard'));
+    });
+
+    // Update document title
+    if (page && page.title) document.title = page.title + ' — J&T Express MX';
+
+    // Render page
+    main.innerHTML = '';
+    Promise.resolve(page && page.render(main, params)).catch(function (err) {
+      console.error('Page render error:', err);
+    });
+  }
+
+  // Sidebar click navigation
+  document.querySelectorAll('.nav-item[data-page]').forEach(function (el) {
+    el.addEventListener('click', function () {
+      window.location.hash = el.dataset.page;
+    });
+  });
+
+  window.addEventListener('hashchange', navigate);
+
+  // Dynamic script loader
+  function loadScript(src) {
+    return new Promise(function (resolve, reject) {
+      var s = document.createElement('script');
+      s.src = src;
+      s.onload = resolve;
+      s.onerror = function () { reject(new Error('Failed to load: ' + src)); };
+      document.body.appendChild(s);
+    });
+  }
+
+  // Load all page modules, then navigate
+  var PAGE_SCRIPTS = [
+    'js/pages/settings.js',
+    'js/pages/dashboard.js',
+    'js/pages/zones.js',
+    'js/pages/freight.js',
+  ];
+
+  Promise.all(PAGE_SCRIPTS.map(loadScript)).then(function () {
+    var initHash = window.location.hash.slice(1).split('?')[0];
+    if (!window.hasCredentials()) {
+      window.location.hash = 'settings';
+    } else {
+      window.location.hash = initHash || 'dashboard';
+    }
+    navigate();
+  }).catch(function (err) {
+    console.error('Failed to load page scripts:', err);
+    main.innerHTML = '<div class="empty-state"><div class="empty-state-title">Failed to load page scripts</div><div class="empty-state-desc">' + err.message + '</div></div>';
+  });
+})();
+</script>
+
+</body>
+</html>

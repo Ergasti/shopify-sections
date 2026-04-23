@@ -1,0 +1,1471 @@
+/**
+ * Pricing Matrix page — ShipBlu Explorer
+ * Fetches pricing for all governorates × 4 package sizes and renders an
+ * interactive matrix with filtering, sorting, and a pure-CSS bar chart.
+ */
+;(function () {
+  'use strict';
+
+  // ─── Constants ────────────────────────────────────────────────────────────
+
+  const PKG_IDS = [1, 2, 3, 4];
+  const PKG_NAMES = {
+    1: 'Small Flyer (S-FLY)',
+    2: 'Medium Flyer',
+    3: 'Large Box',
+    4: 'XL Box',
+  };
+
+  // Known valid governorate IDs (skip 20 = NOGOV)
+  const KNOWN_GOV_IDS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 14, 16, 17, 18, 19];
+
+  // Tier thresholds (based on real API data, pkg 1 total)
+  const TIER_RULES = [
+    { max: 115,  key: 'same-city', label: 'Same City'    },
+    { max: 120,  key: 'major',     label: 'Major City'   },
+    { max: 140,  key: 'delta',     label: 'Delta/Canal'  },
+    { max: 200,  key: 'upper',     label: 'Upper Egypt'  },
+    { max: Infinity, key: 'remote', label: 'Remote'      },
+  ];
+
+  const TIER_BADGE_CLASS = {
+    'same-city': 'badge-success',
+    'major':     'badge-info',
+    'delta':     'badge-warning',
+    'upper':     'badge-warning-deep',
+    'remote':    'badge-error',
+  };
+
+  // ─── Module state ─────────────────────────────────────────────────────────
+
+  let govData      = [];           // [{id, name, code, max_order_age}]
+  let pricingData  = {};           // { govId: { pkgId: {subtotal,vat,...} | {error} } }
+  let lastFetched  = null;         // Date
+  let fetchCtrl    = null;         // AbortController
+  let activePackage = 1;
+  let searchQuery  = '';
+  let activeTier   = 'all';
+  let sortMode     = 'price-asc';
+  let sortCol      = null;         // column key for header-click sort
+  let sortDir      = 1;            // 1 = asc, -1 = desc
+  let codAmount    = 100;
+
+  // ─── Styles ───────────────────────────────────────────────────────────────
+
+  const STYLES = `
+/* ── Pricing page scoped styles ── */
+.pm-page { font-family: var(--font-sans, -apple-system, BlinkMacSystemFont, system-ui, sans-serif); }
+
+/* Header */
+.pm-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.pm-header-text h2 {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--color-text, #e6edf3);
+  letter-spacing: -0.4px;
+}
+.pm-header-text p {
+  font-size: 13px;
+  color: var(--color-text-muted, #8b949e);
+  margin-top: 2px;
+}
+.pm-header-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.pm-cod-input {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--color-elevated, #1c2333);
+  border: 1px solid var(--color-border, #30363d);
+  border-radius: 6px;
+  padding: 0 10px;
+}
+.pm-cod-input label {
+  font-size: 12px;
+  color: var(--color-text-muted, #8b949e);
+  white-space: nowrap;
+}
+.pm-cod-input input {
+  width: 80px;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--color-text, #e6edf3);
+  font-family: var(--font-mono, monospace);
+  font-size: 13px;
+  padding: 7px 0;
+}
+
+/* Progress area */
+.pm-progress-area {
+  margin-bottom: 20px;
+  background: var(--color-elevated, #1c2333);
+  border: 1px solid var(--color-border, #30363d);
+  border-radius: 8px;
+  padding: 16px;
+  display: none;
+}
+.pm-progress-area.visible { display: block; }
+.pm-progress-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  gap: 12px;
+}
+.pm-progress-label {
+  font-size: 13px;
+  color: var(--color-text, #e6edf3);
+}
+.pm-progress-pct {
+  font-size: 12px;
+  font-family: var(--font-mono, monospace);
+  color: var(--color-accent, #58a6ff);
+}
+.pm-progress-bar-track {
+  height: 6px;
+  background: var(--color-border, #30363d);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.pm-progress-bar-fill {
+  height: 100%;
+  background: var(--color-accent, #58a6ff);
+  border-radius: 3px;
+  transition: width 0.25s ease;
+  width: 0%;
+}
+.pm-last-fetched {
+  font-size: 12px;
+  color: var(--color-text-muted, #8b949e);
+  margin-top: 6px;
+}
+
+/* Stat cards */
+.pm-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.pm-stat {
+  background: var(--color-surface, #161b22);
+  border: 1px solid var(--color-border, #30363d);
+  border-radius: 8px;
+  padding: 16px 18px;
+}
+.pm-stat-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--color-text-muted, #8b949e);
+  font-weight: 600;
+}
+.pm-stat-value {
+  font-size: 20px;
+  font-weight: 700;
+  font-family: var(--font-mono, monospace);
+  color: var(--color-text, #e6edf3);
+  margin-top: 6px;
+  line-height: 1.2;
+}
+.pm-stat-sub {
+  font-size: 12px;
+  color: var(--color-text-muted, #8b949e);
+  margin-top: 2px;
+}
+
+/* Filter toolbar */
+.pm-toolbar {
+  background: var(--color-surface, #161b22);
+  border: 1px solid var(--color-border, #30363d);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+.pm-search-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 180px;
+}
+.pm-search-wrap svg {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 14px;
+  height: 14px;
+  color: var(--color-text-muted, #8b949e);
+  pointer-events: none;
+}
+.pm-search-input {
+  width: 100%;
+  background: var(--color-elevated, #1c2333);
+  border: 1px solid var(--color-border, #30363d);
+  border-radius: 6px;
+  padding: 7px 12px 7px 32px;
+  color: var(--color-text, #e6edf3);
+  font-size: 13px;
+  font-family: var(--font-sans, sans-serif);
+  outline: none;
+  transition: border-color 0.2s;
+}
+.pm-search-input:focus { border-color: var(--color-accent, #58a6ff); }
+.pm-search-input::placeholder { color: var(--color-text-muted, #8b949e); }
+
+.pm-tier-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.pm-chip {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--color-border, #30363d);
+  color: var(--color-text-muted, #8b949e);
+  background: transparent;
+  transition: all 0.15s;
+  font-family: var(--font-sans, sans-serif);
+}
+.pm-chip:hover { color: var(--color-text, #e6edf3); border-color: var(--color-text-muted, #8b949e); }
+.pm-chip.active { color: #fff; background: var(--color-accent, #58a6ff); border-color: var(--color-accent, #58a6ff); }
+.pm-chip.active-same-city { background: #3fb950; border-color: #3fb950; color: #fff; }
+.pm-chip.active-major     { background: var(--color-accent, #58a6ff); border-color: var(--color-accent, #58a6ff); color: #fff; }
+.pm-chip.active-delta     { background: #d29922; border-color: #d29922; color: #fff; }
+.pm-chip.active-upper     { background: #e3b341; border-color: #e3b341; color: #111; }
+.pm-chip.active-remote    { background: #f85149; border-color: #f85149; color: #fff; }
+
+.pm-toolbar-right {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.pm-sort-select {
+  background: var(--color-elevated, #1c2333);
+  border: 1px solid var(--color-border, #30363d);
+  border-radius: 6px;
+  padding: 7px 28px 7px 10px;
+  color: var(--color-text, #e6edf3);
+  font-size: 13px;
+  font-family: var(--font-sans, sans-serif);
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238b949e' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  cursor: pointer;
+}
+.pm-pkg-tabs {
+  display: flex;
+  background: var(--color-elevated, #1c2333);
+  border: 1px solid var(--color-border, #30363d);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.pm-pkg-tab {
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  color: var(--color-text-muted, #8b949e);
+  transition: all 0.15s;
+  border: none;
+  background: transparent;
+  font-family: var(--font-sans, sans-serif);
+}
+.pm-pkg-tab:hover { color: var(--color-text, #e6edf3); }
+.pm-pkg-tab.active { background: var(--color-accent, #58a6ff); color: #fff; }
+
+/* Table */
+.pm-table-wrap {
+  border: 1px solid var(--color-border, #30363d);
+  border-radius: 8px;
+  overflow: auto;
+  max-height: 520px;
+  background: var(--color-surface, #161b22);
+  position: relative;
+}
+.pm-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.pm-table caption {
+  text-align: left;
+  padding: 12px 16px 6px;
+  font-size: 12px;
+  color: var(--color-text-muted, #8b949e);
+  font-style: italic;
+}
+.pm-table thead th {
+  background: var(--color-elevated, #1c2333);
+  padding: 10px 14px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--color-text-muted, #8b949e);
+  border-bottom: 1px solid var(--color-border, #30363d);
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.15s;
+}
+.pm-table thead th:hover { color: var(--color-text, #e6edf3); }
+.pm-table thead th.sort-active { color: var(--color-accent, #58a6ff); }
+.pm-table thead th .sort-icon { margin-left: 4px; opacity: 0.5; font-size: 10px; }
+.pm-table thead th.sort-active .sort-icon { opacity: 1; }
+.pm-table thead th:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 3;
+}
+.pm-table tbody td {
+  padding: 9px 14px;
+  border-bottom: 1px solid rgba(48,54,61,0.5);
+  white-space: nowrap;
+}
+.pm-table tbody tr:last-child td { border-bottom: none; }
+.pm-table tbody tr:hover td { background: rgba(88,166,255,0.04); }
+.pm-table tbody td:first-child {
+  position: sticky;
+  left: 0;
+  background: var(--color-surface, #161b22);
+  z-index: 1;
+}
+.pm-table tbody tr:hover td:first-child { background: rgba(88,166,255,0.08); }
+
+.pm-gov-name { font-weight: 500; color: var(--color-text, #e6edf3); }
+.pm-gov-name-ar { display: block; font-size: 11px; color: var(--color-text-muted, #8b949e); margin-top: 1px; }
+.pm-code { font-family: var(--font-mono, monospace); font-size: 12px; color: var(--color-text-muted, #8b949e); }
+
+/* Tier badges */
+.pm-tier {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.pm-tier-same-city { background: rgba(63,185,80,0.15);  color: #3fb950; }
+.pm-tier-major     { background: rgba(88,166,255,0.15); color: #58a6ff; }
+.pm-tier-delta     { background: rgba(210,153,34,0.15); color: #d29922; }
+.pm-tier-upper     { background: rgba(227,179,65,0.18); color: #e3b341; }
+.pm-tier-remote    { background: rgba(248,81,73,0.15);  color: #f85149; }
+
+/* Price cells */
+.pm-price {
+  font-family: var(--font-mono, monospace);
+  font-size: 13px;
+  color: var(--color-text, #e6edf3);
+  position: relative;
+  cursor: default;
+}
+.pm-price.active-pkg {
+  background: rgba(88,166,255,0.08);
+  color: var(--color-accent, #58a6ff);
+  font-weight: 600;
+}
+.pm-price.err { color: #f85149; }
+.pm-price.loading { color: var(--color-text-muted, #8b949e); }
+
+/* Tooltip */
+.pm-tooltip-wrap { position: relative; }
+.pm-tooltip {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-elevated, #1c2333);
+  border: 1px solid var(--color-border, #30363d);
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-size: 12px;
+  line-height: 1.6;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 100;
+  transition: opacity 0.15s;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+}
+.pm-tooltip.visible { opacity: 1; }
+.pm-tooltip-row { display: flex; justify-content: space-between; gap: 16px; }
+.pm-tooltip-key { color: var(--color-text-muted, #8b949e); }
+.pm-tooltip-val { font-family: var(--font-mono, monospace); color: var(--color-text, #e6edf3); }
+.pm-tooltip-total { color: #3fb950; font-weight: 700; }
+
+/* Skeleton */
+.pm-skeleton-row td { padding: 10px 14px; }
+.pm-skeleton-cell {
+  height: 14px;
+  background: linear-gradient(90deg, var(--color-elevated, #1c2333) 25%, rgba(48,54,61,0.5) 50%, var(--color-elevated, #1c2333) 75%);
+  background-size: 200% 100%;
+  animation: pm-shimmer 1.5s infinite;
+  border-radius: 4px;
+}
+@keyframes pm-shimmer { to { background-position: -200% 0; } }
+
+/* Empty state */
+.pm-empty {
+  text-align: center;
+  padding: 56px 20px;
+  color: var(--color-text-muted, #8b949e);
+}
+.pm-empty-icon { font-size: 36px; margin-bottom: 10px; opacity: 0.4; }
+.pm-empty-msg { font-size: 14px; }
+
+/* Bar chart */
+.pm-chart-section {
+  margin-top: 28px;
+  background: var(--color-surface, #161b22);
+  border: 1px solid var(--color-border, #30363d);
+  border-radius: 8px;
+  padding: 20px 24px;
+}
+.pm-chart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.pm-chart-title { font-size: 15px; font-weight: 600; color: var(--color-text, #e6edf3); }
+.pm-chart-subtitle { font-size: 12px; color: var(--color-text-muted, #8b949e); margin-top: 2px; }
+.pm-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  min-width: 0;
+}
+.pm-bar-label {
+  width: 130px;
+  flex-shrink: 0;
+  font-size: 12px;
+  color: var(--color-text-muted, #8b949e);
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pm-bar-track {
+  flex: 1;
+  height: 22px;
+  background: var(--color-elevated, #1c2333);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+.pm-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s cubic-bezier(0.16,1,0.3,1);
+  position: relative;
+}
+.pm-bar-fill.tier-same-city { background: rgba(63,185,80,0.7); }
+.pm-bar-fill.tier-major     { background: rgba(88,166,255,0.7); }
+.pm-bar-fill.tier-delta     { background: rgba(210,153,34,0.7); }
+.pm-bar-fill.tier-upper     { background: rgba(227,179,65,0.7); }
+.pm-bar-fill.tier-remote    { background: rgba(248,81,73,0.7); }
+.pm-bar-price {
+  width: 90px;
+  flex-shrink: 0;
+  font-size: 12px;
+  font-family: var(--font-mono, monospace);
+  color: var(--color-text-muted, #8b949e);
+  white-space: nowrap;
+}
+
+/* Btn tweaks for this page */
+.pm-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: var(--font-sans, sans-serif);
+}
+.pm-btn-primary {
+  background: var(--color-accent, #58a6ff);
+  color: #fff;
+  border-color: var(--color-accent, #58a6ff);
+}
+.pm-btn-primary:hover { background: #79c0ff; border-color: #79c0ff; }
+.pm-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+.pm-btn-ghost {
+  background: transparent;
+  color: var(--color-text-muted, #8b949e);
+  border-color: var(--color-border, #30363d);
+}
+.pm-btn-ghost:hover { color: var(--color-text, #e6edf3); border-color: #8b949e; }
+.pm-btn-ghost:disabled { opacity: 0.4; cursor: not-allowed; }
+.pm-btn-danger {
+  background: rgba(248,81,73,0.12);
+  color: #f85149;
+  border-color: rgba(248,81,73,0.3);
+}
+.pm-btn-danger:hover { background: rgba(248,81,73,0.22); }
+.pm-spinner {
+  width: 13px; height: 13px;
+  border: 2px solid transparent;
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: pm-spin 0.6s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes pm-spin { to { transform: rotate(360deg); } }
+
+/* Live region (a11y) */
+.pm-live { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+`;
+
+  // ─── Helpers ──────────────────────────────────────────────────────────────
+
+  function getTier(total) {
+    for (const rule of TIER_RULES) {
+      if (total < rule.max) return rule;
+    }
+    return TIER_RULES[TIER_RULES.length - 1];
+  }
+
+  function parseGovName(name) {
+    const [en, ar] = name.split(' - ');
+    return { en: en?.trim() || name, ar: ar?.trim() || '' };
+  }
+
+  function fmtPrice(n) {
+    if (typeof window.formatCurrency === 'function') return window.formatCurrency(n);
+    return n.toFixed(2) + ' EGP';
+  }
+
+  function fmtNum(n) {
+    return typeof n === 'number' ? n.toFixed(2) : '—';
+  }
+
+  function minutesAgo(date) {
+    const diff = Math.round((Date.now() - date) / 60000);
+    if (diff < 1) return 'just now';
+    if (diff === 1) return '1 minute ago';
+    return diff + ' minutes ago';
+  }
+
+  function injectStyles() {
+    if (document.getElementById('pm-styles')) return;
+    const el = document.createElement('style');
+    el.id = 'pm-styles';
+    el.textContent = STYLES;
+    document.head.appendChild(el);
+  }
+
+  // ─── DOM helpers ──────────────────────────────────────────────────────────
+
+  function el(tag, attrs = {}, ...children) {
+    const node = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs)) {
+      if (k === 'class') node.className = v;
+      else if (k === 'html') node.innerHTML = v;
+      else if (k.startsWith('data-')) node.setAttribute(k, v);
+      else if (k === 'style') node.style.cssText = v;
+      else node[k] = v;
+    }
+    for (const child of children) {
+      if (child == null) continue;
+      node.appendChild(typeof child === 'string' ? document.createTextNode(child) : child);
+    }
+    return node;
+  }
+
+  // ─── Render helpers ───────────────────────────────────────────────────────
+
+  function renderSkeletonRows(count = 8) {
+    const frag = document.createDocumentFragment();
+    for (let i = 0; i < count; i++) {
+      const tr = document.createElement('tr');
+      tr.className = 'pm-skeleton-row';
+      // 10 cells: #, gov, code, tier, pkg1-4, visual, maxAge
+      const widths = ['24px', '140px', '50px', '80px', '70px', '70px', '70px', '70px', '120px', '40px'];
+      widths.forEach(w => {
+        const td = document.createElement('td');
+        const inner = document.createElement('div');
+        inner.className = 'pm-skeleton-cell';
+        inner.style.width = w;
+        td.appendChild(inner);
+        tr.appendChild(td);
+      });
+      frag.appendChild(tr);
+    }
+    return frag;
+  }
+
+  function buildTooltip(priceEntry) {
+    if (!priceEntry || priceEntry.error) return null;
+    const wrap = el('div', { class: 'pm-tooltip-wrap' });
+    const tip = el('div', { class: 'pm-tooltip' });
+    const rows = [
+      ['Subtotal',  fmtNum(priceEntry.subtotal)],
+      ['VAT',       fmtNum(priceEntry.vat)],
+      ['Insurance', fmtNum(priceEntry.insurance_fees)],
+      ['Postal Tax',fmtNum(priceEntry.postal_tax)],
+      ['Total',     fmtNum(priceEntry.total)],
+    ];
+    rows.forEach(([k, v], i) => {
+      const row = el('div', { class: 'pm-tooltip-row' });
+      row.appendChild(el('span', { class: 'pm-tooltip-key' }, k));
+      row.appendChild(el('span', { class: 'pm-tooltip-val' + (i === 4 ? ' pm-tooltip-total' : '') }, v + ' EGP'));
+      tip.appendChild(row);
+    });
+    wrap.appendChild(tip);
+    wrap.addEventListener('mouseenter', () => tip.classList.add('visible'));
+    wrap.addEventListener('mouseleave', () => tip.classList.remove('visible'));
+    return { wrap, tip };
+  }
+
+  // ─── Filtered + sorted data ───────────────────────────────────────────────
+
+  function getFilteredRows() {
+    const q = searchQuery.toLowerCase();
+    let rows = govData.filter(g => {
+      const { en, ar } = parseGovName(g.name);
+      if (g.name === 'NOGOV') return false;
+      if (q && !en.toLowerCase().includes(q) && !ar.includes(q) && !(g.code || '').toLowerCase().includes(q)) return false;
+      if (activeTier !== 'all') {
+        const p1 = pricingData[g.id]?.[1];
+        if (!p1 || p1.error) return false;
+        const tier = getTier(p1.total);
+        if (tier.key !== activeTier) return false;
+      }
+      return true;
+    });
+
+    // Sorting
+    rows = [...rows].sort((a, b) => {
+      const pa = pricingData[a.id]?.[activePackage];
+      const pb = pricingData[b.id]?.[activePackage];
+
+      if (sortMode === 'name-asc') {
+        return parseGovName(a.name).en.localeCompare(parseGovName(b.name).en);
+      }
+      if (sortMode === 'name-desc') {
+        return parseGovName(b.name).en.localeCompare(parseGovName(a.name).en);
+      }
+      const ta = pa && !pa.error ? pa.total : Infinity;
+      const tb = pb && !pb.error ? pb.total : Infinity;
+      return sortMode === 'price-asc' ? ta - tb : tb - ta;
+    });
+
+    // Column sort overrides
+    if (sortCol) {
+      rows = [...rows].sort((a, b) => {
+        if (sortCol === 'name') {
+          return sortDir * parseGovName(a.name).en.localeCompare(parseGovName(b.name).en);
+        }
+        if (sortCol === 'code') {
+          return sortDir * (a.code || '').localeCompare(b.code || '');
+        }
+        if (sortCol === 'maxage') {
+          return sortDir * ((a.max_order_age || 0) - (b.max_order_age || 0));
+        }
+        const pid = parseInt(sortCol.replace('pkg', ''));
+        if (!isNaN(pid)) {
+          const ta2 = pricingData[a.id]?.[pid]?.total ?? Infinity;
+          const tb2 = pricingData[b.id]?.[pid]?.total ?? Infinity;
+          return sortDir * (ta2 - tb2);
+        }
+        return 0;
+      });
+    }
+
+    return rows;
+  }
+
+  // ─── Main render ──────────────────────────────────────────────────────────
+
+  let _refs = {};  // cached DOM node references
+
+  function renderAll() {
+    renderStats();
+    renderTableBody();
+    renderChart();
+  }
+
+  function renderStats() {
+    const { statsEl } = _refs;
+    if (!statsEl) return;
+
+    const realGovs = govData.filter(g => g.name !== 'NOGOV');
+    if (!realGovs.length) { statsEl.style.display = 'none'; return; }
+
+    // Calculate stats using pkg1 totals
+    let cheapestVal = Infinity, cheapestName = '';
+    let expensiveVal = -Infinity, expensiveName = '';
+    let minPrice = Infinity, maxPrice = -Infinity;
+
+    for (const g of realGovs) {
+      const p = pricingData[g.id]?.[1];
+      if (!p || p.error) continue;
+      const t = p.total;
+      if (t < cheapestVal) { cheapestVal = t; cheapestName = parseGovName(g.name).en; }
+      if (t > expensiveVal) { expensiveVal = t; expensiveName = parseGovName(g.name).en; }
+      if (t < minPrice) minPrice = t;
+      if (t > maxPrice) maxPrice = t;
+    }
+
+    const govCountEl = statsEl.querySelector('[data-stat="count"] .pm-stat-value');
+    const cheapEl    = statsEl.querySelector('[data-stat="cheapest"] .pm-stat-value');
+    const cheapSub   = statsEl.querySelector('[data-stat="cheapest"] .pm-stat-sub');
+    const expEl      = statsEl.querySelector('[data-stat="expensive"] .pm-stat-value');
+    const expSub     = statsEl.querySelector('[data-stat="expensive"] .pm-stat-sub');
+    const rangeEl    = statsEl.querySelector('[data-stat="range"] .pm-stat-value');
+
+    if (govCountEl) govCountEl.textContent = realGovs.length;
+    if (cheapEl) cheapEl.textContent = cheapestVal === Infinity ? '—' : fmtNum(cheapestVal) + ' EGP';
+    if (cheapSub) cheapSub.textContent = cheapestName;
+    if (expEl) expEl.textContent = expensiveVal === -Infinity ? '—' : fmtNum(expensiveVal) + ' EGP';
+    if (expSub) expSub.textContent = expensiveName;
+    if (rangeEl) rangeEl.textContent = (minPrice === Infinity ? '—' : fmtNum(minPrice)) + ' – ' + (maxPrice === -Infinity ? '—' : fmtNum(maxPrice));
+
+    statsEl.style.display = 'grid';
+  }
+
+  function renderTableBody() {
+    const { tbody, emptyStateEl, liveEl } = _refs;
+    if (!tbody) return;
+
+    const rows = getFilteredRows();
+
+    tbody.innerHTML = '';
+
+    if (!rows.length) {
+      if (govData.length) {
+        // Data loaded but no matches
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 10;
+        td.appendChild(el('div', { class: 'pm-empty' },
+          el('div', { class: 'pm-empty-icon' }, '🔍'),
+          el('p', { class: 'pm-empty-msg' }, 'No governorates match your search or filter.')
+        ));
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+      } else {
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 10;
+        td.appendChild(el('div', { class: 'pm-empty' },
+          el('div', { class: 'pm-empty-icon' }, '⎋'),
+          el('p', { class: 'pm-empty-msg' }, 'Enter your API key and click Fetch Pricing to load the matrix.')
+        ));
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+      }
+      if (liveEl) liveEl.textContent = rows.length === 0 ? 'No results found.' : '';
+      return;
+    }
+
+    const frag = document.createDocumentFragment();
+    rows.forEach((gov, idx) => {
+      const { en, ar } = parseGovName(gov.name);
+      const p1 = pricingData[gov.id]?.[1];
+      const tier = p1 && !p1.error ? getTier(p1.total) : { key: 'delta', label: '—' };
+      const tr = document.createElement('tr');
+
+      // # column
+      const tdIdx = el('td', { style: 'color:var(--color-text-muted,#8b949e);font-size:12px;' }, String(idx + 1));
+      tr.appendChild(tdIdx);
+
+      // Gov name (sticky)
+      const tdName = document.createElement('td');
+      const nameSpan = el('span', { class: 'pm-gov-name' }, en);
+      tdName.appendChild(nameSpan);
+      if (ar) {
+        tdName.appendChild(el('span', { class: 'pm-gov-name-ar' }, ar));
+      }
+      tr.appendChild(tdName);
+
+      // Code
+      tr.appendChild(el('td', {}, el('span', { class: 'pm-code' }, gov.code || '—')));
+
+      // Tier badge
+      const tierBadge = el('span', { class: `pm-tier pm-tier-${tier.key}` }, tier.label);
+      tr.appendChild(el('td', {}, tierBadge));
+
+      // Package price cells
+      PKG_IDS.forEach(pid => {
+        const entry = pricingData[gov.id]?.[pid];
+        const td = document.createElement('td');
+        td.className = 'pm-price' + (pid === activePackage ? ' active-pkg' : '');
+        td.setAttribute('data-gov', gov.id);
+        td.setAttribute('data-pkg', pid);
+
+        if (!entry) {
+          td.classList.add('loading');
+          td.textContent = '…';
+        } else if (entry.error) {
+          td.classList.add('err');
+          td.textContent = 'ERR';
+          td.title = entry.error;
+        } else {
+          const tooltipObj = buildTooltip(entry);
+          if (tooltipObj) {
+            tooltipObj.wrap.appendChild(document.createTextNode(fmtNum(entry.total)));
+            td.appendChild(tooltipObj.wrap);
+          } else {
+            td.textContent = fmtNum(entry.total);
+          }
+        }
+        tr.appendChild(td);
+      });
+
+      // Cost Visual — inline horizontal bar for active package
+      const tdVisual = document.createElement('td');
+      tdVisual.style.cssText = 'min-width:120px;padding:9px 14px;';
+      const activePriceEntry = pricingData[gov.id]?.[activePackage];
+      if (activePriceEntry && !activePriceEntry.error) {
+        // Compute max across filtered rows for relative width
+        const _allPrices = govData
+          .filter(g => g.name !== 'NOGOV' && pricingData[g.id]?.[activePackage] && !pricingData[g.id][activePackage].error)
+          .map(g => pricingData[g.id][activePackage].total);
+        const _maxPrice = _allPrices.length ? Math.max(..._allPrices) : 1;
+        const _pct = Math.max(4, Math.round((activePriceEntry.total / _maxPrice) * 100));
+        // Color by tier: same-city/major=green, delta=amber, upper/remote=red
+        const _tierKey = tier.key;
+        const _barColor = (_tierKey === 'same-city' || _tierKey === 'major')
+          ? 'var(--color-green, #3fb950)'
+          : (_tierKey === 'delta' || _tierKey === 'upper')
+            ? '#d29922'
+            : '#f85149';
+        const barTrack = el('div', { style: 'height:10px;background:var(--color-elevated,#1c2333);border-radius:4px;overflow:hidden;position:relative;' });
+        const barFill  = el('div', {
+          style: `height:100%;width:${_pct}%;background:${_barColor};border-radius:4px;transition:width .5s cubic-bezier(.16,1,.3,1);`,
+          title: `${fmtNum(activePriceEntry.total)} EGP — ${tier.label}\nSubtotal: ${fmtNum(activePriceEntry.subtotal)}\nVAT: ${fmtNum(activePriceEntry.vat)}\nInsurance: ${fmtNum(activePriceEntry.insurance_fees)}\nPostal: ${fmtNum(activePriceEntry.postal_tax)}`,
+        });
+        barTrack.appendChild(barFill);
+        tdVisual.appendChild(barTrack);
+      } else if (!activePriceEntry) {
+        tdVisual.appendChild(el('span', { style: 'color:var(--color-text-muted,#8b949e);font-size:11px' }, '…'));
+      } else {
+        tdVisual.appendChild(el('span', { style: 'color:#f85149;font-size:11px' }, 'ERR'));
+      }
+      tr.appendChild(tdVisual);
+
+      // Max age
+      tr.appendChild(el('td', { style: 'color:var(--color-text-muted,#8b949e)' }, gov.max_order_age ? gov.max_order_age + 'd' : '—'));
+
+      frag.appendChild(tr);
+    });
+
+    tbody.appendChild(frag);
+    const totalGovs = govData.filter(g => g.name !== 'NOGOV').length;
+    const isFiltered = searchQuery || activeTier !== 'all';
+    const countText = isFiltered
+      ? `${rows.length} of ${totalGovs} governorates`
+      : `${rows.length} governorate${rows.length === 1 ? '' : 's'}`;
+    if (liveEl) liveEl.textContent = `Showing ${countText}.`;
+    // Update filter count badge
+    if (_refs.filterCount) {
+      _refs.filterCount.textContent = isFiltered ? countText : '';
+      _refs.filterCount.style.display = isFiltered ? 'inline' : 'none';
+    }
+  }
+
+  function updateSortHeaders() {
+    const { tableEl } = _refs;
+    if (!tableEl) return;
+    tableEl.querySelectorAll('thead th[data-col]').forEach(th => {
+      const col = th.getAttribute('data-col');
+      const icon = th.querySelector('.sort-icon');
+      th.classList.toggle('sort-active', sortCol === col);
+      if (icon) {
+        if (sortCol === col) {
+          icon.textContent = sortDir === 1 ? ' ▲' : ' ▼';
+        } else {
+          icon.textContent = ' ⇅';
+        }
+      }
+    });
+  }
+
+  function renderChart() {
+    const { chartBars } = _refs;
+    if (!chartBars) return;
+
+    const realGovs = govData.filter(g => g.name !== 'NOGOV' && !KNOWN_GOV_IDS.includes(g.id)
+      ? false  // exclude non-standard
+      : g.name !== 'NOGOV'
+    );
+
+    if (!realGovs.length) { chartBars.innerHTML = ''; return; }
+
+    // Collect prices for active package
+    const items = realGovs
+      .map(g => {
+        const entry = pricingData[g.id]?.[activePackage];
+        const p1 = pricingData[g.id]?.[1];
+        const tier = p1 && !p1.error ? getTier(p1.total) : { key: 'delta' };
+        return {
+          name: parseGovName(g.name).en,
+          price: entry && !entry.error ? entry.total : null,
+          tierKey: tier.key,
+        };
+      })
+      .filter(i => i.price !== null)
+      .sort((a, b) => a.price - b.price);
+
+    if (!items.length) { chartBars.innerHTML = '<p style="color:var(--color-text-muted,#8b949e);font-size:13px">No data yet — fetch pricing first.</p>'; return; }
+
+    const maxPrice = Math.max(...items.map(i => i.price));
+    const frag = document.createDocumentFragment();
+
+    items.forEach(item => {
+      const pct = ((item.price / maxPrice) * 100).toFixed(1);
+      const row = el('div', { class: 'pm-bar-row' });
+      row.appendChild(el('span', { class: 'pm-bar-label', title: item.name }, item.name));
+
+      const track = el('div', { class: 'pm-bar-track' });
+      const fill = el('div', { class: `pm-bar-fill tier-${item.tierKey}`, style: `width:${pct}%` });
+      track.appendChild(fill);
+      row.appendChild(track);
+      row.appendChild(el('span', { class: 'pm-bar-price' }, fmtNum(item.price) + ' EGP'));
+      frag.appendChild(row);
+    });
+
+    chartBars.innerHTML = '';
+    chartBars.appendChild(frag);
+  }
+
+  // ─── Progress bar ─────────────────────────────────────────────────────────
+
+  function showProgress(done, total, govName) {
+    const { progressArea, progressBar, progressLabel, progressPct } = _refs;
+    if (!progressArea) return;
+    progressArea.classList.add('visible');
+    const pct = total ? Math.round((done / total) * 100) : 0;
+    if (progressBar) progressBar.style.width = pct + '%';
+    if (progressPct) progressPct.textContent = pct + '%';
+    if (progressLabel) progressLabel.textContent = `Fetching pricing… (${done}/${total})${govName ? ' — ' + govName : ''}`;
+  }
+
+  function hideProgress() {
+    const { progressArea, progressBar, progressLabel, progressPct, lastFetchedEl, cancelBtn } = _refs;
+    if (!progressArea) return;
+    progressArea.classList.remove('visible');
+    if (progressBar) progressBar.style.width = '0%';
+    if (cancelBtn) cancelBtn.style.display = 'none';
+    if (lastFetchedEl && lastFetched) {
+      lastFetchedEl.textContent = 'Last fetched: ' + minutesAgo(lastFetched);
+      lastFetchedEl.style.display = 'block';
+    }
+  }
+
+  function updateLastFetched() {
+    const { lastFetchedEl } = _refs;
+    if (lastFetchedEl && lastFetched) {
+      lastFetchedEl.textContent = 'Last fetched: ' + minutesAgo(lastFetched);
+    }
+  }
+
+  // ─── Fetch logic ──────────────────────────────────────────────────────────
+
+  async function fetchPricing() {
+    const apiCall = (typeof window.shipbluApi === 'function')
+      ? window.shipbluApi.bind(window)
+      : null;
+
+    if (!apiCall) {
+      showMsg('window.shipbluApi is not defined. Please check js/api.js is loaded.', 'error');
+      return;
+    }
+
+    const { fetchBtn, cancelBtn, exportBtn, progressArea, lastFetchedEl } = _refs;
+
+    if (fetchBtn) { fetchBtn.disabled = true; fetchBtn.querySelector?.('.pm-spinner')?.style && (fetchBtn.innerHTML = '<span class="pm-spinner"></span> Fetching…'); }
+    if (cancelBtn) cancelBtn.style.display = 'inline-flex';
+    if (exportBtn) exportBtn.disabled = true;
+
+    fetchCtrl = new AbortController();
+    const signal = fetchCtrl.signal;
+
+    try {
+      // 1. Fetch governorates
+      showMsg('Fetching governorates…', 'info');
+      govData = await apiCall('GET', '/v1/governorates/');
+
+      const realGovs = govData.filter(g => g.name !== 'NOGOV');
+      const total = realGovs.length * PKG_IDS.length;
+      let done = 0;
+
+      // Show skeleton while loading
+      if (_refs.tbody) _refs.tbody.appendChild(renderSkeletonRows(8));
+
+      // 2. Fetch pricing for each gov × pkg sequentially
+      for (const gov of realGovs) {
+        if (signal.aborted) break;
+        if (!pricingData[gov.id]) pricingData[gov.id] = {};
+
+        for (const pid of PKG_IDS) {
+          if (signal.aborted) break;
+          showProgress(done, total, parseGovName(gov.name).en);
+
+          try {
+            const result = await apiCall('POST', '/v1/pricing/orders/delivery/', {
+              packages: [pid],
+              to_governorate: gov.id,
+              cash_amount: codAmount,
+            });
+            pricingData[gov.id][pid] = result;
+          } catch (e) {
+            pricingData[gov.id][pid] = { error: e.message };
+          }
+          done++;
+        }
+      }
+
+      lastFetched = new Date();
+
+      // Final render
+      renderAll();
+      hideProgress();
+
+      if (signal.aborted) {
+        showMsg('Fetch cancelled — showing partial data.', 'info');
+      } else {
+        showMsg('Loaded pricing for ' + realGovs.length + ' governorates × 4 package sizes.', 'success');
+        if (exportBtn) exportBtn.disabled = false;
+      }
+
+    } catch (e) {
+      hideProgress();
+      if (e.name === 'AbortError') {
+        showMsg('Fetch cancelled.', 'info');
+        renderAll();
+      } else if (e.message && e.message.includes('CORS')) {
+        showMsg(
+          'CORS error — the API blocked the request from this origin. Try running a local proxy or use the browser extension to allow cross-origin requests.',
+          'error'
+        );
+      } else {
+        showMsg('Error: ' + (e.message || String(e)), 'error');
+      }
+    } finally {
+      fetchCtrl = null;
+      if (fetchBtn) {
+        fetchBtn.disabled = false;
+        fetchBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg> Fetch Pricing';
+      }
+      if (cancelBtn) cancelBtn.style.display = 'none';
+    }
+  }
+
+  function cancelFetch() {
+    if (fetchCtrl) {
+      fetchCtrl.abort();
+      fetchCtrl = null;
+    }
+  }
+
+  // ─── Export CSV ───────────────────────────────────────────────────────────
+
+  function exportCSV() {
+    // Export only the currently filtered/visible rows (respects search + tier filter)
+    const rows = getFilteredRows();
+    if (!rows.length) return;
+
+    const headers = ['Governorate', 'Code', 'Tier', 'Pkg1 Total', 'Pkg2 Total', 'Pkg3 Total', 'Pkg4 Total', 'Max Age (days)'];
+    const lines = [headers.join(',')];
+
+    for (const gov of rows) {
+      const { en } = parseGovName(gov.name);
+      const p1 = pricingData[gov.id]?.[1];
+      const tier = p1 && !p1.error ? getTier(p1.total).label : 'Unknown';
+      const prices = PKG_IDS.map(pid => {
+        const e = pricingData[gov.id]?.[pid];
+        return e && !e.error ? e.total.toFixed(2) : 'ERR';
+      });
+      lines.push([
+        JSON.stringify(en),
+        gov.code || '',
+        JSON.stringify(tier),
+        ...prices,
+        gov.max_order_age || '',
+      ].join(','));
+    }
+
+    const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'shipblu-pricing-' + new Date().toISOString().slice(0, 10) + '.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    if (typeof window.showToast === 'function') window.showToast('CSV exported!', 'success');
+  }
+
+  // ─── Toast/message helper ─────────────────────────────────────────────────
+
+  function showMsg(msg, type = 'info') {
+    if (typeof window.showToast === 'function') {
+      window.showToast(msg, type);
+    } else {
+      console.log('[pricing]', type, msg);
+    }
+  }
+
+  // ─── Build DOM ────────────────────────────────────────────────────────────
+
+  function buildPage(container) {
+    injectStyles();
+    container.className = 'pm-page';
+
+    // A11y live region
+    const liveEl = el('div', { class: 'pm-live', 'aria-live': 'polite', 'aria-atomic': 'true' });
+    container.appendChild(liveEl);
+
+    // ── Header ───────────────────────────────────────────────────────────────
+    const header = el('div', { class: 'pm-header' });
+
+    const headerText = el('div', { class: 'pm-header-text' });
+    headerText.appendChild(el('h2', {}, 'Pricing Matrix'));
+    headerText.appendChild(el('p', {}, 'Shipping costs per governorate and package size'));
+    header.appendChild(headerText);
+
+    const actions = el('div', { class: 'pm-header-actions' });
+
+    const fetchBtn = el('button', { class: 'pm-btn pm-btn-primary', type: 'button' });
+    fetchBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg> Fetch Pricing';
+    fetchBtn.addEventListener('click', fetchPricing);
+
+    const codWrap = el('div', { class: 'pm-cod-input' });
+    codWrap.appendChild(el('label', { for: 'pm-cod' }, 'COD'));
+    const codInput = el('input', {
+      type: 'number', id: 'pm-cod', min: '0', step: '10', value: String(codAmount),
+      title: 'Cash on Delivery amount (EGP)',
+    });
+    codInput.addEventListener('change', () => {
+      codAmount = parseFloat(codInput.value) || 0;
+    });
+    codWrap.appendChild(codInput);
+    codWrap.appendChild(el('span', { style: 'font-size:11px;color:var(--color-text-muted,#8b949e)' }, 'EGP'));
+
+    const exportBtn = el('button', { class: 'pm-btn pm-btn-ghost', type: 'button', disabled: true });
+    exportBtn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Export CSV';
+    exportBtn.addEventListener('click', exportCSV);
+
+    const cancelBtn = el('button', {
+      class: 'pm-btn pm-btn-danger', type: 'button',
+      style: 'display:none',
+      title: 'Cancel ongoing fetch',
+    });
+    cancelBtn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Cancel';
+    cancelBtn.addEventListener('click', cancelFetch);
+
+    actions.appendChild(fetchBtn);
+    actions.appendChild(codWrap);
+    actions.appendChild(cancelBtn);
+    actions.appendChild(exportBtn);
+    header.appendChild(actions);
+    container.appendChild(header);
+
+    // ── Progress area ─────────────────────────────────────────────────────────
+    const progressArea = el('div', { class: 'pm-progress-area', role: 'status', 'aria-live': 'polite' });
+    const progHeader = el('div', { class: 'pm-progress-header' });
+    const progressLabel = el('span', { class: 'pm-progress-label' }, 'Fetching…');
+    const progressPct = el('span', { class: 'pm-progress-pct' }, '0%');
+    progHeader.appendChild(progressLabel);
+    progHeader.appendChild(progressPct);
+    progressArea.appendChild(progHeader);
+
+    const track = el('div', { class: 'pm-progress-bar-track' });
+    const progressBar = el('div', { class: 'pm-progress-bar-fill' });
+    track.appendChild(progressBar);
+    progressArea.appendChild(track);
+
+    const lastFetchedEl = el('div', { class: 'pm-last-fetched', style: 'display:none' });
+    progressArea.appendChild(lastFetchedEl);
+    container.appendChild(progressArea);
+
+    // ── Stat cards ────────────────────────────────────────────────────────────
+    const statsEl = el('div', { class: 'pm-stats', style: 'display:none' });
+    [
+      { stat: 'count',     label: 'Governorates', value: '—', sub: null },
+      { stat: 'cheapest',  label: 'Cheapest Route', value: '—', sub: '' },
+      { stat: 'expensive', label: 'Most Expensive',  value: '—', sub: '' },
+      { stat: 'range',     label: 'Price Range',     value: '—', sub: null },
+    ].forEach(({ stat, label, value, sub }) => {
+      const card = el('div', { class: 'pm-stat', 'data-stat': stat });
+      card.appendChild(el('div', { class: 'pm-stat-label' }, label));
+      card.appendChild(el('div', { class: 'pm-stat-value' }, value));
+      if (sub !== null) card.appendChild(el('div', { class: 'pm-stat-sub' }, sub));
+      statsEl.appendChild(card);
+    });
+    container.appendChild(statsEl);
+
+    // ── Filter toolbar ────────────────────────────────────────────────────────
+    const toolbar = el('div', { class: 'pm-toolbar', role: 'toolbar', 'aria-label': 'Filter and sort pricing table' });
+
+    // Search
+    const searchWrap = el('div', { class: 'pm-search-wrap' });
+    searchWrap.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>';
+    const searchInput = el('input', {
+      type: 'search', class: 'pm-search-input',
+      placeholder: 'Search governorates…',
+      'aria-label': 'Search governorates',
+    });
+    searchInput.addEventListener('input', () => {
+      searchQuery = searchInput.value.trim();
+      sortCol = null;
+      renderTableBody();
+      renderChart();
+    });
+    searchWrap.appendChild(searchInput);
+    toolbar.appendChild(searchWrap);
+
+    // Filter result count badge (shown when search or tier filter active)
+    const filterCount = el('span', {
+      class: 'pm-filter-count',
+      style: 'font-size:12px;color:var(--color-accent,#58a6ff);display:none;white-space:nowrap;',
+      'aria-live': 'polite',
+    });
+    toolbar.appendChild(filterCount);
+
+    // Tier chips
+    const chipsWrap = el('div', { class: 'pm-tier-chips', role: 'group', 'aria-label': 'Filter by tier' });
+    const tierOptions = [
+      { key: 'all', label: 'All' },
+      { key: 'same-city', label: 'Same City' },
+      { key: 'major',     label: 'Major' },
+      { key: 'delta',     label: 'Delta' },
+      { key: 'upper',     label: 'Upper' },
+      { key: 'remote',    label: 'Remote' },
+    ];
+    tierOptions.forEach(({ key, label }) => {
+      const chip = el('button', {
+        class: 'pm-chip' + (key === 'all' ? ' active' : ''),
+        type: 'button',
+        'data-tier': key,
+        'aria-pressed': key === 'all' ? 'true' : 'false',
+      }, label);
+      chip.addEventListener('click', () => {
+        activeTier = key;
+        sortCol = null;
+        chipsWrap.querySelectorAll('.pm-chip').forEach(c => {
+          const isActive = c.getAttribute('data-tier') === key;
+          c.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+          c.className = 'pm-chip' + (isActive ? ' active' + (key !== 'all' ? '-' + key : '') : '');
+        });
+        renderTableBody();
+        renderChart();
+      });
+      chipsWrap.appendChild(chip);
+    });
+    toolbar.appendChild(chipsWrap);
+
+    // Sort + package selector
+    const toolbarRight = el('div', { class: 'pm-toolbar-right' });
+
+    const sortSelect = el('select', { class: 'pm-sort-select', 'aria-label': 'Sort order' });
+    [
+      { value: 'name-asc',   label: 'Name A–Z' },
+      { value: 'price-asc',  label: 'Price ↑' },
+      { value: 'price-desc', label: 'Price ↓' },
+    ].forEach(({ value, label }) => {
+      sortSelect.appendChild(el('option', { value }, label));
+    });
+    sortSelect.value = 'price-asc';
+    sortSelect.addEventListener('change', () => {
+      sortMode = sortSelect.value;
+      sortCol = null;
+      updateSortHeaders();
+      renderTableBody();
+    });
+    toolbarRight.appendChild(sortSelect);
+
+    // Package tabs
+    const pkgTabs = el('div', { class: 'pm-pkg-tabs', role: 'tablist', 'aria-label': 'Active package size' });
+    PKG_IDS.forEach(pid => {
+      const tab = el('button', {
+        class: 'pm-pkg-tab' + (pid === activePackage ? ' active' : ''),
+        type: 'button',
+        role: 'tab',
+        'aria-selected': pid === activePackage ? 'true' : 'false',
+        'data-pkg': pid,
+        title: PKG_NAMES[pid],
+      }, 'Pkg ' + pid);
+      tab.addEventListener('click', () => {
+        activePackage = pid;
+        pkgTabs.querySelectorAll('.pm-pkg-tab').forEach(t => {
+          const isActive = parseInt(t.getAttribute('data-pkg')) === pid;
+          t.classList.toggle('active', isActive);
+          t.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        });
+        renderTableBody();
+        renderChart();
+        updateSortHeaders();
+      });
+      pkgTabs.appendChild(tab);
+    });
+    toolbarRight.appendChild(pkgTabs);
+    toolbar.appendChild(toolbarRight);
+    container.appendChild(toolbar);
+
+    // ── Table ─────────────────────────────────────────────────────────────────
+    const tableWrap = el('div', { class: 'pm-table-wrap' });
+    const tableEl = el('table', { class: 'pm-table' });
+    tableEl.appendChild(el('caption', {}, 'ShipBlu delivery pricing by governorate and package size. All prices in EGP.'));
+
+    const thead = document.createElement('thead');
+    const headRow = document.createElement('tr');
+
+    const colDefs = [
+      { key: '#',      label: '#',           col: null     },
+      { key: 'name',   label: 'Governorate', col: 'name'   },
+      { key: 'code',   label: 'Code',        col: 'code'   },
+      { key: 'tier',   label: 'Tier',        col: null     },
+      { key: 'pkg1',   label: 'Pkg 1',       col: 'pkg1'   },
+      { key: 'pkg2',   label: 'Pkg 2',       col: 'pkg2'   },
+      { key: 'pkg3',   label: 'Pkg 3',       col: 'pkg3'   },
+      { key: 'pkg4',   label: 'Pkg 4',       col: 'pkg4'   },
+      { key: 'visual', label: 'Cost Visual', col: null     },
+      { key: 'maxage', label: 'Max Age',     col: 'maxage' },
+    ];
+
+    colDefs.forEach(({ key, label, col }) => {
+      const th = el('th', { scope: 'col' });
+      if (col) {
+        th.setAttribute('data-col', col);
+        th.innerHTML = label + '<span class="sort-icon" aria-hidden="true"> ⇅</span>';
+        th.addEventListener('click', () => {
+          if (sortCol === col) {
+            sortDir = -sortDir;
+          } else {
+            sortCol = col;
+            sortDir = 1;
+          }
+          sortMode = ''; // clear dropdown sort
+          updateSortHeaders();
+          renderTableBody();
+        });
+      } else {
+        th.textContent = label;
+      }
+      if (key === '#') th.style.width = '36px';
+      headRow.appendChild(th);
+    });
+
+    thead.appendChild(headRow);
+    tableEl.appendChild(thead);
+
+    const tbody = document.createElement('tbody');
+    // Initial empty state row
+    const initTr = document.createElement('tr');
+    const initTd = document.createElement('td');
+    initTd.colSpan = 9;
+    initTd.appendChild(el('div', { class: 'pm-empty' },
+      el('div', { class: 'pm-empty-icon' }, '⎋'),
+      el('p', { class: 'pm-empty-msg' }, 'Enter your API key and click Fetch Pricing to load the matrix.')
+    ));
+    initTr.appendChild(initTd);
+    tbody.appendChild(initTr);
+
+    tableEl.appendChild(tbody);
+    tableWrap.appendChild(tableEl);
+    container.appendChild(tableWrap);
+
+    // ── Bar chart ─────────────────────────────────────────────────────────────
+    const chartSection = el('div', { class: 'pm-chart-section' });
+    const chartHeader = el('div', { class: 'pm-chart-header' });
+    const chartTitleWrap = el('div', {});
+    chartTitleWrap.appendChild(el('div', { class: 'pm-chart-title' }, 'Price Comparison by Governorate'));
+    chartTitleWrap.appendChild(el('div', { class: 'pm-chart-subtitle' }, 'Bars sorted by price ascending, colored by delivery tier'));
+    chartHeader.appendChild(chartTitleWrap);
+    chartSection.appendChild(chartHeader);
+
+    const chartBars = el('div', { class: 'pm-chart-bars', 'aria-label': 'Horizontal bar chart of pricing by governorate' });
+    chartBars.innerHTML = '<p style="color:var(--color-text-muted,#8b949e);font-size:13px">No data yet — fetch pricing first.</p>';
+    chartSection.appendChild(chartBars);
+    container.appendChild(chartSection);
+
+    // ── Cache refs ────────────────────────────────────────────────────────────
+    _refs = {
+      liveEl,
+      fetchBtn,
+      cancelBtn,
+      exportBtn,
+      progressArea,
+      progressBar,
+      progressLabel,
+      progressPct,
+      lastFetchedEl,
+      statsEl,
+      toolbar,
+      filterCount,
+      searchInput,
+      sortSelect,
+      pkgTabs,
+      tableEl,
+      tbody,
+      chartBars,
+    };
+
+    // Keep last-fetched ticker updated
+    setInterval(() => {
+      if (lastFetched) updateLastFetched();
+    }, 30000);
+  }
+
+  // ─── Register ─────────────────────────────────────────────────────────────
+
+  window.registerPage('pricing', {
+    title: 'Pricing Matrix',
+    icon: '💰',
+    render(container) {
+      // Reset state when re-rendering (e.g. tab switch)
+      _refs = {};
+      buildPage(container);
+
+      // If we already have data (came back to this tab), re-render it
+      if (govData.length) {
+        renderAll();
+        if (_refs.exportBtn) _refs.exportBtn.disabled = false;
+        if (lastFetched && _refs.lastFetchedEl) {
+          _refs.lastFetchedEl.textContent = 'Last fetched: ' + minutesAgo(lastFetched);
+          _refs.lastFetchedEl.style.display = 'block';
+        }
+      }
+    },
+  });
+
+})();

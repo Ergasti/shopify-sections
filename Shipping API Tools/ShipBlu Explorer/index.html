@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="ShipBlu API Explorer — Interactive interface for the ShipBlu shipping API" />
+  <title>ShipBlu Explorer</title>
+
+  <!-- SVG favicon: green circle with "S" -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%2322C55E'/%3E%3Ctext x='16' y='21' text-anchor='middle' font-family='system-ui%2Csans-serif' font-weight='700' font-size='18' fill='%230a1a0f'%3ES%3C/text%3E%3C/svg%3E" />
+
+  <!-- Google Fonts: Fira Code + Fira Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Fira+Sans:wght@400;500;600;700&display=swap" />
+
+  <!-- Design system (tokens, components, layout) -->
+  <link rel="stylesheet" href="css/design-system.css" />
+</head>
+
+<body>
+
+  <!-- Skip-to-content link (accessibility — Task #16) -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <!-- =========================================================
+       App Shell
+       ========================================================= -->
+  <div id="app">
+
+    <!-- -------------------------------------------------------
+         Sidebar
+         ------------------------------------------------------- -->
+    <aside id="sidebar" aria-label="App navigation">
+
+      <!-- Brand / Logo -->
+      <a class="sidebar-brand" href="#dashboard" aria-label="ShipBlu Explorer — go to dashboard">
+        <div class="sidebar-logo" aria-hidden="true">SB</div>
+        <span class="sidebar-brand-name">ShipBlu Explorer</span>
+      </a>
+
+      <!-- Connection status indicator -->
+      <div class="connection-badge" id="connection-badge" aria-live="polite" aria-atomic="true">
+        <span class="connection-dot" id="connection-dot" aria-hidden="true"></span>
+        <span id="connection-label">Checking…</span>
+      </div>
+
+      <!-- Primary navigation -->
+      <nav role="navigation" aria-label="Main sections">
+
+        <!-- GROUP: Overview -->
+        <div class="nav-group" role="group" aria-labelledby="nav-group-overview">
+          <div class="nav-group-label" id="nav-group-overview">Overview</div>
+
+          <a class="nav-link" href="#dashboard" data-page="dashboard">
+            <!-- Dashboard: grid of 4 squares -->
+            <svg viewBox="0 0 24 24" stroke-width="1.75" aria-hidden="true" focusable="false">
+              <rect x="3"  y="3"  width="7" height="7" rx="1"/>
+              <rect x="14" y="3"  width="7" height="7" rx="1"/>
+              <rect x="3"  y="14" width="7" height="7" rx="1"/>
+              <rect x="14" y="14" width="7" height="7" rx="1"/>
+            </svg>
+            Dashboard
+          </a>
+        </div>
+
+        <!-- GROUP: Shipping -->
+        <div class="nav-group" role="group" aria-labelledby="nav-group-shipping">
+          <div class="nav-group-label" id="nav-group-shipping">Shipping</div>
+
+          <a class="nav-link" href="#orders" data-page="orders">
+            <!-- Orders: bullet list -->
+            <svg viewBox="0 0 24 24" stroke-width="1.75" aria-hidden="true" focusable="false">
+              <line x1="8"  y1="6"  x2="21" y2="6"/>
+              <line x1="8"  y1="12" x2="21" y2="12"/>
+              <line x1="8"  y1="18" x2="21" y2="18"/>
+              <circle cx="4" cy="6"  r="1" fill="currentColor" stroke="none"/>
+              <circle cx="4" cy="12" r="1" fill="currentColor" stroke="none"/>
+              <circle cx="4" cy="18" r="1" fill="currentColor" stroke="none"/>
+            </svg>
+            Orders
+          </a>
+
+          <a class="nav-link" href="#create-order" data-page="create-order">
+            <!-- Create Order: circle with plus -->
+            <svg viewBox="0 0 24 24" stroke-width="1.75" aria-hidden="true" focusable="false">
+              <circle cx="12" cy="12" r="9"/>
+              <line x1="12" y1="8"  x2="12" y2="16"/>
+              <line x1="8"  y1="12" x2="16" y2="12"/>
+            </svg>
+            Create Order
+          </a>
+
+          <a class="nav-link" href="#returns" data-page="returns">
+            <!-- Returns: circle with left arrow -->
+            <svg viewBox="0 0 24 24" stroke-width="1.75" aria-hidden="true" focusable="false">
+              <circle cx="12" cy="12" r="9"/>
+              <polyline points="9 14 6 12 9 10"/>
+              <path d="M18 12h-6a2 2 0 0 0-2 2" stroke-linecap="round"/>
+            </svg>
+            Returns
+          </a>
+
+          <a class="nav-link" href="#exchanges" data-page="exchanges">
+            <!-- Exchanges: two swapping arrows -->
+            <svg viewBox="0 0 24 24" stroke-width="1.75" aria-hidden="true" focusable="false">
+              <polyline points="17 1 21 5 17 9"/>
+              <path d="M3 11V9a4 4 0 0 1 4-4h14" stroke-linecap="round"/>
+              <polyline points="7 23 3 19 7 15"/>
+              <path d="M21 13v2a4 4 0 0 1-4 4H3" stroke-linecap="round"/>
+            </svg>
+            Exchanges
+          </a>
+        </div>
+
+        <!-- GROUP: Finance -->
+        <div class="nav-group" role="group" aria-labelledby="nav-group-finance">
+          <div class="nav-group-label" id="nav-group-finance">Finance</div>
+
+          <a class="nav-link" href="#cash-collections" data-page="cash-collections">
+            <!-- Cash Collections: banknote -->
+            <svg viewBox="0 0 24 24" stroke-width="1.75" aria-hidden="true" focusable="false">
+              <rect x="2" y="6" width="20" height="12" rx="2"/>
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M2 10h2M20 10h2M2 14h2M20 14h2" stroke-linecap="round"/>
+            </svg>
+            Cash Collections
+          </a>
+
+          <a class="nav-link" href="#pricing" data-page="pricing">
+            <!-- Pricing: price tag -->
+            <svg viewBox="0 0 24 24" stroke-width="1.75" aria-hidden="true" focusable="false">
+              <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+              <circle cx="7" cy="7" r="1.5" fill="currentColor" stroke="none"/>
+            </svg>
+            Pricing
+          </a>
+        </div>
+
+        <!-- GROUP: Reference -->
+        <div class="nav-group" role="group" aria-labelledby="nav-group-reference">
+          <div class="nav-group-label" id="nav-group-reference">Reference</div>
+
+          <a class="nav-link" href="#locations" data-page="locations">
+            <!-- Locations: map pin -->
+            <svg viewBox="0 0 24 24" stroke-width="1.75" aria-hidden="true" focusable="false">
+              <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 1 1 18 0z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+            Locations
+          </a>
+        </div>
+
+      </nav><!-- /nav -->
+
+      <!-- Settings pinned to bottom -->
+      <div class="sidebar-footer">
+        <a class="nav-link" href="#settings" data-page="settings">
+          <!-- Settings: cog wheel -->
+          <svg viewBox="0 0 24 24" stroke-width="1.75" aria-hidden="true" focusable="false">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+          Settings
+        </a>
+      </div>
+
+    </aside><!-- /#sidebar -->
+
+    <!-- -------------------------------------------------------
+         Main content (topbar + content)
+         ------------------------------------------------------- -->
+    <div id="main">
+
+      <!-- Top bar -->
+      <header id="topbar" role="banner">
+
+        <div class="topbar-left">
+          <!-- Hamburger button — visible on mobile only -->
+          <button
+            class="hamburger"
+            id="hamburger-btn"
+            type="button"
+            aria-label="Open navigation menu"
+            aria-expanded="false"
+            aria-controls="sidebar"
+          >
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false">
+              <line x1="3"  y1="6"  x2="21" y2="6"/>
+              <line x1="3"  y1="12" x2="21" y2="12"/>
+              <line x1="3"  y1="18" x2="21" y2="18"/>
+            </svg>
+          </button>
+
+          <!-- Current page breadcrumb -->
+          <span class="topbar-breadcrumb" id="topbar-breadcrumb" aria-live="polite" aria-atomic="true">
+            Dashboard
+          </span>
+        </div>
+
+        <div class="topbar-right">
+          <!-- API key status chip: masked key preview + link to settings -->
+          <a
+            class="api-key-chip"
+            href="#settings"
+            id="api-key-chip"
+            aria-label="API key status — go to Settings"
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+              <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
+            </svg>
+            <span id="api-key-preview">No API Key</span>
+          </a>
+        </div>
+
+      </header><!-- /#topbar -->
+
+      <!-- Page content — rendered by router -->
+      <main id="main-content" tabindex="-1" aria-label="Page content">
+        <!-- Placeholder shown before scripts load -->
+        <div class="empty-state" style="margin-top:var(--space-12)">
+          <div class="skeleton skeleton-block" style="width:200px;height:28px;margin-bottom:var(--space-4)"></div>
+          <div class="skeleton skeleton-text" style="width:260px"></div>
+          <div class="skeleton skeleton-text" style="width:180px;margin-top:var(--space-2)"></div>
+        </div>
+      </main>
+
+    </div><!-- /#main -->
+
+  </div><!-- /#app -->
+
+  <!-- =========================================================
+       Toast notification container
+       ========================================================= -->
+  <div id="toast-container" role="region" aria-label="Notifications" aria-live="polite" aria-atomic="false"></div>
+
+  <!-- Mobile sidebar backdrop -->
+  <div id="sidebar-overlay" role="presentation" aria-hidden="true"></div>
+
+  <!-- =========================================================
+       API client — must load before page scripts
+       ========================================================= -->
+  <script src="js/api.js"></script>
+
+  <!-- =========================================================
+       App bootstrap: page registry + router + sidebar toggle
+       ========================================================= -->
+  <script>
+    'use strict';
+
+    /* ------------------------------------------------------------------
+       Page Registry
+       ------------------------------------------------------------------ */
+
+    /**
+     * All registered pages. Pages call window.registerPage() on load.
+     * @type {Record<string, { title: string, icon?: string, render: function(HTMLElement): void }>}
+     */
+    window.pages = {};
+
+    /**
+     * Registers a renderable page with the router.
+     *
+     * @param {string} id
+     * @param {{ title: string, render: function(HTMLElement): void }} config
+     */
+    window.registerPage = (id, config) => {
+      if (!id || typeof config?.render !== 'function') {
+        console.warn(`[registerPage] Invalid config for page '${id}'`, config);
+        return;
+      }
+      window.pages[id] = config;
+    };
+
+    /* ------------------------------------------------------------------
+       Connection status badge
+       ------------------------------------------------------------------ */
+
+    function updateConnectionStatus() {
+      const hasKey = !!window.getApiKey();
+      const dot    = document.getElementById('connection-dot');
+      const label  = document.getElementById('connection-label');
+      const chip   = document.getElementById('api-key-preview');
+
+      if (hasKey) {
+        const key = window.getApiKey();
+        dot.className    = 'connection-dot connected';
+        label.textContent = 'Connected';
+        // Show last 8 chars, rest masked
+        chip.textContent  = '••••' + key.slice(-8);
+      } else {
+        dot.className    = 'connection-dot disconnected';
+        label.textContent = 'No API Key';
+        chip.textContent  = 'No API Key';
+      }
+    }
+
+    window.addEventListener('apikeychanged', updateConnectionStatus);
+    updateConnectionStatus();
+
+    /* ------------------------------------------------------------------
+       Router
+       ------------------------------------------------------------------ */
+
+    let _activePage = null;
+
+    /** Extracts page id and params from hash string.
+     *  e.g. "#orders-detail?id=123" → { pageId: 'orders-detail', params: { id: '123' } }
+     */
+    function parseHash(hash) {
+      const raw = (hash || '').replace(/^#/, '').trim() || 'dashboard';
+      const [path, qs] = raw.split('?');
+      const params = {};
+      if (qs) {
+        qs.split('&').forEach(pair => {
+          const [k, v] = pair.split('=');
+          if (k) params[decodeURIComponent(k)] = decodeURIComponent(v || '');
+        });
+      }
+      return { pageId: path || 'dashboard', params };
+    }
+
+    /** Extracts clean page id from hash string. */
+    function pageIdFromHash(hash) {
+      return parseHash(hash).pageId;
+    }
+
+    /** Highlights the matching nav link and clears all others. */
+    function setActiveNavLink(pageId) {
+      document.querySelectorAll('.nav-link[data-page]').forEach(link => {
+        const active = link.dataset.page === pageId;
+        link.classList.toggle('active', active);
+        active
+          ? link.setAttribute('aria-current', 'page')
+          : link.removeAttribute('aria-current');
+      });
+    }
+
+    /** Updates the topbar breadcrumb and document title. */
+    function setPageTitle(title) {
+      const el = document.getElementById('topbar-breadcrumb');
+      if (el) el.textContent = title;
+      document.title = `${title} — ShipBlu Explorer`;
+    }
+
+    /** Renders a "page not found" message inside the container. */
+    function renderNotFound(container, pageId) {
+      container.innerHTML = `
+        <div class="empty-state animate-fade-in">
+          <svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <p class="empty-state-title">Page not found</p>
+          <p class="empty-state-description">
+            No page is registered for
+            <code class="tag">#${_escapeHtml(pageId)}</code>.
+            The page script may not have loaded yet.
+          </p>
+          <a href="#dashboard" class="btn btn-ghost btn-sm" style="margin-top:var(--space-3)">
+            Go to Dashboard
+          </a>
+        </div>`;
+    }
+
+    /**
+     * Navigate to a page by hash string.
+     * @param {string} rawHash - e.g. "#orders" or "orders"
+     */
+    function navigateTo(rawHash) {
+      const { pageId, params } = parseHash(rawHash);
+
+      // Redirect to settings when no API key (except settings itself)
+      if (!window.getApiKey() && pageId !== 'settings') {
+        window.location.hash = '#settings';
+        return;
+      }
+
+      // Allow re-render for detail pages (params may differ)
+      const isDetailPage = pageId.includes('-detail');
+      if (_activePage === pageId && !isDetailPage) return;
+      _activePage = pageId;
+
+      const page      = window.pages[pageId];
+      const container = document.getElementById('main-content');
+      if (!container) return;
+
+      // Nav link highlight — use base page id (orders-detail highlights orders)
+      const navId = pageId.replace(/-detail$/, '');
+      setActiveNavLink(navId);
+
+      const title = page?.title ?? 'Not Found';
+      setPageTitle(title);
+
+      // Clear previous page content
+      container.innerHTML = '';
+
+      if (page) {
+        try {
+          page.render(container, params);
+        } catch (err) {
+          console.error(`[router] Render error for '${pageId}':`, err);
+          container.innerHTML = `
+            <div class="empty-state">
+              <p class="empty-state-title text-error">Render error</p>
+              <p class="empty-state-description text-mono text-sm">${_escapeHtml(err.message)}</p>
+            </div>`;
+        }
+      } else {
+        renderNotFound(container, pageId);
+      }
+
+      // Move focus to content region for keyboard / screen reader users
+      container.focus({ preventScroll: false });
+
+      // Close mobile sidebar on any navigation
+      closeSidebar();
+    }
+
+    window.addEventListener('hashchange', () => navigateTo(window.location.hash));
+
+    /* ------------------------------------------------------------------
+       Sidebar / hamburger (mobile)
+       ------------------------------------------------------------------ */
+
+    const _sidebar  = document.getElementById('sidebar');
+    const _overlay  = document.getElementById('sidebar-overlay');
+    const _hamburger = document.getElementById('hamburger-btn');
+
+    function openSidebar() {
+      _sidebar.classList.add('open');
+      _overlay.classList.add('visible');
+      _overlay.removeAttribute('aria-hidden');
+      _hamburger.setAttribute('aria-expanded', 'true');
+      _hamburger.setAttribute('aria-label', 'Close navigation menu');
+      // Give focus to first nav item
+      _sidebar.querySelector('a, button')?.focus();
+    }
+
+    function closeSidebar() {
+      if (!_sidebar.classList.contains('open')) return;
+      _sidebar.classList.remove('open');
+      _overlay.classList.remove('visible');
+      _overlay.setAttribute('aria-hidden', 'true');
+      _hamburger.setAttribute('aria-expanded', 'false');
+      _hamburger.setAttribute('aria-label', 'Open navigation menu');
+    }
+
+    _hamburger.addEventListener('click', () => {
+      _sidebar.classList.contains('open') ? closeSidebar() : openSidebar();
+    });
+
+    _overlay.addEventListener('click', closeSidebar);
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && _sidebar.classList.contains('open')) {
+        closeSidebar();
+        _hamburger.focus();
+      }
+    });
+
+    /* ------------------------------------------------------------------
+       Dynamic page script loader
+       ------------------------------------------------------------------ */
+
+    /** Scripts to load. Each module calls window.registerPage() on load. */
+    const PAGE_SCRIPTS = [
+      'js/pages/settings.js',
+      'js/pages/dashboard.js',
+      'js/pages/orders.js',
+      'js/pages/create-order.js',
+      'js/pages/pricing.js',
+      'js/pages/calculator.js',
+      'js/pages/locations.js',
+      'js/pages/returns.js',
+      'js/pages/exchanges.js',
+      'js/pages/cash-collections.js',
+    ];
+
+    /**
+     * Injects a <script> tag and resolves when it loads.
+     * Always resolves (never rejects) so a missing file doesn't block the router.
+     * @param {string} src
+     * @returns {Promise<void>}
+     */
+    function loadScript(src) {
+      return new Promise((resolve) => {
+        if (document.querySelector(`script[src="${src}"]`)) {
+          resolve();
+          return;
+        }
+        const s   = document.createElement('script');
+        s.src     = src;
+        s.async   = false; // preserve execution order
+        s.onload  = () => resolve();
+        s.onerror = () => {
+          // Non-fatal: page simply won't register
+          console.info(`[loader] Skipping missing script: ${src}`);
+          resolve();
+        };
+        document.head.appendChild(s);
+      });
+    }
+
+    // Load all page scripts in parallel (network), execute in order (async=false),
+    // then kick off the initial route.
+    Promise.all(PAGE_SCRIPTS.map(loadScript)).then(() => {
+      const hasKey     = !!window.getApiKey();
+      const initHash   = window.location.hash;
+      const defaultHash = hasKey ? (initHash || '#dashboard') : '#settings';
+
+      if (!initHash) {
+        // Setting the hash triggers hashchange → navigateTo
+        window.location.hash = defaultHash;
+      } else {
+        navigateTo(initHash);
+      }
+    });
+
+    /* ------------------------------------------------------------------
+       Internal helper: HTML escape
+       ------------------------------------------------------------------ */
+
+    function _escapeHtml(str) {
+      return String(str)
+        .replace(/&/g,  '&amp;')
+        .replace(/</g,  '&lt;')
+        .replace(/>/g,  '&gt;')
+        .replace(/"/g,  '&quot;')
+        .replace(/'/g,  '&#39;');
+    }
+  </script>
+
+</body>
+</html>
