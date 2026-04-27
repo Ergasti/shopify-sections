@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/trial/.config/**)",
+      "Read(//Users/trial/Library/**)",
+      "Bash(pkill -f \"shopify theme list\")",
+      "Bash(find /tmp/uncov-* -maxdepth 2 -name \"*.yml\" -o -name \".shopifyignore\")",
+      "Bash(tee /tmp/sympl-auth.log)",
+      "Bash(rtk shopify *)",
+      "Bash(tee /tmp/sympl-loud-list.log)",
+      "mcp__playwright__browser_take_screenshot",
+      "Bash(rtk diff *)",
+      "mcp__playwright__browser_close",
+      "Bash(cp \"/Users/trial/shopify-sections/Uncovered Theme Edits/snippets/sympl-widget.liquid\" /tmp/sympl-uncovered/snippets/sympl-widget.liquid)",
+      "Bash(cp \"/Users/trial/shopify-sections/Uncovered Theme Edits/snippets/shipping-bar-restyle.liquid\" /tmp/sympl-uncovered/snippets/shipping-bar-restyle.liquid)",
+      "Bash(mkdir -p /tmp/sympl-loudcrush/snippets)",
+      "Bash(cp \"/Users/trial/shopify-sections/Uncovered Theme Edits/snippets/sympl-widget.liquid\" /tmp/sympl-loudcrush/snippets/sympl-widget.liquid)",
+      "Edit(/.claude/skills/web-performance-optimization/**)",
+      "Bash(pkill -f \"ms-playwright\")",
+      "Bash(pkill -f \"playwright\")",
+      "Read(//Users/trial/.claude/skills/page-cro/**)",
+      "Bash(rtk ls *)",
+      "Bash(mkdir -p .claude/PRPs/plans)"
+    ],
+    "additionalDirectories": [
+      "/Users/trial/shopify-sections/.claude/skills"
+    ]
+  }
+}
