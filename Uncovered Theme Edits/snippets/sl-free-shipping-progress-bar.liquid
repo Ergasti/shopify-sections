@@ -603,7 +603,7 @@
       var currency = (cart && cart.currency) ? cart.currency : null;
       roots.forEach(function(root) {
         updateBar(root, total, currency);
-        if (opts.fromAdd) playConfetti(root);
+        /* Confetti is handled by updateBar's unlocked-seen guard — no extra trigger needed */
       });
     }
 

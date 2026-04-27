@@ -1,71 +1,103 @@
 {% comment %}
   Shipping Progress Bar — Restyle Override
-  Tones down the Starter Labs free shipping bar to match store branding.
-  Removes heavy shadow, shrinks track, kills excessive animations,
-  and applies monochrome styling consistent with the black/white brand.
+  Containerizes the Starter Labs free-shipping bar in a soft-curve card to
+  match the embedded Sympl widget on the product page. Width-controlled to
+  the surrounding price column, rounded on all four sides, with refined
+  monochrome track and accent.
 
   Usage — Add to layout/theme.liquid before </body>:
     {% render 'shipping-bar-restyle' %}
 {% endcomment %}
 
 <style>
-  /* ── Base container: remove card-like appearance ── */
+  /* ── Card container ── */
   .shipping-progress-bar {
+    width: 100% !important;
     max-width: 100% !important;
-    margin: 4px 0 !important;
-    padding: 6px 0 !important;
-    background: transparent !important;
-    border-radius: 0 !important;
-    border: none !important;
-    border-top: 1px solid rgba(0, 0, 0, 0.08) !important;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+    box-sizing: border-box !important;
+    margin: 0.6rem 0 1rem !important;
+    padding: 0.7rem 0.9rem !important;
+    background: rgba(0, 0, 0, 0.025) !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    border-radius: 12px !important;
     box-shadow: none !important;
     overflow: hidden !important;
+    transition: border-color 200ms ease, background 200ms ease !important;
   }
 
-  /* ── Layout: tighter gap ── */
-  .shipping-progress-bar__container {
-    gap: 4px !important;
+  .shipping-progress-bar:hover {
+    border-color: rgba(0, 0, 0, 0.16) !important;
+    background: rgba(0, 0, 0, 0.035) !important;
   }
 
-  /* ── Message: match store typography ── */
-  .shipping-progress-bar__message {
-    font-size: 10px !important;
-    font-weight: 600 !important;
-    line-height: 1 !important;
-    color: #000 !important;
-    letter-spacing: 0.03em !important;
-    text-transform: uppercase !important;
-    gap: 4px !important;
-  }
-
-  .shipping-progress-bar__message-text {
-    line-height: 1 !important;
-  }
-
-  .shipping-progress-bar__message--success {
-    color: #000 !important;
+  /* Unlocked state — subtle success tint, still card-shaped */
+  .shipping-progress-bar--unlocked {
+    background: rgba(22, 163, 74, 0.06) !important;
+    border-color: rgba(22, 163, 74, 0.25) !important;
     animation: none !important;
   }
 
-  /* ── Icon: monochrome, smaller ── */
+  .shipping-progress-bar--unlocked:hover {
+    background: rgba(22, 163, 74, 0.09) !important;
+    border-color: rgba(22, 163, 74, 0.4) !important;
+  }
+
+  /* ── Layout: tighter rhythm inside the card ── */
+  .shipping-progress-bar__container {
+    gap: 6px !important;
+  }
+
+  /* ── Message: theme typography ── */
+  .shipping-progress-bar__message {
+    font-family: "Anonymous Pro", ui-monospace, SFMono-Regular, Menlo, monospace !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    line-height: 1.2 !important;
+    color: #111 !important;
+    letter-spacing: 0.04em !important;
+    text-transform: uppercase !important;
+    gap: 6px !important;
+    margin: 0 !important;
+  }
+
+  .shipping-progress-bar__message-text {
+    line-height: 1.2 !important;
+  }
+
+  .shipping-progress-bar__message--success {
+    color: #15803d !important;
+    animation: none !important;
+  }
+
+  /* ── Icon: monochrome, baseline-aligned ── */
   .shipping-progress-bar__icon-emoji {
-    font-size: 10px !important;
+    font-size: 12px !important;
     line-height: 1 !important;
     filter: grayscale(1) !important;
   }
 
-  /* ── Track bar: slim & monochrome ── */
+  /* ── Track ── */
+  .shipping-progress-bar__track-wrap {
+    height: 4px !important;
+    margin-top: 6px !important;
+  }
+
   .shipping-progress-bar__track {
-    height: 3px !important;
-    border-radius: 2px !important;
-    background: rgba(0, 0, 0, 0.1) !important;
+    height: 4px !important;
+    border-radius: 4px !important;
+    background: rgba(0, 0, 0, 0.08) !important;
   }
 
   .shipping-progress-bar__fill {
-    height: 3px !important;
-    border-radius: 2px !important;
-    background: #000 !important;
+    height: 4px !important;
+    border-radius: 4px !important;
+    background: #111 !important;
+    animation: none !important;
+  }
+
+  .shipping-progress-bar--unlocked .shipping-progress-bar__fill,
+  .shipping-progress-bar__fill--complete {
+    background: #16a34a !important;
     animation: none !important;
   }
 
@@ -73,23 +105,14 @@
     display: none !important;
   }
 
-  /* ── Truck icon on track: smaller, monochrome ── */
+  /* ── Truck icon on track ── */
   .shipping-progress-bar__truck-inner {
-    font-size: 10px !important;
+    font-size: 12px !important;
     filter: grayscale(1) !important;
     top: -10px !important;
   }
 
-  .shipping-progress-bar__track-wrap {
-    height: 3px !important;
-    margin-top: 2px !important;
-  }
-
-  /* ── Kill all excessive animations ── */
-  .shipping-progress-bar--unlocked {
-    animation: none !important;
-  }
-
+  /* ── Kill noisy animations ── */
   .shipping-progress-bar__confetti,
   .shipping-progress-bar__confetti span {
     display: none !important;
@@ -99,9 +122,27 @@
     0%, 100% { opacity: 1; }
   }
 
-  /* ── Success state: subtle, not flashy ── */
-  .shipping-progress-bar__fill--complete {
-    background: #000 !important;
-    animation: none !important;
+  /* ── Responsive ── */
+  @media (max-width: 480px) {
+    .shipping-progress-bar {
+      margin: 0.5rem 0 0.85rem !important;
+      padding: 0.6rem 0.75rem !important;
+      border-radius: 10px !important;
+    }
+    .shipping-progress-bar__message {
+      font-size: 10px !important;
+    }
+  }
+
+  /* ── BOGO label price overrides ── */
+  .card-wrapper .price-item--regular { font-size: 0.85em; }
+
+  /* ── Sale price styling ── */
+  .price--on-sale .price-item--regular {
+    font-size: 12px;
+    color: black;
+  }
+  .product__info-container .price--on-sale .price-item--regular {
+    font-size: 12px;
   }
 </style>

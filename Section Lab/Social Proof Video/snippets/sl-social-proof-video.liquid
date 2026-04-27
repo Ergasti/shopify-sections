@@ -64,7 +64,7 @@
                     {% if forloop.first %}src="{{ video_url }}" autoplay{% else %}data-src="{{ video_url }}"{% endif %}
                     poster="{% if video_file.preview_image %}{{ video_file.preview_image | image_url: width: 1200 }}{% endif %}"
                     muted loop playsinline
-                    preload="{% if forloop.first %}auto{% else %}metadata{% endif %}"
+                    preload="{% if forloop.first %}auto{% else %}none{% endif %}"
                     class="sl-spv-video"
                   ></video>
                   <div class="sl-spv-footer">

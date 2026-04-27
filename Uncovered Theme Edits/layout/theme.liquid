@@ -41,6 +41,28 @@
 
     {{ content_for_header }}
 
+    {%- comment -%} PERF: Block Growave widget — 15s blocking resource. Remove this block when Growave is disabled in Shopify admin. {%- endcomment -%}
+    <script>
+      (function(){
+        var obs = new MutationObserver(function(muts) {
+          for (var i = 0; i < muts.length; i++) {
+            for (var j = 0; j < muts[i].addedNodes.length; j++) {
+              var n = muts[i].addedNodes[j];
+              if (n.nodeType !== 1) continue;
+              var s = n.src || n.href || '';
+              if (s.indexOf('grwx.me') !== -1 || s.indexOf('growave') !== -1) n.remove();
+            }
+          }
+        });
+        obs.observe(document.head, { childList: true });
+        document.addEventListener('DOMContentLoaded', function(){ obs.disconnect(); });
+      })();
+    </script>
+    <style>
+      [class*="growave"], [id*="growave"], [data-growave],
+      .gw-widget, .gw-notification { display: none !important; }
+    </style>
+
     {%- liquid
       assign body_font_bold = settings.type_body_font | font_modify: 'weight', 'bold'
       assign body_font_italic = settings.type_body_font | font_modify: 'style', 'italic'
@@ -259,11 +281,11 @@
     <link rel="stylesheet" href="{{ 'component-cart-items.css' | asset_url }}" media="print" onload="this.media='all'">
 
     {%- if settings.cart_type == 'drawer' -%}
-      {{ 'component-cart-drawer.css' | asset_url | stylesheet_tag }}
-      {{ 'component-cart.css' | asset_url | stylesheet_tag }}
-      {{ 'component-totals.css' | asset_url | stylesheet_tag }}
+      <link rel="stylesheet" href="{{ 'component-cart-drawer.css' | asset_url }}" media="print" onload="this.media='all'">
+      <link rel="stylesheet" href="{{ 'component-cart.css' | asset_url }}" media="print" onload="this.media='all'">
+      <link rel="stylesheet" href="{{ 'component-totals.css' | asset_url }}" media="print" onload="this.media='all'">
       {{ 'component-price.css' | asset_url | stylesheet_tag }}
-      {{ 'component-discounts.css' | asset_url | stylesheet_tag }}
+      <link rel="stylesheet" href="{{ 'component-discounts.css' | asset_url }}" media="print" onload="this.media='all'">
     {%- endif -%}
 
     {%- unless settings.type_body_font.system? -%}
@@ -296,6 +318,10 @@
         document.documentElement.classList.add('shopify-design-mode');
       }
     </script>
+    <meta name="google-site-verification" content="iVqodSfChOlWSGsgjUvjQ4ECCJiF6NYnHQoOdsBMgGg" />
+    {%- if request.page_type == 'product' or request.page_type == 'cart' -%}
+      <script src="https://assets.sympl.ai/widgets/ecom-prod-dtls/widget.min.js" defer></script>
+    {%- endif -%}
   </head>
 
   <body class="gradient{% if settings.animations_hover_elements != 'none' %} animate--hover-{{ settings.animations_hover_elements }}{% endif %}">
@@ -437,12 +463,11 @@
 
     <script>
 (function() {
-  const url = new URL(window.location.href);
-  const discount = url.searchParams.get('discount');
-
+  var url = new URL(window.location.href);
+  var discount = url.searchParams.get('discount');
   if (discount) {
     url.searchParams.delete('discount');
-    window.location.href = "/discount/" + discount + "?redirect=" + encodeURIComponent("/?" + url.searchParams.toString());
+    window.location.href = "/discount/" + encodeURIComponent(discount) + "?redirect=" + encodeURIComponent("/?" + url.searchParams.toString());
   }
 })();
 </script>

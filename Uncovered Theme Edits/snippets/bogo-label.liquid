@@ -23,9 +23,6 @@
 {% endcomment %}
 
 {% if product.tags contains 'bogo' %}
-  <style>
-    .card-wrapper .price-item--regular { font-size: 0.85em; }
-  </style>
   {%- if request.locale.iso_code == 'ar' -%}
     {%- assign _bogo_text = bogo_text | default: 'اشتري 2 والتالت هدية' -%}
   {%- else -%}
