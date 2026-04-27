@@ -1,0 +1,184 @@
+{% comment %}
+  SL - Sold Counter (24h) — snippet version for embedding in product info.
+  Designed to match Uncovered brand: Anonymous Pro mono, earthy palette,
+  subtle and refined (no tacky urgency).
+
+  Usage (inside main-product custom_liquid block):
+    {% render 'sl-sold-counter', product: product, block_id: block.id %}
+
+  Optional render arguments (all override the merchant-set defaults):
+    label, subtext, default_goal, use_fallback, fallback_min, accent_color
+
+  Data sources, in priority order:
+    1. product.metafields.custom.sales_24h        (preferred — real data)
+    2. product.metafields.custom.sales_goal       (bar max; falls back to default_goal)
+    3. Deterministic fallback estimate            (only if use_fallback)
+{% endcomment %}
+
+{%- liquid
+  assign uid = block_id | default: product.id | append: '-sc'
+  assign label = label | default: 'sold in the last 24 hours'
+  assign subtext = subtext | default: 'Stocked in small batches.'
+  assign default_goal_v = default_goal | default: 50
+  assign accent = accent_color | default: ''
+  assign min_v = fallback_min | default: 6
+
+  if use_fallback == nil
+    assign use_fallback = true
+  endif
+
+  assign mf_sales = product.metafields.custom.sales_24h.value | default: product.metafields.custom.sales_24h
+  assign mf_goal = product.metafields.custom.sales_goal.value | default: product.metafields.custom.sales_goal
+
+  assign sales_count = mf_sales | plus: 0
+  assign sales_goal = mf_goal | plus: 0
+
+  if sales_goal == 0
+    assign sales_goal = default_goal_v | plus: 0
+  endif
+
+  assign has_real_data = false
+  if mf_sales != blank and sales_count > 0
+    assign has_real_data = true
+  endif
+
+  if has_real_data == false and use_fallback
+    assign seed_a = product.id | modulo: 41
+    assign seed_b = product.id | modulo: 7
+    assign sales_count = min_v | plus: seed_a | plus: seed_b
+  endif
+
+  assign percent = 0
+  if sales_count > 0 and sales_goal > 0
+    assign percent = sales_count | times: 100 | divided_by: sales_goal
+  endif
+  if percent > 100
+    assign percent = 100
+  endif
+
+  assign should_render = false
+  if sales_count > 0
+    if has_real_data
+      assign should_render = true
+    elsif use_fallback
+      assign should_render = true
+    endif
+  endif
+-%}
+
+{% if should_render %}
+  <style>
+    .sl-sc-{{ uid }} {
+      --sl-sc-fg: rgb(var(--color-foreground, 37, 37, 37));
+      --sl-sc-bg: rgb(var(--color-background, 255, 255, 255));
+      {% if accent != blank %}
+      --sl-sc-accent: {{ accent }};
+      {% else %}
+      --sl-sc-accent: rgb(var(--color-foreground, 37, 37, 37));
+      {% endif %}
+      --sl-sc-track: color-mix(in srgb, var(--sl-sc-fg) 12%, transparent);
+      --sl-sc-line: color-mix(in srgb, var(--sl-sc-fg) 14%, transparent);
+
+      display: block;
+      margin: 1.25rem 0 0.5rem;
+      padding: 0.875rem 0;
+      border-top: 1px solid var(--sl-sc-line);
+      border-bottom: 1px solid var(--sl-sc-line);
+      font-family: var(--font-body-family, inherit);
+      color: var(--sl-sc-fg);
+      letter-spacing: 0.01em;
+    }
+    .sl-sc-{{ uid }} .sl-sc__row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-bottom: 0.625rem;
+    }
+    .sl-sc-{{ uid }} .sl-sc__copy {
+      display: flex;
+      align-items: baseline;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      min-width: 0;
+    }
+    .sl-sc-{{ uid }} .sl-sc__count {
+      font-size: 1.375rem;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+      line-height: 1;
+      color: var(--sl-sc-accent);
+      font-variant-numeric: tabular-nums;
+    }
+    .sl-sc-{{ uid }} .sl-sc__label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      opacity: 0.78;
+      line-height: 1.4;
+    }
+    .sl-sc-{{ uid }} .sl-sc__meta {
+      font-size: 0.6875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      opacity: 0.55;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .sl-sc-{{ uid }} .sl-sc__bar {
+      position: relative;
+      width: 100%;
+      height: 3px;
+      background: var(--sl-sc-track);
+      border-radius: 0;
+      overflow: hidden;
+    }
+    .sl-sc-{{ uid }} .sl-sc__fill {
+      position: absolute;
+      inset: 0;
+      width: 0%;
+      background: var(--sl-sc-accent);
+      transform-origin: left center;
+      animation: sl-sc-fill-{{ uid }} 1.4s cubic-bezier(.16,1,.3,1) 0.15s forwards;
+    }
+    .sl-sc-{{ uid }} .sl-sc__sub {
+      margin: 0.5rem 0 0;
+      font-size: 0.6875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      opacity: 0.55;
+      line-height: 1.5;
+    }
+    @keyframes sl-sc-fill-{{ uid }} {
+      from { width: 0%; }
+      to { width: {{ percent }}%; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .sl-sc-{{ uid }} .sl-sc__fill {
+        animation: none;
+        width: {{ percent }}%;
+      }
+    }
+    @media (max-width: 480px) {
+      .sl-sc-{{ uid }} .sl-sc__count { font-size: 1.25rem; }
+      .sl-sc-{{ uid }} .sl-sc__label { font-size: 0.6875rem; }
+      .sl-sc-{{ uid }} .sl-sc__meta { display: none; }
+    }
+  </style>
+
+  <div class="sl-sc-{{ uid }}" role="status" aria-live="polite" aria-atomic="true">
+    <div class="sl-sc__row">
+      <div class="sl-sc__copy">
+        <span class="sl-sc__count" aria-label="{{ sales_count }} sold">{{ sales_count }}</span>
+        <span class="sl-sc__label">{{ label | escape }}</span>
+      </div>
+      <span class="sl-sc__meta" aria-hidden="true">Last 24h</span>
+    </div>
+    <div class="sl-sc__bar" role="progressbar" aria-valuenow="{{ sales_count }}" aria-valuemin="0" aria-valuemax="{{ sales_goal }}">
+      <div class="sl-sc__fill"></div>
+    </div>
+    {% if subtext != blank %}
+      <p class="sl-sc__sub">{{ subtext | escape }}</p>
+    {% endif %}
+  </div>
+{% endif %}

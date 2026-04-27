@@ -1,0 +1,888 @@
+{% comment %}
+  SL - Help Center
+  Full-page help center section with icon category cards, FAQ accordions,
+  quick-action buttons, and a contact CTA — all configurable via the theme editor.
+  Inspired by Bombas help center. Excludes Size Chart & Happiness Guarantee.
+
+  Usage: Add as a section on a custom page (e.g. /pages/help-center).
+
+  Branding: Designed for Hawk Socks — Bricolage Grotesque headings, Poppins body,
+  black/navy/light palette. All colors & fonts are customizable via section settings.
+{% endcomment %}
+
+{%- liquid
+  assign heading = section.settings.heading
+  assign subheading = section.settings.subheading
+  assign bg_color = section.settings.background_color
+  assign card_bg = section.settings.card_background
+  assign text_color = section.settings.text_color
+  assign heading_color = section.settings.heading_color
+  assign accent_color = section.settings.accent_color
+  assign icon_color = section.settings.icon_color
+  assign max_width = section.settings.max_width
+  assign pt = section.settings.padding_top
+  assign pb = section.settings.padding_bottom
+  assign show_quick_actions = section.settings.show_quick_actions
+  assign show_contact = section.settings.show_contact_section
+  assign contact_heading = section.settings.contact_heading
+  assign contact_text = section.settings.contact_text
+  assign contact_email = section.settings.contact_email
+  assign contact_whatsapp = section.settings.contact_whatsapp
+  assign contact_btn_text = section.settings.contact_button_text
+  assign contact_btn_url = section.settings.contact_button_url
+
+  assign category_blocks = section.blocks | where: "type", "category"
+  assign faq_blocks = section.blocks | where: "type", "faq"
+  assign action_blocks = section.blocks | where: "type", "quick_action"
+-%}
+
+<style>
+  .sl-hc {
+    --sl-hc-bg: {{ bg_color }};
+    --sl-hc-card-bg: {{ card_bg }};
+    --sl-hc-text: {{ text_color }};
+    --sl-hc-heading: {{ heading_color }};
+    --sl-hc-accent: {{ accent_color }};
+    --sl-hc-icon: {{ icon_color }};
+    background: var(--sl-hc-bg);
+    color: var(--sl-hc-text);
+    padding-top: {{ pt }}px;
+    padding-bottom: {{ pb }}px;
+    font-family: var(--font-body-family, 'Poppins', sans-serif);
+  }
+  .sl-hc__inner {
+    max-width: {{ max_width }}px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  /* --- Hero --- */
+  .sl-hc__hero {
+    text-align: center;
+    padding: 48px 0 40px;
+  }
+  .sl-hc__title {
+    font-family: var(--font-heading-family, 'Bricolage Grotesque', sans-serif);
+    font-size: clamp(2rem, 1.5rem + 2.5vw, 3.2rem);
+    font-weight: 700;
+    color: var(--sl-hc-heading);
+    margin: 0 0 12px;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+  }
+  .sl-hc__subtitle {
+    font-size: clamp(0.95rem, 0.85rem + 0.5vw, 1.1rem);
+    color: var(--sl-hc-text);
+    opacity: 0.7;
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  /* --- Quick Actions --- */
+  .sl-hc__actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 0 0 48px;
+  }
+  .sl-hc__action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border: 1.5px solid var(--sl-hc-heading);
+    border-radius: 5px;
+    background: transparent;
+    color: var(--sl-hc-heading);
+    font-family: var(--font-heading-family, 'Bricolage Grotesque', sans-serif);
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
+    cursor: pointer;
+    line-height: 1;
+  }
+  .sl-hc__action-btn:hover {
+    background: var(--sl-hc-heading);
+    color: var(--sl-hc-card-bg);
+    transform: translateY(-1px);
+  }
+  .sl-hc__action-btn svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
+
+  /* --- Category Cards Grid --- */
+  .sl-hc__categories {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    padding-bottom: 56px;
+  }
+  .sl-hc__cat-card {
+    background: var(--sl-hc-card-bg);
+    border: 1px solid rgba(0,0,0,0.06);
+    border-radius: 8px;
+    padding: 32px 24px;
+    text-align: center;
+    text-decoration: none;
+    color: var(--sl-hc-text);
+    transition: box-shadow 0.25s ease, transform 0.2s ease, border-color 0.25s ease;
+    cursor: pointer;
+    position: relative;
+  }
+  .sl-hc__cat-card:hover {
+    box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+    transform: translateY(-3px);
+    border-color: var(--sl-hc-accent);
+  }
+  .sl-hc__cat-icon {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--sl-hc-icon);
+  }
+  .sl-hc__cat-icon svg {
+    width: 100%;
+    height: 100%;
+  }
+  .sl-hc__cat-title {
+    font-family: var(--font-heading-family, 'Bricolage Grotesque', sans-serif);
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--sl-hc-heading);
+    margin: 0 0 6px;
+  }
+  .sl-hc__cat-desc {
+    font-size: 13px;
+    opacity: 0.6;
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  /* --- FAQ Section --- */
+  .sl-hc__faq-section {
+    padding-bottom: 56px;
+  }
+  .sl-hc__faq-heading {
+    font-family: var(--font-heading-family, 'Bricolage Grotesque', sans-serif);
+    font-size: clamp(1.4rem, 1.2rem + 1vw, 1.8rem);
+    font-weight: 700;
+    color: var(--sl-hc-heading);
+    margin: 0 0 24px;
+    text-align: center;
+  }
+  .sl-hc__faq-group {
+    margin-bottom: 32px;
+    /* Offset for sticky headers so the title isn't hidden when scrolled into view */
+    scroll-margin-top: 100px;
+  }
+  .sl-hc__faq-group-title {
+    display: block;
+    font-family: var(--font-heading-family, 'Bricolage Grotesque', sans-serif);
+    font-size: clamp(1.1rem, 0.95rem + 0.5vw, 1.3rem);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--sl-hc-heading);
+    margin: 0 0 16px;
+    padding: 0 0 10px;
+    border-bottom: 2px solid var(--sl-hc-accent);
+    position: relative;
+  }
+  .sl-hc__faq-group-title::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    background: var(--sl-hc-accent);
+    border-radius: 50%;
+    margin-right: 10px;
+    vertical-align: middle;
+    transform: translateY(-2px);
+  }
+  .sl-hc__faq-group--target {
+    animation: sl-hc-highlight 1.2s ease-out;
+  }
+  @keyframes sl-hc-highlight {
+    0% { background: transparent; }
+    30% { background: color-mix(in srgb, var(--sl-hc-accent) 8%, transparent); }
+    100% { background: transparent; }
+  }
+  .sl-hc__faq-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .sl-hc__faq-item {
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+  }
+  .sl-hc__faq-item:last-child {
+    border-bottom: none;
+  }
+  .sl-hc__faq-q {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 18px 4px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: var(--font-body-family, 'Poppins', sans-serif);
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--sl-hc-heading);
+    text-align: left;
+    line-height: 1.4;
+    transition: color 0.2s ease;
+  }
+  .sl-hc__faq-q:hover {
+    color: var(--sl-hc-accent);
+  }
+  .sl-hc__faq-q svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    transition: transform 0.3s ease;
+    color: var(--sl-hc-accent);
+  }
+  .sl-hc__faq-item[open] .sl-hc__faq-q svg {
+    transform: rotate(45deg);
+  }
+  .sl-hc__faq-a {
+    padding: 0 4px 20px;
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--sl-hc-text);
+    opacity: 0.75;
+  }
+  .sl-hc__faq-a a {
+    color: var(--sl-hc-accent);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  /* --- Contact CTA --- */
+  .sl-hc__contact {
+    text-align: center;
+    padding: 48px 32px;
+    background: var(--sl-hc-card-bg);
+    border-radius: 12px;
+    border: 1px solid rgba(0,0,0,0.06);
+    margin-bottom: 16px;
+  }
+  .sl-hc__contact-icon {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 20px;
+    color: var(--sl-hc-accent);
+  }
+  .sl-hc__contact-icon svg {
+    width: 100%;
+    height: 100%;
+  }
+  .sl-hc__contact-title {
+    font-family: var(--font-heading-family, 'Bricolage Grotesque', sans-serif);
+    font-size: clamp(1.3rem, 1rem + 1.5vw, 1.7rem);
+    font-weight: 700;
+    color: var(--sl-hc-heading);
+    margin: 0 0 8px;
+  }
+  .sl-hc__contact-text {
+    font-size: 15px;
+    opacity: 0.65;
+    margin: 0 0 24px;
+    line-height: 1.5;
+  }
+  .sl-hc__contact-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .sl-hc__contact-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 28px;
+    border-radius: 5px;
+    font-family: var(--font-heading-family, 'Bricolage Grotesque', sans-serif);
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: opacity 0.2s ease, transform 0.15s ease;
+    line-height: 1;
+  }
+  .sl-hc__contact-btn:hover {
+    opacity: 0.85;
+    transform: translateY(-1px);
+  }
+  .sl-hc__contact-btn--primary {
+    background: var(--sl-hc-heading);
+    color: var(--sl-hc-card-bg);
+    border: none;
+  }
+  .sl-hc__contact-btn--secondary {
+    background: transparent;
+    color: var(--sl-hc-heading);
+    border: 1.5px solid var(--sl-hc-heading);
+  }
+  .sl-hc__contact-btn svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
+
+  /* --- Responsive --- */
+  @media (max-width: 749px) {
+    .sl-hc__hero { padding: 32px 0 28px; }
+    .sl-hc__categories { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .sl-hc__cat-card { padding: 24px 16px; }
+    .sl-hc__cat-icon { width: 36px; height: 36px; margin-bottom: 12px; }
+    .sl-hc__actions { gap: 8px; }
+    .sl-hc__action-btn { padding: 10px 16px; font-size: 13px; }
+    .sl-hc__contact { padding: 32px 20px; }
+    .sl-hc__faq-q { font-size: 14px; padding: 16px 2px; }
+    .sl-hc__faq-a { font-size: 13px; }
+  }
+  @media (max-width: 449px) {
+    .sl-hc__categories { grid-template-columns: 1fr; }
+  }
+</style>
+
+<div class="sl-hc" id="sl-help-center-{{ section.id }}">
+  <div class="sl-hc__inner">
+
+    {%- comment -%} ===== HERO ===== {%- endcomment -%}
+    <div class="sl-hc__hero">
+      {% if heading != blank %}
+        <h1 class="sl-hc__title">{{ heading | escape }}</h1>
+      {% endif %}
+      {% if subheading != blank %}
+        <p class="sl-hc__subtitle">{{ subheading | escape }}</p>
+      {% endif %}
+    </div>
+
+    {%- comment -%} ===== QUICK ACTIONS ===== {%- endcomment -%}
+    {% if show_quick_actions and action_blocks.size > 0 %}
+      <div class="sl-hc__actions">
+        {% for block in action_blocks %}
+          {%- assign icon_id = block.settings.icon | default: 'arrow-right' -%}
+          <a href="{{ block.settings.url | default: '#' }}" class="sl-hc__action-btn"{% if block.settings.url contains 'http' %} target="_blank" rel="noopener"{% endif %} {{ block.shopify_attributes }}>
+            {% render 'sl-hc-icon', icon: icon_id %}
+            {{ block.settings.label | escape }}
+          </a>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {%- comment -%} ===== CATEGORY CARDS ===== {%- endcomment -%}
+    {% if category_blocks.size > 0 %}
+      <div class="sl-hc__categories">
+        {% for block in category_blocks %}
+          {%- assign cat_icon = block.settings.icon | default: 'help-circle' -%}
+          <a href="{{ block.settings.url | default: '#' }}" class="sl-hc__cat-card"{% if block.settings.url contains 'http' %} target="_blank" rel="noopener"{% endif %} {{ block.shopify_attributes }}
+            {% if block.settings.scroll_to_faq != blank %}
+              onclick="event.preventDefault(); var t=document.getElementById('{{ block.settings.scroll_to_faq | escape }}'); if(t){t.scrollIntoView({behavior:'smooth', block:'start'}); t.classList.remove('sl-hc__faq-group--target'); void t.offsetWidth; t.classList.add('sl-hc__faq-group--target');}"
+            {% endif %}
+          >
+            <div class="sl-hc__cat-icon">
+              {% render 'sl-hc-icon', icon: cat_icon %}
+            </div>
+            <p class="sl-hc__cat-title">{{ block.settings.title | escape }}</p>
+            {% if block.settings.description != blank %}
+              <p class="sl-hc__cat-desc">{{ block.settings.description | escape }}</p>
+            {% endif %}
+          </a>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {%- comment -%} ===== FAQ ACCORDIONS ===== {%- endcomment -%}
+    {% if faq_blocks.size > 0 %}
+      <div class="sl-hc__faq-section">
+        {% if section.settings.faq_heading != blank %}
+          <h2 class="sl-hc__faq-heading">{{ section.settings.faq_heading | escape }}</h2>
+        {% endif %}
+
+        {%- assign current_group = '' -%}
+        {%- assign group_open = false -%}
+        {% for block in faq_blocks %}
+          {%- assign this_group = block.settings.group | default: '' -%}
+
+          {% if this_group != current_group %}
+            {% if group_open %}
+              </ul></div>
+            {% endif %}
+            {%- assign current_group = this_group -%}
+            <div class="sl-hc__faq-group" id="sl-hc-faq-{{ this_group | handleize }}">
+              {% if this_group != blank %}
+                <h3 class="sl-hc__faq-group-title">{{ this_group | escape }}</h3>
+              {% endif %}
+              <ul class="sl-hc__faq-list">
+            {%- assign group_open = true -%}
+          {% endif %}
+
+          <li class="sl-hc__faq-item" {{ block.shopify_attributes }}>
+            <details>
+              <summary class="sl-hc__faq-q">
+                <span>{{ block.settings.question | escape }}</span>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              </summary>
+              <div class="sl-hc__faq-a">{{ block.settings.answer }}</div>
+            </details>
+          </li>
+        {% endfor %}
+        {% if group_open %}
+          </ul></div>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    {%- comment -%} ===== CONTACT CTA ===== {%- endcomment -%}
+    {% if show_contact %}
+      <div class="sl-hc__contact">
+        <div class="sl-hc__contact-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        {% if contact_heading != blank %}
+          <h2 class="sl-hc__contact-title">{{ contact_heading | escape }}</h2>
+        {% endif %}
+        {% if contact_text != blank %}
+          <p class="sl-hc__contact-text">{{ contact_text | escape }}</p>
+        {% endif %}
+        <div class="sl-hc__contact-actions">
+          {% if contact_btn_url != blank %}
+            <a href="{{ contact_btn_url }}" class="sl-hc__contact-btn sl-hc__contact-btn--primary">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              {{ contact_btn_text | default: 'Contact Us' | escape }}
+            </a>
+          {% endif %}
+          {% if contact_email != blank %}
+            <a href="mailto:{{ contact_email | escape }}" class="sl-hc__contact-btn sl-hc__contact-btn--secondary">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              Email Us
+            </a>
+          {% endif %}
+          {% if contact_whatsapp != blank %}
+            <a href="https://wa.me/{{ contact_whatsapp | escape }}" target="_blank" rel="noopener" class="sl-hc__contact-btn sl-hc__contact-btn--secondary">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.125.553 4.123 1.523 5.862L0 24l6.335-1.652A11.943 11.943 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.82c-1.98 0-3.87-.537-5.517-1.545l-.396-.235-3.763.982.998-3.648-.26-.414A9.795 9.795 0 0 1 2.18 12C2.18 6.578 6.578 2.18 12 2.18S21.82 6.578 21.82 12 17.422 21.82 12 21.82z"/></svg>
+              WhatsApp
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "SL - Help Center",
+  "tag": "section",
+  "class": "sl-help-center-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Hero"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "How Can We Help?"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Find answers to common questions or reach out to our team."
+    },
+    {
+      "type": "header",
+      "content": "Quick Actions"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_quick_actions",
+      "label": "Show quick action buttons",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "FAQ"
+    },
+    {
+      "type": "text",
+      "id": "faq_heading",
+      "label": "FAQ section heading",
+      "default": "Frequently Asked Questions"
+    },
+    {
+      "type": "header",
+      "content": "Contact Section"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_contact_section",
+      "label": "Show contact section",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "contact_heading",
+      "label": "Contact heading",
+      "default": "Still Need Help?"
+    },
+    {
+      "type": "text",
+      "id": "contact_text",
+      "label": "Contact description",
+      "default": "Our team is here to help. Reach out and we'll get back to you as soon as possible."
+    },
+    {
+      "type": "text",
+      "id": "contact_email",
+      "label": "Contact email"
+    },
+    {
+      "type": "text",
+      "id": "contact_whatsapp",
+      "label": "WhatsApp number (with country code, no +)",
+      "default": "201050509677"
+    },
+    {
+      "type": "text",
+      "id": "contact_button_text",
+      "label": "Primary contact button text",
+      "default": "Contact Us"
+    },
+    {
+      "type": "url",
+      "id": "contact_button_url",
+      "label": "Primary contact button link"
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Page background",
+      "default": "#f9f9f9"
+    },
+    {
+      "type": "color",
+      "id": "card_background",
+      "label": "Card background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Body text",
+      "default": "#333333"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Headings",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent (links, highlights)",
+      "default": "#223859"
+    },
+    {
+      "type": "color",
+      "id": "icon_color",
+      "label": "Icon color",
+      "default": "#223859"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "label": "Max width",
+      "min": 800,
+      "max": 1400,
+      "step": 20,
+      "default": 960,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "default": 0,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "default": 60,
+      "unit": "px"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "quick_action",
+      "name": "Quick Action",
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Button label",
+          "default": "Track Order"
+        },
+        {
+          "type": "text",
+          "id": "url",
+          "label": "Link",
+          "info": "Accepts internal paths (/pages/contact) or full URLs (https://wa.me/...)"
+        },
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icon",
+          "options": [
+            { "value": "package", "label": "Package" },
+            { "value": "truck", "label": "Truck" },
+            { "value": "refresh", "label": "Return/Refresh" },
+            { "value": "mail", "label": "Email" },
+            { "value": "message-circle", "label": "Chat" },
+            { "value": "credit-card", "label": "Payment" },
+            { "value": "help-circle", "label": "Help" },
+            { "value": "arrow-right", "label": "Arrow" }
+          ],
+          "default": "package"
+        }
+      ]
+    },
+    {
+      "type": "category",
+      "name": "Category Card",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Shipping"
+        },
+        {
+          "type": "text",
+          "id": "description",
+          "label": "Description",
+          "default": "Delivery times, tracking & more"
+        },
+        {
+          "type": "text",
+          "id": "url",
+          "label": "Link (optional)",
+          "info": "Accepts internal paths (/pages/contact) or full URLs (https://wa.me/...)"
+        },
+        {
+          "type": "text",
+          "id": "scroll_to_faq",
+          "label": "Scroll to FAQ group ID (optional)",
+          "info": "Enter the group name in handleized form, e.g. sl-hc-faq-shipping"
+        },
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icon",
+          "options": [
+            { "value": "truck", "label": "Truck (Shipping)" },
+            { "value": "package", "label": "Package (Orders)" },
+            { "value": "refresh", "label": "Return/Refresh" },
+            { "value": "credit-card", "label": "Credit Card (Payment)" },
+            { "value": "help-circle", "label": "Help Circle" },
+            { "value": "shield", "label": "Shield (Security)" },
+            { "value": "user", "label": "User (Account)" },
+            { "value": "tag", "label": "Tag (Promo)" },
+            { "value": "gift", "label": "Gift" },
+            { "value": "clock", "label": "Clock" },
+            { "value": "map-pin", "label": "Map Pin" },
+            { "value": "message-circle", "label": "Chat" },
+            { "value": "maximize", "label": "Size/Maximize" },
+            { "value": "ruler", "label": "Ruler" }
+          ],
+          "default": "truck"
+        }
+      ]
+    },
+    {
+      "type": "faq",
+      "name": "FAQ Item",
+      "settings": [
+        {
+          "type": "text",
+          "id": "group",
+          "label": "Group name",
+          "info": "FAQs with the same group name are grouped together under a shared heading.",
+          "default": "Shipping"
+        },
+        {
+          "type": "text",
+          "id": "question",
+          "label": "Question",
+          "default": "How long does shipping take?"
+        },
+        {
+          "type": "richtext",
+          "id": "answer",
+          "label": "Answer",
+          "default": "<p>Standard shipping takes 3-5 business days. Express shipping is available at checkout for faster delivery.</p>"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "SL - Help Center",
+      "blocks": [
+        {
+          "type": "quick_action",
+          "settings": { "label": "Track My Order", "icon": "package" }
+        },
+        {
+          "type": "quick_action",
+          "settings": { "label": "Start a Return", "icon": "refresh" }
+        },
+        {
+          "type": "quick_action",
+          "settings": { "label": "Contact Us", "icon": "message-circle" }
+        },
+        {
+          "type": "category",
+          "settings": {
+            "title": "Shipping & Delivery",
+            "description": "Delivery times, tracking & shipping info",
+            "icon": "truck",
+            "scroll_to_faq": "sl-hc-faq-shipping-delivery"
+          }
+        },
+        {
+          "type": "category",
+          "settings": {
+            "title": "Orders",
+            "description": "Order status, changes & cancellations",
+            "icon": "package",
+            "scroll_to_faq": "sl-hc-faq-orders"
+          }
+        },
+        {
+          "type": "category",
+          "settings": {
+            "title": "Returns & Exchanges",
+            "description": "How to return or exchange items",
+            "icon": "refresh",
+            "scroll_to_faq": "sl-hc-faq-returns-exchanges"
+          }
+        },
+        {
+          "type": "category",
+          "settings": {
+            "title": "Payment",
+            "description": "Payment methods, promo codes & billing",
+            "icon": "credit-card",
+            "scroll_to_faq": "sl-hc-faq-payment"
+          }
+        },
+        {
+          "type": "faq",
+          "settings": {
+            "group": "Shipping & Delivery",
+            "question": "How long does shipping take?",
+            "answer": "<p>Standard shipping typically takes 3\u20135 business days within Egypt. You\u2019ll receive a tracking number once your order ships.</p>"
+          }
+        },
+        {
+          "type": "faq",
+          "settings": {
+            "group": "Shipping & Delivery",
+            "question": "How can I track my order?",
+            "answer": "<p>Once your order ships, you\u2019ll receive a confirmation email with a tracking link. You can also check your order status in your account.</p>"
+          }
+        },
+        {
+          "type": "faq",
+          "settings": {
+            "group": "Shipping & Delivery",
+            "question": "Do you offer free shipping?",
+            "answer": "<p>Yes! We offer free shipping on orders over a certain amount. Check our current shipping policy for details.</p>"
+          }
+        },
+        {
+          "type": "faq",
+          "settings": {
+            "group": "Orders",
+            "question": "Can I change or cancel my order?",
+            "answer": "<p>You can request changes or cancellations within 1 hour of placing your order. After that, the order may already be in processing. Contact us as soon as possible and we\u2019ll do our best to help.</p>"
+          }
+        },
+        {
+          "type": "faq",
+          "settings": {
+            "group": "Orders",
+            "question": "What if I received the wrong item?",
+            "answer": "<p>We\u2019re sorry about that! Please contact us within 48 hours of delivery with a photo of the item received, and we\u2019ll arrange a replacement or refund immediately.</p>"
+          }
+        },
+        {
+          "type": "faq",
+          "settings": {
+            "group": "Returns & Exchanges",
+            "question": "What is your return policy?",
+            "answer": "<p>We accept returns within 14 days of delivery. Items must be unused and in their original packaging. Contact our team to start a return.</p>"
+          }
+        },
+        {
+          "type": "faq",
+          "settings": {
+            "group": "Returns & Exchanges",
+            "question": "How do I exchange an item?",
+            "answer": "<p>To exchange an item, contact us with your order number and the item you\u2019d like instead. We\u2019ll guide you through the process.</p>"
+          }
+        },
+        {
+          "type": "faq",
+          "settings": {
+            "group": "Payment",
+            "question": "What payment methods do you accept?",
+            "answer": "<p>We accept credit/debit cards, cash on delivery (COD), and various digital payment methods. All options are shown at checkout.</p>"
+          }
+        },
+        {
+          "type": "faq",
+          "settings": {
+            "group": "Payment",
+            "question": "How do I apply a promo code?",
+            "answer": "<p>Enter your promo code in the discount field at checkout and click Apply. The discount will be reflected in your order total.</p>"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

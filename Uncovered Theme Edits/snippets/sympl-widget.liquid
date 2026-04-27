@@ -1,0 +1,374 @@
+{% comment %}
+  Sympl installment widget — Uncovered Perfumes theme.
+
+  Usage:
+    Product page:
+      {%- render 'sympl-widget', product: product, store_code: 'STR-1365' -%}
+
+    Cart drawer / cart page:
+      {%- render 'sympl-widget', is_cart: true, store_code: 'STR-1365' -%}
+
+  Both modes share the same card styling so the inline widget unifies with
+  the free-shipping progress bar.
+
+  We blend Sympl's web components into the editorial/mono layout by injecting
+  override stylesheets into both shadow roots:
+    • <sympl-widget>  — the small inline card under the price / under cart total.
+    • #sympl-dialog   — the "learn more" full-screen modal (lazily mounted).
+
+  The "10% 🔥" partner-offer stamp is preserved (Sympl-side config) and uses
+  Sympl's default red SVG badge.
+{% endcomment %}
+
+{%- assign sympl_store_code = store_code | default: 'STR-1365' -%}
+
+<div class="sympl-installments{% if is_cart %} sympl-installments--cart{% endif %}" data-sympl-host>
+  {%- if is_cart -%}
+    <sympl-widget
+      productprice="{{ cart.total_price | money_without_currency }}"
+      storecode="{{ sympl_store_code }}"
+      isCart="true"
+    ></sympl-widget>
+  {%- else -%}
+    <sympl-widget
+      productprice="{{ product.price | money_without_currency }}"
+      product="{{ product | json | base64_encode }}"
+      storecode="{{ sympl_store_code }}"
+    ></sympl-widget>
+  {%- endif -%}
+</div>
+
+{%- style -%}
+  .sympl-installments {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    margin: 1.2rem 0 1.4rem;
+    padding: 0.85rem 1rem 1rem;
+    box-sizing: border-box;
+    background: rgba(0, 0, 0, 0.025);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 12px;
+    transition: border-color 200ms ease, background 200ms ease;
+  }
+
+  .sympl-installments:hover {
+    border-color: rgba(0, 0, 0, 0.16);
+    background: rgba(0, 0, 0, 0.035);
+  }
+
+  .sympl-installments sympl-widget {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  /* Cart variant — same card, but allow it to span wider than the narrow
+     totals column so the installment text doesn't wrap awkwardly. */
+  .sympl-installments--cart {
+    margin: 0.7rem -0.5rem 0.95rem;
+    padding: 0.7rem 0.75rem 0.8rem;
+    width: calc(100% + 1rem);
+    max-width: calc(100% + 1rem);
+  }
+  .sympl-installments--cart sympl-widget {
+    --sympl-widget-gap: 0.5rem;
+  }
+  @media (max-width: 749px) {
+    .sympl-installments--cart {
+      margin: 0.6rem 0 0.85rem;
+      width: 100%;
+      max-width: 100%;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .sympl-installments {
+      margin: 1rem 0 1.2rem;
+      padding: 0.75rem 0.85rem 0.9rem;
+      border-radius: 10px;
+    }
+  }
+{%- endstyle -%}
+
+<script>
+  (function () {
+    var WIDGET_INJECTED = '__symplWidgetStyleInjected';
+    var DIALOG_INJECTED = '__symplDialogStyleInjected';
+
+    /* ------------------------------------------------------------------ */
+    /*  Inline widget (under price)                                       */
+    /* ------------------------------------------------------------------ */
+    var widgetCss = [
+      ':host { display: block !important; width: 100% !important; max-width: 100% !important; }',
+      'section#sympl-widget { font-family: "Anonymous Pro", ui-monospace, SFMono-Regular, Menlo, monospace !important; }',
+      'div.sympl-widget {',
+      '  background: transparent !important;',
+      '  border: 0 !important;',
+      '  border-radius: 0 !important;',
+      '  box-shadow: none !important;',
+      '  padding: 0 !important;',
+      '  max-width: 100% !important;',
+      '  width: 100% !important;',
+      '  min-height: 0 !important;',
+      '  max-height: none !important;',
+      '  column-gap: 0.75rem !important;',
+      '  align-items: center !important;',
+      '  position: relative !important;',
+      '  overflow: visible !important;',
+      '}',
+      /* Keep the original Sympl offer-stamp styling (absolute top-right red
+         SVG badge). Earlier custom override made it look broken; reverting. */
+      'div.sympl-widget .paragraph {',
+      '  font-family: inherit !important;',
+      '  font-size: 13px !important;',
+      '  line-height: 1.55 !important;',
+      '  letter-spacing: 0 !important;',
+      '  color: #111 !important;',
+      '  flex: 1 1 auto !important;',
+      '}',
+      'div.sympl-widget .paragraph .strong,',
+      'div.sympl-widget .paragraph strong { font-weight: 700 !important; }',
+      /* Hide "(amount may vary)" from the inline widget — moved to the
+         modal so the inline card stays compact. */
+      'div.sympl-widget .paragraph .hint,',
+      'div.sympl-widget [data-i18n-key="widgethintText"] { display: none !important; }',
+      'div.sympl-widget .color-primary { color: #d40a0a !important; }',
+      'div.sympl-widget .paragraph a {',
+      '  color: #111 !important;',
+      '  text-decoration: underline !important;',
+      '  text-underline-offset: 2px !important;',
+      '}',
+      'div.sympl-widget img {',
+      '  width: 52px !important;',
+      '  opacity: 1 !important;',
+      '  filter: none !important;',
+      '}',
+      '@media (max-width: 480px) {',
+      '  div.sympl-widget .paragraph { font-size: 12px !important; }',
+      '  div.sympl-widget img { width: 44px !important; }',
+      '}'
+    ].join('\n');
+
+    /* ------------------------------------------------------------------ */
+    /*  Modal dialog (lazy-mounted at #sympl-dialog)                      */
+    /* ------------------------------------------------------------------ */
+    var dialogCss = [
+      ':host { font-family: "Anonymous Pro", ui-monospace, SFMono-Regular, Menlo, monospace !important; }',
+      /* Scrim with subtle blur for depth */
+      '.modal-bg {',
+      '  background: rgba(10, 10, 10, 0.55) !important;',
+      '  -webkit-backdrop-filter: blur(6px) saturate(1.05) !important;',
+      '  backdrop-filter: blur(6px) saturate(1.05) !important;',
+      '}',
+      /* Container — soft on all four corners, modern shadow, refined padding */
+      '.modal-container {',
+      '  border-radius: 16px !important;',
+      '  background: #fdfdfd !important;',
+      '  padding: 32px 32px 96px !important;',
+      '  max-width: min(820px, calc(100vw - 32px)) !important;',
+      '  max-height: min(86vh, 800px) !important;',
+      '  box-shadow:',
+      '    0 1px 2px rgba(0,0,0,0.06),',
+      '    0 8px 24px rgba(0,0,0,0.10),',
+      '    0 24px 56px rgba(0,0,0,0.14) !important;',
+      '  overflow: hidden !important;',
+      '  position: relative !important;',
+      '  font-family: inherit !important;',
+      '}',
+      /* Close button → 44pt hit target with hover affordance */
+      '.modal-close {',
+      '  position: absolute !important;',
+      '  top: 12px !important;',
+      '  right: 12px !important;',
+      '  width: 44px !important;',
+      '  height: 44px !important;',
+      '  display: inline-flex !important;',
+      '  align-items: center !important;',
+      '  justify-content: center !important;',
+      '  border-radius: 50% !important;',
+      '  background: transparent !important;',
+      '  color: #111 !important;',
+      '  font-size: 18px !important;',
+      '  font-weight: 400 !important;',
+      '  cursor: pointer !important;',
+      '  transition: background 180ms ease, color 180ms ease !important;',
+      '  z-index: 2 !important;',
+      '}',
+      '.modal-close:hover { background: rgba(0,0,0,0.06) !important; color: #d40a0a !important; }',
+      '.modal-close:focus-visible { outline: 2px solid #d40a0a !important; outline-offset: 2px !important; }',
+      /* Header */
+      '.modal-header { margin-bottom: 8px !important; }',
+      '.modal-header img.logo { width: 110px !important; }',
+      '.modal-header p.modal-header {',
+      '  font-family: inherit !important;',
+      '  font-size: 16px !important;',
+      '  font-weight: 700 !important;',
+      '  line-height: 1.5 !important;',
+      '  letter-spacing: 0 !important;',
+      '  margin-top: 12px !important;',
+      '  margin-bottom: 16px !important;',
+      '  color: #111 !important;',
+      '}',
+      '.modal-header p.modal-header .color-primary,',
+      '.color-primary { color: #d40a0a !important; }',
+      /* Content + plan figure */
+      '.modal-content { font-family: inherit !important; }',
+      '.modal-content h3 {',
+      '  font-family: inherit !important;',
+      '  font-size: 14px !important;',
+      '  font-weight: 700 !important;',
+      '  letter-spacing: 0.02em !important;',
+      '  text-transform: uppercase !important;',
+      '  color: #111 !important;',
+      '  line-height: 1.5 !important;',
+      '}',
+      '.modal-content h3#howto { margin-bottom: 16px !important; }',
+      '.modal-content .planfig, .modal-content #planfig { margin: 8px 0 6px !important; }',
+      /* "* amount may vary" caption — moved here from the inline widget */
+      '.modal-content #planfig::after {',
+      '  content: "* amount may vary";',
+      '  display: block;',
+      '  margin: 6px 0 18px;',
+      '  font-family: inherit;',
+      '  font-size: 11px;',
+      '  letter-spacing: 0.02em;',
+      '  color: rgba(0,0,0,0.55);',
+      '}',
+      '.modal-content .steps { gap: 16px !important; }',
+      '.modal-content .steps .step p {',
+      '  font-family: inherit !important;',
+      '  font-size: 12px !important;',
+      '  line-height: 1.5 !important;',
+      '  color: #333 !important;',
+      '}',
+      /* Actions row */
+      '.modal-actions { padding-top: 8px !important; }',
+      '.modal-actions h3#close { margin: 0 !important; }',
+      '.modal-actions h3#close a {',
+      '  font-family: inherit !important;',
+      '  font-size: 13px !important;',
+      '  text-transform: none !important;',
+      '  letter-spacing: 0 !important;',
+      '  color: #111 !important;',
+      '  text-decoration: underline !important;',
+      '  text-underline-offset: 2px !important;',
+      '  cursor: pointer !important;',
+      '}',
+      '.modal-actions h3#close a:hover { color: #d40a0a !important; }',
+      /* Bottom partner-offer banner — inherit bottom radius, no flat rim */
+      '.modal-actions #modal-offer {',
+      '  border-bottom-left-radius: 16px !important;',
+      '  border-bottom-right-radius: 16px !important;',
+      '  height: 64px !important;',
+      '  background: #f7f3eb !important;',
+      '  box-shadow: inset 0 1px 0 rgba(0,0,0,0.06) !important;',
+      '  border-top: 1px solid rgba(0,0,0,0.06) !important;',
+      '}',
+      '.modal-actions #modal-offer .offer-container {',
+      '  font-family: inherit !important;',
+      '  gap: 10px !important;',
+      '  padding: 0 24px !important;',
+      '}',
+      '.modal-actions #modal-offer .offer-container #offer-text {',
+      '  font-family: inherit !important;',
+      '  font-size: 14px !important;',
+      '  line-height: 1.4 !important;',
+      '  color: #d40a0a !important;',
+      '  font-weight: 600 !important;',
+      '}',
+      /* Plan figure tweaks */
+      '.plan .plan-text {',
+      '  font-family: inherit !important;',
+      '  font-size: 13px !important;',
+      '  line-height: 1.3 !important;',
+      '  color: #111 !important;',
+      '}',
+      '.plan .plan-text--sm { font-size: 10px !important; line-height: 1.3 !important; }',
+      '.plan .pie {',
+      '  background-color: #d40a0a !important;',
+      '}',
+      /* Responsive */
+      '@media screen and (max-width: 768px) {',
+      '  .modal-container {',
+      '    border-radius: 14px !important;',
+      '    padding: 20px 16px 84px !important;',
+      '    max-width: calc(100vw - 24px) !important;',
+      '    max-height: 88vh !important;',
+      '  }',
+      '  .modal-actions #modal-offer {',
+      '    border-bottom-left-radius: 14px !important;',
+      '    border-bottom-right-radius: 14px !important;',
+      '    height: 56px !important;',
+      '  }',
+      '  .modal-actions #modal-offer .offer-container { padding: 0 16px !important; }',
+      '  .modal-actions #modal-offer .offer-container #offer-text { font-size: 12px !important; }',
+      '  .modal-header img.logo { width: 88px !important; }',
+      '  .modal-header p.modal-header { font-size: 14px !important; }',
+      '  .modal-content h3 { font-size: 13px !important; }',
+      '  .modal-close { top: 8px !important; right: 8px !important; }',
+      '}'
+    ].join('\n');
+
+    /* ------------------------------------------------------------------ */
+    /*  Generic shadow-root style injector                                */
+    /* ------------------------------------------------------------------ */
+    function injectShadowStyles(host, key, css, dataAttr) {
+      if (!host || host[key]) return false;
+      var sr = host.shadowRoot;
+      if (!sr) return false;
+      var style = document.createElement('style');
+      style.setAttribute(dataAttr, '');
+      style.textContent = css;
+      sr.appendChild(style);
+      host[key] = true;
+      return true;
+    }
+
+    function attachToHost(host, key, css, dataAttr) {
+      if (injectShadowStyles(host, key, css, dataAttr)) return;
+      var obs = new MutationObserver(function() {
+        if (injectShadowStyles(host, key, css, dataAttr)) obs.disconnect();
+      });
+      obs.observe(host, { childList: true, subtree: true });
+      setTimeout(function(){ obs.disconnect(); }, 6000);
+    }
+
+    /* ------------------------------------------------------------------ */
+    /*  Bind widgets on the page                                          */
+    /* ------------------------------------------------------------------ */
+    function bindWidgets() {
+      document.querySelectorAll('.sympl-installments sympl-widget').forEach(function (w) {
+        attachToHost(w, WIDGET_INJECTED, widgetCss, 'data-sympl-native');
+      });
+    }
+
+    /* ------------------------------------------------------------------ */
+    /*  Watch for the lazy-mounted modal dialog                           */
+    /* ------------------------------------------------------------------ */
+    function tryBindDialog() {
+      var dialog = document.getElementById('sympl-dialog');
+      if (dialog) {
+        attachToHost(dialog, DIALOG_INJECTED, dialogCss, 'data-sympl-dialog');
+        dialogObserver.disconnect();
+        return true;
+      }
+      return false;
+    }
+
+    var dialogObserver = new MutationObserver(function () { tryBindDialog(); });
+    dialogObserver.observe(document.body, { childList: true, subtree: true });
+    setTimeout(function(){ dialogObserver.disconnect(); }, 30000);
+    tryBindDialog();
+
+    /* ------------------------------------------------------------------ */
+    /*  Init                                                              */
+    /* ------------------------------------------------------------------ */
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', bindWidgets);
+    } else {
+      bindWidgets();
+    }
+    document.addEventListener('shopify:section:load', bindWidgets);
+  })();
+</script>
